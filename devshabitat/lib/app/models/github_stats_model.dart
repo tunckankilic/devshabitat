@@ -1,5 +1,3 @@
-import 'package:get/get.dart';
-
 class GithubStatsModel {
   final String username;
   final int totalRepositories;

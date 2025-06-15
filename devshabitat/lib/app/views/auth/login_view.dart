@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:get/get.dart';
 import 'login/large_phone_login.dart';
 import 'login/small_phone_login.dart';
 import 'login/tablet_login.dart';
@@ -12,11 +11,11 @@ class LoginView extends StatelessWidget {
     return LayoutBuilder(
       builder: (context, constraints) {
         if (constraints.maxWidth < 600) {
-          return SmallPhoneLogin();
+          return const SmallPhoneLogin();
         } else if (constraints.maxWidth < 900) {
           return LargePhoneLogin();
         } else {
-          return TabletLogin();
+          return const TabletLogin();
         }
       },
     );

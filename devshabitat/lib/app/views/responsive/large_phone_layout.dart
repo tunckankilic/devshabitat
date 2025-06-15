@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:get/get.dart';
 import '../../utils/responsive_helper.dart';
 
 class LargePhoneLayout extends StatelessWidget {

@@ -82,7 +82,7 @@ class SmallPhoneLogin extends StatelessWidget {
                   alignment: Alignment.centerRight,
                   child: TextButton(
                     onPressed: () {
-                      // TODO: Implement password reset
+                      Get.toNamed('/forgot-password');
                     },
                     child: const Text('Şifremi Unuttum'),
                   ),
@@ -95,7 +95,9 @@ class SmallPhoneLogin extends StatelessWidget {
                         ? null
                         : () {
                             if (formKey.currentState!.validate()) {
-                              authController.signInWithEmailAndPassword();
+                              authController.signInWithEmailAndPassword(
+                                  emailController.text,
+                                  passwordController.text);
                             }
                           },
                     style: ElevatedButton.styleFrom(
@@ -112,12 +114,12 @@ class SmallPhoneLogin extends StatelessWidget {
                 SizedBox(height: 24.h),
                 Row(
                   children: [
-                    Expanded(child: Divider()),
+                    const Expanded(child: Divider()),
                     Padding(
                       padding: EdgeInsets.symmetric(horizontal: 16.w),
                       child: const Text('veya'),
                     ),
-                    Expanded(child: Divider()),
+                    const Expanded(child: Divider()),
                   ],
                 ),
                 SizedBox(height: 24.h),

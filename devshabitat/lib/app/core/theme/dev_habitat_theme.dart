@@ -8,7 +8,7 @@ class DevHabitatTheme {
     return ThemeData(
       useMaterial3: true,
       brightness: Brightness.dark,
-      colorScheme: ColorScheme.dark(
+      colorScheme: const ColorScheme.dark(
         primary: DevHabitatColors.primary,
         secondary: DevHabitatColors.secondary,
         background: DevHabitatColors.darkBackground,
@@ -20,7 +20,7 @@ class DevHabitatTheme {
         color: DevHabitatColors.darkCard,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(16.r),
-          side: BorderSide(
+          side: const BorderSide(
             color: DevHabitatColors.darkBorder,
             width: 1,
           ),
@@ -32,7 +32,7 @@ class DevHabitatTheme {
         backgroundColor: DevHabitatColors.darkBackground,
         elevation: 0,
         centerTitle: 1.sw <= 600,
-        iconTheme: IconThemeData(color: DevHabitatColors.textPrimary),
+        iconTheme: const IconThemeData(color: DevHabitatColors.textPrimary),
         titleTextStyle: TextStyle(
           color: DevHabitatColors.textPrimary,
           fontSize: 1.sw <= 600 ? 20.sp : 24.sp,
@@ -124,28 +124,28 @@ class DevHabitatTheme {
         fillColor: DevHabitatColors.darkCard,
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12.r),
-          borderSide: BorderSide(
+          borderSide: const BorderSide(
             color: DevHabitatColors.darkBorder,
             width: 1,
           ),
         ),
         enabledBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12.r),
-          borderSide: BorderSide(
+          borderSide: const BorderSide(
             color: DevHabitatColors.darkBorder,
             width: 1,
           ),
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12.r),
-          borderSide: BorderSide(
+          borderSide: const BorderSide(
             color: DevHabitatColors.primary,
             width: 2,
           ),
         ),
         errorBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12.r),
-          borderSide: BorderSide(
+          borderSide: const BorderSide(
             color: DevHabitatColors.error,
             width: 1,
           ),
@@ -169,7 +169,7 @@ class DevHabitatTheme {
       outlinedButtonTheme: OutlinedButtonThemeData(
         style: OutlinedButton.styleFrom(
           foregroundColor: DevHabitatColors.primary,
-          side: BorderSide(color: DevHabitatColors.primary),
+          side: const BorderSide(color: DevHabitatColors.primary),
           padding: EdgeInsets.symmetric(
             horizontal: 1.sw <= 600 ? 16.w : 24.w,
             vertical: 1.sw <= 600 ? 12.h : 16.h,
@@ -271,7 +271,7 @@ class DevHabitatTheme {
     return ThemeData(
       useMaterial3: true,
       brightness: Brightness.light,
-      colorScheme: ColorScheme.light(
+      colorScheme: const ColorScheme.light(
         primary: DevHabitatColors.primary,
         secondary: DevHabitatColors.secondary,
         background: DevHabitatColors.lightBackground,
@@ -283,7 +283,7 @@ class DevHabitatTheme {
         color: DevHabitatColors.lightCard,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(16.r),
-          side: BorderSide(
+          side: const BorderSide(
             color: DevHabitatColors.lightBorder,
             width: 1,
           ),
@@ -295,7 +295,7 @@ class DevHabitatTheme {
         backgroundColor: DevHabitatColors.lightBackground,
         elevation: 0,
         centerTitle: 1.sw <= 600,
-        iconTheme: IconThemeData(color: DevHabitatColors.textDark),
+        iconTheme: const IconThemeData(color: DevHabitatColors.textDark),
         titleTextStyle: TextStyle(
           color: DevHabitatColors.textDark,
           fontSize: 1.sw <= 600 ? 20.sp : 24.sp,
@@ -387,28 +387,28 @@ class DevHabitatTheme {
         fillColor: DevHabitatColors.lightCard,
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12.r),
-          borderSide: BorderSide(
+          borderSide: const BorderSide(
             color: DevHabitatColors.lightBorder,
             width: 1,
           ),
         ),
         enabledBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12.r),
-          borderSide: BorderSide(
+          borderSide: const BorderSide(
             color: DevHabitatColors.lightBorder,
             width: 1,
           ),
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12.r),
-          borderSide: BorderSide(
+          borderSide: const BorderSide(
             color: DevHabitatColors.primary,
             width: 2,
           ),
         ),
         errorBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12.r),
-          borderSide: BorderSide(
+          borderSide: const BorderSide(
             color: DevHabitatColors.error,
             width: 1,
           ),
@@ -432,7 +432,7 @@ class DevHabitatTheme {
       outlinedButtonTheme: OutlinedButtonThemeData(
         style: OutlinedButton.styleFrom(
           foregroundColor: DevHabitatColors.primary,
-          side: BorderSide(color: DevHabitatColors.primary),
+          side: const BorderSide(color: DevHabitatColors.primary),
           padding: EdgeInsets.symmetric(
             horizontal: 1.sw <= 600 ? 16.w : 24.w,
             vertical: 1.sw <= 600 ? 12.h : 16.h,
@@ -538,7 +538,7 @@ class DevHabitatTheme {
           color: DevHabitatColors.glassBorder,
           width: 1,
         ),
-        boxShadow: [
+        boxShadow: const [
           BoxShadow(
             color: DevHabitatColors.shadowDark,
             blurRadius: 10,
@@ -554,7 +554,7 @@ class DevHabitatTheme {
           color: DevHabitatColors.glassBorder,
           width: 1,
         ),
-        boxShadow: [
+        boxShadow: const [
           BoxShadow(
             color: DevHabitatColors.shadowLight,
             blurRadius: 20,
@@ -567,7 +567,7 @@ class DevHabitatTheme {
   static BoxDecoration get neumorphismDecoration => BoxDecoration(
         color: DevHabitatColors.darkBackground,
         borderRadius: BorderRadius.circular(16.r),
-        boxShadow: [
+        boxShadow: const [
           BoxShadow(
             color: DevHabitatColors.shadowDark,
             offset: Offset(4, 4),
@@ -746,40 +746,6 @@ class DevHabitatTheme {
         letterSpacing: 0,
         color: Colors.white,
       );
-
-  // Responsive metin stilleri
-  static TextTheme _buildResponsiveTextTheme(Color textColor) {
-    return TextTheme(
-      displayLarge: TextStyle(
-        fontSize: 32.sp,
-        fontWeight: FontWeight.bold,
-        color: textColor,
-      ),
-      displayMedium: TextStyle(
-        fontSize: 28.sp,
-        fontWeight: FontWeight.bold,
-        color: textColor,
-      ),
-      displaySmall: TextStyle(
-        fontSize: 24.sp,
-        fontWeight: FontWeight.bold,
-        color: textColor,
-      ),
-      headlineMedium: TextStyle(
-        fontSize: 20.sp,
-        fontWeight: FontWeight.w600,
-        color: textColor,
-      ),
-      bodyLarge: TextStyle(
-        fontSize: 16.sp,
-        color: textColor,
-      ),
-      bodyMedium: TextStyle(
-        fontSize: 14.sp,
-        color: textColor,
-      ),
-    );
-  }
 }
 
 // Cam efektli container widget'ı

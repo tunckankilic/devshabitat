@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:get/get.dart';
 import '../../controllers/profile_controller.dart';
 import 'small_phone_profile.dart';
 import 'large_phone_profile.dart';

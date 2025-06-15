@@ -1,7 +1,10 @@
 import 'package:get/get.dart';
 import '../models/github_stats_model.dart';
+import '../services/github_service.dart';
+import '../repositories/enhanced_auth_repository.dart';
 
 class GithubIntegrationController extends GetxController {
+  final GithubService _githubService = Get.find<GithubService>();
   final Rx<GithubStatsModel?> _githubStats = Rx<GithubStatsModel?>(null);
   final RxBool _isLoading = false.obs;
   final RxString _error = ''.obs;
@@ -19,9 +22,9 @@ class GithubIntegrationController extends GetxController {
       _isLoading.value = true;
       _error.value = '';
 
-      // TODO: GitHub OAuth bağlantısını başlat
-      // Örnek bağlantı simülasyonu:
-      await Future.delayed(const Duration(seconds: 2));
+      // GitHub OAuth bağlantısını başlat
+      final authRepository = Get.find<EnhancedAuthRepository>();
+      await authRepository.linkWithGithub();
       _isConnected.value = true;
 
       await loadGithubStats();
@@ -43,41 +46,8 @@ class GithubIntegrationController extends GetxController {
       _isLoading.value = true;
       _error.value = '';
 
-      // TODO: GitHub API'den istatistikleri yükle
-      _githubStats.value = GithubStatsModel(
-        username: 'johndoe',
-        totalRepositories: 50,
-        totalContributions: 1000,
-        languageStats: {'Dart': 60, 'JavaScript': 30, 'Python': 10},
-        recentRepositories: [
-          {
-            'name': 'flutter-app',
-            'description': 'A beautiful Flutter app',
-            'stars': 100,
-            'forks': 20,
-            'language': 'Dart',
-          },
-          {
-            'name': 'react-project',
-            'description': 'React web application',
-            'stars': 50,
-            'forks': 10,
-            'language': 'JavaScript',
-          },
-        ],
-        contributionGraph: {
-          '2024-01-01': 5,
-          '2024-01-02': 3,
-          '2024-01-03': 7,
-        },
-        followers: 100,
-        following: 50,
-        avatarUrl: 'https://github.com/avatar.jpg',
-        bio: 'Flutter Developer',
-        location: 'Istanbul, Turkey',
-        website: 'https://example.com',
-        company: 'Tech Company',
-      );
+      final username = _githubStats.value?.username ?? 'YOUR_GITHUB_USERNAME';
+      _githubStats.value = await _githubService.getGithubStats(username);
     } catch (e) {
       _error.value = 'GitHub istatistikleri yüklenirken bir hata oluştu: $e';
     } finally {
@@ -91,8 +61,8 @@ class GithubIntegrationController extends GetxController {
       _isLoading.value = true;
       _error.value = '';
 
-      // TODO: GitHub bağlantısını kes
-      await Future.delayed(const Duration(seconds: 1));
+      final authRepository = Get.find<EnhancedAuthRepository>();
+      await authRepository.unlinkProvider('github.com');
       _isConnected.value = false;
       _githubStats.value = null;
 
@@ -119,8 +89,8 @@ class GithubIntegrationController extends GetxController {
       _isLoading.value = true;
       _error.value = '';
 
-      // TODO: GitHub profil doğrulamasını gerçekleştir
-      await Future.delayed(const Duration(seconds: 2));
+      final username = _githubStats.value?.username ?? 'YOUR_GITHUB_USERNAME';
+      await _githubService.getUserInfo(username);
 
       Get.snackbar(
         'Başarılı',

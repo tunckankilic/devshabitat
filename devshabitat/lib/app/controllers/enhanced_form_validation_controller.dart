@@ -78,8 +78,9 @@ class EnhancedFormValidationController extends GetxController {
       final errors = <String>[];
       if (!hasMinLength) errors.add('En az 3 karakter');
       if (!hasMaxLength) errors.add('En fazla 20 karakter');
-      if (!hasValidChars)
+      if (!hasValidChars) {
         errors.add('Sadece harf, rakam ve alt çizgi kullanabilirsiniz');
+      }
       _usernameError.value = errors.join(', ');
     } else {
       _usernameError.value = null;

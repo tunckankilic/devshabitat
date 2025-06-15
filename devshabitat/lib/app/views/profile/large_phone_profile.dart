@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:url_launcher/url_launcher.dart';
 import '../../controllers/profile_controller.dart';
 import '../../controllers/image_upload_controller.dart';
 import '../../controllers/github_integration_controller.dart';
 import 'widgets/skill_chip_grid.dart';
 import 'widgets/responsive_image_picker.dart';
-import 'widgets/adaptive_progress_indicator.dart';
 import 'widgets/github_repo_card.dart';
 
 class LargePhoneProfile extends StatelessWidget {
@@ -238,8 +238,17 @@ class LargePhoneProfile extends StatelessWidget {
                             leading: const Icon(Icons.link),
                             title: Text(link),
                             trailing: const Icon(Icons.open_in_new),
-                            onTap: () {
-                              // TODO: Link açma işlemi
+                            onTap: () async {
+                              final Uri url = Uri.parse(link);
+                              if (await canLaunchUrl(url)) {
+                                await launchUrl(url);
+                              } else {
+                                Get.snackbar(
+                                  'Hata',
+                                  'Link açılamadı',
+                                  snackPosition: SnackPosition.BOTTOM,
+                                );
+                              }
                             },
                           )),
                     ],

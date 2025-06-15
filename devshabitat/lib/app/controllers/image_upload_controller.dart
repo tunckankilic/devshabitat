@@ -2,9 +2,11 @@ import 'dart:io';
 import 'package:get/get.dart';
 import 'package:image_cropper/image_cropper.dart';
 import 'package:image_picker/image_picker.dart';
+import '../services/image_upload_service.dart';
 
 class ImageUploadController extends GetxController {
   final _imagePicker = ImagePicker();
+  final _imageUploadService = Get.find<ImageUploadService>();
   final Rx<File?> _selectedImage = Rx<File?>(null);
   final RxBool _isUploading = false.obs;
   final RxString _error = ''.obs;
@@ -60,7 +62,12 @@ class ImageUploadController extends GetxController {
       );
 
       if (croppedFile != null) {
-        _selectedImage.value = File(croppedFile.path);
+        final file = File(croppedFile.path);
+        // Resmi sıkıştır ve yeniden boyutlandır
+        final compressedFile = await _imageUploadService.compressImage(file);
+        final resizedFile =
+            await _imageUploadService.resizeImage(compressedFile);
+        _selectedImage.value = resizedFile;
       }
     } catch (e) {
       _error.value = 'Resim kırpılırken bir hata oluştu: $e';
@@ -79,15 +86,10 @@ class ImageUploadController extends GetxController {
       _error.value = '';
       _uploadProgress.value = 0.0;
 
-      // TODO: Resmi sunucuya yükle
-      // Örnek yükleme simülasyonu:
-      for (int i = 0; i <= 100; i += 10) {
-        await Future.delayed(const Duration(milliseconds: 100));
-        _uploadProgress.value = i / 100;
-      }
-
-      // TODO: Sunucudan dönen URL'i al
-      final String imageUrl = 'https://example.com/profile/image.jpg';
+      // Resmi sunucuya yükle
+      final imageUrl =
+          await _imageUploadService.uploadImage(_selectedImage.value!);
+      _uploadProgress.value = 1.0;
 
       Get.snackbar(
         'Başarılı',

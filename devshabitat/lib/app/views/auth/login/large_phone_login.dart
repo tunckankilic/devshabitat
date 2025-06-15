@@ -3,7 +3,6 @@ import 'package:get/get.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import '../widgets/responsive_form_field.dart';
 import '../widgets/social_login_button.dart';
-import '../widgets/adaptive_loading_indicator.dart';
 import '../../../controllers/enhanced_auth_controller.dart';
 
 class LargePhoneLogin extends StatelessWidget {
@@ -82,7 +81,7 @@ class LargePhoneLogin extends StatelessWidget {
                   alignment: Alignment.centerRight,
                   child: TextButton(
                     onPressed: () {
-                      // TODO: Şifremi unuttum sayfasına yönlendir
+                      Get.toNamed('/forgot-password');
                     },
                     child: Text(
                       'Şifremi Unuttum',
@@ -97,7 +96,15 @@ class LargePhoneLogin extends StatelessWidget {
                 SizedBox(
                   width: double.infinity,
                   child: ElevatedButton(
-                    onPressed: controller.signInWithEmailAndPassword,
+                    onPressed: () {
+                      if (controller.emailController.text.isNotEmpty &&
+                          controller.passwordController.text.isNotEmpty) {
+                        controller.signInWithEmailAndPassword(
+                          controller.emailController.text,
+                          controller.passwordController.text,
+                        );
+                      }
+                    },
                     style: ElevatedButton.styleFrom(
                       padding: EdgeInsets.symmetric(vertical: 16.h),
                       shape: RoundedRectangleBorder(

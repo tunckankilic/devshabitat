@@ -1,7 +1,6 @@
 import 'package:get/get.dart';
 import 'package:flutter/material.dart';
 import 'package:connectivity_plus/connectivity_plus.dart';
-import '../core/theme/dev_habitat_theme.dart';
 import '../services/error_handler_service.dart';
 import '../constants/app_strings.dart';
 

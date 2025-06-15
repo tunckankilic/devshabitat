@@ -12,7 +12,6 @@ class AppBinding extends Bindings {
     Get.put(ErrorHandlerService());
     Get.put(EnhancedAuthRepository());
     Get.put(EnhancedAuthController(
-      authRepository: Get.find<EnhancedAuthRepository>(),
       errorHandler: Get.find<ErrorHandlerService>(),
     ));
   }

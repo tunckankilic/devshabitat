@@ -112,7 +112,7 @@ class TabletLogin extends StatelessWidget {
                           alignment: Alignment.centerRight,
                           child: TextButton(
                             onPressed: () {
-                              // TODO: Implement password reset
+                              Get.toNamed('/forgot-password');
                             },
                             child: const Text('Şifremi Unuttum'),
                           ),
@@ -125,8 +125,9 @@ class TabletLogin extends StatelessWidget {
                                 ? null
                                 : () {
                                     if (formKey.currentState!.validate()) {
-                                      authController
-                                          .signInWithEmailAndPassword();
+                                      authController.signInWithEmailAndPassword(
+                                          emailController.text,
+                                          passwordController.text);
                                     }
                                   },
                             style: ElevatedButton.styleFrom(

@@ -1,5 +1,3 @@
-import 'package:get/get.dart';
-
 enum SkillCategory {
   programming,
   framework,

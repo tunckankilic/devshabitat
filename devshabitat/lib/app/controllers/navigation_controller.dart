@@ -3,7 +3,7 @@ import 'package:get/get.dart';
 
 class NavigationController extends GetxController {
   // Mevcut seçili index
-  final RxInt currentIndex = 0.obs;
+  final RxInt selectedIndex = 0.obs;
 
   // NavigationDestination listesi
   final List<NavigationDestination> destinations = [
@@ -30,16 +30,16 @@ class NavigationController extends GetxController {
   }
 
   // Index değiştirme metodu
-  void changeIndex(int index) {
-    currentIndex.value = index;
+  void changePage(int index) {
+    selectedIndex.value = index;
   }
 
   // Responsive navigasyon widget'ı oluşturma
   Widget buildResponsiveNavigation(BuildContext context) {
     if (isTablet(context)) {
       return NavigationRail(
-        selectedIndex: currentIndex.value,
-        onDestinationSelected: changeIndex,
+        selectedIndex: selectedIndex.value,
+        onDestinationSelected: changePage,
         destinations: destinations
             .map((dest) => NavigationRailDestination(
                   icon: dest.icon,
@@ -50,8 +50,8 @@ class NavigationController extends GetxController {
       );
     } else {
       return NavigationBar(
-        selectedIndex: currentIndex.value,
-        onDestinationSelected: changeIndex,
+        selectedIndex: selectedIndex.value,
+        onDestinationSelected: changePage,
         destinations: destinations,
       );
     }
