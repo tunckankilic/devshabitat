@@ -147,4 +147,26 @@ class GithubService extends GetxService {
       throw Exception('GitHub istatistikleri alınırken bir hata oluştu: $e');
     }
   }
+
+  // GitHub aktivitelerini getir
+  Future<List<Map<String, dynamic>>> getUserActivities(String username) async {
+    try {
+      final response = await http.get(
+        Uri.parse('$_baseUrl/users/$username/events'),
+        headers: {
+          'Accept': 'application/vnd.github.v3+json',
+          'Authorization': 'Bearer $_token',
+        },
+      );
+
+      if (response.statusCode == 200) {
+        return List<Map<String, dynamic>>.from(json.decode(response.body));
+      } else {
+        throw Exception(
+            'GitHub aktiviteleri alınamadı: ${response.statusCode}');
+      }
+    } catch (e) {
+      throw Exception('GitHub aktiviteleri alınırken bir hata oluştu: $e');
+    }
+  }
 }

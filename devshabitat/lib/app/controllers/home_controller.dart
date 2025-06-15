@@ -22,11 +22,13 @@ class HomeController extends GetxController {
       isLoading.value = true;
 
       // GitHub istatistiklerini yükle
-      final stats = await _githubService.getUserStats();
-      githubStats.value = stats;
+      final username =
+          'YOUR_GITHUB_USERNAME'; // TODO: Get actual username from auth
+      final stats = await _githubService.getGithubStats(username);
+      githubStats.value = stats.toJson();
 
       // Aktivite akışını yükle
-      final activities = await _githubService.getUserActivities();
+      final activities = await _githubService.getUserActivities(username);
       activityFeed.value = activities;
 
       // Bağlantı sayısını yükle
