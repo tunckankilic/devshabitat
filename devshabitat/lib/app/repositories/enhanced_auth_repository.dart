@@ -3,54 +3,44 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:sign_in_with_apple/sign_in_with_apple.dart';
 import 'package:flutter_facebook_auth/flutter_facebook_auth.dart';
-import 'package:http/http.dart' as http;
-import 'dart:convert';
 import '../models/enhanced_user_model.dart';
-import '../models/github_user_model.dart';
 import 'package:logger/logger.dart';
 import 'package:get/get.dart';
 
-abstract class IEnhancedAuthRepository {
-  // Temel Auth İşlemleri
+abstract class BaseEnhancedAuthRepository {
+  Stream<User?> get authStateChanges;
+  Stream<EnhancedUserModel?> get userProfileChanges;
+
+  Future<EnhancedUserModel> getUserProfile(String userId);
   Future<UserCredential> signInWithEmailAndPassword(
       String email, String password);
   Future<UserCredential> createUserWithEmailAndPassword(
       String email, String password, String username);
   Future<UserCredential> signInWithGoogle();
-  Future<UserCredential> signInWithApple();
-  Future<UserCredential> signInWithFacebook();
   Future<UserCredential> signInWithGithub();
+  Future<UserCredential> signInWithFacebook();
+  Future<UserCredential> signInWithApple();
   Future<void> signOut();
-
-  // Hesap Yönetimi
   Future<void> sendPasswordResetEmail(String email);
   Future<void> verifyEmail();
   Future<void> updatePassword(String newPassword);
   Future<void> updateEmail(String newEmail);
   Future<void> deleteAccount();
-  Future<void> reauthenticate(String password);
-
-  // Provider Bağlama
+  Future<void> reauthenticate(String email, String password);
   Future<void> linkWithGoogle();
-  Future<void> linkWithApple();
-  Future<void> linkWithFacebook();
   Future<void> linkWithGithub();
+  Future<void> linkWithFacebook();
+  Future<void> linkWithApple();
   Future<void> unlinkProvider(String providerId);
-
-  // Kullanıcı Profili
   Future<void> updateUserProfile(EnhancedUserModel user);
+  Future<void> updateUserPreferences(Map<String, dynamic> preferences);
   Future<void> updateLastSeen();
   Future<void> addConnection(String userId);
   Future<void> removeConnection(String userId);
-  Future<void> updateUserPreferences(Map<String, dynamic> preferences);
   Future<void> updateUserConnections(Map<String, dynamic> connections);
-
-  // Stream'ler
-  Stream<User?> get authStateChanges;
-  Stream<EnhancedUserModel?> get userProfileChanges;
 }
 
-class EnhancedAuthRepository implements IEnhancedAuthRepository {
+class EnhancedAuthRepository implements BaseEnhancedAuthRepository {
   final FirebaseAuth _auth;
   final FirebaseFirestore _firestore;
   final GoogleSignIn _googleSignIn;
@@ -244,13 +234,13 @@ class EnhancedAuthRepository implements IEnhancedAuthRepository {
   }
 
   @override
-  Future<void> reauthenticate(String password) async {
+  Future<void> reauthenticate(String email, String password) async {
     try {
       final user = _auth.currentUser;
       if (user == null) throw Exception('Kullanıcı oturum açmamış');
 
       final credential = EmailAuthProvider.credential(
-        email: user.email!,
+        email: email,
         password: password,
       );
       await user.reauthenticateWithCredential(credential);
@@ -342,9 +332,9 @@ class EnhancedAuthRepository implements IEnhancedAuthRepository {
       final currentUser = _auth.currentUser;
       if (currentUser == null) throw Exception('Kullanıcı oturum açmamış');
 
-      await currentUser.updateDisplayName(user.displayName?.value ?? '');
-      if (user.photoURL?.value != null) {
-        await currentUser.updatePhotoURL(user.photoURL!.value);
+      await currentUser.updateDisplayName(user.displayName ?? '');
+      if (user.photoURL != null) {
+        await currentUser.updatePhotoURL(user.photoURL);
       }
 
       await _updateUserProfileInFirestore(user);
@@ -430,9 +420,14 @@ class EnhancedAuthRepository implements IEnhancedAuthRepository {
         'Kullanıcı profil değişiklikleri henüz uygulanmadı');
   }
 
-  Future<EnhancedUserModel?> getUserProfile(String userId) async {
+  @override
+  Future<EnhancedUserModel> getUserProfile(String userId) async {
     try {
-      return await _getUserProfileFromFirestore(userId);
+      final user = await _getUserProfileFromFirestore(userId);
+      if (user == null) {
+        throw Exception('Kullanıcı profili bulunamadı');
+      }
+      return user;
     } catch (e) {
       _logger.e('Kullanıcı profili alınırken hata: $e');
       throw _handleAuthException(e);
@@ -443,12 +438,12 @@ class EnhancedAuthRepository implements IEnhancedAuthRepository {
   Future<void> _initializeUserProfile(User user) async {
     try {
       final enhancedUser = EnhancedUserModel(
-        id: user.uid,
+        uid: user.uid,
         email: user.email!,
         displayName: user.displayName,
         photoURL: user.photoURL,
-        connections: <String, dynamic>{},
-        preferences: <String, dynamic>{},
+        connections: [],
+        preferences: {},
         createdAt: DateTime.now(),
         updatedAt: DateTime.now(),
         lastSeen: DateTime.now(),

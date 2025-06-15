@@ -2,8 +2,6 @@ import 'package:devshabitat/app/core/theme/dev_habitat_colors.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import '../controllers/app_controller.dart';
-import '../constants/app_strings.dart';
 import '../core/theme/dev_habitat_theme.dart';
 
 class GlobalLoadingOverlay extends StatelessWidget {

@@ -2,8 +2,10 @@ import 'package:get/get.dart';
 import '../models/developer_profile_model.dart';
 import '../models/skill_model.dart';
 import '../models/github_stats_model.dart';
+import '../services/profile_service.dart';
 
 class ProfileController extends GetxController {
+  final ProfileService _profileService = Get.find<ProfileService>();
   final Rx<DeveloperProfile?> _profile = Rx<DeveloperProfile?>(null);
   final RxList<SkillModel> _skills = <SkillModel>[].obs;
   final Rx<GithubStatsModel?> _githubStats = Rx<GithubStatsModel?>(null);
@@ -23,24 +25,7 @@ class ProfileController extends GetxController {
       _isLoading.value = true;
       _error.value = '';
 
-      // TODO: API'den profil verilerini yükle
-      // Örnek veri:
-      _profile.value = DeveloperProfile(
-        id: userId,
-        name: 'John Doe',
-        title: 'Senior Flutter Developer',
-        bio: 'Passionate about mobile development',
-        skills: ['Flutter', 'Dart', 'Firebase'],
-        languages: ['Dart', 'JavaScript', 'Python'],
-        frameworks: ['Flutter', 'React', 'Django'],
-        githubStats: {},
-        profileImage: '',
-        location: 'Istanbul, Turkey',
-        portfolioLinks: [],
-        experienceLevel: ExperienceLevel.senior,
-        interests: ['Mobile Development', 'UI/UX'],
-      );
-
+      _profile.value = await _profileService.getProfile(userId);
       await loadSkills();
       await loadGithubStats();
     } catch (e) {
@@ -53,21 +38,9 @@ class ProfileController extends GetxController {
   // Yetenekleri yükleme
   Future<void> loadSkills() async {
     try {
-      // TODO: API'den yetenekleri yükle
-      _skills.value = [
-        SkillModel(
-          id: '1',
-          name: 'Flutter',
-          category: SkillCategory.framework,
-          proficiency: 5,
-        ),
-        SkillModel(
-          id: '2',
-          name: 'Dart',
-          category: SkillCategory.programming,
-          proficiency: 4,
-        ),
-      ];
+      if (_profile.value != null) {
+        _skills.value = await _profileService.getSkills(_profile.value!.id);
+      }
     } catch (e) {
       _error.value = 'Yetenekler yüklenirken bir hata oluştu: $e';
     }
@@ -76,17 +49,14 @@ class ProfileController extends GetxController {
   // GitHub istatistiklerini yükleme
   Future<void> loadGithubStats() async {
     try {
-      // TODO: GitHub API'den istatistikleri yükle
-      _githubStats.value = GithubStatsModel(
-        username: 'johndoe',
-        totalRepositories: 50,
-        totalContributions: 1000,
-        languageStats: {'Dart': 60, 'JavaScript': 30, 'Python': 10},
-        recentRepositories: [],
-        contributionGraph: {},
-        followers: 100,
-        following: 50,
-      );
+      if (_profile.value != null) {
+        final githubUsername =
+            _profile.value!.githubStats['username'] as String?;
+        if (githubUsername != null) {
+          _githubStats.value =
+              await _profileService.getGithubStats(githubUsername);
+        }
+      }
     } catch (e) {
       _error.value = 'GitHub istatistikleri yüklenirken bir hata oluştu: $e';
     }
@@ -98,7 +68,7 @@ class ProfileController extends GetxController {
       _isLoading.value = true;
       _error.value = '';
 
-      // TODO: API'ye profil güncellemesini gönder
+      await _profileService.updateProfile(updatedProfile);
       _profile.value = updatedProfile;
 
       Get.snackbar(
@@ -121,8 +91,10 @@ class ProfileController extends GetxController {
   // Yetenek ekleme
   Future<void> addSkill(SkillModel skill) async {
     try {
-      // TODO: API'ye yetenek ekleme isteği gönder
-      _skills.add(skill);
+      if (_profile.value != null) {
+        await _profileService.addSkill(_profile.value!.id, skill);
+        _skills.add(skill);
+      }
     } catch (e) {
       _error.value = 'Yetenek eklenirken bir hata oluştu: $e';
     }
@@ -131,8 +103,10 @@ class ProfileController extends GetxController {
   // Yetenek silme
   Future<void> removeSkill(String skillId) async {
     try {
-      // TODO: API'ye yetenek silme isteği gönder
-      _skills.removeWhere((skill) => skill.id == skillId);
+      if (_profile.value != null) {
+        await _profileService.removeSkill(_profile.value!.id, skillId);
+        _skills.removeWhere((skill) => skill.id == skillId);
+      }
     } catch (e) {
       _error.value = 'Yetenek silinirken bir hata oluştu: $e';
     }

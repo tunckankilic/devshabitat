@@ -3,64 +3,74 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:get/get.dart';
 
 class EnhancedUserModel {
+  final String uid;
+  final String email;
+  final String? displayName;
+  final String? photoURL;
+  final Map<String, dynamic>? preferences;
+  final DateTime? createdAt;
+  final DateTime? updatedAt;
+  final DateTime? lastSeen;
+  final List<String>? connections;
+  final String? githubUsername;
+  final String? githubAvatarUrl;
+  final String? githubId;
+  final Map<String, dynamic>? githubData;
+  final List<String>? skills;
+  final List<Map<String, dynamic>>? experience;
+
+  // Reactive properties
   final RxString id;
-  final RxString email;
-  final RxString? displayName;
-  final RxString? photoURL;
-  final RxMap<String, dynamic>? connections;
-  final RxMap<String, dynamic>? preferences;
-  final Rx<DateTime?> createdAt;
-  final Rx<DateTime?> updatedAt;
-  final Rx<DateTime?> lastSeen;
-  final RxList<String>? skills;
-  final RxList<Map<String, dynamic>>? experience;
-  final RxString? githubUsername;
-  final RxString? githubAvatarUrl;
-  final RxString? githubId;
-  final RxMap<String, dynamic>? githubData;
+  final RxString emailRx;
+  final RxString? displayNameRx;
+  final RxString? photoURLRx;
+  final RxMap<String, dynamic>? preferencesRx;
+  final Rx<DateTime?> createdAtRx;
+  final Rx<DateTime?> updatedAtRx;
+  final Rx<DateTime?> lastSeenRx;
+  final RxList<String>? connectionsRx;
+  final RxString? githubUsernameRx;
+  final RxString? githubAvatarUrlRx;
+  final RxString? githubIdRx;
+  final RxMap<String, dynamic>? githubDataRx;
+  final RxList<String>? skillsRx;
+  final RxList<Map<String, dynamic>>? experienceRx;
 
   EnhancedUserModel({
-    required String id,
-    required String email,
-    String? displayName,
-    String? photoURL,
-    Map<String, dynamic>? connections,
-    Map<String, dynamic>? preferences,
-    DateTime? createdAt,
-    DateTime? updatedAt,
-    DateTime? lastSeen,
-    List<String>? skills,
-    List<Map<String, dynamic>>? experience,
-    String? githubUsername,
-    String? githubAvatarUrl,
-    String? githubId,
-    Map<String, dynamic>? githubData,
-  })  : id = id.obs,
-        email = email.obs,
-        displayName = displayName?.obs,
-        photoURL = photoURL?.obs,
-        connections = connections != null
-            ? RxMap<String, dynamic>.from(connections)
-            : null,
-        preferences = preferences != null
-            ? RxMap<String, dynamic>.from(preferences)
-            : null,
-        createdAt = createdAt.obs,
-        updatedAt = updatedAt.obs,
-        lastSeen = lastSeen.obs,
-        skills = skills != null ? RxList<String>.from(skills) : null,
-        experience = experience != null
-            ? RxList<Map<String, dynamic>>.from(experience)
-            : null,
-        githubUsername = githubUsername?.obs,
-        githubAvatarUrl = githubAvatarUrl?.obs,
-        githubId = githubId?.obs,
-        githubData =
-            githubData != null ? RxMap<String, dynamic>.from(githubData) : null;
+    required this.uid,
+    required this.email,
+    this.displayName,
+    this.photoURL,
+    this.preferences,
+    this.createdAt,
+    this.updatedAt,
+    this.lastSeen,
+    this.connections,
+    this.githubUsername,
+    this.githubAvatarUrl,
+    this.githubId,
+    this.githubData,
+    this.skills,
+    this.experience,
+  })  : id = uid.obs,
+        emailRx = email.obs,
+        displayNameRx = displayName?.obs,
+        photoURLRx = photoURL?.obs,
+        preferencesRx = preferences?.obs,
+        createdAtRx = Rx<DateTime?>(createdAt),
+        updatedAtRx = Rx<DateTime?>(updatedAt),
+        lastSeenRx = Rx<DateTime?>(lastSeen),
+        connectionsRx = connections?.obs,
+        githubUsernameRx = githubUsername?.obs,
+        githubAvatarUrlRx = githubAvatarUrl?.obs,
+        githubIdRx = githubId?.obs,
+        githubDataRx = githubData?.obs,
+        skillsRx = skills?.obs,
+        experienceRx = experience?.obs;
 
   factory EnhancedUserModel.fromFirebase(User user) {
     return EnhancedUserModel(
-      id: user.uid,
+      uid: user.uid,
       email: user.email ?? '',
       displayName: user.displayName,
       photoURL: user.photoURL,
@@ -72,118 +82,121 @@ class EnhancedUserModel {
 
   factory EnhancedUserModel.fromJson(Map<String, dynamic> json) {
     return EnhancedUserModel(
-      id: json['id'] as String,
+      uid: json['uid'] as String,
       email: json['email'] as String,
       displayName: json['displayName'] as String?,
       photoURL: json['photoURL'] as String?,
-      connections: json['connections'] as Map<String, dynamic>?,
       preferences: json['preferences'] as Map<String, dynamic>?,
-      createdAt: (json['createdAt'] as Timestamp?)?.toDate(),
-      updatedAt: (json['updatedAt'] as Timestamp?)?.toDate(),
-      lastSeen: (json['lastSeen'] as Timestamp?)?.toDate(),
-      skills: (json['skills'] as List<dynamic>?)?.cast<String>(),
-      experience: (json['experience'] as List<dynamic>?)
-          ?.map((e) => e as Map<String, dynamic>)
-          .toList(),
+      createdAt: json['createdAt'] != null
+          ? (json['createdAt'] as Timestamp).toDate()
+          : null,
+      updatedAt: json['updatedAt'] != null
+          ? (json['updatedAt'] as Timestamp).toDate()
+          : null,
+      lastSeen: json['lastSeen'] != null
+          ? (json['lastSeen'] as Timestamp).toDate()
+          : null,
+      connections: (json['connections'] as List<dynamic>?)?.cast<String>(),
       githubUsername: json['githubUsername'] as String?,
       githubAvatarUrl: json['githubAvatarUrl'] as String?,
       githubId: json['githubId'] as String?,
       githubData: json['githubData'] as Map<String, dynamic>?,
+      skills: (json['skills'] as List<dynamic>?)?.cast<String>(),
+      experience: (json['experience'] as List<dynamic>?)
+          ?.map((e) => e as Map<String, dynamic>)
+          .toList(),
     );
   }
 
   Map<String, dynamic> toJson() {
     return {
-      'id': id.value,
-      'email': email.value,
-      'displayName': displayName?.value,
-      'photoURL': photoURL?.value,
-      'connections': connections?.value,
-      'preferences': preferences?.value,
-      'createdAt':
-          createdAt.value != null ? Timestamp.fromDate(createdAt.value!) : null,
-      'updatedAt':
-          updatedAt.value != null ? Timestamp.fromDate(updatedAt.value!) : null,
-      'lastSeen':
-          lastSeen.value != null ? Timestamp.fromDate(lastSeen.value!) : null,
-      'skills': skills?.value,
-      'experience': experience?.value,
-      'githubUsername': githubUsername?.value,
-      'githubAvatarUrl': githubAvatarUrl?.value,
-      'githubId': githubId?.value,
-      'githubData': githubData?.value,
+      'uid': uid,
+      'email': email,
+      'displayName': displayName,
+      'photoURL': photoURL,
+      'preferences': preferences,
+      'createdAt': createdAt,
+      'updatedAt': updatedAt,
+      'lastSeen': lastSeen,
+      'connections': connections,
+      'githubUsername': githubUsername,
+      'githubAvatarUrl': githubAvatarUrl,
+      'githubId': githubId,
+      'githubData': githubData,
+      'skills': skills,
+      'experience': experience,
     };
   }
 
   EnhancedUserModel copyWith({
-    String? id,
+    String? uid,
     String? email,
     String? displayName,
     String? photoURL,
-    Map<String, dynamic>? connections,
     Map<String, dynamic>? preferences,
     DateTime? createdAt,
     DateTime? updatedAt,
     DateTime? lastSeen,
-    List<String>? skills,
-    List<Map<String, dynamic>>? experience,
+    List<String>? connections,
     String? githubUsername,
     String? githubAvatarUrl,
     String? githubId,
     Map<String, dynamic>? githubData,
+    List<String>? skills,
+    List<Map<String, dynamic>>? experience,
   }) {
     return EnhancedUserModel(
-      id: id ?? this.id.value,
-      email: email ?? this.email.value,
-      displayName: displayName ?? this.displayName?.value,
-      photoURL: photoURL ?? this.photoURL?.value,
-      connections: connections ?? this.connections?.value,
-      preferences: preferences ?? this.preferences?.value,
-      createdAt: createdAt ?? this.createdAt.value,
-      updatedAt: updatedAt ?? this.updatedAt.value,
-      lastSeen: lastSeen ?? this.lastSeen.value,
-      skills: skills ?? this.skills?.value,
-      experience: experience ?? this.experience?.value,
-      githubUsername: githubUsername ?? this.githubUsername?.value,
-      githubAvatarUrl: githubAvatarUrl ?? this.githubAvatarUrl?.value,
-      githubId: githubId ?? this.githubId?.value,
-      githubData: githubData ?? this.githubData?.value,
+      uid: uid ?? this.uid,
+      email: email ?? this.email,
+      displayName: displayName ?? this.displayName,
+      photoURL: photoURL ?? this.photoURL,
+      preferences: preferences ?? this.preferences,
+      createdAt: createdAt ?? this.createdAt,
+      updatedAt: updatedAt ?? this.updatedAt,
+      lastSeen: lastSeen ?? this.lastSeen,
+      connections: connections ?? this.connections,
+      githubUsername: githubUsername ?? this.githubUsername,
+      githubAvatarUrl: githubAvatarUrl ?? this.githubAvatarUrl,
+      githubId: githubId ?? this.githubId,
+      githubData: githubData ?? this.githubData,
+      skills: skills ?? this.skills,
+      experience: experience ?? this.experience,
     );
   }
 
-  bool get isValid => id.value.isNotEmpty && email.value.isNotEmpty;
+  bool get isValid => uid.isNotEmpty && email.isNotEmpty;
 
   void updateLastSeen() {
-    lastSeen.value = DateTime.now();
+    lastSeenRx.value = DateTime.now();
   }
 
   void addSkill(String skill) {
-    skills?.add(skill);
+    skillsRx?.add(skill);
   }
 
   void removeSkill(String skill) {
-    skills?.remove(skill);
+    skillsRx?.remove(skill);
   }
 
   void addExperience(Map<String, dynamic> exp) {
-    experience?.add(exp);
+    experienceRx?.add(exp);
   }
 
   void removeExperience(int index) {
-    if (index >= 0 && index < (experience?.length ?? 0)) {
-      experience?.removeAt(index);
+    if (index >= 0 && index < (experienceRx?.length ?? 0)) {
+      experienceRx?.removeAt(index);
     }
   }
 
   void updatePreferences(Map<String, dynamic> newPreferences) {
-    preferences?.addAll(newPreferences);
+    preferencesRx?.addAll(newPreferences);
   }
 
-  void addConnection(String userId, Map<String, dynamic> connectionData) {
-    connections?.addAll({userId: connectionData});
+  void addConnection(String userId) {
+    connectionsRx?.add(userId);
   }
 
   void removeConnection(String userId) {
-    connections?.remove(userId);
+    connectionsRx?.remove(userId);
   }
 }

@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:url_launcher/url_launcher.dart';
 import '../../controllers/profile_controller.dart';
 import '../../controllers/image_upload_controller.dart';
 import '../../controllers/github_integration_controller.dart';
 import 'widgets/skill_chip_grid.dart';
 import 'widgets/responsive_image_picker.dart';
-import 'widgets/adaptive_progress_indicator.dart';
 import 'widgets/github_repo_card.dart';
 
 class TabletProfile extends StatelessWidget {
@@ -256,8 +256,25 @@ class TabletProfile extends StatelessWidget {
                                   leading: const Icon(Icons.link),
                                   title: Text(link),
                                   trailing: const Icon(Icons.open_in_new),
-                                  onTap: () {
-                                    // TODO: Link açma işlemi
+                                  onTap: () async {
+                                    try {
+                                      final uri = Uri.parse(link);
+                                      if (await canLaunchUrl(uri)) {
+                                        await launchUrl(uri);
+                                      } else {
+                                        Get.snackbar(
+                                          'Hata',
+                                          'Link açılamadı',
+                                          snackPosition: SnackPosition.BOTTOM,
+                                        );
+                                      }
+                                    } catch (e) {
+                                      Get.snackbar(
+                                        'Hata',
+                                        'Link açılırken bir hata oluştu',
+                                        snackPosition: SnackPosition.BOTTOM,
+                                      );
+                                    }
                                   },
                                 )),
                           ],

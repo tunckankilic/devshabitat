@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:url_launcher/url_launcher.dart';
 import '../../controllers/profile_controller.dart';
 import '../../controllers/image_upload_controller.dart';
 import '../../controllers/github_integration_controller.dart';
 import 'widgets/skill_chip_grid.dart';
 import 'widgets/responsive_image_picker.dart';
-import 'widgets/adaptive_progress_indicator.dart';
 import 'widgets/github_repo_card.dart';
 
 class SmallPhoneProfile extends StatelessWidget {
@@ -135,7 +135,7 @@ class SmallPhoneProfile extends StatelessWidget {
                           Text(
                               'Toplam Katkı: ${_githubController.githubStats!.totalContributions}'),
                           const SizedBox(height: 8),
-                          Text('Popüler Repolar:'),
+                          const Text('Popüler Repolar:'),
                           ..._githubController.githubStats!.recentRepositories
                               .map((repo) => GithubRepoCard(repo: repo))
                               .toList(),
@@ -187,8 +187,17 @@ class SmallPhoneProfile extends StatelessWidget {
                       ...profile.portfolioLinks.map((link) => ListTile(
                             leading: const Icon(Icons.link),
                             title: Text(link),
-                            onTap: () {
-                              // TODO: Link açma işlemi
+                            onTap: () async {
+                              final Uri url = Uri.parse(link);
+                              if (await canLaunchUrl(url)) {
+                                await launchUrl(url);
+                              } else {
+                                Get.snackbar(
+                                  'Hata',
+                                  'Link açılamadı',
+                                  snackPosition: SnackPosition.BOTTOM,
+                                );
+                              }
                             },
                           )),
                     ],

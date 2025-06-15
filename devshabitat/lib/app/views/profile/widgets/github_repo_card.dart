@@ -55,7 +55,7 @@ class GithubRepoCard extends StatelessWidget {
                 ],
 
                 // Yıldız
-                Icon(
+                const Icon(
                   Icons.star,
                   size: 16,
                   color: Colors.amber,
@@ -68,7 +68,7 @@ class GithubRepoCard extends StatelessWidget {
                 const SizedBox(width: 16),
 
                 // Fork
-                Icon(
+                const Icon(
                   Icons.call_split,
                   size: 16,
                   color: Colors.grey,

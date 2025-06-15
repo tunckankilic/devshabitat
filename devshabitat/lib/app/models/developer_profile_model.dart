@@ -1,5 +1,3 @@
-import 'package:get/get.dart';
-
 enum ExperienceLevel { junior, midLevel, senior, lead, architect }
 
 class DeveloperProfile {

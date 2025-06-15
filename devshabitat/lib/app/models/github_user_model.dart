@@ -1,4 +1,3 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:get/get.dart';
 import 'enhanced_user_model.dart';
 
@@ -206,14 +205,14 @@ class GitHubUserModel {
 
   EnhancedUserModel toUser() {
     return EnhancedUserModel(
-      id: id.value,
+      uid: id.value,
       email: email?.value ?? '',
       displayName: name?.value ?? login.value,
       photoURL: avatarUrl?.value,
       githubUsername: login.value,
       githubAvatarUrl: avatarUrl?.value,
       githubId: id.value,
-      githubData: rawData?.value,
+      githubData: rawData,
     );
   }
 
@@ -293,7 +292,7 @@ class GitHubUserModel {
       reposUrl: reposUrl ?? this.reposUrl?.value,
       eventsUrl: eventsUrl ?? this.eventsUrl?.value,
       receivedEventsUrl: receivedEventsUrl ?? this.receivedEventsUrl?.value,
-      rawData: rawData ?? this.rawData?.value,
+      rawData: rawData ?? this.rawData,
     );
   }
 

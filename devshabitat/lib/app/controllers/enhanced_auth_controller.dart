@@ -1,5 +1,4 @@
 import 'package:get/get.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import '../repositories/enhanced_auth_repository.dart';
 import '../models/enhanced_user_model.dart';
@@ -14,14 +13,14 @@ enum AuthState {
 }
 
 class EnhancedAuthController extends GetxController {
-  final EnhancedAuthRepository _authRepository;
+  final _authRepository = Get.find<EnhancedAuthRepository>();
   final ErrorHandlerService _errorHandler;
 
   // Reactive state variables
   final _isLoading = false.obs;
   final _currentUser = Rxn<EnhancedUserModel>();
   final _authState = AuthState.initial.obs;
-  final _lastError = RxnString();
+  final _lastError = ''.obs;
 
   // Form controllers
   final emailController = TextEditingController();
@@ -34,13 +33,11 @@ class EnhancedAuthController extends GetxController {
   bool get isLoading => _isLoading.value;
   EnhancedUserModel? get currentUser => _currentUser.value;
   AuthState get authState => _authState.value;
-  String? get lastError => _lastError.value;
+  String get lastError => _lastError.value;
 
   EnhancedAuthController({
-    required EnhancedAuthRepository authRepository,
     required ErrorHandlerService errorHandler,
-  })  : _authRepository = authRepository,
-        _errorHandler = errorHandler;
+  }) : _errorHandler = errorHandler;
 
   @override
   void onInit() {
@@ -74,39 +71,42 @@ class EnhancedAuthController extends GetxController {
     }
   }
 
-  Future<void> signInWithEmailAndPassword() async {
+  Future<void> signInWithEmailAndPassword(String email, String password) async {
     try {
       _isLoading.value = true;
-      await _authRepository.signInWithEmailAndPassword(
-        emailController.text,
-        passwordController.text,
-      );
-      _errorHandler.handleSuccess('Giriş başarılı');
+      _lastError.value = '';
+      await _authRepository.signInWithEmailAndPassword(email, password);
+      Get.offAllNamed('/home');
     } catch (e) {
-      _errorHandler.handleError(e);
       _lastError.value = e.toString();
+      Get.snackbar(
+        'Hata',
+        'Giriş yapılırken bir hata oluştu',
+        snackPosition: SnackPosition.BOTTOM,
+      );
     } finally {
       _isLoading.value = false;
     }
   }
 
-  Future<void> createUserWithEmailAndPassword() async {
-    if (passwordController.text != confirmPasswordController.text) {
-      _errorHandler.handleError('Şifreler eşleşmiyor');
-      return;
-    }
-
+  Future<void> signUpWithEmailAndPassword(String email, String password) async {
     try {
       _isLoading.value = true;
+      _lastError.value = '';
       await _authRepository.createUserWithEmailAndPassword(
-        emailController.text,
-        passwordController.text,
-        usernameController.text,
+        email,
+        password,
+        email.split('@')[
+            0], // Geçici olarak email'in @ öncesini username olarak kullanıyoruz
       );
-      _errorHandler.handleSuccess('Hesap oluşturuldu');
+      Get.offAllNamed('/home');
     } catch (e) {
-      _errorHandler.handleError(e);
       _lastError.value = e.toString();
+      Get.snackbar(
+        'Hata',
+        'Kayıt olurken bir hata oluştu',
+        snackPosition: SnackPosition.BOTTOM,
+      );
     } finally {
       _isLoading.value = false;
     }
@@ -115,11 +115,16 @@ class EnhancedAuthController extends GetxController {
   Future<void> signInWithGoogle() async {
     try {
       _isLoading.value = true;
+      _lastError.value = '';
       await _authRepository.signInWithGoogle();
-      _errorHandler.handleSuccess('Google ile giriş başarılı');
+      Get.offAllNamed('/home');
     } catch (e) {
-      _errorHandler.handleError(e);
       _lastError.value = e.toString();
+      Get.snackbar(
+        'Hata',
+        'Google ile giriş yapılırken bir hata oluştu',
+        snackPosition: SnackPosition.BOTTOM,
+      );
     } finally {
       _isLoading.value = false;
     }
@@ -128,11 +133,16 @@ class EnhancedAuthController extends GetxController {
   Future<void> signInWithApple() async {
     try {
       _isLoading.value = true;
+      _lastError.value = '';
       await _authRepository.signInWithApple();
-      _errorHandler.handleSuccess('Apple ile giriş başarılı');
+      Get.offAllNamed('/home');
     } catch (e) {
-      _errorHandler.handleError(e);
       _lastError.value = e.toString();
+      Get.snackbar(
+        'Hata',
+        'Apple ile giriş yapılırken bir hata oluştu',
+        snackPosition: SnackPosition.BOTTOM,
+      );
     } finally {
       _isLoading.value = false;
     }
@@ -141,11 +151,16 @@ class EnhancedAuthController extends GetxController {
   Future<void> signInWithFacebook() async {
     try {
       _isLoading.value = true;
+      _lastError.value = '';
       await _authRepository.signInWithFacebook();
-      _errorHandler.handleSuccess('Facebook ile giriş başarılı');
+      Get.offAllNamed('/home');
     } catch (e) {
-      _errorHandler.handleError(e);
       _lastError.value = e.toString();
+      Get.snackbar(
+        'Hata',
+        'Facebook ile giriş yapılırken bir hata oluştu',
+        snackPosition: SnackPosition.BOTTOM,
+      );
     } finally {
       _isLoading.value = false;
     }
@@ -154,11 +169,16 @@ class EnhancedAuthController extends GetxController {
   Future<void> signInWithGithub() async {
     try {
       _isLoading.value = true;
+      _lastError.value = '';
       await _authRepository.signInWithGithub();
-      _errorHandler.handleSuccess('GitHub ile giriş başarılı');
+      Get.offAllNamed('/home');
     } catch (e) {
-      _errorHandler.handleError(e);
       _lastError.value = e.toString();
+      Get.snackbar(
+        'Hata',
+        'GitHub ile giriş yapılırken bir hata oluştu',
+        snackPosition: SnackPosition.BOTTOM,
+      );
     } finally {
       _isLoading.value = false;
     }
@@ -167,11 +187,16 @@ class EnhancedAuthController extends GetxController {
   Future<void> signOut() async {
     try {
       _isLoading.value = true;
+      _lastError.value = '';
       await _authRepository.signOut();
-      _errorHandler.handleSuccess('Çıkış yapıldı');
+      Get.offAllNamed('/login');
     } catch (e) {
-      _errorHandler.handleError(e);
       _lastError.value = e.toString();
+      Get.snackbar(
+        'Hata',
+        'Çıkış yapılırken bir hata oluştu',
+        snackPosition: SnackPosition.BOTTOM,
+      );
     } finally {
       _isLoading.value = false;
     }
@@ -179,14 +204,30 @@ class EnhancedAuthController extends GetxController {
 
   Future<void> sendPasswordResetEmail() async {
     try {
-      _isLoading.value = true;
+      if (emailController.text.isEmpty) {
+        Get.snackbar(
+          'Hata',
+          'Lütfen e-posta adresinizi girin',
+          snackPosition: SnackPosition.BOTTOM,
+        );
+        return;
+      }
+
       await _authRepository.sendPasswordResetEmail(emailController.text);
-      _errorHandler.handleSuccess('Şifre sıfırlama e-postası gönderildi');
+
+      Get.snackbar(
+        'Başarılı',
+        'Şifre sıfırlama bağlantısı e-posta adresinize gönderildi',
+        snackPosition: SnackPosition.BOTTOM,
+      );
+
+      Get.back();
     } catch (e) {
-      _errorHandler.handleError(e);
-      _lastError.value = e.toString();
-    } finally {
-      _isLoading.value = false;
+      Get.snackbar(
+        'Hata',
+        'Şifre sıfırlama e-postası gönderilemedi: ${e.toString()}',
+        snackPosition: SnackPosition.BOTTOM,
+      );
     }
   }
 
@@ -242,14 +283,18 @@ class EnhancedAuthController extends GetxController {
     }
   }
 
-  Future<void> reauthenticate(String password) async {
+  Future<void> reauthenticate(String email, String password) async {
     try {
       _isLoading.value = true;
-      await _authRepository.reauthenticate(password);
-      _errorHandler.handleSuccess('Kimlik doğrulama başarılı');
+      _lastError.value = '';
+      await _authRepository.reauthenticate(email, password);
     } catch (e) {
-      _errorHandler.handleError(e);
       _lastError.value = e.toString();
+      Get.snackbar(
+        'Hata',
+        'Kimlik doğrulama başarısız',
+        snackPosition: SnackPosition.BOTTOM,
+      );
     } finally {
       _isLoading.value = false;
     }

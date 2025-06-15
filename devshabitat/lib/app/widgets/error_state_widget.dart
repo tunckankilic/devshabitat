@@ -1,8 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import '../constants/app_strings.dart';
-import '../core/theme/dev_habitat_theme.dart';
-import 'package:get/get.dart';
 
 class ErrorStateWidget extends StatelessWidget {
   final String? message;
