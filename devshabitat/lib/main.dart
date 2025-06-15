@@ -9,7 +9,7 @@ import 'app/controllers/enhanced_auth_controller.dart';
 import 'app/services/profile_service.dart';
 import 'app/services/github_service.dart';
 import 'app/services/image_upload_service.dart';
-import 'app/routes/app_routes.dart';
+import 'app/routes/app_pages.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -35,7 +35,7 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ScreenUtilInit(
-      designSize: const Size(375, 812), // iPhone X tasarım boyutu
+      designSize: const Size(375, 812),
       minTextAdapt: true,
       splitScreenMode: true,
       builder: (context, child) {
@@ -45,7 +45,8 @@ class MyApp extends StatelessWidget {
             colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
             useMaterial3: true,
           ),
-          initialRoute: AppRoutes.initial,
+          initialRoute: Routes.MAIN,
+          getPages: AppPages.routes,
           defaultTransition: Transition.fade,
         );
       },

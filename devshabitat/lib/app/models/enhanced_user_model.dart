@@ -7,6 +7,7 @@ class EnhancedUserModel {
   final String email;
   final String? displayName;
   final String? photoURL;
+  final String? bio;
   final Map<String, dynamic>? preferences;
   final DateTime? createdAt;
   final DateTime? updatedAt;
@@ -41,6 +42,7 @@ class EnhancedUserModel {
     required this.email,
     this.displayName,
     this.photoURL,
+    this.bio,
     this.preferences,
     this.createdAt,
     this.updatedAt,
@@ -86,6 +88,7 @@ class EnhancedUserModel {
       email: json['email'] as String,
       displayName: json['displayName'] as String?,
       photoURL: json['photoURL'] as String?,
+      bio: json['bio'] as String?,
       preferences: json['preferences'] as Map<String, dynamic>?,
       createdAt: json['createdAt'] != null
           ? (json['createdAt'] as Timestamp).toDate()
@@ -114,6 +117,7 @@ class EnhancedUserModel {
       'email': email,
       'displayName': displayName,
       'photoURL': photoURL,
+      'bio': bio,
       'preferences': preferences,
       'createdAt': createdAt,
       'updatedAt': updatedAt,
@@ -133,6 +137,7 @@ class EnhancedUserModel {
     String? email,
     String? displayName,
     String? photoURL,
+    String? bio,
     Map<String, dynamic>? preferences,
     DateTime? createdAt,
     DateTime? updatedAt,
@@ -150,6 +155,7 @@ class EnhancedUserModel {
       email: email ?? this.email,
       displayName: displayName ?? this.displayName,
       photoURL: photoURL ?? this.photoURL,
+      bio: bio ?? this.bio,
       preferences: preferences ?? this.preferences,
       createdAt: createdAt ?? this.createdAt,
       updatedAt: updatedAt ?? this.updatedAt,

@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../repositories/enhanced_auth_repository.dart';
 import '../models/enhanced_user_model.dart';
 import '../core/services/error_handler_service.dart';
+import '../routes/app_pages.dart';
 
 enum AuthState {
   initial,
@@ -49,9 +50,13 @@ class EnhancedAuthController extends GetxController {
     _authRepository.authStateChanges.listen((user) async {
       if (user != null) {
         await _loadUserProfile(user.uid);
+        if (_authState.value == AuthState.authenticated) {
+          Get.offAllNamed(Routes.MAIN);
+        }
       } else {
         _currentUser.value = null;
         _authState.value = AuthState.unauthenticated;
+        Get.offAllNamed(Routes.LOGIN);
       }
     });
   }
@@ -76,7 +81,6 @@ class EnhancedAuthController extends GetxController {
       _isLoading.value = true;
       _lastError.value = '';
       await _authRepository.signInWithEmailAndPassword(email, password);
-      Get.offAllNamed('/home');
     } catch (e) {
       _lastError.value = e.toString();
       Get.snackbar(
@@ -96,10 +100,8 @@ class EnhancedAuthController extends GetxController {
       await _authRepository.createUserWithEmailAndPassword(
         email,
         password,
-        email.split('@')[
-            0], // Geçici olarak email'in @ öncesini username olarak kullanıyoruz
+        email.split('@')[0],
       );
-      Get.offAllNamed('/home');
     } catch (e) {
       _lastError.value = e.toString();
       Get.snackbar(
@@ -117,7 +119,6 @@ class EnhancedAuthController extends GetxController {
       _isLoading.value = true;
       _lastError.value = '';
       await _authRepository.signInWithGoogle();
-      Get.offAllNamed('/home');
     } catch (e) {
       _lastError.value = e.toString();
       Get.snackbar(
@@ -135,7 +136,6 @@ class EnhancedAuthController extends GetxController {
       _isLoading.value = true;
       _lastError.value = '';
       await _authRepository.signInWithApple();
-      Get.offAllNamed('/home');
     } catch (e) {
       _lastError.value = e.toString();
       Get.snackbar(
@@ -153,7 +153,6 @@ class EnhancedAuthController extends GetxController {
       _isLoading.value = true;
       _lastError.value = '';
       await _authRepository.signInWithFacebook();
-      Get.offAllNamed('/home');
     } catch (e) {
       _lastError.value = e.toString();
       Get.snackbar(
@@ -171,7 +170,6 @@ class EnhancedAuthController extends GetxController {
       _isLoading.value = true;
       _lastError.value = '';
       await _authRepository.signInWithGithub();
-      Get.offAllNamed('/home');
     } catch (e) {
       _lastError.value = e.toString();
       Get.snackbar(
@@ -187,9 +185,7 @@ class EnhancedAuthController extends GetxController {
   Future<void> signOut() async {
     try {
       _isLoading.value = true;
-      _lastError.value = '';
       await _authRepository.signOut();
-      Get.offAllNamed('/login');
     } catch (e) {
       _lastError.value = e.toString();
       Get.snackbar(
