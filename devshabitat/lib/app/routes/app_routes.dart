@@ -10,4 +10,7 @@ abstract class Routes {
   static const PROFILE = '/profile';
   static const SETTINGS = '/settings';
   static const FORGOT_PASSWORD = '/forgot-password';
+  static const MESSAGES = '/messages';
+  static const CHAT = '/chat';
+  static const NEW_CHAT = '/new-chat';
 }

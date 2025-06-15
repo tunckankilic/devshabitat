@@ -102,9 +102,8 @@ class AuthRepository implements IAuthRepository {
         throw Exception('Facebook login failed');
       }
 
-      final AccessToken accessToken = result.accessToken!;
-      final OAuthCredential credential =
-          FacebookAuthProvider.credential(accessToken.token);
+      final credential =
+          FacebookAuthProvider.credential(result.accessToken!.tokenString);
 
       return await _auth.signInWithCredential(credential);
     } catch (e) {

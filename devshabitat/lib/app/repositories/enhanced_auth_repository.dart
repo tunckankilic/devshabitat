@@ -38,6 +38,7 @@ abstract class BaseEnhancedAuthRepository {
   Future<void> addConnection(String userId);
   Future<void> removeConnection(String userId);
   Future<void> updateUserConnections(Map<String, dynamic> connections);
+  Future<List<String>> getUserConnections();
 }
 
 class EnhancedAuthRepository implements BaseEnhancedAuthRepository {
@@ -155,7 +156,7 @@ class EnhancedAuthRepository implements BaseEnhancedAuthRepository {
 
       final AccessToken accessToken = result.accessToken!;
       final OAuthCredential credential =
-          FacebookAuthProvider.credential(accessToken.token);
+          FacebookAuthProvider.credential(accessToken.tokenString);
 
       final userCredential = await _auth.signInWithCredential(credential);
       await _handleProviderSignIn(userCredential.user!, 'facebook.com');
@@ -299,7 +300,7 @@ class EnhancedAuthRepository implements BaseEnhancedAuthRepository {
 
       final AccessToken accessToken = result.accessToken!;
       final OAuthCredential credential =
-          FacebookAuthProvider.credential(accessToken.token);
+          FacebookAuthProvider.credential(accessToken.tokenString);
 
       await _auth.currentUser?.linkWithCredential(credential);
     } catch (e) {
@@ -430,6 +431,20 @@ class EnhancedAuthRepository implements BaseEnhancedAuthRepository {
       return user;
     } catch (e) {
       _logger.e('Kullanıcı profili alınırken hata: $e');
+      throw _handleAuthException(e);
+    }
+  }
+
+  @override
+  Future<List<String>> getUserConnections() async {
+    try {
+      final currentUser = _auth.currentUser;
+      if (currentUser == null) throw Exception('Kullanıcı oturum açmamış');
+
+      final userProfile = await _getUserProfileFromFirestore(currentUser.uid);
+      return userProfile?.connections ?? [];
+    } catch (e) {
+      _logger.e('Bağlantılar alınamadı: $e');
       throw _handleAuthException(e);
     }
   }

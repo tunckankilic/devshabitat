@@ -1,0 +1,106 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:encrypt/encrypt.dart' as encrypt;
+
+/// Mesaj türlerini tanımlayan enum
+enum MessageType { text, image, file, code }
+
+/// Mesaj durumlarını tanımlayan enum
+enum MessageStatus { sent, delivered, read, failed }
+
+/// Mesaj modeli sınıfı
+/// Bu sınıf, uygulama içindeki mesajların yapısını temsil eder
+class MessageModel {
+  final String id;
+  final String conversationId;
+  final String content;
+  final String senderId;
+  final String senderName;
+  final DateTime timestamp;
+  final MessageStatus status;
+  final String type;
+
+  MessageModel({
+    required this.id,
+    required this.conversationId,
+    required this.content,
+    required this.senderId,
+    required this.senderName,
+    required this.timestamp,
+    required this.status,
+    this.type = 'text',
+  });
+
+  /// Mesajı şifrelemek için kullanılan yardımcı metod
+  static String _encryptContent(String content, String key) {
+    final encrypter =
+        encrypt.Encrypter(encrypt.AES(encrypt.Key.fromUtf8(key.padRight(32))));
+    final iv = encrypt.IV.fromLength(16);
+    return encrypter.encrypt(content, iv: iv).base64;
+  }
+
+  /// Mesajı çözmek için kullanılan yardımcı metod
+  static String _decryptContent(String encryptedContent, String key) {
+    try {
+      final encrypter = encrypt.Encrypter(
+          encrypt.AES(encrypt.Key.fromUtf8(key.padRight(32))));
+      final iv = encrypt.IV.fromLength(16);
+      return encrypter.decrypt64(encryptedContent, iv: iv);
+    } catch (e) {
+      return encryptedContent; // Çözülemezse orijinal içeriği döndür
+    }
+  }
+
+  /// Modeli Map'e dönüştürme metodu
+  Map<String, dynamic> toJson() {
+    return {
+      'id': id,
+      'conversationId': conversationId,
+      'content': content,
+      'senderId': senderId,
+      'senderName': senderName,
+      'timestamp': timestamp.toIso8601String(),
+      'status': status.toString().split('.').last,
+      'type': type,
+    };
+  }
+
+  /// Map'ten model oluşturma factory metodu
+  factory MessageModel.fromJson(Map<String, dynamic> json) {
+    return MessageModel(
+      id: json['id'] as String,
+      conversationId: json['conversationId'] as String,
+      content: json['content'] as String,
+      senderId: json['senderId'] as String,
+      senderName: json['senderName'] as String,
+      timestamp: DateTime.parse(json['timestamp'] as String),
+      status: MessageStatus.values.firstWhere(
+        (e) => e.toString() == 'MessageStatus.${json['status']}',
+        orElse: () => MessageStatus.sent,
+      ),
+      type: json['type'] as String? ?? 'text',
+    );
+  }
+
+  /// Modelin kopyasını oluşturma metodu
+  MessageModel copyWith({
+    String? id,
+    String? conversationId,
+    String? content,
+    String? senderId,
+    String? senderName,
+    DateTime? timestamp,
+    MessageStatus? status,
+    String? type,
+  }) {
+    return MessageModel(
+      id: id ?? this.id,
+      conversationId: conversationId ?? this.conversationId,
+      content: content ?? this.content,
+      senderId: senderId ?? this.senderId,
+      senderName: senderName ?? this.senderName,
+      timestamp: timestamp ?? this.timestamp,
+      status: status ?? this.status,
+      type: type ?? this.type,
+    );
+  }
+}
