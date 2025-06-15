@@ -360,7 +360,7 @@ class EnhancedAuthRepository implements IEnhancedAuthRepository {
       if (user == null) return;
 
       // Firestore'da son görülme zamanını güncelle
-      await _updateLastSeenInFirestore(user.uid);
+      await _updateLastSeenInFirestore();
     } catch (e) {
       _logger.e('Son görülme zamanı güncellenirken hata: $e');
     }
@@ -373,7 +373,7 @@ class EnhancedAuthRepository implements IEnhancedAuthRepository {
       if (currentUser == null) throw Exception('Kullanıcı oturum açmamış');
 
       // Firestore'da bağlantıyı ekle
-      await _addConnectionInFirestore(currentUser.uid, userId);
+      await _addConnectionInFirestore(currentUser.uid);
     } catch (e) {
       throw _handleAuthException(e);
     }
@@ -386,7 +386,7 @@ class EnhancedAuthRepository implements IEnhancedAuthRepository {
       if (currentUser == null) throw Exception('Kullanıcı oturum açmamış');
 
       // Firestore'dan bağlantıyı kaldır
-      await _removeConnectionInFirestore(currentUser.uid, userId);
+      await _removeConnectionInFirestore(currentUser.uid);
     } catch (e) {
       throw _handleAuthException(e);
     }
@@ -399,7 +399,7 @@ class EnhancedAuthRepository implements IEnhancedAuthRepository {
       if (currentUser == null) throw Exception('Kullanıcı oturum açmamış');
 
       // Firestore'da tercihleri güncelle
-      await _updatePreferencesInFirestore(currentUser.uid, preferences);
+      await _updatePreferencesInFirestore(preferences);
     } catch (e) {
       throw _handleAuthException(e);
     }
@@ -478,36 +478,122 @@ class EnhancedAuthRepository implements IEnhancedAuthRepository {
 
   // Firestore işlemleri
   Future<void> _updateUserProfileInFirestore(EnhancedUserModel user) async {
-    // TODO: Firestore implementasyonu
-    throw UnimplementedError('Firestore işlemleri henüz uygulanmadı');
+    try {
+      await _firestore.collection('users').doc(user.id.value).update({
+        ...user.toJson(),
+        'updatedAt': FieldValue.serverTimestamp(),
+      });
+    } catch (e) {
+      _logger.e('Firestore\'da kullanıcı profili güncellenemedi: $e');
+      rethrow;
+    }
   }
 
-  Future<void> _updateLastSeenInFirestore(String userId) async {
-    // TODO: Firestore implementasyonu
-    throw UnimplementedError('Firestore işlemleri henüz uygulanmadı');
+  Future<void> _updateLastSeenInFirestore() async {
+    try {
+      final user = _auth.currentUser;
+      if (user == null) return;
+
+      await _firestore.collection('users').doc(user.uid).update({
+        'lastSeen': FieldValue.serverTimestamp(),
+      });
+    } catch (e) {
+      _logger.e('Son görülme zamanı güncellenemedi: $e');
+      rethrow;
+    }
   }
 
-  Future<void> _addConnectionInFirestore(
-      String userId, String connectionId) async {
-    // TODO: Firestore implementasyonu
-    throw UnimplementedError('Firestore işlemleri henüz uygulanmadı');
+  Future<void> _addConnectionInFirestore(String userId) async {
+    try {
+      final currentUser = _auth.currentUser;
+      if (currentUser == null) throw Exception('Kullanıcı oturum açmamış');
+
+      final batch = _firestore.batch();
+
+      // Mevcut kullanıcının bağlantılarını güncelle
+      batch.update(
+        _firestore.collection('users').doc(currentUser.uid),
+        {
+          'connections': FieldValue.arrayUnion([userId.toString()]),
+          'updatedAt': FieldValue.serverTimestamp(),
+        },
+      );
+
+      // Hedef kullanıcının bağlantılarını güncelle
+      batch.update(
+        _firestore.collection('users').doc(userId),
+        {
+          'connections': FieldValue.arrayUnion([currentUser.uid]),
+          'updatedAt': FieldValue.serverTimestamp(),
+        },
+      );
+
+      await batch.commit();
+    } catch (e) {
+      _logger.e('Bağlantı eklenemedi: $e');
+      rethrow;
+    }
   }
 
-  Future<void> _removeConnectionInFirestore(
-      String userId, String connectionId) async {
-    // TODO: Firestore implementasyonu
-    throw UnimplementedError('Firestore işlemleri henüz uygulanmadı');
+  Future<void> _removeConnectionInFirestore(String userId) async {
+    try {
+      final currentUser = _auth.currentUser;
+      if (currentUser == null) throw Exception('Kullanıcı oturum açmamış');
+
+      final batch = _firestore.batch();
+
+      // Mevcut kullanıcının bağlantılarını güncelle
+      batch.update(
+        _firestore.collection('users').doc(currentUser.uid),
+        {
+          'connections': FieldValue.arrayRemove([userId]),
+          'updatedAt': FieldValue.serverTimestamp(),
+        },
+      );
+
+      // Hedef kullanıcının bağlantılarını güncelle
+      batch.update(
+        _firestore.collection('users').doc(userId),
+        {
+          'connections': FieldValue.arrayRemove([currentUser.uid]),
+          'updatedAt': FieldValue.serverTimestamp(),
+        },
+      );
+
+      await batch.commit();
+    } catch (e) {
+      _logger.e('Bağlantı kaldırılamadı: $e');
+      rethrow;
+    }
   }
 
   Future<void> _updatePreferencesInFirestore(
-      String userId, Map<String, dynamic> preferences) async {
-    // TODO: Firestore implementasyonu
-    throw UnimplementedError('Firestore işlemleri henüz uygulanmadı');
+      Map<String, dynamic> preferences) async {
+    try {
+      final user = _auth.currentUser;
+      if (user == null) throw Exception('Kullanıcı oturum açmamış');
+
+      await _firestore.collection('users').doc(user.uid).update({
+        'preferences': preferences,
+        'updatedAt': FieldValue.serverTimestamp(),
+      });
+    } catch (e) {
+      _logger.e('Tercihler güncellenemedi: $e');
+      rethrow;
+    }
   }
 
   Future<EnhancedUserModel?> _getUserProfileFromFirestore(String userId) async {
-    // TODO: Firestore implementasyonu
-    throw UnimplementedError('Firestore işlemleri henüz uygulanmadı');
+    try {
+      final doc = await _firestore.collection('users').doc(userId).get();
+      if (!doc.exists) {
+        throw Exception('Kullanıcı profili bulunamadı');
+      }
+      return EnhancedUserModel.fromJson(doc.data()!);
+    } catch (e) {
+      _logger.e('Firestore\'dan kullanıcı profili alınamadı: $e');
+      rethrow;
+    }
   }
 
   Exception _handleAuthException(dynamic e) {

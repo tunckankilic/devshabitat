@@ -746,4 +746,108 @@ class DevHabitatTheme {
         letterSpacing: 0,
         color: Colors.white,
       );
+
+  // Responsive metin stilleri
+  static TextTheme _buildResponsiveTextTheme(Color textColor) {
+    return TextTheme(
+      displayLarge: TextStyle(
+        fontSize: 32.sp,
+        fontWeight: FontWeight.bold,
+        color: textColor,
+      ),
+      displayMedium: TextStyle(
+        fontSize: 28.sp,
+        fontWeight: FontWeight.bold,
+        color: textColor,
+      ),
+      displaySmall: TextStyle(
+        fontSize: 24.sp,
+        fontWeight: FontWeight.bold,
+        color: textColor,
+      ),
+      headlineMedium: TextStyle(
+        fontSize: 20.sp,
+        fontWeight: FontWeight.w600,
+        color: textColor,
+      ),
+      bodyLarge: TextStyle(
+        fontSize: 16.sp,
+        color: textColor,
+      ),
+      bodyMedium: TextStyle(
+        fontSize: 14.sp,
+        color: textColor,
+      ),
+    );
+  }
+}
+
+// Cam efektli container widget'ı
+class GlassContainer extends StatelessWidget {
+  final Widget child;
+  final double borderRadius;
+  final EdgeInsetsGeometry padding;
+  final EdgeInsetsGeometry margin;
+  final double blurRadius;
+
+  const GlassContainer({
+    super.key,
+    required this.child,
+    this.borderRadius = 16,
+    this.padding = const EdgeInsets.all(16),
+    this.margin = EdgeInsets.zero,
+    this.blurRadius = 10,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      margin: margin,
+      padding: padding,
+      decoration: BoxDecoration(
+        color: DevHabitatColors.glassBackground,
+        borderRadius: BorderRadius.circular(borderRadius.r),
+        border: Border.all(
+          color: DevHabitatColors.glassBorder,
+          width: 1,
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: DevHabitatColors.shadowDark,
+            blurRadius: blurRadius,
+            spreadRadius: 0,
+          ),
+        ],
+      ),
+      child: child,
+    );
+  }
+}
+
+// Responsive boşluk widget'ı
+class AdaptiveSpacing extends StatelessWidget {
+  final double mobile;
+  final double tablet;
+  final double desktop;
+  final bool isVertical;
+
+  const AdaptiveSpacing({
+    super.key,
+    this.mobile = 8,
+    this.tablet = 16,
+    this.desktop = 24,
+    this.isVertical = true,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final spacing = 1.sw <= 600
+        ? mobile
+        : 1.sw <= 900
+            ? tablet
+            : desktop;
+    return isVertical
+        ? SizedBox(height: spacing.h)
+        : SizedBox(width: spacing.w);
+  }
 }

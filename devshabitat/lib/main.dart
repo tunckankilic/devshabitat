@@ -9,6 +9,8 @@ import 'package:logger/logger.dart';
 import 'app/core/services/error_handler_service.dart';
 import 'app/repositories/enhanced_auth_repository.dart';
 import 'app/controllers/enhanced_auth_controller.dart';
+import 'app/routes/app_pages.dart';
+import 'app/routes/app_routes.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -31,21 +33,14 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return ScreenUtilInit(
-      designSize: const Size(375, 812), // iPhone X tasarım boyutu
-      minTextAdapt: true,
-      splitScreenMode: true,
-      builder: (context, child) {
-        return GetMaterialApp(
-          title: 'DevHabitat',
-          theme: DevHabitatTheme.lightTheme,
-          darkTheme: DevHabitatTheme.darkTheme,
-          themeMode: ThemeMode.dark,
-          initialBinding: AppBinding(),
-          home: const ResponsiveAuthWrapper(),
-          debugShowCheckedModeBanner: false,
-        );
-      },
+    return GetMaterialApp(
+      title: 'DevsHabitat',
+      theme: ThemeData(
+        colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
+        useMaterial3: true,
+      ),
+      initialRoute: AppRoutes.initial,
+      defaultTransition: Transition.fade,
     );
   }
 }

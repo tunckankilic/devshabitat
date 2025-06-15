@@ -1,7 +1,41 @@
 import 'package:flutter/material.dart';
 import '../constants/app_breakpoints.dart';
 
+final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
+
 class ResponsiveHelper {
+  static double getResponsiveValue({
+    required double mobile,
+    required double tablet,
+    required double desktop,
+  }) {
+    final width = MediaQuery.of(navigatorKey.currentContext!).size.width;
+
+    if (width < AppBreakpoints.tablet) {
+      return mobile;
+    } else if (width < AppBreakpoints.desktop) {
+      return tablet;
+    } else {
+      return desktop;
+    }
+  }
+
+  static bool isMobile(BuildContext context) =>
+      MediaQuery.of(context).size.width < AppBreakpoints.tablet;
+
+  static bool isTablet(BuildContext context) =>
+      MediaQuery.of(context).size.width >= AppBreakpoints.tablet &&
+      MediaQuery.of(context).size.width < AppBreakpoints.desktop;
+
+  static bool isDesktop(BuildContext context) =>
+      MediaQuery.of(context).size.width >= AppBreakpoints.desktop;
+
+  static double getScreenWidth(BuildContext context) =>
+      MediaQuery.of(context).size.width;
+
+  static double getScreenHeight(BuildContext context) =>
+      MediaQuery.of(context).size.height;
+
   static double getAdaptiveWidth(BuildContext context, double percentage) {
     return MediaQuery.of(context).size.width * (percentage / 100);
   }
@@ -65,7 +99,7 @@ class ResponsiveHelper {
         width <= AppBreakpoints.largePhone;
   }
 
-  static bool isTablet(BuildContext context) {
+  static bool isTabletOrLarger(BuildContext context) {
     return MediaQuery.of(context).size.width > AppBreakpoints.largePhone;
   }
 }
