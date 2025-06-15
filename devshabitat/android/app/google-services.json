@@ -1,0 +1,46 @@
+{
+  "project_info": {
+    "project_number": "663354311647",
+    "project_id": "devshabitat",
+    "storage_bucket": "devshabitat.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:663354311647:android:2d48bd0fc5f76ad140ba6a",
+        "android_client_info": {
+          "package_name": "site.tunckankilic.devshabitat"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "663354311647-fjidjfiv8javnl81f29ofsl4183mua17.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAhZcXbJa76nAt_nuWtP3YKZtu_tElGv9k"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "663354311647-fjidjfiv8javnl81f29ofsl4183mua17.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "663354311647-b08kjil14ms6a2bqlul9o0r54ocb90jh.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "site.tunckankilic.devshabitat"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
