@@ -134,7 +134,7 @@ class LargePhoneProfile extends StatelessWidget {
               const SizedBox(height: 24),
 
               // GitHub Entegrasyonu
-              if (_githubController.isConnected.value) ...[
+              if (_githubController.isConnected) ...[
                 Card(
                   child: Padding(
                     padding: const EdgeInsets.all(20.0),

@@ -4,14 +4,15 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import '../widgets/responsive_form_field.dart';
 import '../widgets/social_login_button.dart';
 import '../widgets/adaptive_loading_indicator.dart';
-import '../../../controllers/auth_controller.dart';
+import '../../../controllers/enhanced_auth_controller.dart';
 
 class SmallPhoneLogin extends StatelessWidget {
   const SmallPhoneLogin({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
-    final AuthController authController = Get.find<AuthController>();
+    final EnhancedAuthController authController =
+        Get.find<EnhancedAuthController>();
     final emailController = TextEditingController();
     final passwordController = TextEditingController();
     final formKey = GlobalKey<FormState>();
@@ -88,13 +89,13 @@ class SmallPhoneLogin extends StatelessWidget {
                 ),
                 SizedBox(height: 24.h),
                 Obx(() {
-                  final isLoading = authController.isLoading.value;
+                  final isLoading = authController.isLoading;
                   return ElevatedButton(
                     onPressed: isLoading
                         ? null
                         : () {
                             if (formKey.currentState!.validate()) {
-                              authController.login();
+                              authController.signInWithEmailAndPassword();
                             }
                           },
                     style: ElevatedButton.styleFrom(
@@ -123,7 +124,7 @@ class SmallPhoneLogin extends StatelessWidget {
                 SocialLoginButton(
                   text: 'Google ile Giriş Yap',
                   iconPath: 'assets/icons/google.png',
-                  onPressed: authController.googleLogin,
+                  onPressed: authController.signInWithGoogle,
                   backgroundColor: Colors.white,
                   textColor: Colors.black87,
                 ),
@@ -133,7 +134,7 @@ class SmallPhoneLogin extends StatelessWidget {
                   iconPath: 'assets/icons/facebook.png',
                   backgroundColor: const Color(0xFF1877F2),
                   textColor: Colors.white,
-                  onPressed: authController.facebookLogin,
+                  onPressed: authController.signInWithFacebook,
                 ),
                 SizedBox(height: 12.h),
                 SocialLoginButton(
@@ -141,7 +142,7 @@ class SmallPhoneLogin extends StatelessWidget {
                   iconPath: 'assets/icons/github.png',
                   backgroundColor: Colors.black,
                   textColor: Colors.white,
-                  onPressed: authController.githubLogin,
+                  onPressed: authController.signInWithGithub,
                 ),
                 SizedBox(height: 12.h),
                 SocialLoginButton(
@@ -149,7 +150,7 @@ class SmallPhoneLogin extends StatelessWidget {
                   iconPath: 'assets/icons/apple.png',
                   backgroundColor: Colors.black,
                   textColor: Colors.white,
-                  onPressed: authController.appleLogin,
+                  onPressed: authController.signInWithApple,
                 ),
                 SizedBox(height: 24.h),
                 Row(

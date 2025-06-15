@@ -3,14 +3,15 @@ import 'package:get/get.dart';
 import '../widgets/responsive_form_field.dart';
 import '../widgets/social_login_button.dart';
 import '../widgets/adaptive_loading_indicator.dart';
-import '../../../controllers/auth_controller.dart';
+import '../../../controllers/enhanced_auth_controller.dart';
 
 class TabletLogin extends StatelessWidget {
   const TabletLogin({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
-    final AuthController authController = Get.find<AuthController>();
+    final EnhancedAuthController authController =
+        Get.find<EnhancedAuthController>();
     final emailController = TextEditingController();
     final passwordController = TextEditingController();
     final formKey = GlobalKey<FormState>();
@@ -118,13 +119,14 @@ class TabletLogin extends StatelessWidget {
                         ),
                         const SizedBox(height: 32),
                         Obx(() {
-                          final isLoading = authController.isLoading.value;
+                          final isLoading = authController.isLoading;
                           return ElevatedButton(
                             onPressed: isLoading
                                 ? null
                                 : () {
                                     if (formKey.currentState!.validate()) {
-                                      authController.login();
+                                      authController
+                                          .signInWithEmailAndPassword();
                                     }
                                   },
                             style: ElevatedButton.styleFrom(
@@ -167,7 +169,7 @@ class TabletLogin extends StatelessWidget {
                               child: SocialLoginButton(
                                 text: 'Google',
                                 iconPath: 'assets/icons/google.png',
-                                onPressed: authController.googleLogin,
+                                onPressed: authController.signInWithGoogle,
                                 backgroundColor: Colors.white,
                                 textColor: Colors.black87,
                               ),
@@ -179,7 +181,7 @@ class TabletLogin extends StatelessWidget {
                                 iconPath: 'assets/icons/facebook.png',
                                 backgroundColor: const Color(0xFF1877F2),
                                 textColor: Colors.white,
-                                onPressed: authController.facebookLogin,
+                                onPressed: authController.signInWithFacebook,
                               ),
                             ),
                           ],
@@ -193,7 +195,7 @@ class TabletLogin extends StatelessWidget {
                                 iconPath: 'assets/icons/github.png',
                                 backgroundColor: Colors.black,
                                 textColor: Colors.white,
-                                onPressed: authController.githubLogin,
+                                onPressed: authController.signInWithGithub,
                               ),
                             ),
                             const SizedBox(width: 16),
@@ -203,7 +205,7 @@ class TabletLogin extends StatelessWidget {
                                 iconPath: 'assets/icons/apple.png',
                                 backgroundColor: Colors.black,
                                 textColor: Colors.white,
-                                onPressed: authController.appleLogin,
+                                onPressed: authController.signInWithApple,
                               ),
                             ),
                           ],

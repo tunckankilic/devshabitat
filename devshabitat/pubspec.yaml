@@ -19,7 +19,7 @@ publish_to: "none" # Remove this line if you wish to publish to pub.dev
 version: 1.0.0+1
 
 environment:
-  sdk: ">=3.0.0 <4.0.0"
+  sdk: ">=3.2.3 <4.0.0"
 
 # Dependencies specify other packages that your package needs in order to work.
 # To automatically upgrade your package dependencies to the latest versions
@@ -28,23 +28,27 @@ environment:
 # the latest version available on pub.dev. To see which dependencies have newer
 # versions available, run `flutter pub outdated`.
 dependencies:
-  cloud_firestore: ^5.6.9
+  cloud_firestore: ^4.13.6
   cupertino_icons: ^1.0.2
-  firebase_auth: ^5.6.0
-  firebase_core: ^3.14.0
+  firebase_auth: ^4.15.3
+  firebase_core: ^2.24.2
   flutter:
     sdk: flutter
-  flutter_facebook_auth: ^7.1.2
+  flutter_facebook_auth: ^6.0.3
   flutter_quill: ^11.4.1
   flutter_screenutil: ^5.9.0
   flutter_secure_storage: ^9.0.0
   flutter_svg: ^2.0.9
   get: ^4.6.6
   google_fonts: ^6.1.0
-  google_sign_in: ^6.2.1
+  google_sign_in: ^6.1.6
   image_cropper: ^5.0.1
-  image_picker: ^1.0.7
-  sign_in_with_apple: ^7.0.1
+  image_picker: ^1.0.5
+  sign_in_with_apple: ^5.0.0
+  logger: ^2.0.2+1
+  http: ^1.1.2
+  flutter_web_auth: ^0.5.0
+  url_launcher: ^6.2.2
 
 dev_dependencies:
   flutter_lints: ^2.0.0

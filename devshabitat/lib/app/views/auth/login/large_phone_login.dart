@@ -4,10 +4,10 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import '../widgets/responsive_form_field.dart';
 import '../widgets/social_login_button.dart';
 import '../widgets/adaptive_loading_indicator.dart';
-import '../../../controllers/auth_controller.dart';
+import '../../../controllers/enhanced_auth_controller.dart';
 
 class LargePhoneLogin extends StatelessWidget {
-  final AuthController controller = Get.find<AuthController>();
+  final EnhancedAuthController controller = Get.find<EnhancedAuthController>();
 
   LargePhoneLogin({Key? key}) : super(key: key);
 
@@ -97,7 +97,7 @@ class LargePhoneLogin extends StatelessWidget {
                 SizedBox(
                   width: double.infinity,
                   child: ElevatedButton(
-                    onPressed: controller.login,
+                    onPressed: controller.signInWithEmailAndPassword,
                     style: ElevatedButton.styleFrom(
                       padding: EdgeInsets.symmetric(vertical: 16.h),
                       shape: RoundedRectangleBorder(
@@ -134,7 +134,7 @@ class LargePhoneLogin extends StatelessWidget {
                 SocialLoginButton(
                   text: 'Google ile Giriş Yap',
                   iconPath: 'assets/icons/google.png',
-                  onPressed: controller.googleLogin,
+                  onPressed: controller.signInWithGoogle,
                   backgroundColor: Colors.white,
                   textColor: Colors.black87,
                 ),
@@ -142,7 +142,7 @@ class LargePhoneLogin extends StatelessWidget {
                 SocialLoginButton(
                   text: 'Facebook ile Giriş Yap',
                   iconPath: 'assets/icons/facebook.png',
-                  onPressed: controller.facebookLogin,
+                  onPressed: controller.signInWithFacebook,
                   backgroundColor: const Color(0xFF1877F2),
                   textColor: Colors.white,
                 ),
@@ -150,7 +150,7 @@ class LargePhoneLogin extends StatelessWidget {
                 SocialLoginButton(
                   text: 'Apple ile Giriş Yap',
                   iconPath: 'assets/icons/apple.png',
-                  onPressed: controller.appleLogin,
+                  onPressed: controller.signInWithApple,
                   backgroundColor: Colors.black,
                   textColor: Colors.white,
                 ),

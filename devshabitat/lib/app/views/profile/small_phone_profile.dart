@@ -117,7 +117,7 @@ class SmallPhoneProfile extends StatelessWidget {
               const SizedBox(height: 16),
 
               // GitHub Entegrasyonu
-              if (_githubController.isConnected.value) ...[
+              if (_githubController.isConnected) ...[
                 Card(
                   child: Padding(
                     padding: const EdgeInsets.all(16.0),

@@ -1,78 +1,113 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:firebase_auth/firebase_auth.dart';
+import 'package:logger/logger.dart';
 
 class ErrorHandlerService extends GetxService {
-  static ErrorHandlerService get to => Get.find();
+  final _logger = Logger();
 
-  void handleError(dynamic error, {String? customMessage}) {
-    String message;
-
-    if (error is FirebaseAuthException) {
-      message = _handleFirebaseAuthError(error);
-    } else if (error is Exception) {
-      message = error.toString();
-    } else {
-      message = customMessage ?? 'Beklenmeyen bir hata oluştu';
-    }
-
+  void handleError(dynamic error) {
+    _logger.e('Hata: $error');
     Get.snackbar(
       'Hata',
-      message,
+      error.toString(),
       snackPosition: SnackPosition.BOTTOM,
-      backgroundColor: Colors.red.shade100,
-      colorText: Colors.red.shade900,
+      backgroundColor: Colors.red,
+      colorText: Colors.white,
       duration: const Duration(seconds: 3),
-      margin: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
-      borderRadius: 8,
     );
   }
 
-  String _handleFirebaseAuthError(FirebaseAuthException error) {
-    switch (error.code) {
-      case 'user-not-found':
-        return 'Kullanıcı bulunamadı';
-      case 'wrong-password':
-        return 'Hatalı şifre';
-      case 'email-already-in-use':
-        return 'Bu e-posta adresi zaten kullanımda';
-      case 'weak-password':
-        return 'Şifre çok zayıf';
-      case 'invalid-email':
-        return 'Geçersiz e-posta adresi';
-      case 'operation-not-allowed':
-        return 'Bu işlem şu anda kullanılamıyor';
-      case 'account-exists-with-different-credential':
-        return 'Bu e-posta adresi farklı bir giriş yöntemi ile kullanılıyor';
-      case 'network-request-failed':
-        return 'İnternet bağlantısı hatası';
-      case 'too-many-requests':
-        return 'Çok fazla deneme yapıldı. Lütfen daha sonra tekrar deneyin';
-      case 'user-disabled':
-        return 'Bu hesap devre dışı bırakılmış';
-      case 'invalid-verification-code':
-        return 'Geçersiz doğrulama kodu';
-      case 'invalid-verification-id':
-        return 'Geçersiz doğrulama kimliği';
-      case 'credential-already-in-use':
-        return 'Bu kimlik bilgisi zaten kullanımda';
-      case 'requires-recent-login':
-        return 'Bu işlem için son zamanlarda giriş yapmanız gerekiyor';
-      default:
-        return 'Kimlik doğrulama hatası: ${error.message}';
-    }
-  }
-
   void handleSuccess(String message) {
+    _logger.i('Başarılı: $message');
     Get.snackbar(
       'Başarılı',
       message,
       snackPosition: SnackPosition.BOTTOM,
-      backgroundColor: Colors.green.shade100,
-      colorText: Colors.green.shade900,
+      backgroundColor: Colors.green,
+      colorText: Colors.white,
       duration: const Duration(seconds: 3),
-      margin: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
-      borderRadius: 8,
+    );
+  }
+
+  void handleWarning(String message) {
+    _logger.w('Uyarı: $message');
+    Get.snackbar(
+      'Uyarı',
+      message,
+      snackPosition: SnackPosition.BOTTOM,
+      backgroundColor: Colors.orange,
+      colorText: Colors.white,
+      duration: const Duration(seconds: 3),
+    );
+  }
+
+  void handleInfo(String message) {
+    _logger.i('Bilgi: $message');
+    Get.snackbar(
+      'Bilgi',
+      message,
+      snackPosition: SnackPosition.BOTTOM,
+      backgroundColor: Colors.blue,
+      colorText: Colors.white,
+      duration: const Duration(seconds: 3),
+    );
+  }
+
+  void showErrorDialog(String title, String message) {
+    Get.dialog(
+      AlertDialog(
+        title: Text(title),
+        content: Text(message),
+        actions: [
+          TextButton(
+            onPressed: () => Get.back(),
+            child: const Text('Tamam'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void showSuccessDialog(String title, String message) {
+    Get.dialog(
+      AlertDialog(
+        title: Text(title),
+        content: Text(message),
+        actions: [
+          TextButton(
+            onPressed: () => Get.back(),
+            child: const Text('Tamam'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void showConfirmationDialog({
+    required String title,
+    required String message,
+    required VoidCallback onConfirm,
+    String confirmText = 'Evet',
+    String cancelText = 'Hayır',
+  }) {
+    Get.dialog(
+      AlertDialog(
+        title: Text(title),
+        content: Text(message),
+        actions: [
+          TextButton(
+            onPressed: () => Get.back(),
+            child: Text(cancelText),
+          ),
+          TextButton(
+            onPressed: () {
+              Get.back();
+              onConfirm();
+            },
+            child: Text(confirmText),
+          ),
+        ],
+      ),
     );
   }
 }
