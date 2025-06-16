@@ -1,49 +1,60 @@
 import 'package:get/get.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:logger/logger.dart';
 import '../models/user_profile.dart';
 
 class AuthService extends GetxService {
   final FirebaseAuth _auth = FirebaseAuth.instance;
-  final Rx<User?> _firebaseUser = Rx<User?>(null);
+  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
+  final Logger _logger = Logger();
 
-  User? get currentUser => _firebaseUser.value;
-  Stream<User?> get userChanges => _auth.userChanges();
+  Rx<User?> currentUser = Rx<User?>(null);
 
   @override
   void onInit() {
     super.onInit();
-    _firebaseUser.bindStream(_auth.userChanges());
+    currentUser.bindStream(_auth.authStateChanges());
   }
 
-  Future<UserCredential> signInWithEmailAndPassword(
-    String email,
-    String password,
-  ) async {
+  Future<User?> signInWithEmailAndPassword(
+      String email, String password) async {
     try {
-      final credential = await _auth.signInWithEmailAndPassword(
+      final UserCredential result = await _auth.signInWithEmailAndPassword(
         email: email,
         password: password,
       );
-      return credential;
+      return result.user;
     } catch (e) {
-      print('Giriş yapılırken hata: $e');
-      rethrow;
+      _logger.e('Giriş yapılırken hata: $e');
+      return null;
     }
   }
 
-  Future<UserCredential> createUserWithEmailAndPassword(
+  Future<User?> registerWithEmailAndPassword(
     String email,
     String password,
+    String username,
   ) async {
     try {
-      final credential = await _auth.createUserWithEmailAndPassword(
+      final UserCredential result = await _auth.createUserWithEmailAndPassword(
         email: email,
         password: password,
       );
-      return credential;
+
+      if (result.user != null) {
+        await _firestore.collection('users').doc(result.user!.uid).set({
+          'username': username,
+          'email': email,
+          'createdAt': FieldValue.serverTimestamp(),
+          'fcmTokens': [],
+        });
+      }
+
+      return result.user;
     } catch (e) {
-      print('Kullanıcı oluşturulurken hata: $e');
-      rethrow;
+      _logger.e('Kayıt olunurken hata: $e');
+      return null;
     }
   }
 
@@ -51,16 +62,30 @@ class AuthService extends GetxService {
     try {
       await _auth.signOut();
     } catch (e) {
-      print('Çıkış yapılırken hata: $e');
+      _logger.e('Çıkış yapılırken hata: $e');
+    }
+  }
+
+  Future<void> resetPassword(String email) async {
+    try {
+      await _auth.sendPasswordResetEmail(email: email);
+    } catch (e) {
+      _logger.e('Şifre sıfırlama maili gönderilirken hata: $e');
       rethrow;
     }
   }
 
-  Future<void> sendPasswordResetEmail(String email) async {
+  Future<void> updateProfile({
+    String? displayName,
+    String? photoURL,
+  }) async {
     try {
-      await _auth.sendPasswordResetEmail(email: email);
+      if (_auth.currentUser != null) {
+        await _auth.currentUser!.updateDisplayName(displayName);
+        await _auth.currentUser!.updatePhotoURL(photoURL);
+      }
     } catch (e) {
-      print('Şifre sıfırlama e-postası gönderilirken hata: $e');
+      _logger.e('Profil güncellenirken hata: $e');
       rethrow;
     }
   }
@@ -105,5 +130,5 @@ class AuthService extends GetxService {
     }
   }
 
-  bool get isAuthenticated => currentUser != null;
+  bool get isAuthenticated => currentUser.value != null;
 }

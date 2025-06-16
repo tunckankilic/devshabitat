@@ -2,7 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../controllers/thread_controller.dart';
 import '../models/thread_model.dart';
-import 'message_attachment_widget.dart';
+import '../models/attachment_model.dart';
+import 'message_attachment_widget.dart' as widget;
 import 'user_avatar_widget.dart';
 
 class MessageThreadWidget extends StatelessWidget {
@@ -80,7 +81,7 @@ class MessageThreadWidget extends StatelessWidget {
             ...thread.attachments.map((attachment) {
               return Padding(
                 padding: const EdgeInsets.only(bottom: 8),
-                child: MessageAttachmentWidget(
+                child: widget.MessageAttachmentWidget(
                   attachment: attachment,
                   onTap: () => _handleAttachmentTap(attachment),
                 ),
@@ -153,7 +154,7 @@ class MessageThreadWidget extends StatelessWidget {
             ...reply.attachments.map((attachment) {
               return Padding(
                 padding: const EdgeInsets.only(bottom: 8),
-                child: MessageAttachmentWidget(
+                child: widget.MessageAttachmentWidget(
                   attachment: attachment,
                   onTap: () => _handleAttachmentTap(attachment),
                 ),
@@ -217,7 +218,7 @@ class MessageThreadWidget extends StatelessWidget {
             title: const Text('Bildirimleri Yönet'),
             onTap: () {
               Navigator.pop(context);
-              // TODO: Implement notifications management
+              _showNotificationSettings(context);
             },
           ),
         ],
@@ -226,7 +227,7 @@ class MessageThreadWidget extends StatelessWidget {
   }
 
   void _handleAttachmentTap(MessageAttachment attachment) {
-    // TODO: Implement attachment handling
+    controller.handleAttachment(attachment);
   }
 
   void _sendReply(BuildContext context) {
@@ -253,6 +254,37 @@ class MessageThreadWidget extends StatelessWidget {
               controller.deleteThread(threadId);
             },
             child: const Text('Sil'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _showNotificationSettings(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Bildirim Ayarları'),
+        content: Obx(() {
+          final isEnabled = controller.threadNotifications[threadId] ?? true;
+          return Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              SwitchListTile(
+                title: const Text('Thread Bildirimleri'),
+                subtitle: Text(isEnabled ? 'Açık' : 'Kapalı'),
+                value: isEnabled,
+                onChanged: (value) {
+                  controller.toggleThreadNotifications(threadId);
+                },
+              ),
+            ],
+          );
+        }),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Tamam'),
           ),
         ],
       ),
