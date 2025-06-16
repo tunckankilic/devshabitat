@@ -5,13 +5,12 @@ import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
 import '../models/search_filter_model.dart';
 import '../models/connection_model.dart';
-import 'package:geoflutterfire2/geoflutterfire2.dart';
+import 'package:geolocator/geolocator.dart';
 import '../models/user_profile_model.dart';
 import 'discovery_algorithm_service.dart';
 
 class DiscoveryService {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
-  final GeoFlutterFire _geo = GeoFlutterFire();
   final GetStorage _cache = GetStorage();
   final StreamController<Map<String, bool>> _onlineStatusController =
       StreamController<Map<String, bool>>.broadcast();
@@ -29,9 +28,24 @@ class DiscoveryService {
   CollectionReference get _userAnalyticsCollection =>
       _firestore.collection('user_analytics');
 
+  // Konum hesaplama yardımcı fonksiyonları
+  double _calculateDistance(GeoPoint point1, GeoPoint point2) {
+    return Geolocator.distanceBetween(
+      point1.latitude,
+      point1.longitude,
+      point2.latitude,
+      point2.longitude,
+    );
+  }
+
+  bool _isWithinRadius(GeoPoint center, GeoPoint point, double radiusInKm) {
+    final distanceInMeters = _calculateDistance(center, point);
+    return distanceInMeters <= (radiusInKm * 1000);
+  }
+
   // Search users with filters
   Stream<List<UserProfile>> searchUsersWithFilters(SearchFilterModel filters) {
-    Query query = _usersCollection.limit(20); // Sabit limit kullanıyoruz
+    Query query = _usersCollection.limit(20);
 
     // Apply text search filter
     if (filters.name.isNotEmpty) {
@@ -46,21 +60,26 @@ class DiscoveryService {
 
     // Apply location filter
     if (filters.location != null && filters.maxDistance != null) {
-      final center = _geo.point(
-        latitude: filters.location!.latitude,
-        longitude: filters.location!.longitude,
+      final center = GeoPoint(
+        filters.location!.latitude,
+        filters.location!.longitude,
       );
 
-      return _geo
-          .collection(collectionRef: query)
-          .within(
-            center: center,
-            radius: filters.maxDistance!,
-            field: 'location',
-            strictMode: true,
-          )
-          .map((docs) =>
-              docs.map((doc) => UserProfile.fromFirestore(doc)).toList());
+      // Konum filtresini manuel olarak uygula
+      return query.snapshots().map((snapshot) {
+        final users = snapshot.docs
+            .map((doc) => UserProfile.fromFirestore(doc))
+            .where((user) {
+          if (user.location == null) return false;
+          return _isWithinRadius(
+            center,
+            user.location!,
+            filters.maxDistance!.toDouble(),
+          );
+        }).toList();
+
+        return users;
+      });
     }
 
     // Apply experience filter
@@ -103,9 +122,15 @@ class DiscoveryService {
         final cacheTimestamp =
             DateTime.fromMillisecondsSinceEpoch(cachedData['timestamp']);
         if (DateTime.now().difference(cacheTimestamp) < _cacheDuration) {
-          return (cachedData['users'] as List)
-              .map((userData) => UserProfile.fromMap(userData))
-              .toList();
+          return (cachedData['users'] as List).map((userData) {
+            final doc = _usersCollection.doc().withConverter(
+                  fromFirestore: (snapshot, _) =>
+                      UserProfile.fromFirestore(snapshot),
+                  toFirestore: (user, _) => userData as Map<String, dynamic>,
+                );
+            return UserProfile.fromFirestore(
+                doc as DocumentSnapshot<Map<String, dynamic>>);
+          }).toList();
         }
       }
 
@@ -127,7 +152,7 @@ class DiscoveryService {
       // Cache results
       await _cache.write(_recommendedUsersCacheKey + userId, {
         'timestamp': DateTime.now().millisecondsSinceEpoch,
-        'users': results.map((user) => user.toMap()).toList(),
+        'users': results.map((user) => (user as dynamic).data()).toList(),
       });
 
       return results;
@@ -162,7 +187,7 @@ class DiscoveryService {
         createdAt: DateTime.now(),
       );
 
-      await _connectionsCollection.add(connection.toMap());
+      await _connectionsCollection.add(connection.toFirestore());
 
       // Update analytics
       await _updateConnectionAnalytics(senderId);
@@ -259,7 +284,7 @@ class DiscoveryService {
         createdAt: DateTime.now(),
       );
 
-      await _connectionsCollection.add(connection.toMap());
+      await _connectionsCollection.add(connection.toFirestore());
 
       // Remove any existing connections
       final existingConnections = await _connectionsCollection
@@ -541,6 +566,7 @@ class DiscoveryService {
     try {
       await _firestore.collection('users').doc(userId).update({
         'location': location,
+        'lastLocationUpdate': FieldValue.serverTimestamp(),
       });
     } catch (e) {
       print('Error updating user location: $e');
@@ -595,6 +621,38 @@ class DiscoveryService {
     } catch (e) {
       print('Error removing connection: $e');
       rethrow;
+    }
+  }
+
+  // Yakındaki kullanıcıları getir
+  Future<List<UserProfile>> getNearbyUsers(
+    GeoPoint center,
+    double radiusInKm, {
+    int limit = 20,
+  }) async {
+    try {
+      // Tüm kullanıcıları al ve mesafeye göre filtrele
+      final querySnapshot = await _usersCollection.limit(100).get();
+
+      final nearbyUsers = querySnapshot.docs
+          .map((doc) => UserProfile.fromFirestore(doc))
+          .where((user) {
+        if (user.location == null) return false;
+        return _isWithinRadius(center, user.location!, radiusInKm);
+      }).toList();
+
+      // Mesafeye göre sırala
+      nearbyUsers.sort((a, b) {
+        final distanceA = _calculateDistance(center, a.location!);
+        final distanceB = _calculateDistance(center, b.location!);
+        return distanceA.compareTo(distanceB);
+      });
+
+      // İstenilen sayıda kullanıcı döndür
+      return nearbyUsers.take(limit).toList();
+    } catch (e) {
+      print('Error getting nearby users: $e');
+      return [];
     }
   }
 }

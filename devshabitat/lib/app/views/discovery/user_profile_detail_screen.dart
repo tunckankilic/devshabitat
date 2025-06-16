@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import '../../../core/widgets/skill_chip.dart';
-import '../../../core/widgets/connection_button.dart';
+import '../../widgets/skill_chip.dart';
+import '../../widgets/connection_button.dart';
 import '../../controllers/user_profile_controller.dart';
 import '../../models/user_profile_model.dart';
 
@@ -55,7 +55,7 @@ class UserProfileDetailScreen extends GetView<UserProfileController> {
           child: Container(
             decoration: BoxDecoration(
               image: DecorationImage(
-                image: NetworkImage(user.profileImage),
+                image: NetworkImage(user.photoUrl ?? ""),
                 fit: BoxFit.cover,
               ),
             ),
@@ -82,7 +82,7 @@ class UserProfileDetailScreen extends GetView<UserProfileController> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          user.title,
+          user.title ?? "No Title",
           style: Get.textTheme.titleLarge,
         ),
         const SizedBox(height: 8),
@@ -91,14 +91,14 @@ class UserProfileDetailScreen extends GetView<UserProfileController> {
             const Icon(Icons.location_on_outlined, size: 16),
             const SizedBox(width: 4),
             Text(
-              user.location,
+              user.location.toString() ?? "No Location",
               style: Get.textTheme.bodyMedium,
             ),
             const SizedBox(width: 16),
             const Icon(Icons.business_outlined, size: 16),
             const SizedBox(width: 4),
             Text(
-              user.company,
+              user.company ?? "No Company",
               style: Get.textTheme.bodyMedium,
             ),
           ],
@@ -117,7 +117,7 @@ class UserProfileDetailScreen extends GetView<UserProfileController> {
         ),
         const SizedBox(height: 8),
         Text(
-          user.bio,
+          user.bio ?? "No Bio",
           style: Get.textTheme.bodyMedium,
         ),
       ],
@@ -181,16 +181,19 @@ class UserProfileDetailScreen extends GetView<UserProfileController> {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceEvenly,
       children: [
-        ElevatedButton.icon(
-          onPressed: () => controller.openGitHub(user.githubUrl),
-          icon: const Icon(Icons.code),
-          label: const Text('GitHub'),
-        ),
-        ElevatedButton.icon(
-          onPressed: () => controller.openLinkedIn(user.linkedinUrl),
-          icon: const Icon(Icons.business_center),
-          label: const Text('LinkedIn'),
-        ),
+        if (user.socialLinks['github'] != null)
+          ElevatedButton.icon(
+            onPressed: () => controller.openGitHub(user.socialLinks['github']),
+            icon: const Icon(Icons.code),
+            label: const Text('GitHub'),
+          ),
+        if (user.socialLinks['linkedin'] != null)
+          ElevatedButton.icon(
+            onPressed: () =>
+                controller.openLinkedIn(user.socialLinks['linkedin']),
+            icon: const Icon(Icons.business_center),
+            label: const Text('LinkedIn'),
+          ),
       ],
     );
   }

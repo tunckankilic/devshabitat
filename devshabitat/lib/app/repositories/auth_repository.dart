@@ -103,7 +103,7 @@ class AuthRepository implements IAuthRepository {
       }
 
       final credential =
-          FacebookAuthProvider.credential(result.accessToken!.tokenString);
+          FacebookAuthProvider.credential(result.accessToken!.token);
 
       return await _auth.signInWithCredential(credential);
     } catch (e) {

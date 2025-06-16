@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import '../../app/controllers/user_profile_controller.dart';
+import '../controllers/user_profile_controller.dart';
 
 class ConnectionButton extends StatelessWidget {
   final ConnectionStatus status;

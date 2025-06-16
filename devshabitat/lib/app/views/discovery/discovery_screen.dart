@@ -1,7 +1,6 @@
+import 'package:devshabitat/app/widgets/user_card.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import '../../../core/widgets/user_card.dart';
-import '../../../core/widgets/skill_chip.dart';
 import 'advanced_filters_screen.dart';
 import '../../controllers/discovery_controller.dart';
 

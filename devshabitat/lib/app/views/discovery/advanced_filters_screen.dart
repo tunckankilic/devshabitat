@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../../controllers/filter_controller.dart';
-import '../../../core/widgets/skill_chip.dart';
 
 class AdvancedFiltersScreen extends GetView<FilterController> {
   const AdvancedFiltersScreen({Key? key}) : super(key: key);
@@ -33,7 +32,7 @@ class AdvancedFiltersScreen extends GetView<FilterController> {
             const SizedBox(height: 24),
             _buildOnlineStatusSection(),
             const SizedBox(height: 24),
-            _buildSavedFiltersSection(),
+            _buildSavedFiltersSection(context),
           ],
         ),
       ),
@@ -199,7 +198,7 @@ class AdvancedFiltersScreen extends GetView<FilterController> {
     );
   }
 
-  Widget _buildSavedFiltersSection() {
+  Widget _buildSavedFiltersSection(BuildContext context) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [

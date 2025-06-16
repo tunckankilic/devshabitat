@@ -55,10 +55,8 @@ class DiscoveryController extends GetxController {
       final currentUserId = _authController.user.value?.uid;
       if (currentUserId == null) return;
 
-      final recommendations = await _discoveryService.getRecommendedUsers(
-        currentUserId,
-        currentFilter.value,
-      );
+      final recommendations =
+          await _discoveryService.getRecommendedUsers(currentUserId);
 
       recommendedUsers.value = List<UserProfile>.from(recommendations);
     } catch (e) {
@@ -116,7 +114,7 @@ class DiscoveryController extends GetxController {
       final currentUserId = _authController.user.value?.uid;
       if (currentUserId == null) return;
 
-      await _discoveryService.sendConnectionRequest(
+      await _discoveryService.sendConnectionRequestWithMessage(
         fromUserId: currentUserId,
         toUserId: user.id,
         message: message ?? '',
