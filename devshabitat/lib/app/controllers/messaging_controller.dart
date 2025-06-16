@@ -5,13 +5,17 @@ import '../models/conversation_model.dart';
 import '../models/message_model.dart';
 import '../services/messaging_service.dart';
 import '../services/auth_service.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:logger/logger.dart';
 
 class MessagingController extends GetxController {
   final MessagingService _messagingService = Get.find<MessagingService>();
   final AuthService _authService = Get.find<AuthService>();
+  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
+  final Logger _logger = Logger();
 
   // Getters
-  String? get currentUserId => _authService.currentUser?.uid;
+  String? get currentUserId => _authService.currentUser.value?.uid;
 
   // Reactive Variables
   final RxList<ConversationModel> conversations = <ConversationModel>[].obs;
@@ -27,6 +31,10 @@ class MessagingController extends GetxController {
   // Stream Subscriptions
   late final StreamSubscription _conversationsSubscription;
   StreamSubscription? _messagesSubscription;
+
+  // Pagination değişkenleri
+  final int pageSize = 20;
+  final RxMap<String, int> lastMessageTimestamp = <String, int>{}.obs;
 
   @override
   void onInit() {
@@ -62,22 +70,45 @@ class MessagingController extends GetxController {
     }
   }
 
-  Future<void> loadMessages(String conversationId) async {
+  Future<void> loadMessages(String conversationId,
+      {bool loadMore = false}) async {
     try {
-      isLoading.value = true;
-      _messagesSubscription?.cancel();
-      _messagesSubscription = _messagingService
-          .getMessages(conversationId)
-          .listen((List<MessageModel> messages) {
+      if (!loadMore) {
+        lastMessageTimestamp[conversationId] =
+            DateTime.now().millisecondsSinceEpoch;
+      }
+
+      final lastTimestamp = lastMessageTimestamp[conversationId];
+      final query = _firestore
+          .collection('messages')
+          .where('conversationId', isEqualTo: conversationId)
+          .orderBy('timestamp', descending: true)
+          .limit(pageSize);
+
+      if (loadMore && lastTimestamp != null) {
+        query.startAfter([lastTimestamp]);
+      }
+
+      final snapshot = await query.get();
+      final messages =
+          snapshot.docs.map((doc) => MessageModel.fromMap(doc.data())).toList();
+
+      if (loadMore) {
+        final existingMessages = conversationMessages[conversationId] ?? [];
+        conversationMessages[conversationId] = [
+          ...existingMessages,
+          ...messages
+        ];
+      } else {
         conversationMessages[conversationId] = messages;
-        _updateUnreadCount();
-      }, onError: (error) {
-        errorMessage.value = 'Mesajlar yüklenirken hata oluştu: $error';
-      });
+      }
+
+      if (messages.isNotEmpty) {
+        lastMessageTimestamp[conversationId] =
+            messages.last.timestamp.millisecondsSinceEpoch;
+      }
     } catch (e) {
-      errorMessage.value = 'Mesajlar yüklenirken beklenmeyen hata: $e';
-    } finally {
-      isLoading.value = false;
+      _logger.e('Mesajlar yüklenirken hata: $e');
     }
   }
 
@@ -88,8 +119,8 @@ class MessagingController extends GetxController {
         id: DateTime.now().millisecondsSinceEpoch.toString(),
         conversationId: conversationId,
         content: content,
-        senderId: _authService.currentUser?.uid ?? '',
-        senderName: _authService.currentUser?.displayName ?? 'Anonim',
+        senderId: _authService.currentUser.value?.uid ?? '',
+        senderName: _authService.currentUser.value?.displayName ?? 'Anonim',
         timestamp: DateTime.now(),
         status: MessageStatus.sent,
         type: 'text',

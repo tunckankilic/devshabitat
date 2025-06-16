@@ -1,5 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import '../widgets/message_attachment_widget.dart';
+import '../models/attachment_model.dart';
 
 class ThreadReply {
   final String id;
@@ -77,8 +78,8 @@ class ThreadModel {
     required this.authorName,
     required this.content,
     required this.createdAt,
-    this.attachments = const [],
-    this.replies = const [],
+    required this.attachments,
+    required this.replies,
     this.isRead = false,
   });
 

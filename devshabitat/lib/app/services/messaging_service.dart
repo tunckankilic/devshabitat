@@ -60,7 +60,7 @@ class MessagingService extends GetxService {
 
   /// Konuşmaları gerçek zamanlı dinler
   Stream<List<ConversationModel>> getConversations() {
-    final userId = _authService.currentUser?.uid;
+    final userId = _authService.currentUser.value?.uid;
     if (userId == null) return Stream.value([]);
 
     return _firestore
@@ -127,7 +127,7 @@ class MessagingService extends GetxService {
   }
 
   Future<void> markMessagesAsRead(String conversationId) async {
-    final userId = _authService.currentUser?.uid;
+    final userId = _authService.currentUser.value?.uid;
     if (userId == null) return;
 
     final messages = await _firestore

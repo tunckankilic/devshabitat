@@ -1,51 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:cached_network_image/cached_network_image.dart';
-import 'package:file_picker/file_picker.dart';
+import '../models/attachment_model.dart';
 import 'image_viewer_widget.dart';
-
-enum AttachmentType {
-  image,
-  file,
-  voice,
-}
-
-class MessageAttachment {
-  final String url;
-  final String? name;
-  final AttachmentType type;
-  final int? size;
-  final double? progress;
-
-  const MessageAttachment({
-    required this.url,
-    this.name,
-    required this.type,
-    this.size,
-    this.progress,
-  });
-
-  Map<String, dynamic> toJson() {
-    return {
-      'url': url,
-      'name': name,
-      'type': type.toString().split('.').last,
-      'size': size,
-      'progress': progress,
-    };
-  }
-
-  factory MessageAttachment.fromJson(Map<String, dynamic> json) {
-    return MessageAttachment(
-      url: json['url'] as String,
-      name: json['name'] as String?,
-      type: AttachmentType.values.firstWhere(
-        (e) => e.toString().split('.').last == json['type'],
-      ),
-      size: json['size'] as int?,
-      progress: json['progress'] as double?,
-    );
-  }
-}
 
 class MessageAttachmentWidget extends StatelessWidget {
   final MessageAttachment attachment;
@@ -82,10 +38,10 @@ class MessageAttachmentWidget extends StatelessWidget {
     switch (attachment.type) {
       case AttachmentType.image:
         return _buildImageAttachment(context);
-      case AttachmentType.file:
-        return _buildFileAttachment(context);
-      case AttachmentType.voice:
-        return _buildVoiceAttachment(context);
+      case AttachmentType.video:
+        return _buildVideoAttachment(context);
+      case AttachmentType.document:
+        return _buildDocumentAttachment(context);
     }
   }
 
@@ -97,7 +53,7 @@ class MessageAttachmentWidget extends StatelessWidget {
         ClipRRect(
           borderRadius: BorderRadius.circular(8),
           child: CachedNetworkImage(
-            imageUrl: attachment.url,
+            imageUrl: attachment.thumbnailUrl ?? attachment.url,
             height: 200,
             width: double.infinity,
             fit: BoxFit.cover,
@@ -109,19 +65,61 @@ class MessageAttachmentWidget extends StatelessWidget {
             ),
           ),
         ),
-        if (attachment.progress != null)
-          LinearProgressIndicator(
-            value: attachment.progress,
-            backgroundColor: Theme.of(context).colorScheme.surfaceVariant,
-            valueColor: AlwaysStoppedAnimation<Color>(
-              Theme.of(context).colorScheme.primary,
-            ),
-          ),
       ],
     );
   }
 
-  Widget _buildFileAttachment(BuildContext context) {
+  Widget _buildVideoAttachment(BuildContext context) {
+    return Row(
+      children: [
+        if (attachment.thumbnailUrl != null)
+          ClipRRect(
+            borderRadius: BorderRadius.circular(8),
+            child: CachedNetworkImage(
+              imageUrl: attachment.thumbnailUrl!,
+              height: 80,
+              width: 120,
+              fit: BoxFit.cover,
+            ),
+          )
+        else
+          Container(
+            height: 80,
+            width: 120,
+            decoration: BoxDecoration(
+              color: Theme.of(context).colorScheme.primary.withOpacity(0.1),
+              borderRadius: BorderRadius.circular(8),
+            ),
+            child: Icon(
+              Icons.play_circle_outline,
+              size: 40,
+              color: Theme.of(context).colorScheme.primary,
+            ),
+          ),
+        const SizedBox(width: 12),
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                attachment.fileName,
+                style: Theme.of(context).textTheme.bodyLarge,
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
+              ),
+              if (attachment.size != null)
+                Text(
+                  _formatFileSize(attachment.size!),
+                  style: Theme.of(context).textTheme.bodySmall,
+                ),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildDocumentAttachment(BuildContext context) {
     return Row(
       children: [
         Container(
@@ -141,7 +139,7 @@ class MessageAttachmentWidget extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                attachment.name ?? 'File',
+                attachment.fileName,
                 style: Theme.of(context).textTheme.bodyLarge,
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
@@ -151,62 +149,12 @@ class MessageAttachmentWidget extends StatelessWidget {
                   _formatFileSize(attachment.size!),
                   style: Theme.of(context).textTheme.bodySmall,
                 ),
-              if (attachment.progress != null)
-                LinearProgressIndicator(
-                  value: attachment.progress,
-                  backgroundColor: Theme.of(context).colorScheme.surfaceVariant,
-                  valueColor: AlwaysStoppedAnimation<Color>(
-                    Theme.of(context).colorScheme.primary,
-                  ),
-                ),
             ],
           ),
         ),
         IconButton(
           icon: const Icon(Icons.download),
           onPressed: onDownload,
-        ),
-      ],
-    );
-  }
-
-  Widget _buildVoiceAttachment(BuildContext context) {
-    return Row(
-      children: [
-        Container(
-          padding: const EdgeInsets.all(12),
-          decoration: BoxDecoration(
-            color: Theme.of(context).colorScheme.primary.withOpacity(0.1),
-            borderRadius: BorderRadius.circular(8),
-          ),
-          child: Icon(
-            Icons.mic,
-            color: Theme.of(context).colorScheme.primary,
-          ),
-        ),
-        const SizedBox(width: 12),
-        Expanded(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                'Voice Message',
-                style: Theme.of(context).textTheme.bodyLarge,
-              ),
-              if (attachment.progress != null)
-                LinearProgressIndicator(
-                  value: attachment.progress,
-                  backgroundColor: Theme.of(context).colorScheme.surfaceVariant,
-                  valueColor: AlwaysStoppedAnimation<Color>(
-                    Theme.of(context).colorScheme.primary,
-                  ),
-                ),
-            ],
-          ),
-        ),
-        IconButton(
-          icon: const Icon(Icons.play_arrow),
-          onPressed: onTap,
         ),
       ],
     );

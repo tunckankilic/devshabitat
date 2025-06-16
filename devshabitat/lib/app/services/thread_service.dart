@@ -41,6 +41,8 @@ class ThreadService extends GetxService {
       authorName: currentUser.displayName,
       content: content,
       createdAt: DateTime.now(),
+      attachments: [],
+      replies: [],
     ).toJson();
 
     await _firestore.collection('threads').add(threadData);
@@ -56,6 +58,7 @@ class ThreadService extends GetxService {
       authorName: currentUser.displayName,
       content: content,
       createdAt: DateTime.now(),
+      attachments: [],
     ).toJson();
 
     await _firestore

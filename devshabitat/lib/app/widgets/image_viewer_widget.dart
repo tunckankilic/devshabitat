@@ -5,6 +5,7 @@ import 'package:share_plus/share_plus.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:http/http.dart' as http;
 import 'dart:io';
+import 'package:cross_file/cross_file.dart';
 
 class ImageViewerWidget extends StatelessWidget {
   final String imageUrl;
@@ -83,7 +84,8 @@ class ImageViewerWidget extends StatelessWidget {
       final tempDir = await getTemporaryDirectory();
       final file = File('${tempDir.path}/shared_image.jpg');
       await file.writeAsBytes(response.bodyBytes);
-      await Share.shareFiles([file.path]);
+      final xFile = XFile(file.path);
+      await Share.shareXFiles([xFile]);
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(

@@ -45,8 +45,7 @@ class ChatScreen extends GetView<MessagingController> {
 
               return RefreshIndicator(
                 onRefresh: () async {
-                  // TODO: Implement pagination
-                  await controller.loadMessages(conversationId);
+                  await controller.loadMessages(conversationId, loadMore: true);
                 },
                 child: ListView.builder(
                   controller: scrollController,
@@ -54,6 +53,11 @@ class ChatScreen extends GetView<MessagingController> {
                   padding: const EdgeInsets.symmetric(vertical: 16.0),
                   itemCount: messages.length,
                   itemBuilder: (context, index) {
+                    // Sayfalama için son elemana yaklaşıldığında yeni mesajları yükle
+                    if (index == messages.length - 5) {
+                      controller.loadMessages(conversationId, loadMore: true);
+                    }
+
                     final messageModel = messages[index];
                     final isOwnMessage =
                         messageModel.senderId == controller.currentUserId;

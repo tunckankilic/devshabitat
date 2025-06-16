@@ -122,6 +122,22 @@ class MessageModel {
       attachment: attachment ?? this.attachment,
     );
   }
+
+  factory MessageModel.fromMap(Map<String, dynamic> map) {
+    return MessageModel(
+      id: map['id'] as String,
+      conversationId: map['conversationId'] as String,
+      content: map['content'] as String,
+      senderId: map['senderId'] as String,
+      senderName: map['senderName'] as String,
+      timestamp: (map['timestamp'] as Timestamp).toDate(),
+      status: MessageStatus.values.firstWhere(
+        (e) => e.toString().split('.').last == map['status'],
+        orElse: () => MessageStatus.sent,
+      ),
+      type: map['type'] as String,
+    );
+  }
 }
 
 enum AttachmentType {

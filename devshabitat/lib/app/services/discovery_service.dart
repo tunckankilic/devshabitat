@@ -165,7 +165,7 @@ class DiscoveryService {
   // Send connection request
   Future<bool> sendConnectionRequest(String recipientId, String message) async {
     try {
-      final String senderId = Get.find<AuthService>().currentUser!.uid;
+      final String senderId = Get.find<AuthService>().currentUser.value!.uid;
 
       // Check if connection already exists
       final existingConnection = await _connectionsCollection
@@ -272,7 +272,8 @@ class DiscoveryService {
   // Block user
   Future<bool> blockUser(String userId) async {
     try {
-      final String currentUserId = Get.find<AuthService>().currentUser!.uid;
+      final String currentUserId =
+          Get.find<AuthService>().currentUser.value!.uid;
 
       // Create blocking connection
       final connection = ConnectionModel(
