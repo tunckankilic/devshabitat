@@ -156,7 +156,7 @@ class EnhancedAuthRepository implements BaseEnhancedAuthRepository {
 
       final AccessToken accessToken = result.accessToken!;
       final OAuthCredential credential =
-          FacebookAuthProvider.credential(accessToken.tokenString);
+          FacebookAuthProvider.credential(accessToken.token);
 
       final userCredential = await _auth.signInWithCredential(credential);
       await _handleProviderSignIn(userCredential.user!, 'facebook.com');
@@ -300,7 +300,7 @@ class EnhancedAuthRepository implements BaseEnhancedAuthRepository {
 
       final AccessToken accessToken = result.accessToken!;
       final OAuthCredential credential =
-          FacebookAuthProvider.credential(accessToken.tokenString);
+          FacebookAuthProvider.credential(accessToken.token);
 
       await _auth.currentUser?.linkWithCredential(credential);
     } catch (e) {

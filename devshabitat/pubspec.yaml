@@ -1,5 +1,5 @@
 name: devshabitat
-description: A new Flutter project for developers to connect and collaborate.
+description: "A new Flutter project."
 # The following line prevents the package from being accidentally published to
 # pub.dev using `flutter pub publish`. This is preferred for private packages.
 publish_to: "none"
@@ -16,10 +16,10 @@ publish_to: "none"
 # https://developer.apple.com/library/archive/documentation/General/Reference/InfoPlistKeyReference/Articles/CoreFoundationKeys.html
 # In Windows, build-name is used as the major, minor, and patch parts
 # of the product and file versions while build-number is used as the build suffix.
-version: 1.0.0+1
+version: 0.1.0
 
 environment:
-  sdk: ">=3.0.0 <4.0.0"
+  sdk: ">=3.2.6 <4.0.0"
 
 # Dependencies specify other packages that your package needs in order to work.
 # To automatically upgrade your package dependencies to the latest versions
@@ -30,53 +30,63 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
-  cupertino_icons: ^1.0.6
   get: ^4.6.6
   firebase_core: ^2.24.2
-  firebase_auth: ^4.15.3
-  cloud_firestore: ^4.13.6
-  google_sign_in: ^6.1.6
+  firebase_auth: ^4.16.0
+  cloud_firestore: ^4.14.0
+  firebase_storage: ^11.6.0
+  shared_preferences: ^2.2.2
+  timeago: ^3.6.1
+  image: ^4.1.7
+  path_provider: ^2.1.2
+  path: ^1.8.3
+  google_sign_in: ^6.2.1
   sign_in_with_apple: ^5.0.0
-  flutter_facebook_auth: ^6.0.3
-  flutter_svg: ^2.0.9
-  cached_network_image: ^3.3.0
-  shimmer: ^3.0.0
-  intl: ^0.18.1
-  url_launcher: ^6.2.2
-  share_plus: ^7.2.1
-  image_picker: ^1.0.5
-  firebase_storage: ^11.5.6
-  path_provider: ^2.1.1
-  flutter_local_notifications: ^16.2.0
-  flutter_native_timezone: ^2.0.0
-  geolocator: ^10.1.0
-  geocoding: ^2.1.1
-  google_maps_flutter: ^2.5.0
-  flutter_config: ^2.0.2
-  flutter_markdown: ^0.6.18
-  flutter_highlight: ^0.7.0
-  flutter_quill: ^8.6.3
+  flutter_facebook_auth: ^6.0.4
+  image_picker: ^1.0.7
   file_picker: ^6.1.1
-  flutter_slidable: ^3.0.1
-  flutter_staggered_grid_view: ^0.7.0
-  flutter_rating_bar: ^4.0.1
-  timeago: ^3.6.0
-  connectivity_plus: ^5.0.2
-  package_info_plus: ^5.0.1
-  device_info_plus: ^9.1.1
-  flutter_secure_storage: ^9.0.0
-  uuid: ^4.2.2
   logger: ^2.0.2+1
+  cached_network_image: ^3.3.1
+  connectivity_plus: ^6.1.4
+  cupertino_icons: ^1.0.6
+  device_info_plus: ^11.5.0
+  encrypt: ^5.0.3
+  flutter_config: ^2.0.2
+  flutter_highlight: ^0.7.0
+  flutter_local_notifications: ^19.2.1
+  flutter_markdown: ^0.7.7+1
+  flutter_native_timezone: ^2.0.0
+  flutter_quill: ^11.4.1
+  flutter_rating_bar: ^4.0.1
+  flutter_screenutil: ^5.9.3
+  flutter_secure_storage: ^10.0.0-beta.4
+  flutter_slidable: ^4.0.0
+  flutter_staggered_grid_view: ^0.7.0
+  flutter_svg: ^2.0.9
+  geocoding: ^4.0.0
+  geolocator: ^14.0.1
+  get_storage: ^2.1.1
+  google_fonts: ^6.2.1
+  google_maps_flutter: ^2.5.0
+  image_cropper: ^9.1.0
+  intl: ^0.20.2
+  package_info_plus: ^8.3.0
+  share_plus: ^7.2.2
+  shimmer: ^3.0.0
+  url_launcher: ^6.2.2
+  uuid: ^4.2.2
+  photo_view: ^0.14.0
+  http: ^1.2.0
 
 dev_dependencies:
   flutter_test:
     sdk: flutter
-  flutter_lints: ^3.0.1
+  flutter_lints: ^2.0.0
   build_runner: ^2.4.7
+  flutter_launcher_icons: ^0.14.4
+  flutter_native_splash: ^2.3.8
   json_serializable: ^6.7.1
   mockito: ^5.4.3
-  flutter_launcher_icons: ^0.13.1
-  flutter_native_splash: ^2.3.8
 
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec
@@ -120,7 +130,6 @@ flutter:
   #
   # For details regarding fonts from package dependencies,
   # see https://flutter.dev/to/font-from-package
-
 flutter_icons:
   android: true
   ios: true

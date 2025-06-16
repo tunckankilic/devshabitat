@@ -54,9 +54,21 @@ class ChatScreen extends GetView<MessagingController> {
                   padding: const EdgeInsets.symmetric(vertical: 16.0),
                   itemCount: messages.length,
                   itemBuilder: (context, index) {
-                    final message = messages[index];
+                    final messageModel = messages[index];
                     final isOwnMessage =
-                        message.senderId == controller.currentUserId;
+                        messageModel.senderId == controller.currentUserId;
+
+                    // MessageModel'i Message'a dönüştür
+                    final message = Message(
+                      id: messageModel.id,
+                      conversationId: messageModel.conversationId,
+                      content: messageModel.content,
+                      senderId: messageModel.senderId,
+                      senderName: messageModel.senderName,
+                      timestamp: messageModel.timestamp,
+                      type: MessageType.text, // Default olarak text
+                      attachments: [], // Boş liste
+                    );
 
                     return MessageBubble(
                       message: message,

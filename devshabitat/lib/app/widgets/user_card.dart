@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import '../../app/models/user_profile_model.dart';
+import '../models/user_profile_model.dart';
 
 class UserCard extends StatelessWidget {
   final UserProfile user;
@@ -33,7 +33,7 @@ class UserCard extends StatelessWidget {
                     top: Radius.circular(12),
                   ),
                   child: Image.network(
-                    user.profileImage,
+                    user.photoUrl ?? "",
                     height: 150,
                     width: double.infinity,
                     fit: BoxFit.cover,
@@ -95,7 +95,7 @@ class UserCard extends StatelessWidget {
                   ),
                   const SizedBox(height: 4),
                   Text(
-                    user.title,
+                    user.title ?? "No Title",
                     style: Theme.of(context).textTheme.bodyMedium,
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
@@ -111,7 +111,7 @@ class UserCard extends StatelessWidget {
                       const SizedBox(width: 4),
                       Expanded(
                         child: Text(
-                          user.location,
+                          user.location?.toString() ?? "No Locations",
                           style: Theme.of(context).textTheme.bodySmall,
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
