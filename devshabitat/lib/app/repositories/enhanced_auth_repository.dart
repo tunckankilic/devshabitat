@@ -3,9 +3,12 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:sign_in_with_apple/sign_in_with_apple.dart';
 import 'package:flutter_facebook_auth/flutter_facebook_auth.dart';
+import 'package:github_signin_promax/github_signin_promax.dart';
+import '../core/config/github_config.dart';
 import '../models/enhanced_user_model.dart';
 import 'package:logger/logger.dart';
 import 'package:get/get.dart';
+import 'package:flutter/material.dart';
 
 abstract class BaseEnhancedAuthRepository {
   Stream<User?> get authStateChanges;
@@ -169,8 +172,37 @@ class EnhancedAuthRepository implements BaseEnhancedAuthRepository {
   @override
   Future<UserCredential> signInWithGithub() async {
     try {
-      // GitHub OAuth implementasyonu
-      throw UnimplementedError('GitHub girişi henüz uygulanmadı');
+      final params = GithubSignInParams(
+        clientId: GitHubConfig.clientId,
+        clientSecret: GitHubConfig.clientSecret,
+        redirectUrl: GitHubConfig.redirectUrl,
+        scopes: GitHubConfig.scope,
+      );
+
+      final result =
+          await Navigator.of(Get.context!).push<GithubSignInResponse>(
+        MaterialPageRoute(
+          builder: (context) => GithubSigninScreen(
+            params: params,
+            headerColor: Colors.black,
+            title: 'GitHub ile Giriş Yap',
+          ),
+        ),
+      );
+
+      if (result == null ||
+          result.status != 'success' ||
+          result.accessToken == null) {
+        throw Exception('GitHub girişi iptal edildi');
+      }
+
+      final githubAuthCredential =
+          GithubAuthProvider.credential(result.accessToken!);
+      final userCredential =
+          await _auth.signInWithCredential(githubAuthCredential);
+      await _handleProviderSignIn(userCredential.user!, 'github.com');
+
+      return userCredential;
     } catch (e) {
       throw _handleAuthException(e);
     }
@@ -311,8 +343,33 @@ class EnhancedAuthRepository implements BaseEnhancedAuthRepository {
   @override
   Future<void> linkWithGithub() async {
     try {
-      // GitHub hesap bağlama implementasyonu
-      throw UnimplementedError('GitHub hesap bağlama henüz uygulanmadı');
+      final params = GithubSignInParams(
+        clientId: GitHubConfig.clientId,
+        clientSecret: GitHubConfig.clientSecret,
+        redirectUrl: GitHubConfig.redirectUrl,
+        scopes: GitHubConfig.scope,
+      );
+
+      final result =
+          await Navigator.of(Get.context!).push<GithubSignInResponse>(
+        MaterialPageRoute(
+          builder: (context) => GithubSigninScreen(
+            params: params,
+            headerColor: Colors.black,
+            title: 'GitHub Hesabını Bağla',
+          ),
+        ),
+      );
+
+      if (result == null ||
+          result.status != 'success' ||
+          result.accessToken == null) {
+        throw Exception('GitHub bağlantısı iptal edildi');
+      }
+
+      final githubAuthCredential =
+          GithubAuthProvider.credential(result.accessToken!);
+      await _auth.currentUser?.linkWithCredential(githubAuthCredential);
     } catch (e) {
       throw _handleAuthException(e);
     }
