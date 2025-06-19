@@ -1,8 +1,8 @@
+import 'package:devshabitat/app/controllers/auth_controller.dart';
+import 'package:devshabitat/app/repositories/auth_repository.dart';
 import 'package:get/get.dart';
 import 'package:logger/logger.dart';
 import '../core/services/error_handler_service.dart';
-import '../repositories/enhanced_auth_repository.dart';
-import '../controllers/enhanced_auth_controller.dart';
 
 class AppBinding extends Bindings {
   @override
@@ -10,8 +10,9 @@ class AppBinding extends Bindings {
     // Servisleri başlat
     Get.put(Logger());
     Get.put(ErrorHandlerService());
-    Get.put(EnhancedAuthRepository());
-    Get.put(EnhancedAuthController(
+
+    Get.put(AuthController(
+      authRepository: Get.put(AuthRepository()),
       errorHandler: Get.find<ErrorHandlerService>(),
     ));
   }

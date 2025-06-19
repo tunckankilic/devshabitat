@@ -1,6 +1,6 @@
+import 'package:devshabitat/app/repositories/auth_repository.dart';
 import 'package:get/get.dart';
 import 'package:flutter/material.dart';
-import '../repositories/enhanced_auth_repository.dart';
 import '../core/services/error_handler_service.dart';
 
 enum RegistrationStep {
@@ -12,7 +12,7 @@ enum RegistrationStep {
 }
 
 class RegistrationController extends GetxController {
-  final EnhancedAuthRepository _authRepository;
+  final AuthRepository _authRepository;
   final ErrorHandlerService _errorHandler;
 
   // Reactive state variables
@@ -42,7 +42,7 @@ class RegistrationController extends GetxController {
       _isEmailValid.value && _isPasswordValid.value && _isUsernameValid.value;
 
   RegistrationController({
-    required EnhancedAuthRepository authRepository,
+    required AuthRepository authRepository,
     required ErrorHandlerService errorHandler,
   })  : _authRepository = authRepository,
         _errorHandler = errorHandler;

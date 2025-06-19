@@ -17,7 +17,7 @@ class UserProfileController extends GetxController {
 
   Future<void> loadCurrentUserSkills() async {
     try {
-      final currentUserId = Get.find<AuthController>().user.value?.uid;
+      final currentUserId = Get.find<AuthController>().currentUser?.uid;
       if (currentUserId != null) {
         final doc =
             await _firestore.collection('users').doc(currentUserId).get();
@@ -33,7 +33,7 @@ class UserProfileController extends GetxController {
 
   Future<void> sendConnectionRequest(UserProfile user) async {
     try {
-      final currentUserId = Get.find<AuthController>().user.value?.uid;
+      final currentUserId = Get.find<AuthController>().currentUser?.uid;
       if (currentUserId == null) return;
 
       await _firestore.collection('connections').add({

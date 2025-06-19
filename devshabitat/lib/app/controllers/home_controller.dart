@@ -1,9 +1,9 @@
 import 'package:get/get.dart';
-import '../repositories/enhanced_auth_repository.dart';
 import '../services/github_service.dart';
+import '../repositories/auth_repository.dart';
 
 class HomeController extends GetxController {
-  final _authRepository = Get.find<EnhancedAuthRepository>();
+  final _authRepository = Get.find<AuthRepository>();
   final _githubService = Get.find<GithubService>();
 
   final RxBool isLoading = false.obs;
@@ -22,8 +22,10 @@ class HomeController extends GetxController {
       isLoading.value = true;
 
       // GitHub istatistiklerini yükle
-      final username =
-          'YOUR_GITHUB_USERNAME'; // TODO: Get actual username from auth
+      final username = _authRepository.currentUser?.providerData
+              .firstWhereOrNull((info) => info.providerId == 'github.com')
+              ?.displayName ??
+          '';
       final stats = await _githubService.getGithubStats(username);
       githubStats.value = stats.toJson();
 

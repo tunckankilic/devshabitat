@@ -1,7 +1,7 @@
+import 'package:devshabitat/app/repositories/auth_repository.dart';
 import 'package:get/get.dart';
 import '../models/github_stats_model.dart';
 import '../services/github_service.dart';
-import '../repositories/enhanced_auth_repository.dart';
 
 class GithubIntegrationController extends GetxController {
   final GithubService _githubService = Get.find<GithubService>();
@@ -23,7 +23,7 @@ class GithubIntegrationController extends GetxController {
       _error.value = '';
 
       // GitHub OAuth bağlantısını başlat
-      final authRepository = Get.find<EnhancedAuthRepository>();
+      final authRepository = Get.find<AuthRepository>();
       await authRepository.linkWithGithub();
       _isConnected.value = true;
 
@@ -61,7 +61,7 @@ class GithubIntegrationController extends GetxController {
       _isLoading.value = true;
       _error.value = '';
 
-      final authRepository = Get.find<EnhancedAuthRepository>();
+      final authRepository = Get.find<AuthRepository>();
       await authRepository.unlinkProvider('github.com');
       _isConnected.value = false;
       _githubStats.value = null;

@@ -1,11 +1,11 @@
+import 'package:devshabitat/app/controllers/auth_controller.dart';
+import 'package:devshabitat/app/repositories/auth_repository.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:logger/logger.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'app/core/services/error_handler_service.dart';
-import 'app/repositories/enhanced_auth_repository.dart';
-import 'app/controllers/enhanced_auth_controller.dart';
 import 'app/services/profile_service.dart';
 import 'app/services/github_service.dart';
 import 'app/services/image_upload_service.dart';
@@ -21,9 +21,10 @@ void main() async {
   Get.put(ProfileService());
   Get.put(GithubService());
   Get.put(ImageUploadService());
-  Get.put(EnhancedAuthRepository());
-  Get.put(EnhancedAuthController(
-    errorHandler: Get.find<ErrorHandlerService>(),
+  Get.put(AuthRepository());
+  Get.put(AuthController(
+    authRepository: Get.find(),
+    errorHandler: Get.find(),
   ));
 
   runApp(const MyApp());

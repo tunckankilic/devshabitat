@@ -1,18 +1,17 @@
+import 'package:devshabitat/app/controllers/auth_controller.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import '../widgets/responsive_form_field.dart';
 import '../widgets/social_login_button.dart';
 import '../widgets/adaptive_loading_indicator.dart';
-import '../../../controllers/enhanced_auth_controller.dart';
 
 class SmallPhoneLogin extends StatelessWidget {
   const SmallPhoneLogin({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
-    final EnhancedAuthController authController =
-        Get.find<EnhancedAuthController>();
+    final AuthController authController = Get.find<AuthController>();
     final emailController = TextEditingController();
     final passwordController = TextEditingController();
     final formKey = GlobalKey<FormState>();
@@ -95,9 +94,7 @@ class SmallPhoneLogin extends StatelessWidget {
                         ? null
                         : () {
                             if (formKey.currentState!.validate()) {
-                              authController.signInWithEmailAndPassword(
-                                  emailController.text,
-                                  passwordController.text);
+                              authController.signInWithEmailAndPassword();
                             }
                           },
                     style: ElevatedButton.styleFrom(

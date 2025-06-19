@@ -1,11 +1,11 @@
+import 'package:devshabitat/app/controllers/auth_controller.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import '../widgets/responsive_form_field.dart';
-import '../../../controllers/enhanced_auth_controller.dart';
 
 class ForgotPasswordView extends StatelessWidget {
-  final EnhancedAuthController controller = Get.find<EnhancedAuthController>();
+  final AuthController controller = Get.find<AuthController>();
 
   ForgotPasswordView({Key? key}) : super(key: key);
 

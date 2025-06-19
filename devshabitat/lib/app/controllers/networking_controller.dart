@@ -1,17 +1,16 @@
+import 'package:devshabitat/app/repositories/auth_repository.dart';
 import 'package:get/get.dart';
 import 'package:logger/logger.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import '../models/network_stats_model.dart';
 import '../models/user_profile_model.dart';
 import '../services/network_analytics_service.dart';
-import '../repositories/enhanced_auth_repository.dart';
 
 class NetworkingController extends GetxController {
   // Servisler
   final NetworkAnalyticsService _analyticsService =
       Get.find<NetworkAnalyticsService>();
-  final EnhancedAuthRepository _authRepository =
-      Get.find<EnhancedAuthRepository>();
+  final AuthRepository _authRepository = Get.find<AuthRepository>();
   final Logger _logger = Get.find<Logger>();
 
   // Observable State

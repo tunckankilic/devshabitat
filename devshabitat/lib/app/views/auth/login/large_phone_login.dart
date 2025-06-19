@@ -1,12 +1,12 @@
+import 'package:devshabitat/app/controllers/auth_controller.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import '../widgets/responsive_form_field.dart';
 import '../widgets/social_login_button.dart';
-import '../../../controllers/enhanced_auth_controller.dart';
 
 class LargePhoneLogin extends StatelessWidget {
-  final EnhancedAuthController controller = Get.find<EnhancedAuthController>();
+  final AuthController controller = Get.find<AuthController>();
 
   LargePhoneLogin({Key? key}) : super(key: key);
 
@@ -99,10 +99,7 @@ class LargePhoneLogin extends StatelessWidget {
                     onPressed: () {
                       if (controller.emailController.text.isNotEmpty &&
                           controller.passwordController.text.isNotEmpty) {
-                        controller.signInWithEmailAndPassword(
-                          controller.emailController.text,
-                          controller.passwordController.text,
-                        );
+                        controller.signInWithEmailAndPassword();
                       }
                     },
                     style: ElevatedButton.styleFrom(
