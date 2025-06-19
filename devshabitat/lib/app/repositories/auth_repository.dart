@@ -2,12 +2,14 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:sign_in_with_apple/sign_in_with_apple.dart';
 import 'package:flutter_facebook_auth/flutter_facebook_auth.dart';
-import 'package:github_signin_promax/github_signin_promax.dart';
+import 'package:oauth2/oauth2.dart' as oauth2;
 import 'package:cloud_firestore/cloud_firestore.dart';
 import '../core/config/github_config.dart';
 import 'package:flutter/material.dart';
 import 'package:logger/logger.dart';
 import 'package:get/get.dart';
+import 'package:webview_flutter/webview_flutter.dart';
+import '../services/github_oauth_service.dart';
 
 abstract class IAuthRepository {
   Future<UserCredential> signInWithEmailAndPassword(
@@ -40,6 +42,7 @@ class AuthRepository implements IAuthRepository {
   final FirebaseFirestore _firestore;
   final GoogleSignIn _googleSignIn;
   final FacebookAuth _facebookAuth;
+  final GitHubOAuthService _githubOAuthService;
   final Logger _logger;
 
   AuthRepository({
@@ -47,10 +50,12 @@ class AuthRepository implements IAuthRepository {
     FirebaseFirestore? firestore,
     GoogleSignIn? googleSignIn,
     FacebookAuth? facebookAuth,
+    required GitHubOAuthService githubOAuthService,
   })  : _auth = auth ?? FirebaseAuth.instance,
         _firestore = firestore ?? FirebaseFirestore.instance,
         _googleSignIn = googleSignIn ?? GoogleSignIn(),
         _facebookAuth = facebookAuth ?? FacebookAuth.instance,
+        _githubOAuthService = githubOAuthService,
         _logger = Get.find<Logger>();
 
   @override
@@ -118,37 +123,47 @@ class AuthRepository implements IAuthRepository {
   @override
   Future<UserCredential> signInWithGithub() async {
     try {
-      final params = GithubSignInParams(
-        clientId: GitHubConfig.clientId,
-        clientSecret: GitHubConfig.clientSecret,
-        redirectUrl: GitHubConfig.redirectUrl,
-        scopes: GitHubConfig.scope,
-      );
+      // GitHub OAuth akışını başlat
+      final accessToken = await _githubOAuthService.getAccessToken();
 
-      final result =
-          await Navigator.of(Get.context!).push<GithubSignInResponse>(
-        MaterialPageRoute(
-          builder: (context) => GithubSigninScreen(
-            params: params,
-            headerColor: Colors.black,
-            title: 'GitHub ile Giriş Yap',
-          ),
-        ),
-      );
-
-      if (result == null ||
-          result.status != 'success' ||
-          result.accessToken == null) {
-        throw Exception('GitHub girişi iptal edildi');
+      if (accessToken == null) {
+        _logger.w(
+            'GitHub OAuth akışı başarısız oldu veya kullanıcı tarafından iptal edildi');
+        throw Exception('GitHub ile giriş yapılamadı. Lütfen tekrar deneyin.');
       }
 
-      final githubAuthCredential =
-          GithubAuthProvider.credential(result.accessToken!);
+      // Firebase kimlik doğrulaması
+      final githubAuthCredential = GithubAuthProvider.credential(accessToken);
       final userCredential =
           await _auth.signInWithCredential(githubAuthCredential);
+
+      if (userCredential.user == null) {
+        _logger.e('Firebase kimlik doğrulaması başarısız oldu');
+        throw Exception('Kimlik doğrulama hatası. Lütfen tekrar deneyin.');
+      }
+
+      // Kullanıcı bilgilerini Firestore'a kaydet
       await _handleSocialSignIn(userCredential.user!);
+
+      _logger.i('GitHub ile giriş başarılı: ${userCredential.user?.email}');
       return userCredential;
     } catch (e) {
+      _logger.e('GitHub ile giriş yaparken hata: $e');
+
+      if (e is FirebaseAuthException) {
+        if (e.code == 'account-exists-with-different-credential') {
+          // Hesap zaten başka bir yöntemle kayıtlı
+          final existingEmail = e.email;
+          if (existingEmail != null) {
+            final methods =
+                await _auth.fetchSignInMethodsForEmail(existingEmail);
+            throw Exception(
+                'Bu e-posta adresi (${existingEmail}) zaten ${methods.join(", ")} ile kayıtlı. '
+                'Lütfen bu yöntemlerden birini kullanın.');
+          }
+        }
+      }
+
       throw _handleAuthException(e);
     }
   }
@@ -367,35 +382,43 @@ class AuthRepository implements IAuthRepository {
   @override
   Future<void> linkWithGithub() async {
     try {
-      final params = GithubSignInParams(
-        clientId: GitHubConfig.clientId,
-        clientSecret: GitHubConfig.clientSecret,
-        redirectUrl: GitHubConfig.redirectUrl,
-        scopes: GitHubConfig.scope,
-      );
-
-      final result =
-          await Navigator.of(Get.context!).push<GithubSignInResponse>(
-        MaterialPageRoute(
-          builder: (context) => GithubSigninScreen(
-            params: params,
-            headerColor: Colors.black,
-            title: 'GitHub Hesabını Bağla',
-          ),
-        ),
-      );
-
-      if (result == null ||
-          result.status != 'success' ||
-          result.accessToken == null) {
-        throw Exception('GitHub bağlantısı iptal edildi');
+      final currentUser = _auth.currentUser;
+      if (currentUser == null) {
+        throw Exception('Hesap bağlamak için önce giriş yapmalısınız');
       }
 
-      final githubAuthCredential =
-          GithubAuthProvider.credential(result.accessToken!);
-      await _auth.currentUser?.linkWithCredential(githubAuthCredential);
+      // GitHub OAuth akışını başlat
+      final accessToken = await _githubOAuthService.getAccessToken();
+
+      if (accessToken == null) {
+        _logger.w(
+            'GitHub OAuth akışı başarısız oldu veya kullanıcı tarafından iptal edildi');
+        throw Exception('GitHub hesabı bağlanamadı. Lütfen tekrar deneyin.');
+      }
+
+      // GitHub hesabını mevcut hesaba bağla
+      final githubAuthCredential = GithubAuthProvider.credential(accessToken);
+      await currentUser.linkWithCredential(githubAuthCredential);
+
+      _logger.i('GitHub hesabı başarıyla bağlandı: ${currentUser.email}');
+
+      // Firestore'daki kullanıcı belgesini güncelle
+      await _firestore.collection('users').doc(currentUser.uid).update({
+        'linkedProviders': FieldValue.arrayUnion(['github.com']),
+        'updatedAt': FieldValue.serverTimestamp(),
+      });
     } catch (e) {
       _logger.e('GitHub hesabı bağlanırken hata: $e');
+
+      if (e is FirebaseAuthException) {
+        if (e.code == 'provider-already-linked') {
+          throw Exception('Bu GitHub hesabı zaten bağlı');
+        } else if (e.code == 'credential-already-in-use') {
+          throw Exception(
+              'Bu GitHub hesabı başka bir kullanıcı tarafından kullanılıyor');
+        }
+      }
+
       throw _handleAuthException(e);
     }
   }

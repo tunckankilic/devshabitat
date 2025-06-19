@@ -7,9 +7,74 @@ import 'widgets/connections_overview_card.dart';
 import 'widgets/quick_actions_card.dart';
 import 'widgets/activity_feed_card.dart';
 import 'widgets/github_stats_card.dart';
+import '../../widgets/loading_widget.dart';
+import '../base/refreshable_view.dart';
 
-class HomeView extends GetView<HomeController> {
+class HomeView extends RefreshableView<HomeController> {
   const HomeView({Key? key}) : super(key: key);
+
+  @override
+  Future<void> onRefresh() async {
+    await controller.loadData();
+  }
+
+  @override
+  Widget buildContent(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('Ana Sayfa'),
+      ),
+      body: Obx(() {
+        if (controller.isLoading.value) {
+          return const LoadingList();
+        }
+
+        if (controller.hasError.value) {
+          return Center(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                const Icon(Icons.error_outline, size: 48, color: Colors.red),
+                const SizedBox(height: 16),
+                Text(controller.errorMessage.value),
+                const SizedBox(height: 16),
+                ElevatedButton(
+                  onPressed: controller.loadData,
+                  child: const Text('Tekrar Dene'),
+                ),
+              ],
+            ),
+          );
+        }
+
+        if (controller.items.isEmpty) {
+          return const Center(
+            child: Text('Henüz içerik yok'),
+          );
+        }
+
+        return ListView.separated(
+          padding: const EdgeInsets.all(16),
+          itemCount: controller.items.length,
+          separatorBuilder: (_, __) => const SizedBox(height: 16),
+          itemBuilder: (context, index) {
+            final item = controller.items[index];
+            return Card(
+              child: ListTile(
+                leading: CircleAvatar(
+                  backgroundImage: NetworkImage(item.imageUrl),
+                ),
+                title: Text(item.title),
+                subtitle: Text(item.description),
+                trailing: const Icon(Icons.chevron_right),
+                onTap: () => controller.onItemTap(item),
+              ),
+            );
+          },
+        );
+      }),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {

@@ -1,0 +1,38 @@
+default_platform(:ios)
+
+platform :ios do
+  desc "Push a new release build to the App Store"
+  lane :release do
+    setup_ci if is_ci
+    
+    match(
+      type: "appstore",
+      readonly: is_ci,
+      keychain_name: ENV['MATCH_KEYCHAIN_NAME'],
+      keychain_password: ENV['MATCH_KEYCHAIN_PASSWORD']
+    )
+    
+    increment_build_number(
+      build_number: latest_testflight_build_number + 1
+    )
+    
+    build_ios_app(
+      workspace: "Runner.xcworkspace",
+      scheme: "Runner",
+      export_method: "app-store",
+      export_options: {
+        provisioningProfiles: {
+          "com.devshabitat.app" => "match AppStore com.devshabitat.app"
+        }
+      }
+    )
+    
+    upload_to_app_store(
+      skip_metadata: true,
+      skip_screenshots: true,
+      submit_for_review: true,
+      force: true,
+      precheck_include_in_app_purchases: false
+    )
+  end
+end 

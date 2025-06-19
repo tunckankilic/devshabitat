@@ -8,6 +8,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'app/core/services/error_handler_service.dart';
 import 'app/services/profile_service.dart';
 import 'app/services/github_service.dart';
+import 'app/services/github_oauth_service.dart';
 import 'app/services/image_upload_service.dart';
 import 'app/routes/app_pages.dart';
 
@@ -16,12 +17,18 @@ void main() async {
   await Firebase.initializeApp();
 
   // Servisleri başlat
-  Get.put(Logger());
-  Get.put(ErrorHandlerService());
+  final logger = Get.put(Logger());
+  final errorHandler = Get.put(ErrorHandlerService());
   Get.put(ProfileService());
   Get.put(GithubService());
   Get.put(ImageUploadService());
-  Get.put(AuthRepository());
+  Get.put(GitHubOAuthService(
+    logger: logger,
+    errorHandler: errorHandler,
+  ));
+  Get.put(AuthRepository(
+    githubOAuthService: Get.find(),
+  ));
   Get.put(AuthController(
     authRepository: Get.find(),
     errorHandler: Get.find(),
