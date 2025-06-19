@@ -1,14 +1,17 @@
 import 'dart:io';
 import 'dart:async';
+import 'dart:convert';
 import 'package:get/get.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:firebase_storage/firebase_storage.dart';
-import 'package:devshabitat/app/models/message_model.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:share_plus/share_plus.dart';
 import 'package:devshabitat/app/services/background_sync_service.dart';
 
 class ChatManagementController extends GetxController {
   final BackgroundSyncService _syncService = Get.find<BackgroundSyncService>();
   final _storage = FirebaseStorage.instance;
+  final _firestore = FirebaseFirestore.instance;
   final _memoryUsage = 0.0.obs;
   final _isProcessing = false.obs;
   Timer? _memoryMonitorTimer;
@@ -53,7 +56,10 @@ class ChatManagementController extends GetxController {
       await storageRef.putFile(archiveFile);
 
       // Arşiv durumunu güncelle
-      // TODO: Veritabanında arşiv durumunu güncelle
+      await _firestore.collection('chats').doc(chatId).update({
+        'isArchived': true,
+        'archivedAt': FieldValue.serverTimestamp(),
+      });
     } catch (e) {
       print('Sohbet arşivleme hatası: $e');
       rethrow;
@@ -70,11 +76,34 @@ class ChatManagementController extends GetxController {
       final exportDir = await getTemporaryDirectory();
       final exportFile = File('${exportDir.path}/$chatId.$format');
 
-      // Sohbet verilerini dışa aktar
-      // TODO: Sohbet verilerini seçilen formatta dışa aktar
+      // Sohbet verilerini al
+      final chatDoc = await _firestore.collection('chats').doc(chatId).get();
+      final messages = await _firestore
+          .collection('chats')
+          .doc(chatId)
+          .collection('messages')
+          .orderBy('timestamp')
+          .get();
 
-      // Dışa aktarılan dosyayı kullanıcıya sun
-      // TODO: Share plugin ile dosyayı paylaş
+      final chatData = {
+        'chatInfo': chatDoc.data(),
+        'messages': messages.docs.map((doc) => doc.data()).toList(),
+        'exportDate': DateTime.now().toIso8601String(),
+      };
+
+      // Verileri dosyaya yaz
+      if (format == 'json') {
+        await exportFile.writeAsString(jsonEncode(chatData));
+      } else {
+        throw 'Desteklenmeyen format: $format';
+      }
+
+      // Dışa aktarılan dosyayı paylaş
+      await Share.shareXFiles(
+        [XFile(exportFile.path)],
+        text: 'Sohbet dışa aktarıldı',
+        subject: 'Sohbet Dışa Aktarımı',
+      );
     } catch (e) {
       print('Sohbet dışa aktarma hatası: $e');
       rethrow;
@@ -118,8 +147,18 @@ class ChatManagementController extends GetxController {
       await archiveFile.delete();
     }
 
-    // Önbellek temizliği
-    // TODO: Medya dosyalarını ve önbelleği temizle
+    // Medya dosyalarını ve önbelleği temizle
+    final appDir = await getApplicationDocumentsDirectory();
+    final mediaDir = Directory('${appDir.path}/media/$chatId');
+    final cacheDir = Directory('${appDir.path}/cache/$chatId');
+
+    if (await mediaDir.exists()) {
+      await mediaDir.delete(recursive: true);
+    }
+
+    if (await cacheDir.exists()) {
+      await cacheDir.delete(recursive: true);
+    }
   }
 
   Future<Directory> _getArchiveDirectory() async {

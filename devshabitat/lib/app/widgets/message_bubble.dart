@@ -10,12 +10,12 @@ class MessageBubble extends StatelessWidget {
   final bool? isOwnMessage;
 
   const MessageBubble({
-    Key? key,
+    super.key,
     required this.message,
     this.highlightText,
     this.onMediaLoaded,
     this.isOwnMessage,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {

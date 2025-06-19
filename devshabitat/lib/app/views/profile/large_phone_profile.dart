@@ -14,9 +14,9 @@ class LargePhoneProfile extends StatelessWidget {
   final _githubController = Get.put(GithubIntegrationController());
 
   LargePhoneProfile({
-    Key? key,
+    super.key,
     required this.profileController,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -182,7 +182,7 @@ class LargePhoneProfile extends StatelessWidget {
                           const SizedBox(height: 12),
                           ..._githubController.githubStats!.recentRepositories
                               .map((repo) => GithubRepoCard(repo: repo))
-                              .toList(),
+                              ,
                         ],
                       ],
                     ),

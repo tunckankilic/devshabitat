@@ -2,13 +2,9 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:sign_in_with_apple/sign_in_with_apple.dart';
 import 'package:flutter_facebook_auth/flutter_facebook_auth.dart';
-import 'package:oauth2/oauth2.dart' as oauth2;
 import 'package:cloud_firestore/cloud_firestore.dart';
-import '../core/config/github_config.dart';
-import 'package:flutter/material.dart';
 import 'package:logger/logger.dart';
 import 'package:get/get.dart';
-import 'package:webview_flutter/webview_flutter.dart';
 import '../services/github_oauth_service.dart';
 
 abstract class IAuthRepository {
@@ -158,7 +154,7 @@ class AuthRepository implements IAuthRepository {
             final methods =
                 await _auth.fetchSignInMethodsForEmail(existingEmail);
             throw Exception(
-                'Bu e-posta adresi (${existingEmail}) zaten ${methods.join(", ")} ile kayıtlı. '
+                'Bu e-posta adresi ($existingEmail) zaten ${methods.join(", ")} ile kayıtlı. '
                 'Lütfen bu yöntemlerden birini kullanın.');
           }
         }

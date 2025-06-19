@@ -1,16 +1,56 @@
+import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../models/developer_profile_model.dart';
 import '../models/skill_model.dart';
 import '../models/github_stats_model.dart';
 import '../services/profile_service.dart';
+import '../services/auth_service.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 
 class ProfileController extends GetxController {
   final ProfileService _profileService = Get.find<ProfileService>();
+  final AuthService _authService = Get.find<AuthService>();
   final Rx<DeveloperProfile?> _profile = Rx<DeveloperProfile?>(null);
   final RxList<SkillModel> _skills = <SkillModel>[].obs;
   final Rx<GithubStatsModel?> _githubStats = Rx<GithubStatsModel?>(null);
   final RxBool _isLoading = false.obs;
   final RxString _error = ''.obs;
+
+  final nameController = TextEditingController();
+  final bioController = TextEditingController();
+  final locationController = TextEditingController();
+  final githubUsernameController = TextEditingController();
+
+  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
+
+  @override
+  void onInit() {
+    super.onInit();
+    _loadUserData();
+  }
+
+  @override
+  void onClose() {
+    nameController.dispose();
+    bioController.dispose();
+    locationController.dispose();
+    githubUsernameController.dispose();
+    super.onClose();
+  }
+
+  Future<void> _loadUserData() async {
+    final user = _authService.currentUser.value;
+    if (user != null) {
+      final userData = await _firestore.collection('users').doc(user.uid).get();
+      if (userData.exists) {
+        final data = userData.data()!;
+        nameController.text = data['displayName'] ?? '';
+        bioController.text = data['bio'] ?? '';
+        locationController.text = data['location'] ?? '';
+        githubUsernameController.text = data['githubUsername'] ?? '';
+      }
+    }
+  }
 
   // Getters
   DeveloperProfile? get profile => _profile.value;
@@ -63,28 +103,17 @@ class ProfileController extends GetxController {
   }
 
   // Profil güncelleme
-  Future<void> updateProfile(DeveloperProfile updatedProfile) async {
+  Future<void> updateProfile() async {
     try {
-      _isLoading.value = true;
-      _error.value = '';
-
-      await _profileService.updateProfile(updatedProfile);
-      _profile.value = updatedProfile;
-
-      Get.snackbar(
-        'Başarılı',
-        'Profil başarıyla güncellendi',
-        snackPosition: SnackPosition.BOTTOM,
+      await _authService.updateUserProfile(
+        name: nameController.text,
+        bio: bioController.text,
+        location: locationController.text,
+        githubUsername: githubUsernameController.text,
       );
+      Get.snackbar('Başarılı', 'Profil güncellendi');
     } catch (e) {
-      _error.value = 'Profil güncellenirken bir hata oluştu: $e';
-      Get.snackbar(
-        'Hata',
-        'Profil güncellenirken bir hata oluştu',
-        snackPosition: SnackPosition.BOTTOM,
-      );
-    } finally {
-      _isLoading.value = false;
+      Get.snackbar('Hata', 'Profil güncellenirken bir hata oluştu');
     }
   }
 

@@ -3,7 +3,7 @@ import 'package:get/get.dart';
 import '../../controllers/filter_controller.dart';
 
 class AdvancedFiltersScreen extends GetView<FilterController> {
-  const AdvancedFiltersScreen({Key? key}) : super(key: key);
+  const AdvancedFiltersScreen({super.key});
 
   @override
   Widget build(BuildContext context) {

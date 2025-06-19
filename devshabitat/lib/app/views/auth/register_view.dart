@@ -4,7 +4,7 @@ import 'package:get/get.dart';
 import 'responsive_auth_wrapper.dart';
 
 class RegisterView extends StatelessWidget {
-  const RegisterView({Key? key}) : super(key: key);
+  const RegisterView({super.key});
 
   @override
   Widget build(BuildContext context) {

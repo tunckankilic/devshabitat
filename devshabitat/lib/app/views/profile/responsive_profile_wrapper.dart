@@ -8,9 +8,9 @@ class ResponsiveProfileWrapper extends StatelessWidget {
   final ProfileController profileController;
 
   const ResponsiveProfileWrapper({
-    Key? key,
+    super.key,
     required this.profileController,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {

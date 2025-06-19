@@ -11,7 +11,7 @@ class AdaptiveTouchTarget extends StatelessWidget {
   final BorderRadius? borderRadius;
 
   const AdaptiveTouchTarget({
-    Key? key,
+    super.key,
     required this.child,
     this.onTap,
     this.minSize = 48.0,
@@ -19,7 +19,7 @@ class AdaptiveTouchTarget extends StatelessWidget {
     this.splashColor,
     this.highlightColor,
     this.borderRadius,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {

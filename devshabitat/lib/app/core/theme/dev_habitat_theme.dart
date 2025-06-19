@@ -11,7 +11,6 @@ class DevHabitatTheme {
       colorScheme: const ColorScheme.dark(
         primary: DevHabitatColors.primary,
         secondary: DevHabitatColors.secondary,
-        background: DevHabitatColors.darkBackground,
         surface: DevHabitatColors.darkSurface,
         error: DevHabitatColors.error,
       ),
@@ -274,7 +273,6 @@ class DevHabitatTheme {
       colorScheme: const ColorScheme.light(
         primary: DevHabitatColors.primary,
         secondary: DevHabitatColors.secondary,
-        background: DevHabitatColors.lightBackground,
         surface: DevHabitatColors.lightSurface,
         error: DevHabitatColors.error,
       ),

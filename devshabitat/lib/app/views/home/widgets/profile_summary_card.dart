@@ -4,7 +4,7 @@ import 'package:get/get.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 class ProfileSummaryCard extends GetView<AuthController> {
-  const ProfileSummaryCard({Key? key}) : super(key: key);
+  const ProfileSummaryCard({super.key});
 
   @override
   Widget build(BuildContext context) {

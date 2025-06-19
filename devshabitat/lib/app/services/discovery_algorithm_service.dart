@@ -1,5 +1,4 @@
 import 'dart:math' as math;
-import 'dart:math';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:get/get.dart';
 import '../models/user_profile_model.dart';
@@ -199,59 +198,6 @@ class DiscoveryAlgorithmService extends GetxService {
       print('Error getting recommended users: $e');
       return [];
     }
-  }
-
-  Future<double> _calculateUserScore({
-    required UserProfile currentUser,
-    required UserProfile candidateUser,
-    required List<String> connectedUserIds,
-  }) async {
-    double score = 0.0;
-
-    // Ortak yetenekler için puan
-    final commonSkills = currentUser.skills
-        .where((skill) => candidateUser.skills.contains(skill))
-        .length;
-    score += commonSkills * 2.0;
-
-    // Ortak ilgi alanları için puan
-    final commonInterests = currentUser.interests
-        .where((interest) => candidateUser.interests.contains(interest))
-        .length;
-    score += commonInterests * 1.5;
-
-    // Aynı lokasyon için puan
-    if (currentUser.location == candidateUser.location) {
-      score += 3.0;
-    }
-
-    // Aynı şirket için puan
-    if (currentUser.company == candidateUser.company) {
-      score += 2.0;
-    }
-
-    // Ortak bağlantılar için puan
-    final candidateConnections = await _firestore
-        .collection('connections')
-        .where('fromUserId', isEqualTo: candidateUser.id)
-        .where('status', isEqualTo: 'accepted')
-        .get();
-
-    final candidateConnectedUserIds = candidateConnections.docs
-        .map((doc) => doc.data()['toUserId'] as String)
-        .toList();
-
-    final commonConnections = connectedUserIds
-        .where((id) => candidateConnectedUserIds.contains(id))
-        .length;
-    score += commonConnections * 1.0;
-
-    // Aktiflik durumu için puan
-    if (candidateUser.isOnline) {
-      score += 1.0;
-    }
-
-    return score;
   }
 
   double _calculateSkillMatch(List<String> skills1, List<String> skills2) {

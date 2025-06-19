@@ -109,8 +109,9 @@ class SimpleRecommendationService {
         if (doc.id == currentUser.id.value) continue;
 
         final otherUser = EnhancedUserModel.fromJson(doc.data());
-        if (otherUser.experience == null || otherUser.experience!.isEmpty)
+        if (otherUser.experience == null || otherUser.experience!.isEmpty) {
           continue;
+        }
 
         final otherUserCompanies = otherUser.experience!
             .map((e) => e['company'] as String?)

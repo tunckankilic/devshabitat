@@ -11,7 +11,7 @@ import '../../widgets/loading_widget.dart';
 import '../base/refreshable_view.dart';
 
 class HomeView extends RefreshableView<HomeController> {
-  const HomeView({Key? key}) : super(key: key);
+  const HomeView({super.key});
 
   @override
   Future<void> onRefresh() async {
@@ -62,10 +62,13 @@ class HomeView extends RefreshableView<HomeController> {
             return Card(
               child: ListTile(
                 leading: CircleAvatar(
-                  backgroundImage: NetworkImage(item.imageUrl),
+                  backgroundImage: item.imageUrl != null
+                      ? NetworkImage(item.imageUrl!)
+                      : null,
+                  child:
+                      item.imageUrl == null ? const Icon(Icons.person) : null,
                 ),
-                title: Text(item.title),
-                subtitle: Text(item.description),
+                title: Text(item.content),
                 trailing: const Icon(Icons.chevron_right),
                 onTap: () => controller.onItemTap(item),
               ),
@@ -117,7 +120,17 @@ class HomeView extends RefreshableView<HomeController> {
           flex: 4,
           child: Column(
             children: [
-              const ActivityFeedCard(),
+              Obx(() {
+                if (controller.items.isEmpty) {
+                  return const Center(child: Text('Henüz içerik yok'));
+                }
+                return ActivityFeedCard(
+                  feedItem: controller.items.first,
+                  onLike: () => controller.onLike(controller.items.first),
+                  onComment: () => controller.onComment(controller.items.first),
+                  onShare: () => controller.onShare(controller.items.first),
+                );
+              }),
               SizedBox(height: 16.h),
               const GithubStatsCard(),
             ],
@@ -167,7 +180,17 @@ class HomeView extends RefreshableView<HomeController> {
           ],
         ),
         SizedBox(height: 16.h),
-        const ActivityFeedCard(),
+        Obx(() {
+          if (controller.items.isEmpty) {
+            return const Center(child: Text('Henüz içerik yok'));
+          }
+          return ActivityFeedCard(
+            feedItem: controller.items.first,
+            onLike: () => controller.onLike(controller.items.first),
+            onComment: () => controller.onComment(controller.items.first),
+            onShare: () => controller.onShare(controller.items.first),
+          );
+        }),
       ],
     );
   }
@@ -184,7 +207,17 @@ class HomeView extends RefreshableView<HomeController> {
           SizedBox(height: 16.h),
           const GithubStatsCard(),
           SizedBox(height: 16.h),
-          const ActivityFeedCard(),
+          Obx(() {
+            if (controller.items.isEmpty) {
+              return const Center(child: Text('Henüz içerik yok'));
+            }
+            return ActivityFeedCard(
+              feedItem: controller.items.first,
+              onLike: () => controller.onLike(controller.items.first),
+              onComment: () => controller.onComment(controller.items.first),
+              onShare: () => controller.onShare(controller.items.first),
+            );
+          }),
         ],
       ),
     );

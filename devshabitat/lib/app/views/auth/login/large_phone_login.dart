@@ -8,7 +8,7 @@ import '../widgets/social_login_button.dart';
 class LargePhoneLogin extends StatelessWidget {
   final AuthController controller = Get.find<AuthController>();
 
-  LargePhoneLogin({Key? key}) : super(key: key);
+  LargePhoneLogin({super.key});
 
   @override
   Widget build(BuildContext context) {

@@ -7,7 +7,7 @@ import 'search/search_view.dart';
 import 'settings/settings_view.dart';
 
 class MainWrapper extends GetView<NavigationController> {
-  const MainWrapper({Key? key}) : super(key: key);
+  const MainWrapper({super.key});
 
   @override
   Widget build(BuildContext context) {

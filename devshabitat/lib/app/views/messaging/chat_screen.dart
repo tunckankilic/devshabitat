@@ -5,7 +5,7 @@ import '../../widgets/message_bubble.dart';
 import '../../models/message_model.dart';
 
 class ChatScreen extends GetView<MessagingController> {
-  const ChatScreen({Key? key}) : super(key: key);
+  const ChatScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -121,7 +121,7 @@ class ChatScreen extends GetView<MessagingController> {
                   borderSide: BorderSide.none,
                 ),
                 filled: true,
-                fillColor: Theme.of(context).colorScheme.surfaceVariant,
+                fillColor: Theme.of(context).colorScheme.surfaceContainerHighest,
                 contentPadding: const EdgeInsets.symmetric(
                   horizontal: 16.0,
                   vertical: 8.0,

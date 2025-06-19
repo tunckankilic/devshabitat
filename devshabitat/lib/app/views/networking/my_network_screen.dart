@@ -1,7 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:get/get.dart';
-import '../../models/network_stats_model.dart';
-import '../../services/network_analytics_service.dart';
 
 class MyNetworkScreen extends StatelessWidget {
   const MyNetworkScreen({super.key});

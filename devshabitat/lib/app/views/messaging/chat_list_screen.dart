@@ -5,7 +5,7 @@ import '../../widgets/conversation_tile.dart';
 import '../../routes/app_pages.dart';
 
 class ChatListScreen extends GetView<MessagingController> {
-  const ChatListScreen({Key? key}) : super(key: key);
+  const ChatListScreen({super.key});
 
   @override
   Widget build(BuildContext context) {

@@ -7,12 +7,12 @@ class SocialAuthButtons extends StatelessWidget {
   final VoidCallback onAppleSignIn;
 
   const SocialAuthButtons({
-    Key? key,
+    super.key,
     required this.onGoogleSignIn,
     required this.onGithubSignIn,
     required this.onFacebookSignIn,
     required this.onAppleSignIn,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {

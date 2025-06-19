@@ -14,9 +14,9 @@ class TabletProfile extends StatelessWidget {
   final _githubController = Get.put(GithubIntegrationController());
 
   TabletProfile({
-    Key? key,
+    super.key,
     required this.profileController,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {

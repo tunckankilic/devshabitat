@@ -141,7 +141,7 @@ class ChatExportService extends GetxService {
       final directory = await getApplicationDocumentsDirectory();
       final files = directory
           .listSync()
-          .where((entity) => entity is File)
+          .whereType<File>()
           .cast<File>()
           .where((file) => file.path.contains('sohbet_'))
           .toList();

@@ -7,7 +7,7 @@ import '../widgets/responsive_form_field.dart';
 class ForgotPasswordView extends StatelessWidget {
   final AuthController controller = Get.find<AuthController>();
 
-  ForgotPasswordView({Key? key}) : super(key: key);
+  ForgotPasswordView({super.key});
 
   @override
   Widget build(BuildContext context) {

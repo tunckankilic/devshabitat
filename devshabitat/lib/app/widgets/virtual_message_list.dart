@@ -1,6 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/rendering.dart';
-import 'package:get/get.dart';
 import 'package:devshabitat/app/models/message_model.dart';
 import 'package:devshabitat/app/widgets/message_bubble.dart';
 
@@ -12,13 +10,13 @@ class VirtualMessageList extends StatefulWidget {
   final String? highlightText;
 
   const VirtualMessageList({
-    Key? key,
+    super.key,
     required this.messages,
     this.controller,
     this.reverse = true,
     this.padding = const EdgeInsets.all(16),
     this.highlightText,
-  }) : super(key: key);
+  });
 
   @override
   State<VirtualMessageList> createState() => _VirtualMessageListState();
@@ -158,11 +156,11 @@ class _MessageItem extends StatefulWidget {
   final ValueChanged<Size> onSizeChanged;
 
   const _MessageItem({
-    Key? key,
+    super.key,
     required this.message,
     required this.onSizeChanged,
     this.highlightText,
-  }) : super(key: key);
+  });
 
   @override
   State<_MessageItem> createState() => _MessageItemState();

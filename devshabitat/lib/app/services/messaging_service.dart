@@ -10,9 +10,9 @@ class MessagingService extends GetxService {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
   final AuthService _authService = Get.find<AuthService>();
 
-  /// Çevrimdışı destek için persistence ayarı
-  Future<void> enablePersistence() async {
-    await FirebaseFirestore.instance.enablePersistence();
+  MessagingService() {
+    FirebaseFirestore.instance.settings =
+        const Settings(persistenceEnabled: true);
   }
 
   /// Yeni bir konuşma oluşturur

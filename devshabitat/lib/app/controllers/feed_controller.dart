@@ -1,103 +1,145 @@
+import 'package:devshabitat/app/core/services/error_handler_service.dart';
 import 'package:get/get.dart';
-import '../services/feed_service.dart';
-import '../models/post.dart';
-
-enum FeedType { forYou, popular }
+import '../models/feed_item.dart';
+import '../services/feed_repository.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 
 class FeedController extends GetxController {
-  final FeedService _feedService;
-
-  final RxList<Post> forYouPosts = <Post>[].obs;
-  final RxList<Post> popularPosts = <Post>[].obs;
-  final Rx<FeedType> currentFeedType = FeedType.forYou.obs;
-  final RxBool isLoading = false.obs;
-  final RxString selectedTag = ''.obs;
+  final FeedRepository _repository;
+  final ErrorHandlerService _errorHandler;
+  final _firestore = FirebaseFirestore.instance;
+  final _auth = FirebaseAuth.instance;
 
   FeedController({
-    required FeedService feedService,
-  }) : _feedService = feedService;
+    required FeedRepository repository,
+    required ErrorHandlerService errorHandler,
+  })  : _repository = repository,
+        _errorHandler = errorHandler;
+
+  final RxList<FeedItem> _feedItems = <FeedItem>[].obs;
+  final RxBool _isLoading = false.obs;
+  final RxBool _hasError = false.obs;
+  final RxInt _currentPage = 1.obs;
+
+  List<FeedItem> get feedItems => _feedItems;
+  bool get isLoading => _isLoading.value;
+  bool get hasError => _hasError.value;
+
+  String get currentUserId => _auth.currentUser?.uid ?? '';
 
   @override
   void onInit() {
     super.onInit();
-    _subscribeToPosts();
+    refreshFeed();
   }
 
-  void _subscribeToPosts() {
-    // For You feed'ini dinle (kendi ve bağlantıların)
-    _feedService.getForYouFeedStream().listen(
-      (updatedPosts) {
-        forYouPosts.value = updatedPosts;
-      },
-      onError: (error) {
-        // Hata durumunda işlem yap
-      },
-    );
-
-    // Popular feed'i dinle (tüm kullanıcılardan en popüler olanlar)
-    _feedService.getPopularFeedStream().listen(
-      (updatedPosts) {
-        popularPosts.value = updatedPosts;
-      },
-      onError: (error) {
-        // Hata durumunda işlem yap
-      },
-    );
-  }
-
-  // Feed tipini değiştir
-  void changeFeedType(FeedType type) {
-    currentFeedType.value = type;
-  }
-
-  // Aktif feed'deki postları getir
-  List<Post> get currentPosts {
-    return currentFeedType.value == FeedType.forYou
-        ? forYouPosts
-        : popularPosts;
-  }
-
-  // Feed'i yenile
-  Future<void> refreshPosts() async {
-    isLoading.value = true;
+  Future<List<FeedItem>> fetchFeedItems(int page, int pageSize) async {
     try {
-      if (selectedTag.isNotEmpty) {
-        final tagPosts =
-            await _feedService.getTagFeedStream(selectedTag.value).first;
-        forYouPosts.value = tagPosts;
-      } else if (currentFeedType.value == FeedType.forYou) {
-        final posts = await _feedService.getForYouFeedStream().first;
-        forYouPosts.value = posts;
-      } else {
-        final posts = await _feedService.getPopularFeedStream().first;
-        popularPosts.value = posts;
-      }
-    } finally {
-      isLoading.value = false;
-    }
-  }
-
-  // Etiket seç
-  void selectTag(String tag) {
-    if (selectedTag.value == tag) {
-      selectedTag.value = '';
-      _subscribeToPosts(); // Normal feed'e geri dön
-    } else {
-      selectedTag.value = tag;
-      _feedService.getTagFeedStream(tag).listen(
-        (tagPosts) {
-          // Etiket seçiliyken For You feed'ini güncelle
-          forYouPosts.value = tagPosts;
-        },
-        onError: (error) {
-          // Hata durumunda işlem yap
-        },
+      final items = await _repository.getFeedItems(
+        page: page,
+        pageSize: pageSize,
       );
+      return items;
+    } catch (e) {
+      _errorHandler.handleError(e);
+      return [];
     }
   }
 
-  // Profil feed'ini getir
-  Stream<List<Post>> getProfilePosts(String userId) {
-    return _feedService.getProfileFeedStream(userId);
+  Future<void> refreshFeed() async {
+    _currentPage.value = 1;
+    _feedItems.clear();
+    try {
+      final items = await fetchFeedItems(_currentPage.value, 10);
+      _feedItems.addAll(items);
+      _hasError.value = false;
+    } catch (e) {
+      _hasError.value = true;
+      _errorHandler.handleError(e);
+    }
+  }
+
+  Future<void> likeFeedItem(String itemId) async {
+    try {
+      await _repository.likeFeedItem(itemId);
+      final index = _feedItems.indexWhere((item) => item.id == itemId);
+      if (index != -1) {
+        final updatedItem = _feedItems[index].copyWith(
+          likesCount: _feedItems[index].likesCount + 1,
+          isLiked: true,
+        );
+        _feedItems[index] = updatedItem;
+      }
+    } catch (e) {
+      _errorHandler.handleError(e);
+    }
+  }
+
+  Future<void> commentOnFeedItem(String itemId) async {
+    try {
+      // Yorum yapma işlemi
+      Get.toNamed('/comments', arguments: itemId);
+    } catch (e) {
+      _errorHandler.handleError(e);
+    }
+  }
+
+  Future<void> shareFeedItem(String itemId) async {
+    try {
+      await _repository.shareFeedItem(itemId);
+      final index = _feedItems.indexWhere((item) => item.id == itemId);
+      if (index != -1) {
+        final updatedItem = _feedItems[index].copyWith(
+          sharesCount: _feedItems[index].sharesCount + 1,
+        );
+        _feedItems[index] = updatedItem;
+      }
+    } catch (e) {
+      _errorHandler.handleError(e);
+    }
+  }
+
+  Future<void> toggleLike(String postId) async {
+    try {
+      final postRef = _firestore.collection('posts').doc(postId);
+      final post = await postRef.get();
+      final likes = List<String>.from(post.data()?['likes'] ?? []);
+
+      if (likes.contains(currentUserId)) {
+        likes.remove(currentUserId);
+      } else {
+        likes.add(currentUserId);
+      }
+
+      await postRef.update({'likes': likes});
+    } catch (e) {
+      print('Beğeni işlemi başarısız: $e');
+    }
+  }
+
+  Future<void> deletePost(String postId) async {
+    try {
+      await _firestore.collection('posts').doc(postId).delete();
+      Get.snackbar('Başarılı', 'Gönderi silindi');
+    } catch (e) {
+      print('Gönderi silme başarısız: $e');
+      Get.snackbar('Hata', 'Gönderi silinemedi');
+    }
+  }
+
+  Future<void> reportPost(String postId) async {
+    try {
+      await _firestore.collection('reports').add({
+        'postId': postId,
+        'reportedBy': currentUserId,
+        'createdAt': FieldValue.serverTimestamp(),
+        'status': 'pending'
+      });
+      Get.snackbar('Başarılı', 'Gönderi şikayet edildi');
+    } catch (e) {
+      print('Şikayet işlemi başarısız: $e');
+      Get.snackbar('Hata', 'Şikayet gönderilemedi');
+    }
   }
 }

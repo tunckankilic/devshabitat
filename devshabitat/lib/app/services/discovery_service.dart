@@ -480,7 +480,7 @@ class DiscoveryService {
       final querySnapshot = await _firestore
           .collection('users')
           .where('fullName', isGreaterThanOrEqualTo: query)
-          .where('fullName', isLessThan: query + 'z')
+          .where('fullName', isLessThan: '${query}z')
           .limit(limit)
           .get();
 

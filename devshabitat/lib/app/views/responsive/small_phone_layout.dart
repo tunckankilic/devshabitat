@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import '../../utils/responsive_helper.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 class SmallPhoneLayout extends StatelessWidget {
   final Widget child;
@@ -9,13 +9,13 @@ class SmallPhoneLayout extends StatelessWidget {
   final Color? backgroundColor;
 
   const SmallPhoneLayout({
-    Key? key,
+    super.key,
     required this.child,
     this.appBar,
     this.bottomNavigationBar,
     this.floatingActionButton,
     this.backgroundColor,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -23,7 +23,7 @@ class SmallPhoneLayout extends StatelessWidget {
       appBar: appBar,
       body: SafeArea(
         child: Padding(
-          padding: ResponsiveHelper.getAdaptivePadding(context),
+          padding: EdgeInsets.all(16.w),
           child: child,
         ),
       ),

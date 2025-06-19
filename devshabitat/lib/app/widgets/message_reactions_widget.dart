@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../controllers/message_interaction_controller.dart';
-import 'emoji_picker_widget.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 
 class MessageReactionsWidget extends StatelessWidget {
   final String messageId;
@@ -10,12 +10,12 @@ class MessageReactionsWidget extends StatelessWidget {
   final bool isMyMessage;
 
   const MessageReactionsWidget({
-    Key? key,
+    super.key,
     required this.messageId,
     required this.conversationId,
     required this.currentUserId,
     required this.isMyMessage,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -67,7 +67,7 @@ class MessageReactionsWidget extends StatelessWidget {
                 decoration: BoxDecoration(
                   color: hasReacted
                       ? Theme.of(context).colorScheme.primaryContainer
-                      : Theme.of(context).colorScheme.surfaceVariant,
+                      : Theme.of(context).colorScheme.surfaceContainerHighest,
                   borderRadius: BorderRadius.circular(12),
                 ),
                 child: Row(
@@ -113,11 +113,29 @@ class MessageReactionsWidget extends StatelessWidget {
             ),
             const SizedBox(height: 16),
             ...users.map(
-              (userId) => ListTile(
-                title: Text(userId), // TODO: Replace with actual user name
-                leading: const CircleAvatar(
-                  child: Icon(Icons.person),
-                ),
+              (userId) => FutureBuilder<DocumentSnapshot>(
+                future: FirebaseFirestore.instance
+                    .collection('users')
+                    .doc(userId)
+                    .get(),
+                builder: (context, snapshot) {
+                  if (snapshot.hasData && snapshot.data != null) {
+                    final userData =
+                        snapshot.data!.data() as Map<String, dynamic>?;
+                    return ListTile(
+                      title: Text(userData?['displayName'] ?? 'Kullanıcı'),
+                      leading: const CircleAvatar(
+                        child: Icon(Icons.person),
+                      ),
+                    );
+                  }
+                  return const ListTile(
+                    title: Text('Yükleniyor...'),
+                    leading: CircleAvatar(
+                      child: Icon(Icons.person),
+                    ),
+                  );
+                },
               ),
             ),
           ],

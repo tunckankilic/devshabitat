@@ -5,6 +5,9 @@ import 'package:logger/logger.dart';
 import '../core/services/error_handler_service.dart';
 import '../services/github_oauth_service.dart';
 import '../services/post_service.dart';
+import '../services/lazy_loading_service.dart';
+import '../services/asset_optimization_service.dart';
+import '../controllers/app_controller.dart';
 
 class AppBinding extends Bindings {
   @override
@@ -26,6 +29,15 @@ class AppBinding extends Bindings {
       authRepository: Get.put(AuthRepository(
         githubOAuthService: githubOAuthService,
       )),
+      errorHandler: errorHandler,
+    ));
+
+    // Services
+    Get.put(LazyLoadingService());
+    Get.put(AssetOptimizationService());
+
+    // Controllers
+    Get.put(AppController(
       errorHandler: errorHandler,
     ));
   }

@@ -6,11 +6,11 @@ class AdaptiveProgressIndicator extends StatelessWidget {
   final Color? color;
 
   const AdaptiveProgressIndicator({
-    Key? key,
+    super.key,
     required this.progress,
     this.size = 40,
     this.color,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {

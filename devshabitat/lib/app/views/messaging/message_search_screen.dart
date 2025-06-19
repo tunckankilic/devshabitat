@@ -4,7 +4,7 @@ import 'package:devshabitat/app/widgets/search_result_tile.dart';
 import 'package:devshabitat/app/controllers/message_search_controller.dart';
 
 class MessageSearchScreen extends GetView<MessageSearchController> {
-  const MessageSearchScreen({Key? key}) : super(key: key);
+  const MessageSearchScreen({super.key});
 
   @override
   Widget build(BuildContext context) {

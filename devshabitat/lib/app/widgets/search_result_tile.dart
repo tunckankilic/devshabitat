@@ -8,11 +8,11 @@ class SearchResultTile extends StatelessWidget {
   final String highlightText;
 
   const SearchResultTile({
-    Key? key,
+    super.key,
     required this.searchResult,
     required this.onTap,
     required this.highlightText,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -91,12 +91,12 @@ class SearchResultTile extends StatelessWidget {
   }
 
   Widget _buildHighlightedText(BuildContext context) {
-    if (searchResult.content == null || searchResult.content!.isEmpty) {
+    if (searchResult.content.isEmpty) {
       return const SizedBox.shrink();
     }
 
     final List<TextSpan> spans = [];
-    final String content = searchResult.content!.toLowerCase();
+    final String content = searchResult.content.toLowerCase();
     final String searchText = highlightText.toLowerCase();
     int currentIndex = 0;
 
@@ -104,9 +104,9 @@ class SearchResultTile extends StatelessWidget {
       final int matchIndex = content.indexOf(searchText, currentIndex);
       if (matchIndex == -1) {
         // Add remaining text
-        if (currentIndex < searchResult.content!.length) {
+        if (currentIndex < searchResult.content.length) {
           spans.add(TextSpan(
-            text: searchResult.content!.substring(currentIndex),
+            text: searchResult.content.substring(currentIndex),
           ));
         }
         break;
@@ -115,13 +115,13 @@ class SearchResultTile extends StatelessWidget {
       // Add text before match
       if (matchIndex > currentIndex) {
         spans.add(TextSpan(
-          text: searchResult.content!.substring(currentIndex, matchIndex),
+          text: searchResult.content.substring(currentIndex, matchIndex),
         ));
       }
 
       // Add highlighted match
       spans.add(TextSpan(
-        text: searchResult.content!
+        text: searchResult.content
             .substring(matchIndex, matchIndex + searchText.length),
         style: TextStyle(
           backgroundColor:

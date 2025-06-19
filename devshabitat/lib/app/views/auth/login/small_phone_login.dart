@@ -7,13 +7,11 @@ import '../widgets/social_login_button.dart';
 import '../widgets/adaptive_loading_indicator.dart';
 
 class SmallPhoneLogin extends StatelessWidget {
-  const SmallPhoneLogin({Key? key}) : super(key: key);
+  const SmallPhoneLogin({super.key});
 
   @override
   Widget build(BuildContext context) {
     final AuthController authController = Get.find<AuthController>();
-    final emailController = TextEditingController();
-    final passwordController = TextEditingController();
     final formKey = GlobalKey<FormState>();
 
     return Scaffold(

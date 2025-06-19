@@ -11,6 +11,8 @@ class TabletRegister extends StatelessWidget {
   final formController = Get.find<FormValidationController>();
   final githubController = Get.find<GitHubValidationController>();
 
+  TabletRegister({super.key});
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(

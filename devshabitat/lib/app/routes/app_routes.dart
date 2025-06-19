@@ -13,4 +13,11 @@ abstract class Routes {
   static const MESSAGES = '/messages';
   static const CHAT = '/chat';
   static const NEW_CHAT = '/new-chat';
+  static const DISCOVERY = '/discovery';
+  static const NETWORKING = '/networking';
+  static const COMMENTS = '/comments';
+  static const ITEM_DETAIL = '/item-detail';
+  static const USER_PROFILE = '/user-profile';
+  static const EDIT_PROFILE = '/edit-profile';
+  static const NOTIFICATIONS = '/notifications';
 }

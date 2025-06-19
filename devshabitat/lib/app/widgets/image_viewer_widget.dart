@@ -5,15 +5,14 @@ import 'package:share_plus/share_plus.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:http/http.dart' as http;
 import 'dart:io';
-import 'package:cross_file/cross_file.dart';
 
 class ImageViewerWidget extends StatelessWidget {
   final String imageUrl;
 
   const ImageViewerWidget({
-    Key? key,
+    super.key,
     required this.imageUrl,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {

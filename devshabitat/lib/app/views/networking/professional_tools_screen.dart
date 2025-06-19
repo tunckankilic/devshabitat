@@ -1,12 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../../controllers/networking_controller.dart';
-import '../../models/user_profile_model.dart';
 
 class ProfessionalToolsScreen extends StatelessWidget {
   final NetworkingController controller = Get.find<NetworkingController>();
 
-  ProfessionalToolsScreen({Key? key}) : super(key: key);
+  ProfessionalToolsScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -190,7 +189,7 @@ class ProfessionalToolsScreen extends StatelessWidget {
   Widget _buildDataExport(BuildContext context) {
     return Card(
       elevation: 0,
-      color: Theme.of(context).colorScheme.surfaceVariant,
+      color: Theme.of(context).colorScheme.surfaceContainerHighest,
       child: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Column(

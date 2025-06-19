@@ -14,10 +14,10 @@ class EmojiPickerWidget extends StatelessWidget {
   ];
 
   const EmojiPickerWidget({
-    Key? key,
+    super.key,
     required this.onEmojiSelected,
     this.isVisible = true,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -60,10 +60,9 @@ class _EmojiButton extends StatelessWidget {
   final VoidCallback onTap;
 
   const _EmojiButton({
-    Key? key,
     required this.emoji,
     required this.onTap,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {

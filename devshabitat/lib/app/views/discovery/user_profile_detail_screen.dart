@@ -9,9 +9,9 @@ class UserProfileDetailScreen extends GetView<UserProfileController> {
   final UserProfile user;
 
   const UserProfileDetailScreen({
-    Key? key,
+    super.key,
     required this.user,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -91,7 +91,7 @@ class UserProfileDetailScreen extends GetView<UserProfileController> {
             const Icon(Icons.location_on_outlined, size: 16),
             const SizedBox(width: 4),
             Text(
-              user.location.toString() ?? "No Location",
+              user.location.toString(),
               style: Get.textTheme.bodyMedium,
             ),
             const SizedBox(width: 16),

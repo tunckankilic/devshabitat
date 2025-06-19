@@ -1,5 +1,3 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
-import '../widgets/message_attachment_widget.dart';
 import '../models/attachment_model.dart';
 
 class ThreadReply {

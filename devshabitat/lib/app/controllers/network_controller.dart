@@ -1,7 +1,7 @@
+import 'package:devshabitat/app/core/services/error_handler_service.dart';
 import 'package:get/get.dart';
 import 'package:connectivity_plus/connectivity_plus.dart';
 import '../constants/app_strings.dart';
-import '../services/error_handler_service.dart';
 
 class NetworkController extends GetxController {
   final ErrorHandlerService _errorHandler = Get.find<ErrorHandlerService>();

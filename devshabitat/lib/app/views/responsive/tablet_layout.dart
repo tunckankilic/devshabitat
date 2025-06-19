@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import '../../utils/responsive_helper.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 class TabletLayout extends StatelessWidget {
   final Widget child;
@@ -12,7 +12,7 @@ class TabletLayout extends StatelessWidget {
   final Function(int) onDestinationSelected;
 
   const TabletLayout({
-    Key? key,
+    super.key,
     required this.child,
     this.appBar,
     this.navigationRail,
@@ -21,7 +21,7 @@ class TabletLayout extends StatelessWidget {
     required this.destinations,
     required this.selectedIndex,
     required this.onDestinationSelected,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -56,7 +56,7 @@ class TabletLayout extends StatelessWidget {
             ),
             Expanded(
               child: Padding(
-                padding: ResponsiveHelper.getAdaptivePadding(context),
+                padding: EdgeInsets.all(16.w),
                 child: child,
               ),
             ),

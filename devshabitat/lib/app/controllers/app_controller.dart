@@ -1,12 +1,15 @@
+import 'package:devshabitat/app/core/services/error_handler_service.dart';
 import 'package:get/get.dart';
 import 'package:flutter/material.dart';
 import 'package:connectivity_plus/connectivity_plus.dart';
-import '../services/error_handler_service.dart';
 import '../constants/app_strings.dart';
 
 class AppController extends GetxController {
-  // Servisler
-  final ErrorHandlerService _errorHandler = Get.find<ErrorHandlerService>();
+  final ErrorHandlerService _errorHandler;
+
+  AppController({
+    required ErrorHandlerService errorHandler,
+  }) : _errorHandler = errorHandler;
 
   // State değişkenleri
   final RxBool _isDarkMode = false.obs;

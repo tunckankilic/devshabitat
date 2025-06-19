@@ -1,8 +1,8 @@
 class AppBreakpoints {
   // Ekran boyutu kırılım noktaları
-  static const double mobile = 0;
-  static const double tablet = 600;
-  static const double desktop = 1200;
+  static const double mobile = 360;
+  static const double tablet = 768;
+  static const double desktop = 1024;
 
   // Padding ve margin değerleri
   static const double paddingXS = 4;
@@ -30,4 +30,20 @@ class AppBreakpoints {
   static const double iconSizeM = 24;
   static const double iconSizeL = 32;
   static const double iconSizeXL = 48;
+
+  // Responsive değerler
+  static double getResponsiveValue({
+    required double mobile,
+    required double tablet,
+    required double desktop,
+    required double screenWidth,
+  }) {
+    if (screenWidth <= AppBreakpoints.mobile) {
+      return mobile;
+    } else if (screenWidth <= AppBreakpoints.tablet) {
+      return tablet;
+    } else {
+      return desktop;
+    }
+  }
 }
