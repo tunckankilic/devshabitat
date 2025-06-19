@@ -5,51 +5,63 @@ import 'package:logger/logger.dart';
 class ErrorHandlerService extends GetxService {
   final _logger = Logger();
 
-  void handleError(dynamic error) {
+  void handleError(dynamic error,
+      {SnackPosition position = SnackPosition.BOTTOM}) {
     _logger.e('Hata: $error');
     Get.snackbar(
       'Hata',
       error.toString(),
-      snackPosition: SnackPosition.BOTTOM,
+      snackPosition: position,
       backgroundColor: Colors.red,
       colorText: Colors.white,
+      margin: const EdgeInsets.all(16),
       duration: const Duration(seconds: 3),
+      icon: const Icon(Icons.error_outline, color: Colors.white),
     );
   }
 
-  void handleSuccess(String message) {
+  void handleSuccess(String message,
+      {SnackPosition position = SnackPosition.BOTTOM}) {
     _logger.i('Başarılı: $message');
     Get.snackbar(
       'Başarılı',
       message,
-      snackPosition: SnackPosition.BOTTOM,
+      snackPosition: position,
       backgroundColor: Colors.green,
       colorText: Colors.white,
-      duration: const Duration(seconds: 3),
+      margin: const EdgeInsets.all(16),
+      duration: const Duration(seconds: 2),
+      icon: const Icon(Icons.check_circle_outline, color: Colors.white),
     );
   }
 
-  void handleWarning(String message) {
+  void handleWarning(String message,
+      {SnackPosition position = SnackPosition.BOTTOM}) {
     _logger.w('Uyarı: $message');
     Get.snackbar(
       'Uyarı',
       message,
-      snackPosition: SnackPosition.BOTTOM,
+      snackPosition: position,
       backgroundColor: Colors.orange,
       colorText: Colors.white,
+      margin: const EdgeInsets.all(16),
       duration: const Duration(seconds: 3),
+      icon: const Icon(Icons.warning_amber_rounded, color: Colors.white),
     );
   }
 
-  void handleInfo(String message) {
+  void handleInfo(String message,
+      {SnackPosition position = SnackPosition.BOTTOM}) {
     _logger.i('Bilgi: $message');
     Get.snackbar(
       'Bilgi',
       message,
-      snackPosition: SnackPosition.BOTTOM,
+      snackPosition: position,
       backgroundColor: Colors.blue,
       colorText: Colors.white,
-      duration: const Duration(seconds: 3),
+      margin: const EdgeInsets.all(16),
+      duration: const Duration(seconds: 2),
+      icon: const Icon(Icons.info_outline, color: Colors.white),
     );
   }
 
@@ -109,5 +121,17 @@ class ErrorHandlerService extends GetxService {
         ],
       ),
     );
+  }
+
+  void logError(String message, [dynamic error, StackTrace? stackTrace]) {
+    _logger.e(message, error: error, stackTrace: stackTrace);
+  }
+
+  void logInfo(String message) {
+    _logger.i(message);
+  }
+
+  void logWarning(String message) {
+    _logger.w(message);
   }
 }

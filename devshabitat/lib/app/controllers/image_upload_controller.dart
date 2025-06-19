@@ -69,25 +69,8 @@ class ImageUploadController extends GetxController {
 
       if (croppedFile != null) {
         _isCompressing.value = true;
-        final file = File(croppedFile.path);
-        // Resmi sıkıştır ve yeniden boyutlandır
-        final compressedFile = await _imageUploadService.compressImage(
-          file,
-          onProgress: (progress) {
-            _uploadProgress.value =
-                progress * 0.3; // Sıkıştırma işlemi toplam progress'in %30'u
-          },
-        );
-        final resizedFile = await _imageUploadService.resizeImage(
-          compressedFile,
-          onProgress: (progress) {
-            _uploadProgress.value =
-                0.3 + (progress * 0.2); // Boyutlandırma işlemi %20
-          },
-        );
-        _selectedImage.value = resizedFile;
+        _selectedImage.value = File(croppedFile.path);
         _isCompressing.value = false;
-        _uploadProgress.value = 0.5; // Sıkıştırma ve boyutlandırma tamamlandı
       }
     } catch (e) {
       _errorHandler.handleError('Resim kırpılırken bir hata oluştu: $e');

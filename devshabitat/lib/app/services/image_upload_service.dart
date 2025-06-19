@@ -1,11 +1,10 @@
 import 'dart:io';
 import 'dart:typed_data';
-import 'package:get/get.dart';
 import 'package:path/path.dart' as path;
-import 'package:image/image.dart' as img;
-import 'package:path_provider/path_provider.dart';
+import 'package:get/get.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:uuid/uuid.dart';
+import 'package:image/image.dart' as img;
 import '../core/services/error_handler_service.dart';
 
 typedef ProgressCallback = void Function(double progress);
@@ -15,8 +14,9 @@ class ImageUploadService extends GetxService {
   final ErrorHandlerService _errorHandler;
   final _uuid = const Uuid();
 
-  static const int _chunkSize = 1024 * 1024; // 1MB chunk size
-  static const int _maxFileSize = 10 * 1024 * 1024; // 10MB max file size
+  static const int _maxFileSize = 10 * 1024 * 1024; // 10MB
+  static const int _chunkSize = 1024 * 1024; // 1MB
+  static const int _maxDimension = 2048; // Maximum image dimension
 
   ImageUploadService({
     FirebaseStorage? storage,
@@ -24,53 +24,58 @@ class ImageUploadService extends GetxService {
   })  : _storage = storage ?? FirebaseStorage.instance,
         _errorHandler = errorHandler ?? Get.find();
 
-  // Resmi sunucuya yükle
-  Future<String?> uploadImage(String imagePath,
-      {ProgressCallback? onProgress}) async {
+  Future<String?> uploadImage(
+    String imagePath, {
+    ProgressCallback? onProgress,
+    bool shouldCompress = true,
+  }) async {
     try {
       final file = File(imagePath);
-      if (await file.length() > _maxFileSize) {
-        throw Exception('Dosya boyutu 10MB\'dan büyük olamaz');
+      if (!await file.exists()) {
+        throw Exception('Dosya bulunamadı');
       }
 
-      final ext = path.extension(imagePath);
+      var fileToUpload = file;
+      var fileSize = await file.length();
+
+      // Dosya boyutu kontrolü ve sıkıştırma
+      if (fileSize > _maxFileSize) {
+        if (!shouldCompress) {
+          throw Exception('Dosya boyutu 10MB\'dan büyük olamaz');
+        }
+        fileToUpload = await _compressImage(file);
+        fileSize = await fileToUpload.length();
+
+        if (fileSize > _maxFileSize) {
+          throw Exception('Sıkıştırmadan sonra bile dosya boyutu çok büyük');
+        }
+      }
+
+      final ext = path.extension(imagePath).toLowerCase();
+      if (!_isValidImageExtension(ext)) {
+        throw Exception('Desteklenmeyen dosya formatı');
+      }
+
       final ref = _storage.ref().child('images/${_uuid.v4()}$ext');
 
-      if (await file.length() > _chunkSize) {
-        // Büyük dosyalar için chunk upload
-        final uploadTask = ref.putData(
-          await _createChunkedUpload(file, onProgress),
-          SettableMetadata(contentType: _getContentType(ext)),
-        );
-
-        await uploadTask;
+      if (fileSize > _chunkSize) {
+        await _uploadInChunks(fileToUpload, ref, onProgress);
       } else {
-        // Küçük dosyalar için normal upload
-        final uploadTask = ref.putFile(
-          file,
-          SettableMetadata(contentType: _getContentType(ext)),
-        );
-
-        uploadTask.snapshotEvents.listen((TaskSnapshot snapshot) {
-          if (onProgress != null) {
-            final progress = snapshot.bytesTransferred / snapshot.totalBytes;
-            onProgress(progress);
-          }
-        });
-
-        await uploadTask;
+        await _uploadDirect(fileToUpload, ref, onProgress);
       }
 
       return await ref.getDownloadURL();
     } catch (e) {
-      _errorHandler.handleError(e);
+      _errorHandler.handleError('Resim yükleme hatası: $e');
       return null;
     }
   }
 
-  // Chunked upload için veri oluştur
-  Future<Uint8List> _createChunkedUpload(
-      File file, ProgressCallback? onProgress) async {
+  Future<void> _uploadInChunks(
+    File file,
+    Reference ref,
+    ProgressCallback? onProgress,
+  ) async {
     final fileSize = await file.length();
     final chunks = (fileSize / _chunkSize).ceil();
     final completeData = Uint8List(fileSize.toInt());
@@ -88,85 +93,59 @@ class ImageUploadService extends GetxService {
       }
     }
 
-    return completeData;
+    await ref.putData(
+      completeData,
+      SettableMetadata(contentType: _getContentType(path.extension(file.path))),
+    );
   }
 
-  // Resmi sıkıştır
-  Future<File> compressImage(File imageFile,
-      {ProgressCallback? onProgress}) async {
-    try {
-      final img.Image? image = img.decodeImage(await imageFile.readAsBytes());
-      if (image == null) throw Exception('Resim okunamadı');
+  Future<void> _uploadDirect(
+    File file,
+    Reference ref,
+    ProgressCallback? onProgress,
+  ) async {
+    final uploadTask = ref.putFile(
+      file,
+      SettableMetadata(contentType: _getContentType(path.extension(file.path))),
+    );
 
-      if (onProgress != null) onProgress(0.3);
-
-      // WebP formatına dönüştür ve sıkıştır
-      final compressedBytes = img.encodeJpg(image, quality: 80);
-
-      if (onProgress != null) onProgress(0.6);
-
-      // Geçici dosya oluştur
-      final tempDir = await getTemporaryDirectory();
-      final tempFile = File(
-          '${tempDir.path}/compressed_${DateTime.now().millisecondsSinceEpoch}.jpg');
-      await tempFile.writeAsBytes(compressedBytes);
-
-      if (onProgress != null) onProgress(1.0);
-
-      return tempFile;
-    } catch (e) {
-      _errorHandler.handleError(e);
-      rethrow;
-    }
-  }
-
-  // Resmi yeniden boyutlandır
-  Future<File> resizeImage(File imageFile,
-      {ProgressCallback? onProgress}) async {
-    try {
-      final img.Image? image = img.decodeImage(await imageFile.readAsBytes());
-      if (image == null) throw Exception('Resim okunamadı');
-
-      if (onProgress != null) onProgress(0.3);
-
-      // Maksimum 1080p boyutuna ölçekle
-      img.Image resizedImage = image;
-      if (image.width > 1920 || image.height > 1080) {
-        resizedImage = img.copyResize(
-          image,
-          width: image.width > 1920 ? 1920 : null,
-          height: image.height > 1080 ? 1080 : null,
-        );
+    uploadTask.snapshotEvents.listen((TaskSnapshot snapshot) {
+      if (onProgress != null) {
+        final progress = snapshot.bytesTransferred / snapshot.totalBytes;
+        onProgress(progress);
       }
+    });
 
-      if (onProgress != null) onProgress(0.6);
-
-      final tempDir = await getTemporaryDirectory();
-      final tempFile = File(
-          '${tempDir.path}/resized_${DateTime.now().millisecondsSinceEpoch}.jpg');
-      await tempFile.writeAsBytes(img.encodeJpg(resizedImage, quality: 80));
-
-      if (onProgress != null) onProgress(1.0);
-
-      return tempFile;
-    } catch (e) {
-      _errorHandler.handleError(e);
-      rethrow;
-    }
+    await uploadTask;
   }
 
-  Future<void> deleteImage(String imageUrl) async {
-    try {
-      final ref = _storage.refFromURL(imageUrl);
-      await ref.delete();
-    } catch (e) {
-      _errorHandler.handleError(e);
+  Future<File> _compressImage(File file) async {
+    final bytes = await file.readAsBytes();
+    var image = img.decodeImage(bytes);
+
+    if (image == null) {
+      throw Exception('Resim okunamadı');
     }
+
+    // Boyut kontrolü ve yeniden boyutlandırma
+    if (image.width > _maxDimension || image.height > _maxDimension) {
+      image = img.copyResize(
+        image,
+        width: image.width > image.height ? _maxDimension : null,
+        height: image.height >= image.width ? _maxDimension : null,
+      );
+    }
+
+    // Kalite ayarı ile sıkıştırma
+    final compressedBytes = img.encodeJpg(image, quality: 85);
+    final compressedFile = File('${file.path}_compressed.jpg');
+    await compressedFile.writeAsBytes(compressedBytes);
+
+    return compressedFile;
   }
 
-  // Dosya uzantısına göre content type belirle
-  String _getContentType(String fileExtension) {
-    switch (fileExtension.toLowerCase()) {
+  String _getContentType(String extension) {
+    switch (extension.toLowerCase()) {
       case '.jpg':
       case '.jpeg':
         return 'image/jpeg';
@@ -178,6 +157,20 @@ class ImageUploadService extends GetxService {
         return 'image/webp';
       default:
         return 'application/octet-stream';
+    }
+  }
+
+  bool _isValidImageExtension(String extension) {
+    final validExtensions = ['.jpg', '.jpeg', '.png', '.gif', '.webp'];
+    return validExtensions.contains(extension.toLowerCase());
+  }
+
+  Future<void> deleteImage(String imageUrl) async {
+    try {
+      final ref = _storage.refFromURL(imageUrl);
+      await ref.delete();
+    } catch (e) {
+      _errorHandler.handleError('Resim silme hatası: $e');
     }
   }
 }
