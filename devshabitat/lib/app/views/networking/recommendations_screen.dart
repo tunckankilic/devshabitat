@@ -1,13 +1,12 @@
+import 'package:devshabitat/app/repositories/auth_repository.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../../services/simple_recommendation_service.dart';
 import '../../models/enhanced_user_model.dart';
-import '../../algorithms/connection_scoring_algorithm.dart';
-import '../../repositories/enhanced_auth_repository.dart';
 
 class RecommendationsScreen extends StatelessWidget {
   final SimpleRecommendationService _recommendationService = Get.find();
-  final EnhancedAuthRepository _authRepository = Get.find();
+  final AuthRepository _authRepository = Get.find();
   final RxList<EnhancedUserModel> _recommendations = <EnhancedUserModel>[].obs;
   final RxBool _isLoading = false.obs;
 

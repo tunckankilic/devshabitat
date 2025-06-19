@@ -3,51 +3,256 @@ import 'package:get/get.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import '../repositories/auth_repository.dart';
 import '../core/services/error_handler_service.dart';
-import 'package:google_sign_in/google_sign_in.dart';
-import 'package:sign_in_with_apple/sign_in_with_apple.dart';
-import 'package:flutter_facebook_auth/flutter_facebook_auth.dart';
+import '../routes/app_pages.dart';
+
+enum AuthState {
+  initial,
+  loading,
+  authenticated,
+  unauthenticated,
+  error,
+}
 
 class AuthController extends GetxController {
   final AuthRepository _authRepository;
   final ErrorHandlerService _errorHandler;
 
+  // Form controllers
   final emailController = TextEditingController();
   final passwordController = TextEditingController();
   final confirmPasswordController = TextEditingController();
   final usernameController = TextEditingController();
   final githubUsernameController = TextEditingController();
 
-  final isLoading = false.obs;
-  final Rx<User?> user = Rx<User?>(null);
-  final isNewUser = false.obs;
+  // Reactive state variables
+  final _isLoading = false.obs;
+  final _currentUser = Rxn<User>();
+  final _userProfile = Rxn<Map<String, dynamic>>();
+  final _authState = AuthState.initial.obs;
+  final _lastError = ''.obs;
 
-  final FirebaseAuth _auth = FirebaseAuth.instance;
-  final GoogleSignIn _googleSignIn = GoogleSignIn();
-  final FacebookAuth _facebookAuth = FacebookAuth.instance;
+  // Getters
+  bool get isLoading => _isLoading.value;
+  User? get currentUser => _currentUser.value;
+  Map<String, dynamic>? get userProfile => _userProfile.value;
+  AuthState get authState => _authState.value;
+  String get lastError => _lastError.value;
 
   AuthController({
-    AuthRepository? authRepository,
-    ErrorHandlerService? errorHandler,
-  })  : _authRepository = authRepository ?? Get.find<AuthRepository>(),
-        _errorHandler = errorHandler ?? Get.find<ErrorHandlerService>();
+    required AuthRepository authRepository,
+    required ErrorHandlerService errorHandler,
+  })  : _authRepository = authRepository,
+        _errorHandler = errorHandler;
 
   @override
   void onInit() {
     super.onInit();
-    user.bindStream(_auth.authStateChanges());
-    ever(user, _handleAuthStateChange);
+    _initializeAuthState();
   }
 
-  void _handleAuthStateChange(User? user) {
-    if (user != null) {
-      // Kullanıcı profil bilgilerini kontrol et
-      if (user.displayName == null || user.displayName!.isEmpty) {
-        isNewUser.value = true;
-        Get.offAllNamed('/register');
+  void _initializeAuthState() {
+    _authRepository.authStateChanges.listen((user) async {
+      _currentUser.value = user;
+      if (user != null) {
+        _authState.value = AuthState.authenticated;
+        // Kullanıcı profilini yükle
+        _userProfile.value = await _authRepository.getUserProfile(user.uid);
+        Get.offAllNamed(Routes.MAIN);
       } else {
-        isNewUser.value = false;
-        Get.offAllNamed('/home');
+        _authState.value = AuthState.unauthenticated;
+        _userProfile.value = null;
+        Get.offAllNamed(Routes.LOGIN);
       }
+    });
+  }
+
+  Future<void> signInWithEmailAndPassword() async {
+    try {
+      _isLoading.value = true;
+      _lastError.value = '';
+      await _authRepository.signInWithEmailAndPassword(
+        emailController.text,
+        passwordController.text,
+      );
+      _errorHandler.handleSuccess('Giriş başarılı');
+    } catch (e) {
+      _lastError.value = e.toString();
+      _errorHandler.handleError(e);
+    } finally {
+      _isLoading.value = false;
+    }
+  }
+
+  Future<void> createUserWithEmailAndPassword() async {
+    try {
+      if (passwordController.text != confirmPasswordController.text) {
+        throw Exception('Şifreler eşleşmiyor');
+      }
+
+      _isLoading.value = true;
+      _lastError.value = '';
+      await _authRepository.createUserWithEmailAndPassword(
+        emailController.text,
+        passwordController.text,
+        usernameController.text,
+      );
+      _errorHandler.handleSuccess('Hesap oluşturuldu');
+    } catch (e) {
+      _lastError.value = e.toString();
+      _errorHandler.handleError(e);
+    } finally {
+      _isLoading.value = false;
+    }
+  }
+
+  Future<void> signInWithGoogle() async {
+    try {
+      _isLoading.value = true;
+      _lastError.value = '';
+      await _authRepository.signInWithGoogle();
+      _errorHandler.handleSuccess('Google ile giriş başarılı');
+    } catch (e) {
+      _lastError.value = e.toString();
+      _errorHandler.handleError(e);
+    } finally {
+      _isLoading.value = false;
+    }
+  }
+
+  Future<void> signInWithApple() async {
+    try {
+      _isLoading.value = true;
+      _lastError.value = '';
+      await _authRepository.signInWithApple();
+      _errorHandler.handleSuccess('Apple ile giriş başarılı');
+    } catch (e) {
+      _lastError.value = e.toString();
+      _errorHandler.handleError(e);
+    } finally {
+      _isLoading.value = false;
+    }
+  }
+
+  Future<void> signInWithFacebook() async {
+    try {
+      _isLoading.value = true;
+      _lastError.value = '';
+      await _authRepository.signInWithFacebook();
+      _errorHandler.handleSuccess('Facebook ile giriş başarılı');
+    } catch (e) {
+      _lastError.value = e.toString();
+      _errorHandler.handleError(e);
+    } finally {
+      _isLoading.value = false;
+    }
+  }
+
+  Future<void> signInWithGithub() async {
+    try {
+      _isLoading.value = true;
+      _lastError.value = '';
+      await _authRepository.signInWithGithub();
+      _errorHandler.handleSuccess('GitHub ile giriş başarılı');
+    } catch (e) {
+      _lastError.value = e.toString();
+      _errorHandler.handleError(e);
+    } finally {
+      _isLoading.value = false;
+    }
+  }
+
+  Future<void> signOut() async {
+    try {
+      _isLoading.value = true;
+      await _authRepository.signOut();
+      _errorHandler.handleSuccess('Çıkış yapıldı');
+    } catch (e) {
+      _lastError.value = e.toString();
+      _errorHandler.handleError(e);
+    } finally {
+      _isLoading.value = false;
+    }
+  }
+
+  Future<void> sendPasswordResetEmail() async {
+    try {
+      if (emailController.text.isEmpty) {
+        throw Exception('Lütfen e-posta adresinizi girin');
+      }
+
+      _isLoading.value = true;
+      await _authRepository.sendPasswordResetEmail(emailController.text);
+      _errorHandler.handleSuccess('Şifre sıfırlama bağlantısı gönderildi');
+    } catch (e) {
+      _lastError.value = e.toString();
+      _errorHandler.handleError(e);
+    } finally {
+      _isLoading.value = false;
+    }
+  }
+
+  Future<void> verifyEmail() async {
+    try {
+      _isLoading.value = true;
+      await _authRepository.verifyEmail();
+      _errorHandler.handleSuccess('Doğrulama e-postası gönderildi');
+    } catch (e) {
+      _lastError.value = e.toString();
+      _errorHandler.handleError(e);
+    } finally {
+      _isLoading.value = false;
+    }
+  }
+
+  Future<void> updatePassword(String newPassword) async {
+    try {
+      _isLoading.value = true;
+      await _authRepository.updatePassword(newPassword);
+      _errorHandler.handleSuccess('Şifre güncellendi');
+    } catch (e) {
+      _lastError.value = e.toString();
+      _errorHandler.handleError(e);
+    } finally {
+      _isLoading.value = false;
+    }
+  }
+
+  Future<void> updateEmail(String newEmail) async {
+    try {
+      _isLoading.value = true;
+      await _authRepository.updateEmail(newEmail);
+      _errorHandler.handleSuccess('E-posta güncellendi');
+    } catch (e) {
+      _lastError.value = e.toString();
+      _errorHandler.handleError(e);
+    } finally {
+      _isLoading.value = false;
+    }
+  }
+
+  Future<void> deleteAccount() async {
+    try {
+      _isLoading.value = true;
+      await _authRepository.deleteAccount();
+      _errorHandler.handleSuccess('Hesap silindi');
+    } catch (e) {
+      _lastError.value = e.toString();
+      _errorHandler.handleError(e);
+    } finally {
+      _isLoading.value = false;
+    }
+  }
+
+  Future<void> reauthenticate(String email, String password) async {
+    try {
+      _isLoading.value = true;
+      await _authRepository.reauthenticate(email, password);
+      _errorHandler.handleSuccess('Kimlik doğrulama başarılı');
+    } catch (e) {
+      _lastError.value = e.toString();
+      _errorHandler.handleError(e);
+    } finally {
+      _isLoading.value = false;
     }
   }
 
@@ -59,176 +264,5 @@ class AuthController extends GetxController {
     usernameController.dispose();
     githubUsernameController.dispose();
     super.onClose();
-  }
-
-  bool get isAuthenticated => user.value != null;
-
-  Future<void> signInWithEmailAndPassword() async {
-    try {
-      isLoading.value = true;
-      await _auth.signInWithEmailAndPassword(
-        email: emailController.text,
-        password: passwordController.text,
-      );
-      _errorHandler.handleSuccess('Giriş başarılı');
-    } catch (e) {
-      _errorHandler.handleError(e);
-    } finally {
-      isLoading.value = false;
-    }
-  }
-
-  Future<void> createUserWithEmailAndPassword() async {
-    try {
-      if (passwordController.text != confirmPasswordController.text) {
-        throw Exception('Şifreler eşleşmiyor');
-      }
-
-      isLoading.value = true;
-      final userCredential = await _auth.createUserWithEmailAndPassword(
-        email: emailController.text,
-        password: passwordController.text,
-      );
-
-      // Kullanıcı adını güncelle
-      await userCredential.user?.updateDisplayName(usernameController.text);
-
-      _errorHandler.handleSuccess('Hesap oluşturuldu');
-    } catch (e) {
-      _errorHandler.handleError(e);
-    } finally {
-      isLoading.value = false;
-    }
-  }
-
-  Future<void> signInWithGoogle() async {
-    try {
-      isLoading.value = true;
-      final GoogleSignInAccount? googleUser = await _googleSignIn.signIn();
-      if (googleUser == null) return;
-
-      final GoogleSignInAuthentication googleAuth =
-          await googleUser.authentication;
-      final credential = GoogleAuthProvider.credential(
-        accessToken: googleAuth.accessToken,
-        idToken: googleAuth.idToken,
-      );
-
-      await _auth.signInWithCredential(credential);
-    } catch (e) {
-      print('Error signing in with Google: $e');
-      rethrow;
-    } finally {
-      isLoading.value = false;
-    }
-  }
-
-  Future<void> signInWithApple() async {
-    try {
-      isLoading.value = true;
-      final appleCredential = await SignInWithApple.getAppleIDCredential(
-        scopes: [
-          AppleIDAuthorizationScopes.email,
-          AppleIDAuthorizationScopes.fullName,
-        ],
-      );
-
-      final oauthCredential = OAuthProvider('apple.com').credential(
-        idToken: appleCredential.identityToken,
-        accessToken: appleCredential.authorizationCode,
-      );
-
-      await _auth.signInWithCredential(oauthCredential);
-    } catch (e) {
-      print('Error signing in with Apple: $e');
-      rethrow;
-    } finally {
-      isLoading.value = false;
-    }
-  }
-
-  Future<void> signInWithFacebook() async {
-    try {
-      isLoading.value = true;
-      final LoginResult result = await _facebookAuth.login();
-      if (result.status != LoginStatus.success) return;
-
-      final AccessToken? accessToken = result.accessToken;
-      if (accessToken == null) return;
-
-      final userData = await _facebookAuth.getUserData();
-      final OAuthCredential credential =
-          FacebookAuthProvider.credential(accessToken.toString());
-      await _auth.signInWithCredential(credential);
-    } catch (e) {
-      print('Error signing in with Facebook: $e');
-      rethrow;
-    } finally {
-      isLoading.value = false;
-    }
-  }
-
-  Future<void> signOut() async {
-    try {
-      isLoading.value = true;
-      await Future.wait([
-        _auth.signOut(),
-        _googleSignIn.signOut(),
-        _facebookAuth.logOut(),
-      ]);
-      _errorHandler.handleSuccess('Çıkış yapıldı');
-    } catch (e) {
-      _errorHandler.handleError(e);
-    } finally {
-      isLoading.value = false;
-    }
-  }
-
-  Future<void> resetPassword(String email) async {
-    try {
-      isLoading.value = true;
-      await _auth.sendPasswordResetEmail(email: email);
-    } catch (e) {
-      print('Error resetting password: $e');
-      rethrow;
-    } finally {
-      isLoading.value = false;
-    }
-  }
-
-  Future<void> updateEmail(String newEmail) async {
-    try {
-      isLoading.value = true;
-      await user.value?.updateEmail(newEmail);
-    } catch (e) {
-      print('Error updating email: $e');
-      rethrow;
-    } finally {
-      isLoading.value = false;
-    }
-  }
-
-  Future<void> updatePassword(String newPassword) async {
-    try {
-      isLoading.value = true;
-      await user.value?.updatePassword(newPassword);
-    } catch (e) {
-      print('Error updating password: $e');
-      rethrow;
-    } finally {
-      isLoading.value = false;
-    }
-  }
-
-  Future<void> deleteAccount() async {
-    try {
-      isLoading.value = true;
-      await user.value?.delete();
-    } catch (e) {
-      print('Error deleting account: $e');
-      rethrow;
-    } finally {
-      isLoading.value = false;
-    }
   }
 }

@@ -1,9 +1,9 @@
+import 'package:devshabitat/app/controllers/auth_controller.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import '../../../controllers/enhanced_auth_controller.dart';
 
-class ProfileSummaryCard extends GetView<EnhancedAuthController> {
+class ProfileSummaryCard extends GetView<AuthController> {
   const ProfileSummaryCard({Key? key}) : super(key: key);
 
   @override
@@ -65,9 +65,9 @@ class ProfileSummaryCard extends GetView<EnhancedAuthController> {
             ),
             SizedBox(height: 16.h),
             Obx(() {
-              final user = controller.currentUser;
+              final profile = controller.userProfile;
               return Text(
-                user?.bio ?? 'Henüz bir biyografi eklenmemiş.',
+                profile?['bio'] ?? 'Henüz bir biyografi eklenmemiş.',
                 style: TextStyle(fontSize: 14.sp),
               );
             }),

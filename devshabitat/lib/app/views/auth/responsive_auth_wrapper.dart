@@ -1,13 +1,12 @@
+import 'package:devshabitat/app/controllers/auth_controller.dart';
 import 'package:flutter/material.dart';
-import 'package:get/get.dart';
-import '../../controllers/enhanced_auth_controller.dart';
 import 'widgets/auth_form.dart';
 import 'widgets/auth_header.dart';
 import 'widgets/social_auth_buttons.dart';
 import 'widgets/auth_footer.dart';
 
 class ResponsiveAuthWrapper extends StatelessWidget {
-  final EnhancedAuthController authController;
+  final AuthController authController;
   final bool isLogin;
 
   const ResponsiveAuthWrapper({
@@ -118,9 +117,9 @@ class ResponsiveAuthWrapper extends StatelessWidget {
               isLogin: isLogin,
               onSubmit: (email, password) {
                 if (isLogin) {
-                  authController.signInWithEmailAndPassword(email, password);
+                  authController.signInWithEmailAndPassword();
                 } else {
-                  authController.signUpWithEmailAndPassword(email, password);
+                  authController.createUserWithEmailAndPassword();
                 }
               },
             ),

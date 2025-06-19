@@ -52,7 +52,7 @@ class DiscoveryController extends GetxController {
     isLoadingRecommendations.value = true;
 
     try {
-      final currentUserId = _authController.user.value?.uid;
+      final currentUserId = _authController.currentUser?.uid;
       if (currentUserId == null) return;
 
       final recommendations =
@@ -71,7 +71,7 @@ class DiscoveryController extends GetxController {
     isLoadingConnections.value = true;
 
     try {
-      final currentUserId = _authController.user.value?.uid;
+      final currentUserId = _authController.currentUser?.uid;
       if (currentUserId == null) return;
 
       final userConnections =
@@ -89,7 +89,7 @@ class DiscoveryController extends GetxController {
     isLoadingRequests.value = true;
 
     try {
-      final currentUserId = _authController.user.value?.uid;
+      final currentUserId = _authController.currentUser?.uid;
       if (currentUserId == null) return;
 
       // Gelen istekler
@@ -111,7 +111,7 @@ class DiscoveryController extends GetxController {
   Future<void> sendConnectionRequest(UserProfile user,
       {String? message}) async {
     try {
-      final currentUserId = _authController.user.value?.uid;
+      final currentUserId = _authController.currentUser?.uid;
       if (currentUserId == null) return;
 
       await _discoveryService.sendConnectionRequestWithMessage(
@@ -215,7 +215,7 @@ class DiscoveryController extends GetxController {
   }
 
   double calculateMatchPercentage(UserProfile user) {
-    final currentUserId = _authController.user.value?.uid;
+    final currentUserId = _authController.currentUser?.uid;
     if (currentUserId == null) return 0.0;
 
     // Yetenek eşleşmesi

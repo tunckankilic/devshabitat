@@ -22,7 +22,7 @@ class SocialLoginButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Obx(() {
-      final isLoading = Get.find<AuthController>().isLoading.value;
+      final isLoading = Get.find<AuthController>().isLoading;
 
       return ElevatedButton(
         onPressed: isLoading ? null : onPressed,

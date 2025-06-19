@@ -1,6 +1,6 @@
+import 'package:devshabitat/app/controllers/auth_controller.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import '../../controllers/enhanced_auth_controller.dart';
 import 'responsive_auth_wrapper.dart';
 
 class RegisterView extends StatelessWidget {
@@ -8,7 +8,7 @@ class RegisterView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final authController = Get.find<EnhancedAuthController>();
+    final authController = Get.find<AuthController>();
     return ResponsiveAuthWrapper(
       authController: authController,
       isLogin: false,
