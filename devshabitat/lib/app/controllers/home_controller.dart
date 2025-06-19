@@ -17,6 +17,7 @@ class HomeController extends GetxController {
   final RxBool hasError = false.obs;
   final RxString errorMessage = ''.obs;
   final RxList<FeedItem> items = <FeedItem>[].obs;
+  final Rx<FeedItem?> selectedFeedItem = Rx<FeedItem?>(null);
 
   HomeController({
     required FeedRepository feedRepository,
@@ -82,5 +83,29 @@ class HomeController extends GetxController {
   void onItemTap(FeedItem item) {
     // TODO: İtem detay sayfasına yönlendir
     Get.toNamed('/item-detail', arguments: item);
+  }
+
+  void onLike(FeedItem item) async {
+    try {
+      await _feedRepository.likeFeedItem(item.id);
+      final index = items.indexWhere((i) => i.id == item.id);
+      if (index != -1) {
+        items[index] = item.copyWith(
+          likesCount: item.likesCount + 1,
+          isLiked: true,
+        );
+      }
+    } catch (e) {
+      Get.snackbar('Hata', 'Beğeni işlemi başarısız oldu');
+    }
+  }
+
+  void onComment(FeedItem item) {
+    Get.toNamed('/comments', arguments: item);
+  }
+
+  void onShare(FeedItem item) {
+    // TODO: Paylaşım işlemini gerçekleştir
+    Get.snackbar('Bilgi', 'Paylaşım özelliği yakında eklenecek');
   }
 }

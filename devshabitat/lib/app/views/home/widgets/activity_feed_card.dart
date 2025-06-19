@@ -1,119 +1,147 @@
 import 'package:flutter/material.dart';
+import '../../../models/feed_item.dart';
+import '../../../services/asset_optimization_service.dart';
 import 'package:get/get.dart';
-import 'package:flutter_screenutil/flutter_screenutil.dart';
-import '../../../controllers/home_controller.dart';
+import 'package:timeago/timeago.dart' as timeago;
 
-class ActivityFeedCard extends GetView<HomeController> {
-  const ActivityFeedCard({Key? key}) : super(key: key);
+class ActivityFeedCard extends StatelessWidget {
+  final FeedItem feedItem;
+  final VoidCallback onLike;
+  final VoidCallback onComment;
+  final VoidCallback onShare;
+  final AssetOptimizationService _assetService = Get.find();
+
+  ActivityFeedCard({
+    super.key,
+    required this.feedItem,
+    required this.onLike,
+    required this.onComment,
+    required this.onShare,
+  });
 
   @override
   Widget build(BuildContext context) {
     return Card(
-      elevation: 2,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(16.r),
-      ),
-      child: Padding(
-        padding: EdgeInsets.all(16.w),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              'Aktivite Akışı',
-              style: TextStyle(
-                fontSize: 18.sp,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-            SizedBox(height: 16.h),
-            Obx(() {
-              if (controller.isLoading.value) {
-                return const Center(child: CircularProgressIndicator());
-              }
-
-              if (controller.activityFeed.isEmpty) {
-                return Center(
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Icon(
-                        Icons.notifications_none,
-                        size: 48.r,
-                        color: Colors.grey[400],
-                      ),
-                      SizedBox(height: 8.h),
-                      Text(
-                        'Henüz aktivite yok',
-                        style: TextStyle(
-                          fontSize: 16.sp,
-                          color: Colors.grey[600],
-                        ),
-                      ),
-                    ],
-                  ),
-                );
-              }
-
-              return ListView.separated(
-                shrinkWrap: true,
-                physics: const NeverScrollableScrollPhysics(),
-                itemCount: controller.activityFeed.length,
-                separatorBuilder: (context, index) => Divider(height: 16.h),
-                itemBuilder: (context, index) {
-                  final activity = controller.activityFeed[index];
-                  return _buildActivityItem(activity);
-                },
-              );
-            }),
-          ],
-        ),
+      margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          _buildHeader(context),
+          if (feedItem.imageUrl != null) _buildImage(),
+          _buildContent(context),
+          _buildActions(context),
+          _buildStats(context),
+        ],
       ),
     );
   }
 
-  Widget _buildActivityItem(Map<String, dynamic> activity) {
+  Widget _buildHeader(BuildContext context) {
+    return ListTile(
+      leading: CircleAvatar(
+        backgroundImage: NetworkImage(feedItem.imageUrl ?? ''),
+      ),
+      title: Text(
+        feedItem.userId,
+        style: Theme.of(context).textTheme.titleMedium,
+      ),
+      subtitle: Text(
+        timeago.format(feedItem.createdAt, locale: 'tr'),
+        style: Theme.of(context).textTheme.bodySmall,
+      ),
+      trailing: IconButton(
+        icon: const Icon(Icons.more_vert),
+        onPressed: () {
+          // Menü göster
+        },
+      ),
+    );
+  }
+
+  Widget _buildImage() {
+    return _assetService.getOptimizedNetworkImage(
+      imageUrl: feedItem.imageUrl!,
+      fit: BoxFit.cover,
+    );
+  }
+
+  Widget _buildContent(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.all(16),
+      child: Text(
+        feedItem.content,
+        style: Theme.of(context).textTheme.bodyMedium,
+      ),
+    );
+  }
+
+  Widget _buildActions(BuildContext context) {
     return Row(
-      crossAxisAlignment: CrossAxisAlignment.start,
+      mainAxisAlignment: MainAxisAlignment.spaceAround,
       children: [
-        CircleAvatar(
-          radius: 20.r,
-          backgroundImage: NetworkImage(activity['userAvatar'] ?? ''),
-          child: activity['userAvatar'] == null
-              ? Icon(Icons.person, size: 24.r)
-              : null,
+        _buildActionButton(
+          icon: feedItem.isLiked ? Icons.favorite : Icons.favorite_border,
+          label: 'Beğen',
+          onPressed: onLike,
+          color: feedItem.isLiked ? Colors.red : null,
         ),
-        SizedBox(width: 12.w),
-        Expanded(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              RichText(
-                text: TextSpan(
-                  style: TextStyle(
-                    fontSize: 14.sp,
-                    color: Colors.black,
-                  ),
-                  children: [
-                    TextSpan(
-                      text: activity['userName'] ?? 'Kullanıcı',
-                      style: const TextStyle(fontWeight: FontWeight.bold),
-                    ),
-                    TextSpan(text: ' ${activity['action'] ?? ''}'),
-                  ],
-                ),
-              ),
-              SizedBox(height: 4.h),
-              Text(
-                activity['time'] ?? '',
-                style: TextStyle(
-                  fontSize: 12.sp,
-                  color: Colors.grey[600],
-                ),
-              ),
-            ],
-          ),
+        _buildActionButton(
+          icon: Icons.comment_outlined,
+          label: 'Yorum Yap',
+          onPressed: onComment,
+        ),
+        _buildActionButton(
+          icon: Icons.share_outlined,
+          label: 'Paylaş',
+          onPressed: onShare,
         ),
       ],
+    );
+  }
+
+  Widget _buildActionButton({
+    required IconData icon,
+    required String label,
+    required VoidCallback onPressed,
+    Color? color,
+  }) {
+    return TextButton.icon(
+      onPressed: onPressed,
+      icon: Icon(icon, color: color),
+      label: Text(label),
+    );
+  }
+
+  Widget _buildStats(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.all(16),
+      child: Row(
+        children: [
+          _buildStatText(
+            '${feedItem.likesCount} beğeni',
+            context,
+          ),
+          const SizedBox(width: 16),
+          _buildStatText(
+            '${feedItem.commentsCount} yorum',
+            context,
+          ),
+          const SizedBox(width: 16),
+          _buildStatText(
+            '${feedItem.sharesCount} paylaşım',
+            context,
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildStatText(String text, BuildContext context) {
+    return Text(
+      text,
+      style: Theme.of(context).textTheme.bodySmall?.copyWith(
+            fontWeight: FontWeight.bold,
+          ),
     );
   }
 }

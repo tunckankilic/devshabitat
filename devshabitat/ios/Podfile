@@ -1,5 +1,5 @@
 # Uncomment this line to define a global platform for your project
-# platform :ios, '12.0'
+platform :ios, '14.0'
 
 # CocoaPods analytics sends network stats synchronously affecting flutter build latency.
 ENV['COCOAPODS_DISABLE_STATS'] = 'true'
@@ -29,8 +29,10 @@ flutter_ios_podfile_setup
 
 target 'Runner' do
   use_frameworks!
+  use_modular_headers!
 
   flutter_install_all_ios_pods File.dirname(File.realpath(__FILE__))
+  
   target 'RunnerTests' do
     inherit! :search_paths
   end
@@ -39,5 +41,43 @@ end
 post_install do |installer|
   installer.pods_project.targets.each do |target|
     flutter_additional_ios_build_settings(target)
+    
+    # iOS 14.0+ için minimum deployment target ayarları
+    target.build_configurations.each do |config|
+      config.build_settings['IPHONEOS_DEPLOYMENT_TARGET'] = '14.0'
+      
+      # XCode 15+ için gerekli ayarlar
+      config.build_settings['GCC_PREPROCESSOR_DEFINITIONS'] ||= [
+        '$(inherited)',
+        ## dart: PermissionGroup.camera
+        'PERMISSION_CAMERA=1',
+        ## dart: PermissionGroup.photos
+        'PERMISSION_PHOTOS=1',
+        ## dart: PermissionGroup.location
+        'PERMISSION_LOCATION=1',
+        ## dart: PermissionGroup.locationWhenInUse
+        'PERMISSION_LOCATION_WHEN_IN_USE=1',
+        ## dart: PermissionGroup.notification
+        'PERMISSION_NOTIFICATIONS=1',
+      ]
+      
+      # Bitcode desteğini kapat (iOS 14+ için önerilir)
+      config.build_settings['ENABLE_BITCODE'] = 'NO'
+      
+      # Swift version ayarları
+      if config.build_settings['SWIFT_VERSION'].nil?
+        config.build_settings['SWIFT_VERSION'] = '5.0'
+      end
+      
+      # Privacy manifest ayarları (iOS 17+)
+      config.build_settings['GENERATE_INFOPLIST_FILE'] = 'YES'
+      
+      # Metal performans optimizasyonları
+      config.build_settings['MTL_ENABLE_DEBUG_INFO'] = 'NO'
+      
+      # XCode 15 uyumluluk ayarları
+      config.build_settings['DEAD_CODE_STRIPPING'] = 'YES'
+      config.build_settings['EXCLUDED_ARCHS[sdk=iphonesimulator*]'] = 'arm64' if config.name == 'Debug'
+    end
   end
 end

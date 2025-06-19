@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'dart:io' show Platform;
 import '../../../controllers/auth_controller.dart';
 
 class SocialLoginButton extends StatelessWidget {
@@ -21,6 +22,12 @@ class SocialLoginButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // Platform kontrolü yaparak sadece ilgili platformun butonunu göster
+    if ((Platform.isIOS && text.contains('Google')) ||
+        (Platform.isAndroid && text.contains('Apple'))) {
+      return const SizedBox.shrink();
+    }
+
     return Obx(() {
       final isLoading = Get.find<AuthController>().isLoading;
 

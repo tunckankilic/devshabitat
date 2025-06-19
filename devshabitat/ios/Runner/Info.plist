@@ -45,8 +45,11 @@
 	<true/>
 	<key>UIApplicationSupportsIndirectInputEvents</key>
 	<true/>
+	
+	<!-- URL Schemes -->
 	<key>CFBundleURLTypes</key>
 	<array>
+		<!-- Custom URL Scheme -->
 		<dict>
 			<key>CFBundleURLSchemes</key>
 			<array>
@@ -55,6 +58,75 @@
 			<key>CFBundleURLName</key>
 			<string>com.example.devshabitat</string>
 		</dict>
+		<!-- Facebook Login - APP_ID değerini Facebook Developer Console'dan alın -->
+		<dict>
+			<key>CFBundleURLSchemes</key>
+			<array>
+				<string>fbAPP_ID</string>
+			</array>
+		</dict>
 	</array>
+	
+	<!-- Camera & Photo Library Permissions -->
+	<key>NSCameraUsageDescription</key>
+	<string>Bu uygulama fotoğraf çekmek için kamera erişimi gerektirir</string>
+	<key>NSPhotoLibraryUsageDescription</key>
+	<string>Bu uygulama fotoğraf seçmek için galeri erişimi gerektirir</string>
+	<key>NSPhotoLibraryAddUsageDescription</key>
+	<string>Bu uygulama fotoğrafları kaydetmek için galeri erişimi gerektirir</string>
+	
+	<!-- Location Permissions -->
+	<key>NSLocationWhenInUseUsageDescription</key>
+	<string>Bu uygulama konum tabanlı özellikler için konum erişimi gerektirir</string>
+	<key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
+	<string>Bu uygulama konum tabanlı özellikler için sürekli konum erişimi gerektirir</string>
+	
+	<!-- File Access -->
+	<key>LSSupportsOpeningDocumentsInPlace</key>
+	<true/>
+	<key>UIFileSharingEnabled</key>
+	<true/>
+	
+	<!-- Background Modes for Push Notifications -->
+	<key>UIBackgroundModes</key>
+	<array>
+		<string>remote-notification</string>
+		<string>background-fetch</string>
+	</array>
+	
+	<!-- Network Security -->
+	<key>NSAppTransportSecurity</key>
+	<dict>
+		<key>NSAllowsArbitraryLoads</key>
+		<true/>
+		<key>NSAllowsLocalNetworking</key>
+		<true/>
+	</dict>
+	
+	<!-- Facebook Configuration - APP_ID değerini değiştirin -->
+	<key>FacebookAppID</key>
+	<string>APP_ID</string>
+	<key>FacebookDisplayName</key>
+	<string>Devshabitat</string>
+	
+	<!-- Query Schemes for Social Media -->
+	<key>LSApplicationQueriesSchemes</key>
+	<array>
+		<string>fbapi</string>
+		<string>fb-messenger-share-api</string>
+		<string>fbauth2</string>
+		<string>fbshareextension</string>
+		<string>googlegmail</string>
+		<string>googlemail</string>
+	</array>
+	
+	<!-- Encryption Declaration -->
+	<key>ITSAppUsesNonExemptEncryption</key>
+	<false/>
+	
+	<!-- Prevent Screenshots in App Switcher (Optional Security) -->
+	<key>UIApplicationSupportsMultipleScenes</key>
+	<false/>
+	
 </dict>
 </plist>

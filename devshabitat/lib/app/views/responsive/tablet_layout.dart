@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import '../../utils/responsive_helper.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 class TabletLayout extends StatelessWidget {
   final Widget child;
@@ -56,7 +56,7 @@ class TabletLayout extends StatelessWidget {
             ),
             Expanded(
               child: Padding(
-                padding: ResponsiveHelper.getAdaptivePadding(context),
+                padding: EdgeInsets.all(16.w),
                 child: child,
               ),
             ),
