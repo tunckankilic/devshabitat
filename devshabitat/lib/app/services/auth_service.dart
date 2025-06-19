@@ -2,7 +2,6 @@ import 'package:get/get.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:logger/logger.dart';
-import '../models/user_profile.dart';
 
 class AuthService extends GetxService {
   final FirebaseAuth _auth = FirebaseAuth.instance;
@@ -126,6 +125,30 @@ class AuthService extends GetxService {
       await _auth.currentUser?.reauthenticateWithCredential(credential);
     } catch (e) {
       print('Yeniden kimlik doğrulama yapılırken hata: $e');
+      rethrow;
+    }
+  }
+
+  Future<void> updateUserProfile({
+    required String name,
+    required String bio,
+    required String location,
+    required String githubUsername,
+  }) async {
+    try {
+      final user = currentUser.value;
+      if (user != null) {
+        await _auth.currentUser?.updateDisplayName(name);
+        await _firestore.collection('users').doc(user.uid).update({
+          'displayName': name,
+          'bio': bio,
+          'location': location,
+          'githubUsername': githubUsername,
+          'updatedAt': DateTime.now(),
+        });
+        await _auth.currentUser?.reload();
+      }
+    } catch (e) {
       rethrow;
     }
   }

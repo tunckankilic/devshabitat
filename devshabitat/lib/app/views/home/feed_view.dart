@@ -2,14 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../../controllers/feed_controller.dart';
 import '../../models/feed_item.dart';
-import '../../services/lazy_loading_service.dart';
 import '../../utils/performance_optimizer.dart';
 import '../../widgets/paginated_list_view.dart';
 import 'widgets/activity_feed_card.dart';
 
 class FeedView extends StatelessWidget with PerformanceOptimizer {
   final FeedController controller = Get.find<FeedController>();
-  final LazyLoadingService _lazyLoadingService = Get.find<LazyLoadingService>();
 
   FeedView({super.key});
 

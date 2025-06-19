@@ -4,9 +4,9 @@ class GithubRepoCard extends StatelessWidget {
   final Map<String, dynamic> repo;
 
   const GithubRepoCard({
-    Key? key,
+    super.key,
     required this.repo,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {

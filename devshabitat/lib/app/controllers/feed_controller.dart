@@ -2,10 +2,14 @@ import 'package:devshabitat/app/core/services/error_handler_service.dart';
 import 'package:get/get.dart';
 import '../models/feed_item.dart';
 import '../services/feed_repository.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 
 class FeedController extends GetxController {
   final FeedRepository _repository;
   final ErrorHandlerService _errorHandler;
+  final _firestore = FirebaseFirestore.instance;
+  final _auth = FirebaseAuth.instance;
 
   FeedController({
     required FeedRepository repository,
@@ -21,6 +25,8 @@ class FeedController extends GetxController {
   List<FeedItem> get feedItems => _feedItems;
   bool get isLoading => _isLoading.value;
   bool get hasError => _hasError.value;
+
+  String get currentUserId => _auth.currentUser?.uid ?? '';
 
   @override
   void onInit() {
@@ -91,6 +97,49 @@ class FeedController extends GetxController {
       }
     } catch (e) {
       _errorHandler.handleError(e);
+    }
+  }
+
+  Future<void> toggleLike(String postId) async {
+    try {
+      final postRef = _firestore.collection('posts').doc(postId);
+      final post = await postRef.get();
+      final likes = List<String>.from(post.data()?['likes'] ?? []);
+
+      if (likes.contains(currentUserId)) {
+        likes.remove(currentUserId);
+      } else {
+        likes.add(currentUserId);
+      }
+
+      await postRef.update({'likes': likes});
+    } catch (e) {
+      print('Beğeni işlemi başarısız: $e');
+    }
+  }
+
+  Future<void> deletePost(String postId) async {
+    try {
+      await _firestore.collection('posts').doc(postId).delete();
+      Get.snackbar('Başarılı', 'Gönderi silindi');
+    } catch (e) {
+      print('Gönderi silme başarısız: $e');
+      Get.snackbar('Hata', 'Gönderi silinemedi');
+    }
+  }
+
+  Future<void> reportPost(String postId) async {
+    try {
+      await _firestore.collection('reports').add({
+        'postId': postId,
+        'reportedBy': currentUserId,
+        'createdAt': FieldValue.serverTimestamp(),
+        'status': 'pending'
+      });
+      Get.snackbar('Başarılı', 'Gönderi şikayet edildi');
+    } catch (e) {
+      print('Şikayet işlemi başarısız: $e');
+      Get.snackbar('Hata', 'Şikayet gönderilemedi');
     }
   }
 }

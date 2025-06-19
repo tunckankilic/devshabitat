@@ -7,11 +7,11 @@ class UserCard extends StatelessWidget {
   final double? matchPercentage;
 
   const UserCard({
-    Key? key,
+    super.key,
     required this.user,
     required this.onTap,
     this.matchPercentage,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {

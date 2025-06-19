@@ -19,7 +19,7 @@ class ResponsiveFormField extends StatelessWidget {
   final void Function(String)? onFieldSubmitted;
 
   const ResponsiveFormField({
-    Key? key,
+    super.key,
     required this.label,
     this.hint,
     this.isPassword = false,
@@ -34,7 +34,7 @@ class ResponsiveFormField extends StatelessWidget {
     this.focusNode,
     this.textInputAction,
     this.onFieldSubmitted,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {

@@ -7,11 +7,11 @@ class UserAvatarWidget extends StatelessWidget {
   final String? imageUrl;
 
   const UserAvatarWidget({
-    Key? key,
+    super.key,
     required this.userId,
     this.size = 40,
     this.imageUrl,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {

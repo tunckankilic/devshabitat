@@ -6,10 +6,10 @@ class AuthForm extends StatefulWidget {
   final Function(String email, String password) onSubmit;
 
   const AuthForm({
-    Key? key,
+    super.key,
     required this.isLogin,
     required this.onSubmit,
-  }) : super(key: key);
+  });
 
   @override
   State<AuthForm> createState() => _AuthFormState();

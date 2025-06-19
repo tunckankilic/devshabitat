@@ -11,6 +11,8 @@ class SmallPhoneRegister extends StatelessWidget {
   final formController = Get.find<FormValidationController>();
   final githubController = Get.find<GitHubValidationController>();
 
+  SmallPhoneRegister({super.key});
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(

@@ -14,9 +14,9 @@ class SmallPhoneProfile extends StatelessWidget {
   final _githubController = Get.put(GithubIntegrationController());
 
   SmallPhoneProfile({
-    Key? key,
+    super.key,
     required this.profileController,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -138,7 +138,7 @@ class SmallPhoneProfile extends StatelessWidget {
                           const Text('Popüler Repolar:'),
                           ..._githubController.githubStats!.recentRepositories
                               .map((repo) => GithubRepoCard(repo: repo))
-                              .toList(),
+                              ,
                         ],
                       ],
                     ),

@@ -6,10 +6,10 @@ class SkillChipGrid extends StatelessWidget {
   final bool isVertical;
 
   const SkillChipGrid({
-    Key? key,
+    super.key,
     required this.skills,
     this.isVertical = false,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {

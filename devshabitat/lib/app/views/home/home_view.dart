@@ -11,7 +11,7 @@ import '../../widgets/loading_widget.dart';
 import '../base/refreshable_view.dart';
 
 class HomeView extends RefreshableView<HomeController> {
-  const HomeView({Key? key}) : super(key: key);
+  const HomeView({super.key});
 
   @override
   Future<void> onRefresh() async {

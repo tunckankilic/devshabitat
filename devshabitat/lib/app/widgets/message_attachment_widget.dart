@@ -9,17 +9,17 @@ class MessageAttachmentWidget extends StatelessWidget {
   final VoidCallback? onTap;
 
   const MessageAttachmentWidget({
-    Key? key,
+    super.key,
     required this.attachment,
     this.onDownload,
     this.onTap,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
     return Card(
       elevation: 0,
-      color: Theme.of(context).colorScheme.surfaceVariant.withOpacity(0.5),
+      color: Theme.of(context).colorScheme.surfaceContainerHighest.withOpacity(0.5),
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(12),
       ),

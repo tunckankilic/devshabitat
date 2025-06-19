@@ -3,7 +3,7 @@ import 'package:get/get.dart';
 import '../../controllers/home_controller.dart';
 
 class NotificationsView extends GetView<HomeController> {
-  const NotificationsView({Key? key}) : super(key: key);
+  const NotificationsView({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -14,24 +14,26 @@ class NotificationsView extends GetView<HomeController> {
           IconButton(
             icon: const Icon(Icons.check_circle_outline),
             onPressed: () {
-              // TODO: Tüm bildirimleri okundu olarak işaretle
+              controller.markAllNotificationsAsRead();
             },
           ),
         ],
       ),
-      body: ListView.builder(
-        itemCount: 0, // TODO: Bildirim listesi eklenecek
-        itemBuilder: (context, index) {
-          return const ListTile(
-            leading: CircleAvatar(
-              child: Icon(Icons.notifications),
-            ),
-            title: Text('Bildirim Başlığı'),
-            subtitle: Text('Bildirim Açıklaması'),
-            trailing: Text('2 saat önce'),
-          );
-        },
-      ),
+      body: Obx(() => ListView.builder(
+            itemCount: controller.notifications.length,
+            itemBuilder: (context, index) {
+              final notification = controller.notifications[index];
+              return ListTile(
+                leading: const CircleAvatar(
+                  child: Icon(Icons.notifications),
+                ),
+                title: Text(notification.title),
+                subtitle: Text(notification.body),
+                trailing: Text(
+                    '${notification.createdAt.difference(DateTime.now()).inHours.abs()} saat önce'),
+              );
+            },
+          )),
     );
   }
 }

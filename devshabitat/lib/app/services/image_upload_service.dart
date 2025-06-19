@@ -1,10 +1,7 @@
 import 'dart:io';
 import 'dart:typed_data';
 import 'package:get/get.dart';
-import 'package:http/http.dart' as http;
-import 'package:http_parser/http_parser.dart';
 import 'package:path/path.dart' as path;
-import 'dart:convert';
 import 'package:image/image.dart' as img;
 import 'package:path_provider/path_provider.dart';
 import 'package:firebase_storage/firebase_storage.dart';
@@ -26,9 +23,6 @@ class ImageUploadService extends GetxService {
     ErrorHandlerService? errorHandler,
   })  : _storage = storage ?? FirebaseStorage.instance,
         _errorHandler = errorHandler ?? Get.find();
-
-  static const String _baseUrl = 'https://api.devs-habitat.com/v1';
-  static const String _uploadEndpoint = '/upload';
 
   // Resmi sunucuya yükle
   Future<String?> uploadImage(String imagePath,

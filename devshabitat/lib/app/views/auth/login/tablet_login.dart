@@ -6,7 +6,7 @@ import '../widgets/social_login_button.dart';
 import '../widgets/adaptive_loading_indicator.dart';
 
 class TabletLogin extends StatelessWidget {
-  const TabletLogin({Key? key}) : super(key: key);
+  const TabletLogin({super.key});
 
   @override
   Widget build(BuildContext context) {

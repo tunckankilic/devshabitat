@@ -5,7 +5,7 @@ import 'advanced_filters_screen.dart';
 import '../../controllers/discovery_controller.dart';
 
 class DiscoveryScreen extends GetView<DiscoveryController> {
-  const DiscoveryScreen({Key? key}) : super(key: key);
+  const DiscoveryScreen({super.key});
 
   @override
   Widget build(BuildContext context) {

@@ -2,7 +2,6 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:logger/logger.dart';
 import 'package:get/get.dart';
 import '../models/connection_model.dart';
-import '../models/user_profile_model.dart';
 import '../models/skill_model.dart';
 
 class NetworkStats {

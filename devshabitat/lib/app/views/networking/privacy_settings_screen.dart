@@ -3,7 +3,7 @@ import 'package:get/get.dart';
 import '../../controllers/privacy_controller.dart';
 
 class PrivacySettingsScreen extends GetView<PrivacyController> {
-  const PrivacySettingsScreen({Key? key}) : super(key: key);
+  const PrivacySettingsScreen({super.key});
 
   @override
   Widget build(BuildContext context) {

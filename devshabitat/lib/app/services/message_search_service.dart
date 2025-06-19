@@ -39,7 +39,7 @@ class MessageSearchService extends GetxService {
       Query query = _firestore
           .collection('messages')
           .where('content', isGreaterThanOrEqualTo: searchTerm)
-          .where('content', isLessThan: searchTerm + 'z')
+          .where('content', isLessThan: '${searchTerm}z')
           .limit(pageSize);
 
       // Filtreleri uygula

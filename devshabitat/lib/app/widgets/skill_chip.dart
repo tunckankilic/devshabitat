@@ -6,11 +6,11 @@ class SkillChip extends StatelessWidget {
   final VoidCallback? onDeleted;
 
   const SkillChip({
-    Key? key,
+    super.key,
     required this.label,
     this.isMatching = false,
     this.onDeleted,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -25,7 +25,7 @@ class SkillChip extends StatelessWidget {
         ),
       ),
       backgroundColor:
-          isMatching ? colorScheme.primary : colorScheme.surfaceVariant,
+          isMatching ? colorScheme.primary : colorScheme.surfaceContainerHighest,
       deleteIcon: onDeleted != null
           ? Icon(
               Icons.close,

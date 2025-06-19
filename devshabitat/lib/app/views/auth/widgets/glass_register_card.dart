@@ -10,10 +10,10 @@ class GlassRegisterCard extends StatelessWidget {
   final Function(String) onGitHubValidation;
 
   const GlassRegisterCard({
-    Key? key,
+    super.key,
     required this.onRegister,
     required this.onGitHubValidation,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {

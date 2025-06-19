@@ -4,9 +4,9 @@ class AuthHeader extends StatelessWidget {
   final bool isLogin;
 
   const AuthHeader({
-    Key? key,
+    super.key,
     required this.isLogin,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {

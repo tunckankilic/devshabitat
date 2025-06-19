@@ -12,9 +12,9 @@ class MessageThreadWidget extends StatelessWidget {
   final TextEditingController _replyController = TextEditingController();
 
   MessageThreadWidget({
-    Key? key,
+    super.key,
     required this.threadId,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {

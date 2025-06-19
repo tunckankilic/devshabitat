@@ -7,11 +7,11 @@ class LoadingListItem extends StatelessWidget {
   final double borderRadius;
 
   const LoadingListItem({
-    Key? key,
+    super.key,
     this.height = 100,
     this.width = double.infinity,
     this.borderRadius = 8,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -36,11 +36,11 @@ class LoadingList extends StatelessWidget {
   final double spacing;
 
   const LoadingList({
-    Key? key,
+    super.key,
     this.itemCount = 5,
     this.itemHeight = 100,
     this.spacing = 16,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -58,9 +58,9 @@ class LoadingAvatar extends StatelessWidget {
   final double size;
 
   const LoadingAvatar({
-    Key? key,
+    super.key,
     this.size = 48,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {

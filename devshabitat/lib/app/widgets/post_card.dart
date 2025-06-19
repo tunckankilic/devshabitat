@@ -1,17 +1,52 @@
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:share_plus/share_plus.dart';
+import 'package:timeago/timeago.dart' as timeago;
 import '../models/post.dart';
+import '../controllers/feed_controller.dart';
 import 'github_code_viewer.dart';
+import 'comment_modal.dart';
 
 class PostCard extends StatelessWidget {
   final Post post;
   final VoidCallback? onTap;
+  final feedController = Get.find<FeedController>();
 
-  const PostCard({
-    Key? key,
+  PostCard({
+    super.key,
     required this.post,
     this.onTap,
-  }) : super(key: key);
+  });
+
+  void _showPostMenu(BuildContext context) {
+    showModalBottomSheet(
+      context: context,
+      builder: (context) => Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          ListTile(
+            leading: const Icon(Icons.report),
+            title: const Text('Gönderiyi Şikayet Et'),
+            onTap: () {
+              Get.back();
+              feedController.reportPost(post.id);
+            },
+          ),
+          if (post.userId == feedController.currentUserId)
+            ListTile(
+              leading: const Icon(Icons.delete),
+              title: const Text('Gönderiyi Sil'),
+              onTap: () {
+                Get.back();
+                feedController.deletePost(post.id);
+              },
+            ),
+        ],
+      ),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -23,21 +58,31 @@ class PostCard extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             // Kullanıcı bilgileri
-            ListTile(
-              leading: CircleAvatar(
-                backgroundImage: CachedNetworkImageProvider(post.userId),
-              ),
-              title: Text(post.userId), // TODO: Kullanıcı adını göster
-              subtitle: Text(
-                post.createdAt.toString(), // TODO: Zaman formatını düzenle
-                style: TextStyle(color: Colors.grey[600]),
-              ),
-              trailing: IconButton(
-                icon: const Icon(Icons.more_vert),
-                onPressed: () {
-                  // TODO: Post menüsünü göster
-                },
-              ),
+            FutureBuilder<DocumentSnapshot>(
+              future: FirebaseFirestore.instance
+                  .collection('users')
+                  .doc(post.userId)
+                  .get(),
+              builder: (context, snapshot) {
+                final userData = snapshot.data?.data() as Map<String, dynamic>?;
+                return ListTile(
+                  leading: CircleAvatar(
+                    backgroundImage: CachedNetworkImageProvider(
+                      userData?['photoURL'] ??
+                          'https://via.placeholder.com/150',
+                    ),
+                  ),
+                  title: Text(userData?['displayName'] ?? 'Kullanıcı'),
+                  subtitle: Text(
+                    timeago.format(post.createdAt, locale: 'tr'),
+                    style: TextStyle(color: Colors.grey[600]),
+                  ),
+                  trailing: IconButton(
+                    icon: const Icon(Icons.more_vert),
+                    onPressed: () => _showPostMenu(context),
+                  ),
+                );
+              },
             ),
 
             // İçerik
@@ -139,18 +184,18 @@ class PostCard extends StatelessWidget {
               child: Row(
                 children: [
                   // Beğeni butonu
-                  IconButton(
-                    icon: Icon(
-                      post.likes.contains(post.userId)
-                          ? Icons.favorite
-                          : Icons.favorite_border,
-                      color:
-                          post.likes.contains(post.userId) ? Colors.red : null,
-                    ),
-                    onPressed: () {
-                      // TODO: Beğeni işlemini yap
-                    },
-                  ),
+                  Obx(() => IconButton(
+                        icon: Icon(
+                          post.likes.contains(feedController.currentUserId)
+                              ? Icons.favorite
+                              : Icons.favorite_border,
+                          color:
+                              post.likes.contains(feedController.currentUserId)
+                                  ? Colors.red
+                                  : null,
+                        ),
+                        onPressed: () => feedController.toggleLike(post.id),
+                      )),
                   Text(
                     post.likes.length.toString(),
                     style: TextStyle(color: Colors.grey[600]),
@@ -161,7 +206,11 @@ class PostCard extends StatelessWidget {
                   IconButton(
                     icon: const Icon(Icons.comment_outlined),
                     onPressed: () {
-                      // TODO: Yorum modalını göster
+                      showModalBottomSheet(
+                        context: context,
+                        isScrollControlled: true,
+                        builder: (context) => CommentModal(postId: post.id),
+                      );
                     },
                   ),
                   Text(
@@ -174,7 +223,10 @@ class PostCard extends StatelessWidget {
                   IconButton(
                     icon: const Icon(Icons.share_outlined),
                     onPressed: () {
-                      // TODO: Paylaşım menüsünü göster
+                      Share.share(
+                        'DevShabitat\'ta bir gönderi: ${post.content}\n\nGönderiyi görüntüle: https://devshabitat.com/posts/${post.id}',
+                        subject: 'DevShabitat Gönderi Paylaşımı',
+                      );
                     },
                   ),
                 ],

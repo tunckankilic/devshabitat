@@ -4,7 +4,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import '../../../controllers/home_controller.dart';
 
 class ConnectionsOverviewCard extends GetView<HomeController> {
-  const ConnectionsOverviewCard({Key? key}) : super(key: key);
+  const ConnectionsOverviewCard({super.key});
 
   @override
   Widget build(BuildContext context) {

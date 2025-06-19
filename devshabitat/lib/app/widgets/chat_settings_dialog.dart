@@ -16,7 +16,7 @@ class ChatSettingsDialog extends StatelessWidget {
   final VoidCallback? onReport;
 
   const ChatSettingsDialog({
-    Key? key,
+    super.key,
     required this.conversationId,
     required this.conversationTitle,
     required this.messages,
@@ -26,7 +26,7 @@ class ChatSettingsDialog extends StatelessWidget {
     this.onArchiveToggle,
     this.onBlock,
     this.onReport,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {

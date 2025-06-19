@@ -1,8 +1,10 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import '../models/feed_item.dart';
+import '../services/auth_service.dart';
 
 class FeedRepository {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
+  final AuthService _authService = AuthService();
 
   Future<List<FeedItem>> getFeedItems({int page = 1, int pageSize = 10}) async {
     try {
@@ -51,6 +53,19 @@ class FeedRepository {
       });
     } catch (e) {
       throw Exception('Beğeni kaldırma işlemi başarısız oldu: $e');
+    }
+  }
+
+  Future<void> shareFeedItem(String itemId) async {
+    try {
+      final docRef = _firestore.collection('feed').doc(itemId);
+      await docRef.update({
+        'sharesCount': FieldValue.increment(1),
+        'sharedBy':
+            FieldValue.arrayUnion([_authService.currentUser.value?.uid]),
+      });
+    } catch (e) {
+      throw Exception('Paylaşım işlemi başarısız oldu: $e');
     }
   }
 }

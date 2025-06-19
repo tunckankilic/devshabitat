@@ -9,9 +9,9 @@ class GitHubCodeViewer extends StatefulWidget {
   final String githubUrl;
 
   const GitHubCodeViewer({
-    Key? key,
+    super.key,
     required this.githubUrl,
-  }) : super(key: key);
+  });
 
   @override
   State<GitHubCodeViewer> createState() => _GitHubCodeViewerState();
@@ -279,7 +279,14 @@ class _GitHubCodeViewerState extends State<GitHubCodeViewer> {
                           ),
                         ),
                   onTap: () {
-                    // TODO: Dizin veya dosya içeriğini göster
+                    final newPath = _repoInfo!['path']!.isEmpty
+                        ? item['name']
+                        : '${_repoInfo!['path']}/${item['name']}';
+
+                    final newUrl =
+                        'https://github.com/${_repoInfo!['owner']}/${_repoInfo!['repo']}/blob/${_repoInfo!['branch']}/$newPath';
+
+                    Get.to(() => GitHubCodeViewer(githubUrl: newUrl));
                   },
                 );
               },

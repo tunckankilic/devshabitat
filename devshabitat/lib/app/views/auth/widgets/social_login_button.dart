@@ -12,13 +12,13 @@ class SocialLoginButton extends StatelessWidget {
   final Color textColor;
 
   const SocialLoginButton({
-    Key? key,
+    super.key,
     required this.text,
     required this.iconPath,
     required this.onPressed,
     required this.backgroundColor,
     required this.textColor,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {

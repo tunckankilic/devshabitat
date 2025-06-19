@@ -3,7 +3,7 @@ import 'package:get/get.dart';
 import '../../../controllers/home_controller.dart';
 
 class CommentsView extends GetView<HomeController> {
-  const CommentsView({Key? key}) : super(key: key);
+  const CommentsView({super.key});
 
   @override
   Widget build(BuildContext context) {

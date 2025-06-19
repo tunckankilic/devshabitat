@@ -10,6 +10,7 @@ class FeedItem {
   final int sharesCount;
   final DateTime createdAt;
   final bool isLiked;
+  final bool isShared;
 
   FeedItem({
     required this.id,
@@ -21,6 +22,7 @@ class FeedItem {
     required this.sharesCount,
     required this.createdAt,
     required this.isLiked,
+    required this.isShared,
   });
 
   factory FeedItem.fromFirestore(DocumentSnapshot doc) {
@@ -35,6 +37,7 @@ class FeedItem {
       sharesCount: data['sharesCount'] as int,
       createdAt: (data['createdAt'] as Timestamp).toDate(),
       isLiked: data['isLiked'] as bool? ?? false,
+      isShared: data['isShared'] as bool? ?? false,
     );
   }
 
@@ -48,6 +51,7 @@ class FeedItem {
       'sharesCount': sharesCount,
       'createdAt': Timestamp.fromDate(createdAt),
       'isLiked': isLiked,
+      'isShared': isShared,
     };
   }
 
@@ -61,6 +65,7 @@ class FeedItem {
     int? sharesCount,
     DateTime? createdAt,
     bool? isLiked,
+    bool? isShared,
   }) {
     return FeedItem(
       id: id ?? this.id,
@@ -72,6 +77,7 @@ class FeedItem {
       sharesCount: sharesCount ?? this.sharesCount,
       createdAt: createdAt ?? this.createdAt,
       isLiked: isLiked ?? this.isLiked,
+      isShared: isShared ?? this.isShared,
     );
   }
 }

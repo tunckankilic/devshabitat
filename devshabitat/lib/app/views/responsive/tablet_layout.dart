@@ -12,7 +12,7 @@ class TabletLayout extends StatelessWidget {
   final Function(int) onDestinationSelected;
 
   const TabletLayout({
-    Key? key,
+    super.key,
     required this.child,
     this.appBar,
     this.navigationRail,
@@ -21,7 +21,7 @@ class TabletLayout extends StatelessWidget {
     required this.destinations,
     required this.selectedIndex,
     required this.onDestinationSelected,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {

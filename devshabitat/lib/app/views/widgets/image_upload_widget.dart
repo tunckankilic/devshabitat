@@ -5,6 +5,8 @@ import '../../controllers/image_upload_controller.dart';
 class ImageUploadWidget extends StatelessWidget {
   final controller = Get.find<ImageUploadController>();
 
+  ImageUploadWidget({super.key});
+
   @override
   Widget build(BuildContext context) {
     return Obx(() {

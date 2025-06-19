@@ -7,10 +7,10 @@ class ConversationTile extends StatelessWidget {
   final VoidCallback onTap;
 
   const ConversationTile({
-    Key? key,
+    super.key,
     required this.conversation,
     required this.onTap,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -36,7 +36,7 @@ class ConversationTile extends StatelessWidget {
             child: Text(
               conversation.participantName,
               style: theme.textTheme.titleMedium?.copyWith(
-                fontWeight: conversation.unreadCount! > 0
+                fontWeight: conversation.unreadCount > 0
                     ? FontWeight.bold
                     : FontWeight.normal,
               ),
@@ -65,7 +65,7 @@ class ConversationTile extends StatelessWidget {
               overflow: TextOverflow.ellipsis,
             ),
           ),
-          if (conversation.unreadCount! > 0)
+          if (conversation.unreadCount > 0)
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
               decoration: BoxDecoration(

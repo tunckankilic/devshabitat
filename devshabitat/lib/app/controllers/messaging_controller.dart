@@ -1,5 +1,4 @@
 import 'dart:async';
-import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../models/conversation_model.dart';
 import '../models/message_model.dart';
@@ -167,7 +166,8 @@ class MessagingController extends GetxController {
 
   void _updateUnreadCount() {
     unreadCount.value = conversations.fold(0, (sum, conversation) {
-      return sum + (conversation.unreadCount ?? 0);
+      return sum +
+          (conversation.unreadCount > 0 ? conversation.unreadCount : 0);
     });
   }
 

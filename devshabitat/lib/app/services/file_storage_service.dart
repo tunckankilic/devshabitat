@@ -4,7 +4,6 @@ import 'package:firebase_storage/firebase_storage.dart';
 import 'package:get/get.dart';
 import 'package:image/image.dart' as img;
 import 'package:path_provider/path_provider.dart';
-import 'package:path/path.dart' as path;
 
 class FileStorageService extends GetxService {
   final FirebaseStorage _storage = FirebaseStorage.instance;
@@ -24,6 +23,10 @@ class FileStorageService extends GetxService {
     required String conversationId,
     required String messageId,
   }) async {
+    if (!_validateFileSize(file)) {
+      throw Exception('Dosya boyutu 10MB\'dan büyük olamaz');
+    }
+
     final fileName = file.path.split('/').last;
     final ref = _storage.ref().child('messages/$userId/$messageId/$fileName');
     return ref.putFile(file);
@@ -36,11 +39,12 @@ class FileStorageService extends GetxService {
     required String messageId,
     required File imageFile,
   }) async {
+    final compressedImage = await _compressImage(imageFile);
     return await uploadFile(
       userId: userId,
       conversationId: conversationId,
       messageId: messageId,
-      file: imageFile,
+      file: compressedImage,
     );
   }
 

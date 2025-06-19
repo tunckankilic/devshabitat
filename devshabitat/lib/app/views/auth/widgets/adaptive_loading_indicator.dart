@@ -6,11 +6,11 @@ class AdaptiveLoadingIndicator extends StatelessWidget {
   final double strokeWidth;
 
   const AdaptiveLoadingIndicator({
-    Key? key,
+    super.key,
     this.color,
     this.size = 24.0,
     this.strokeWidth = 2.0,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -36,12 +36,12 @@ class AdaptiveLoadingOverlay extends StatelessWidget {
   final String? message;
 
   const AdaptiveLoadingOverlay({
-    Key? key,
+    super.key,
     required this.child,
     required this.isLoading,
     this.color,
     this.message,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {

@@ -7,11 +7,11 @@ class ConnectionButton extends StatelessWidget {
   final VoidCallback onMessage;
 
   const ConnectionButton({
-    Key? key,
+    super.key,
     required this.status,
     required this.onConnect,
     required this.onMessage,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -28,7 +28,7 @@ class ConnectionButton extends StatelessWidget {
           onPressed: null,
           icon: const Icon(Icons.hourglass_empty),
           label: const Text('İstek Gönderildi'),
-          backgroundColor: Theme.of(context).colorScheme.surfaceVariant,
+          backgroundColor: Theme.of(context).colorScheme.surfaceContainerHighest,
           foregroundColor: Theme.of(context).colorScheme.onSurfaceVariant,
         );
 

@@ -8,10 +8,10 @@ class ResponsiveImagePicker extends StatelessWidget {
   final double size;
 
   const ResponsiveImagePicker({
-    Key? key,
+    super.key,
     required this.imageUploadController,
     this.size = 150,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {

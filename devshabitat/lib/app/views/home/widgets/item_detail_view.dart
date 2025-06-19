@@ -4,7 +4,7 @@ import '../../../controllers/home_controller.dart';
 import '../../../models/feed_item.dart';
 
 class ItemDetailView extends GetView<HomeController> {
-  const ItemDetailView({Key? key}) : super(key: key);
+  const ItemDetailView({super.key});
 
   @override
   Widget build(BuildContext context) {

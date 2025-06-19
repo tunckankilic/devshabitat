@@ -9,13 +9,13 @@ class SmallPhoneLayout extends StatelessWidget {
   final Color? backgroundColor;
 
   const SmallPhoneLayout({
-    Key? key,
+    super.key,
     required this.child,
     this.appBar,
     this.bottomNavigationBar,
     this.floatingActionButton,
     this.backgroundColor,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {

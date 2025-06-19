@@ -3,7 +3,7 @@ import 'package:get/get.dart';
 import '../../controllers/profile_controller.dart';
 
 class EditProfileView extends GetView<ProfileController> {
-  const EditProfileView({Key? key}) : super(key: key);
+  const EditProfileView({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -12,8 +12,8 @@ class EditProfileView extends GetView<ProfileController> {
         title: const Text('Profili Düzenle'),
         actions: [
           TextButton(
-            onPressed: () {
-              // TODO: Profil güncelleme işlemi
+            onPressed: () async {
+              await controller.updateProfile();
               Get.back();
             },
             child: const Text('Kaydet'),
@@ -30,6 +30,7 @@ class EditProfileView extends GetView<ProfileController> {
             ),
             const SizedBox(height: 16),
             TextFormField(
+              controller: controller.nameController,
               decoration: const InputDecoration(
                 labelText: 'Ad Soyad',
                 border: OutlineInputBorder(),
@@ -37,6 +38,7 @@ class EditProfileView extends GetView<ProfileController> {
             ),
             const SizedBox(height: 16),
             TextFormField(
+              controller: controller.bioController,
               decoration: const InputDecoration(
                 labelText: 'Biyografi',
                 border: OutlineInputBorder(),
@@ -45,6 +47,7 @@ class EditProfileView extends GetView<ProfileController> {
             ),
             const SizedBox(height: 16),
             TextFormField(
+              controller: controller.locationController,
               decoration: const InputDecoration(
                 labelText: 'Konum',
                 border: OutlineInputBorder(),
@@ -52,6 +55,7 @@ class EditProfileView extends GetView<ProfileController> {
             ),
             const SizedBox(height: 16),
             TextFormField(
+              controller: controller.githubUsernameController,
               decoration: const InputDecoration(
                 labelText: 'GitHub Kullanıcı Adı',
                 border: OutlineInputBorder(),
