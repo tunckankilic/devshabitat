@@ -17,26 +17,24 @@ enum MessageStatus { sent, delivered, read, failed }
 class MessageModel {
   final String id;
   final String conversationId;
-  final String content;
   final String senderId;
   final String senderName;
+  final String content;
   final DateTime timestamp;
-  final MessageStatus status;
-  final String type;
   final bool isRead;
-  final AttachmentData? attachment;
+  final String type;
+  final List<String>? attachments;
 
   MessageModel({
     required this.id,
     required this.conversationId,
-    required this.content,
     required this.senderId,
     required this.senderName,
+    required this.content,
     required this.timestamp,
-    required this.status,
+    required this.isRead,
     this.type = 'text',
-    this.isRead = false,
-    this.attachment,
+    this.attachments,
   });
 
   /// Mesajı şifrelemek için kullanılan yardımcı metod
@@ -59,83 +57,55 @@ class MessageModel {
     }
   }
 
-  /// Modeli Map'e dönüştürme metodu
-  Map<String, dynamic> toJson() {
-    return {
-      'id': id,
-      'conversationId': conversationId,
-      'content': content,
-      'senderId': senderId,
-      'senderName': senderName,
-      'timestamp': timestamp.toIso8601String(),
-      'status': status.toString().split('.').last,
-      'type': type,
-      'isRead': isRead,
-      'attachment': attachment?.toJson(),
-    };
-  }
-
-  /// Map'ten model oluşturma factory metodu
-  factory MessageModel.fromJson(Map<String, dynamic> json) {
-    return MessageModel(
-      id: json['id'] as String,
-      conversationId: json['conversationId'] as String,
-      content: json['content'] as String,
-      senderId: json['senderId'] as String,
-      senderName: json['senderName'] as String,
-      timestamp: (json['timestamp'] as Timestamp).toDate(),
-      status: MessageStatus.values.firstWhere(
-        (e) => e.toString() == 'MessageStatus.${json['status']}',
-        orElse: () => MessageStatus.sent,
-      ),
-      type: json['type'] as String? ?? 'text',
-      isRead: json['isRead'] as bool? ?? false,
-      attachment: json['attachment'] != null
-          ? AttachmentData.fromJson(json['attachment'] as Map<String, dynamic>)
-          : null,
-    );
-  }
-
-  /// Modelin kopyasını oluşturma metodu
-  MessageModel copyWith({
-    String? id,
-    String? conversationId,
-    String? content,
-    String? senderId,
-    String? senderName,
-    DateTime? timestamp,
-    MessageStatus? status,
-    String? type,
-    bool? isRead,
-    AttachmentData? attachment,
-  }) {
-    return MessageModel(
-      id: id ?? this.id,
-      conversationId: conversationId ?? this.conversationId,
-      content: content ?? this.content,
-      senderId: senderId ?? this.senderId,
-      senderName: senderName ?? this.senderName,
-      timestamp: timestamp ?? this.timestamp,
-      status: status ?? this.status,
-      type: type ?? this.type,
-      isRead: isRead ?? this.isRead,
-      attachment: attachment ?? this.attachment,
-    );
-  }
-
   factory MessageModel.fromMap(Map<String, dynamic> map) {
     return MessageModel(
       id: map['id'] as String,
       conversationId: map['conversationId'] as String,
-      content: map['content'] as String,
       senderId: map['senderId'] as String,
       senderName: map['senderName'] as String,
+      content: map['content'] as String,
       timestamp: (map['timestamp'] as Timestamp).toDate(),
-      status: MessageStatus.values.firstWhere(
-        (e) => e.toString().split('.').last == map['status'],
-        orElse: () => MessageStatus.sent,
-      ),
-      type: map['type'] as String,
+      isRead: map['isRead'] as bool? ?? false,
+      type: map['type'] as String? ?? 'text',
+      attachments: (map['attachments'] as List<dynamic>?)?.cast<String>(),
+    );
+  }
+
+  Map<String, dynamic> toMap() {
+    return {
+      'id': id,
+      'conversationId': conversationId,
+      'senderId': senderId,
+      'senderName': senderName,
+      'content': content,
+      'timestamp': Timestamp.fromDate(timestamp),
+      'isRead': isRead,
+      'type': type,
+      'attachments': attachments,
+    };
+  }
+
+  MessageModel copyWith({
+    String? id,
+    String? conversationId,
+    String? senderId,
+    String? senderName,
+    String? content,
+    DateTime? timestamp,
+    bool? isRead,
+    String? type,
+    List<String>? attachments,
+  }) {
+    return MessageModel(
+      id: id ?? this.id,
+      conversationId: conversationId ?? this.conversationId,
+      senderId: senderId ?? this.senderId,
+      senderName: senderName ?? this.senderName,
+      content: content ?? this.content,
+      timestamp: timestamp ?? this.timestamp,
+      isRead: isRead ?? this.isRead,
+      type: type ?? this.type,
+      attachments: attachments ?? this.attachments,
     );
   }
 }

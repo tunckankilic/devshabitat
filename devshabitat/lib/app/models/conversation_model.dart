@@ -1,3 +1,4 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 
 /// Konuşma türlerini tanımlayan enum
 enum ConversationType { direct, group }
@@ -9,41 +10,49 @@ class ConversationModel {
   final String participantId;
   final String participantName;
   final String? lastMessage;
+  final String? lastMessageSenderId;
   final DateTime lastMessageTime;
+  final bool isRead;
+  final String? participantAvatar;
   final int unreadCount;
-  final bool isActive;
 
   ConversationModel({
     required this.id,
     required this.participantId,
     required this.participantName,
     this.lastMessage,
+    this.lastMessageSenderId,
     required this.lastMessageTime,
-    this.unreadCount = 0,
-    this.isActive = true,
+    required this.isRead,
+    this.participantAvatar,
+    required this.unreadCount,
   });
 
-  factory ConversationModel.fromJson(Map<String, dynamic> json) {
+  factory ConversationModel.fromMap(Map<String, dynamic> map) {
     return ConversationModel(
-      id: json['id'] as String,
-      participantId: json['participantId'] as String,
-      participantName: json['participantName'] as String,
-      lastMessage: json['lastMessage'] as String?,
-      lastMessageTime: DateTime.parse(json['lastMessageTime'] as String),
-      unreadCount: json['unreadCount'] as int? ?? 0,
-      isActive: json['isActive'] as bool? ?? true,
+      id: map['id'] as String,
+      participantId: map['participantId'] as String,
+      participantName: map['participantName'] as String,
+      lastMessage: map['lastMessage'] as String?,
+      lastMessageSenderId: map['lastMessageSenderId'] as String?,
+      lastMessageTime: (map['lastMessageTime'] as Timestamp).toDate(),
+      isRead: map['isRead'] as bool? ?? false,
+      participantAvatar: map['participantAvatar'] as String?,
+      unreadCount: map['unreadCount'] as int? ?? 0,
     );
   }
 
-  Map<String, dynamic> toJson() {
+  Map<String, dynamic> toMap() {
     return {
       'id': id,
       'participantId': participantId,
       'participantName': participantName,
       'lastMessage': lastMessage,
-      'lastMessageTime': lastMessageTime.toIso8601String(),
+      'lastMessageSenderId': lastMessageSenderId,
+      'lastMessageTime': Timestamp.fromDate(lastMessageTime),
+      'isRead': isRead,
+      'participantAvatar': participantAvatar,
       'unreadCount': unreadCount,
-      'isActive': isActive,
     };
   }
 
@@ -52,18 +61,22 @@ class ConversationModel {
     String? participantId,
     String? participantName,
     String? lastMessage,
+    String? lastMessageSenderId,
     DateTime? lastMessageTime,
+    bool? isRead,
+    String? participantAvatar,
     int? unreadCount,
-    bool? isActive,
   }) {
     return ConversationModel(
       id: id ?? this.id,
       participantId: participantId ?? this.participantId,
       participantName: participantName ?? this.participantName,
       lastMessage: lastMessage ?? this.lastMessage,
+      lastMessageSenderId: lastMessageSenderId ?? this.lastMessageSenderId,
       lastMessageTime: lastMessageTime ?? this.lastMessageTime,
+      isRead: isRead ?? this.isRead,
+      participantAvatar: participantAvatar ?? this.participantAvatar,
       unreadCount: unreadCount ?? this.unreadCount,
-      isActive: isActive ?? this.isActive,
     );
   }
 }

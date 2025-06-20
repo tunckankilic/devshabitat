@@ -6,64 +6,79 @@ import '../services/messaging_service.dart';
 import '../services/auth_service.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:logger/logger.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import '../core/services/error_handler_service.dart';
 
 class MessagingController extends GetxController {
-  final MessagingService _messagingService = Get.find<MessagingService>();
-  final AuthService _authService = Get.find<AuthService>();
-  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
+  final MessagingService _messagingService;
+  final AuthService _authService;
+  final FirebaseFirestore _firestore;
+  final FirebaseAuth _auth;
+  final ErrorHandlerService _errorHandler;
   final Logger _logger = Logger();
 
-  // Getters
-  String? get currentUserId => _authService.currentUser.value?.uid;
+  static const int pageSize = 20;
+  static const int loadMoreThreshold = 5;
 
-  // Reactive Variables
-  final RxList<ConversationModel> conversations = <ConversationModel>[].obs;
   final RxMap<String, List<MessageModel>> conversationMessages =
-      <String, List<MessageModel>>{}.obs;
-  final Rx<ConversationModel?> selectedConversation =
-      Rx<ConversationModel?>(null);
+      RxMap<String, List<MessageModel>>();
+  final RxList<ConversationModel> conversations = <ConversationModel>[].obs;
   final RxBool isLoading = false.obs;
   final RxString errorMessage = ''.obs;
   final RxInt unreadCount = 0.obs;
   final RxString searchQuery = ''.obs;
+  final Rx<ConversationModel?> selectedConversation =
+      Rx<ConversationModel?>(null);
 
-  // Stream Subscriptions
-  late final StreamSubscription _conversationsSubscription;
-  StreamSubscription? _messagesSubscription;
+  StreamSubscription? _conversationsSubscription;
+  final Map<String, int> _lastMessageTimestamp = {};
+  final Map<String, bool> _isLoadingMore = {};
+  final Map<String, bool> _hasMoreMessages = {};
 
-  // Pagination değişkenleri
-  final int pageSize = 20;
-  final RxMap<String, int> lastMessageTimestamp = <String, int>{}.obs;
+  String get currentUserId => _auth.currentUser?.uid ?? '';
+
+  MessagingController({
+    required MessagingService messagingService,
+    required AuthService authService,
+    required ErrorHandlerService errorHandler,
+    FirebaseFirestore? firestore,
+    FirebaseAuth? auth,
+  })  : _messagingService = messagingService,
+        _authService = authService,
+        _errorHandler = errorHandler,
+        _firestore = firestore ?? FirebaseFirestore.instance,
+        _auth = auth ?? FirebaseAuth.instance;
 
   @override
   void onInit() {
     super.onInit();
     loadConversations();
-    _setupSearchListener();
   }
 
-  void _setupSearchListener() {
-    debounce(searchQuery, (String query) {
-      if (query.isNotEmpty) {
-        _searchConversations(query);
-      } else {
-        loadConversations();
-      }
-    }, time: const Duration(milliseconds: 500));
+  @override
+  void onClose() {
+    _conversationsSubscription?.cancel();
+    super.onClose();
   }
 
   Future<void> loadConversations() async {
     try {
       isLoading.value = true;
+      _conversationsSubscription?.cancel();
+
       _conversationsSubscription = _messagingService.getConversations().listen(
-          (List<ConversationModel> newConversations) {
-        conversations.value = newConversations;
-        _updateUnreadCount();
-      }, onError: (error) {
-        errorMessage.value = 'Konuşmalar yüklenirken hata oluştu: $error';
-      });
+        (List<ConversationModel> newConversations) {
+          conversations.value = newConversations;
+          _updateUnreadCount();
+        },
+        onError: (error) {
+          _errorHandler.handleError('Konuşmalar yüklenirken hata: $error');
+          errorMessage.value = 'Konuşmalar yüklenirken hata oluştu';
+        },
+      );
     } catch (e) {
-      errorMessage.value = 'Konuşmalar yüklenirken beklenmeyen hata: $e';
+      _errorHandler.handleError('Beklenmeyen hata: $e');
+      errorMessage.value = 'Konuşmalar yüklenirken beklenmeyen hata';
     } finally {
       isLoading.value = false;
     }
@@ -71,116 +86,138 @@ class MessagingController extends GetxController {
 
   Future<void> loadMessages(String conversationId,
       {bool loadMore = false}) async {
+    if (_isLoadingMore[conversationId] == true) return;
+    if (!loadMore && _hasMoreMessages[conversationId] == false) return;
+
     try {
+      _isLoadingMore[conversationId] = true;
+
       if (!loadMore) {
-        lastMessageTimestamp[conversationId] =
+        _lastMessageTimestamp[conversationId] =
             DateTime.now().millisecondsSinceEpoch;
+        _hasMoreMessages[conversationId] = true;
       }
 
-      final lastTimestamp = lastMessageTimestamp[conversationId];
-      final query = _firestore
-          .collection('messages')
-          .where('conversationId', isEqualTo: conversationId)
-          .orderBy('timestamp', descending: true)
-          .limit(pageSize);
-
-      if (loadMore && lastTimestamp != null) {
-        query.startAfter([lastTimestamp]);
-      }
-
+      final query = _buildMessageQuery(conversationId, loadMore);
       final snapshot = await query.get();
       final messages =
           snapshot.docs.map((doc) => MessageModel.fromMap(doc.data())).toList();
 
-      if (loadMore) {
-        final existingMessages = conversationMessages[conversationId] ?? [];
-        conversationMessages[conversationId] = [
-          ...existingMessages,
-          ...messages
-        ];
-      } else {
-        conversationMessages[conversationId] = messages;
-      }
-
-      if (messages.isNotEmpty) {
-        lastMessageTimestamp[conversationId] =
-            messages.last.timestamp.millisecondsSinceEpoch;
-      }
+      _updateMessages(conversationId, messages, loadMore);
+      _updateLastTimestamp(conversationId, messages);
+      _hasMoreMessages[conversationId] = messages.length >= pageSize;
     } catch (e) {
-      _logger.e('Mesajlar yüklenirken hata: $e');
-    }
-  }
-
-  Future<void> sendMessage(String conversationId, String content) async {
-    try {
-      isLoading.value = true;
-      final message = MessageModel(
-        id: DateTime.now().millisecondsSinceEpoch.toString(),
-        conversationId: conversationId,
-        content: content,
-        senderId: _authService.currentUser.value?.uid ?? '',
-        senderName: _authService.currentUser.value?.displayName ?? 'Anonim',
-        timestamp: DateTime.now(),
-        status: MessageStatus.sent,
-        type: 'text',
-      );
-
-      await _messagingService.sendMessage(message);
-    } catch (e) {
-      errorMessage.value = 'Mesaj gönderilirken hata oluştu: $e';
+      _errorHandler.handleError('Mesajlar yüklenirken hata: $e');
     } finally {
-      isLoading.value = false;
+      _isLoadingMore[conversationId] = false;
     }
   }
 
-  Future<void> createConversation(ConversationModel newConversation) async {
-    try {
-      isLoading.value = true;
-      final conversation =
-          await _messagingService.createConversation(newConversation);
-      selectedConversation.value = conversation;
-      await loadMessages(conversation.id);
-    } catch (e) {
-      errorMessage.value = 'Konuşma oluşturulurken hata oluştu: $e';
-    } finally {
-      isLoading.value = false;
+  Query<Map<String, dynamic>> _buildMessageQuery(
+      String conversationId, bool loadMore) {
+    var query = _firestore
+        .collection('messages')
+        .where('conversationId', isEqualTo: conversationId)
+        .orderBy('timestamp', descending: true)
+        .limit(pageSize);
+
+    if (loadMore && _lastMessageTimestamp[conversationId] != null) {
+      query = query.startAfter([_lastMessageTimestamp[conversationId]]);
+    }
+
+    return query;
+  }
+
+  void _updateMessages(
+      String conversationId, List<MessageModel> newMessages, bool loadMore) {
+    if (loadMore) {
+      final existingMessages = conversationMessages[conversationId] ?? [];
+      conversationMessages[conversationId] = [
+        ...existingMessages,
+        ...newMessages
+      ];
+    } else {
+      conversationMessages[conversationId] = newMessages;
     }
   }
 
-  void _searchConversations(String query) {
-    try {
-      final filteredConversations = conversations.where((conversation) {
-        final participantName = conversation.participantName.toLowerCase();
-        final lastMessage = conversation.lastMessage?.toLowerCase() ?? '';
-        final searchLower = query.toLowerCase();
-
-        return participantName.contains(searchLower) ||
-            lastMessage.contains(searchLower);
-      }).toList();
-
-      conversations.value = filteredConversations;
-    } catch (e) {
-      errorMessage.value = 'Arama yapılırken hata oluştu: $e';
+  void _updateLastTimestamp(
+      String conversationId, List<MessageModel> messages) {
+    if (messages.isNotEmpty) {
+      _lastMessageTimestamp[conversationId] =
+          messages.last.timestamp.millisecondsSinceEpoch;
     }
   }
 
   void _updateUnreadCount() {
-    unreadCount.value = conversations.fold(0, (sum, conversation) {
-      return sum +
-          (conversation.unreadCount > 0 ? conversation.unreadCount : 0);
-    });
+    unreadCount.value = conversations
+        .where(
+            (conv) => !conv.isRead && conv.lastMessageSenderId != currentUserId)
+        .length;
+  }
+
+  Future<void> sendMessage(String conversationId, String content) async {
+    try {
+      if (content.trim().isEmpty) return;
+
+      final message = MessageModel(
+        id: '',
+        conversationId: conversationId,
+        senderId: currentUserId,
+        senderName: _auth.currentUser?.displayName ?? 'Anonim',
+        content: content.trim(),
+        timestamp: DateTime.now(),
+        isRead: false,
+      );
+
+      await _messagingService.sendMessage(message);
+
+      // Optimistic update
+      final messages = conversationMessages[conversationId] ?? [];
+      messages.insert(0, message);
+      conversationMessages[conversationId] = [...messages];
+    } catch (e) {
+      _errorHandler.handleError('Mesaj gönderilirken hata: $e');
+    }
+  }
+
+  Future<void> markConversationAsRead(String conversationId) async {
+    try {
+      await _messagingService.markConversationAsRead(conversationId);
+      _updateUnreadCount();
+    } catch (e) {
+      _errorHandler.handleError('Okundu işaretlenirken hata: $e');
+    }
+  }
+
+  Future<void> deleteMessage(String conversationId, String messageId) async {
+    try {
+      await _messagingService.deleteMessage(conversationId, messageId);
+
+      // Optimistic update
+      final messages = conversationMessages[conversationId] ?? [];
+      messages.removeWhere((message) => message.id == messageId);
+      conversationMessages[conversationId] = [...messages];
+    } catch (e) {
+      _errorHandler.handleError('Mesaj silinirken hata: $e');
+    }
+  }
+
+  Future<void> deleteConversation(String conversationId) async {
+    try {
+      await _messagingService.deleteConversation(conversationId);
+
+      // Optimistic update
+      conversations.removeWhere((conv) => conv.id == conversationId);
+      conversationMessages.remove(conversationId);
+    } catch (e) {
+      _errorHandler.handleError('Konuşma silinirken hata: $e');
+    }
   }
 
   void selectConversation(ConversationModel conversation) {
     selectedConversation.value = conversation;
     loadMessages(conversation.id);
     _messagingService.markMessagesAsRead(conversation.id);
-  }
-
-  @override
-  void onClose() {
-    _conversationsSubscription.cancel();
-    _messagesSubscription?.cancel();
-    super.onClose();
   }
 }
