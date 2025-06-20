@@ -7,6 +7,7 @@ import 'dart:convert';
 import '../core/config/github_config.dart';
 import '../core/services/error_handler_service.dart';
 import 'package:logger/logger.dart';
+import '../constants/app_strings.dart';
 
 class GitHubOAuthService extends GetxService {
   final Logger _logger;
@@ -20,7 +21,7 @@ class GitHubOAuthService extends GetxService {
 
   Future<String?> signInWithGitHub() async {
     if (!GitHubConfig.isConfigured) {
-      _errorHandler.handleError('GitHub yapılandırması eksik');
+      _errorHandler.handleError(AppStrings.errorOperationNotAllowed);
       return null;
     }
 
@@ -36,7 +37,7 @@ class GitHubOAuthService extends GetxService {
       if (await canLaunchUrl(authUrl)) {
         await launchUrl(authUrl, mode: LaunchMode.externalApplication);
       } else {
-        throw 'GitHub sayfası açılamadı';
+        throw AppStrings.githubLoginFailed;
       }
 
       // Yönlendirme URL'ini bekle
@@ -50,15 +51,15 @@ class GitHubOAuthService extends GetxService {
       // Kullanıcı bilgilerini al
       return await _getUserEmail(accessToken);
     } catch (e) {
-      _logger.e('GitHub ile giriş hatası: $e');
-      _errorHandler.handleError('GitHub ile giriş yapılırken bir hata oluştu');
+      _logger.e('GitHub login error: $e');
+      _errorHandler.handleError(AppStrings.githubLoginFailed);
       return null;
     }
   }
 
   Future<String?> getAccessToken() async {
     if (!GitHubConfig.isConfigured) {
-      _errorHandler.handleError('GitHub yapılandırması eksik');
+      _errorHandler.handleError(AppStrings.errorOperationNotAllowed);
       return null;
     }
 
@@ -74,7 +75,7 @@ class GitHubOAuthService extends GetxService {
       if (await canLaunchUrl(authUrl)) {
         await launchUrl(authUrl, mode: LaunchMode.externalApplication);
       } else {
-        throw 'GitHub sayfası açılamadı';
+        throw AppStrings.githubLoginFailed;
       }
 
       // Yönlendirme URL'ini bekle
@@ -84,8 +85,8 @@ class GitHubOAuthService extends GetxService {
       // Access token al
       return await _getAccessToken(code);
     } catch (e) {
-      _logger.e('GitHub access token alma hatası: $e');
-      _errorHandler.handleError('GitHub ile giriş yapılırken bir hata oluştu');
+      _logger.e('GitHub access token error: $e');
+      _errorHandler.handleError(AppStrings.githubLoginFailed);
       return null;
     }
   }
@@ -97,14 +98,14 @@ class GitHubOAuthService extends GetxService {
 
       final code = uri.queryParameters['code'];
       if (code == null) {
-        _errorHandler.handleError('GitHub yetkilendirme kodu alınamadı');
+        _errorHandler.handleError(AppStrings.githubLoginFailed);
         return null;
       }
 
       return code;
     } on PlatformException catch (e) {
-      _logger.e('Platform hatası: $e');
-      _errorHandler.handleError('Yönlendirme işlemi başarısız oldu');
+      _logger.e('Platform error: $e');
+      _errorHandler.handleError(AppStrings.errorGeneric);
       return null;
     }
   }
@@ -125,15 +126,15 @@ class GitHubOAuthService extends GetxService {
       );
 
       if (response.statusCode != 200) {
-        _errorHandler.handleError('GitHub token alınamadı');
+        _errorHandler.handleError(AppStrings.githubLoginFailed);
         return null;
       }
 
       final data = jsonDecode(response.body);
       return data['access_token'];
     } catch (e) {
-      _logger.e('Token alma hatası: $e');
-      _errorHandler.handleError('Access token alınırken hata oluştu');
+      _logger.e('Token error: $e');
+      _errorHandler.handleError(AppStrings.githubLoginFailed);
       return null;
     }
   }
@@ -149,7 +150,7 @@ class GitHubOAuthService extends GetxService {
       );
 
       if (response.statusCode != 200) {
-        _errorHandler.handleError('GitHub kullanıcı bilgileri alınamadı');
+        _errorHandler.handleError(AppStrings.githubUserInfoFailed);
         return null;
       }
 
@@ -161,8 +162,51 @@ class GitHubOAuthService extends GetxService {
 
       return primaryEmail['email'];
     } catch (e) {
-      _logger.e('Kullanıcı email alma hatası: $e');
-      _errorHandler.handleError('Kullanıcı bilgileri alınırken hata oluştu');
+      _logger.e('User email error: $e');
+      _errorHandler.handleError(AppStrings.githubUserInfoFailed);
+      return null;
+    }
+  }
+
+  Future<Map<String, dynamic>?> getUserInfo(String accessToken) async {
+    try {
+      final response = await http.get(
+        Uri.parse('https://api.github.com/user'),
+        headers: {
+          'Authorization': 'token $accessToken',
+          'Accept': 'application/vnd.github.v3+json',
+        },
+      );
+
+      if (response.statusCode != 200) {
+        _errorHandler.handleError(AppStrings.githubUserInfoFailed);
+        return null;
+      }
+
+      final userData = jsonDecode(response.body);
+
+      // Email bilgisini al
+      final emailResponse = await http.get(
+        Uri.parse('https://api.github.com/user/emails'),
+        headers: {
+          'Authorization': 'token $accessToken',
+          'Accept': 'application/vnd.github.v3+json',
+        },
+      );
+
+      if (emailResponse.statusCode == 200) {
+        final List<dynamic> emails = jsonDecode(emailResponse.body);
+        final primaryEmail = emails.firstWhere(
+          (email) => email['primary'] == true,
+          orElse: () => emails.first,
+        );
+        userData['email'] = primaryEmail['email'];
+      }
+
+      return userData;
+    } catch (e) {
+      _logger.e('GitHub user info error: $e');
+      _errorHandler.handleError(AppStrings.githubUserInfoFailed);
       return null;
     }
   }

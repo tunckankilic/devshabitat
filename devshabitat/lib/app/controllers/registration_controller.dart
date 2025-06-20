@@ -22,14 +22,16 @@ class RegistrationController extends GetxController {
   final _isEmailValid = false.obs;
   final _isPasswordValid = false.obs;
   final _isUsernameValid = false.obs;
+  final _socialAuthData = Rxn<Map<String, dynamic>>();
 
   // Form controllers
-  final emailController = TextEditingController().obs;
-  final passwordController = TextEditingController().obs;
-  final confirmPasswordController = TextEditingController().obs;
-  final usernameController = TextEditingController().obs;
-  final firstNameController = TextEditingController().obs;
-  final lastNameController = TextEditingController().obs;
+  final emailController = TextEditingController();
+  final passwordController = TextEditingController();
+  final confirmPasswordController = TextEditingController();
+  final usernameController = TextEditingController();
+  final firstNameController = TextEditingController();
+  final lastNameController = TextEditingController();
+  final githubUsernameController = TextEditingController();
 
   // Getters
   bool get isLoading => _isLoading.value;
@@ -40,6 +42,7 @@ class RegistrationController extends GetxController {
   bool get isUsernameValid => _isUsernameValid.value;
   bool get canProceed =>
       _isEmailValid.value && _isPasswordValid.value && _isUsernameValid.value;
+  Map<String, dynamic>? get socialAuthData => _socialAuthData.value;
 
   RegistrationController({
     required AuthRepository authRepository,
@@ -51,19 +54,44 @@ class RegistrationController extends GetxController {
   void onInit() {
     super.onInit();
     _setupValidationListeners();
+    _handleSocialAuthData();
+  }
+
+  void _handleSocialAuthData() {
+    final args = Get.arguments;
+    if (args != null && args is Map<String, dynamic>) {
+      _socialAuthData.value = args;
+
+      // Form alanlarını doldur
+      emailController.text = args['email'] ?? '';
+      if (args['displayName'] != null) {
+        final names = args['displayName'].toString().split(' ');
+        firstNameController.text = names.first;
+        if (names.length > 1) {
+          lastNameController.text = names.sublist(1).join(' ');
+        }
+      }
+      if (args['githubUsername'] != null) {
+        githubUsernameController.text = args['githubUsername'];
+      }
+
+      // Email ve kullanıcı adı validasyonlarını tetikle
+      _validateEmail(emailController.text);
+      _validateUsername(usernameController.text);
+    }
   }
 
   void _setupValidationListeners() {
-    ever(emailController, (TextEditingController controller) {
-      _validateEmail(controller.text);
+    emailController.addListener(() {
+      _validateEmail(emailController.text);
     });
 
-    ever(passwordController, (TextEditingController controller) {
-      _validatePassword(controller.text);
+    passwordController.addListener(() {
+      _validatePassword(passwordController.text);
     });
 
-    ever(usernameController, (TextEditingController controller) {
-      _validateUsername(controller.text);
+    usernameController.addListener(() {
+      _validateUsername(usernameController.text);
     });
   }
 
@@ -153,11 +181,32 @@ class RegistrationController extends GetxController {
   Future<void> _startVerification() async {
     try {
       _isLoading.value = true;
-      await _authRepository.createUserWithEmailAndPassword(
+
+      // Email kontrolü
+      final methods = await _authRepository.auth
+          .fetchSignInMethodsForEmail(emailController.text);
+      if (methods.isNotEmpty) {
+        _errorHandler.handleError('Bu email adresi zaten kullanımda');
+        return;
+      }
+
+      // Kullanıcı oluştur
+      final userCredential =
+          await _authRepository.createUserWithEmailAndPassword(
         emailController.value.text,
         passwordController.value.text,
         usernameController.value.text,
       );
+
+      // Sosyal auth provider'ı bağla
+      if (_socialAuthData.value != null) {
+        final provider = _socialAuthData.value!['provider'];
+        if (provider == 'github') {
+          await _authRepository.linkWithGithub();
+        }
+        // Diğer provider'lar için de benzer işlemler eklenebilir
+      }
+
       await _authRepository.verifyEmail();
       _errorHandler.handleSuccess('Doğrulama e-postası gönderildi');
     } catch (e) {
@@ -170,12 +219,13 @@ class RegistrationController extends GetxController {
 
   @override
   void onClose() {
-    emailController.value.dispose();
-    passwordController.value.dispose();
-    confirmPasswordController.value.dispose();
-    usernameController.value.dispose();
-    firstNameController.value.dispose();
-    lastNameController.value.dispose();
+    emailController.dispose();
+    passwordController.dispose();
+    confirmPasswordController.dispose();
+    usernameController.dispose();
+    firstNameController.dispose();
+    lastNameController.dispose();
+    githubUsernameController.dispose();
     super.onClose();
   }
 }

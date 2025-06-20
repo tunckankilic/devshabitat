@@ -21,6 +21,7 @@ import 'app/controllers/app_controller.dart';
 import 'app/controllers/network_controller.dart';
 import 'app/routes/app_pages.dart';
 import 'app/core/theme/dev_habitat_theme.dart';
+import 'app/constants/app_strings.dart';
 import 'firebase_options.dart';
 
 void main() async {
@@ -29,42 +30,88 @@ void main() async {
     options: DefaultFirebaseOptions.currentPlatform,
   );
 
-  // Temel servisler
-  final logger = Get.put(Logger());
-  final errorHandler = Get.put(ErrorHandlerService());
-  Get.put(NetworkController());
+  // Initialize services
+  final logger = Logger();
+  Get.put(logger);
 
-  // Uygulama servisleri
-  Get.put(ProfileService());
-  Get.put(GithubService());
-  Get.put(ImageUploadService());
-  Get.put(LazyLoadingService());
-  Get.put(AssetOptimizationService());
-  Get.put(FeedRepository());
-  Get.put(NetworkAnalyticsService());
-  Get.put(DiscoveryService());
-  Get.put(MessagingService());
-  Get.put(ThreadService());
+  final errorHandler = ErrorHandlerService();
+  Get.put(errorHandler);
 
-  // OAuth servisleri
-  Get.put(GitHubOAuthService(
+  final profileService = ProfileService();
+  Get.put(profileService);
+
+  final githubService = GithubService();
+  Get.put(githubService);
+
+  final githubOAuthService = GitHubOAuthService(
     logger: logger,
     errorHandler: errorHandler,
-  ));
+  );
+  Get.put(githubOAuthService);
 
-  // Repository ve Controller'lar
-  Get.put(AuthRepository(
-    githubOAuthService: Get.find(),
-  ));
-  Get.put(AuthController(
-    authRepository: Get.find(),
-    errorHandler: Get.find(),
-  ));
-  Get.put(AppController(
-    errorHandler: Get.find(),
-  ));
+  final imageUploadService = ImageUploadService();
+  Get.put(imageUploadService);
 
-  runApp(const MyApp());
+  final lazyLoadingService = LazyLoadingService();
+  Get.put(lazyLoadingService);
+
+  final assetOptimizationService = AssetOptimizationService();
+  Get.put(assetOptimizationService);
+
+  final feedRepository = FeedRepository();
+  Get.put(feedRepository);
+
+  final networkAnalyticsService = NetworkAnalyticsService();
+  Get.put(networkAnalyticsService);
+
+  final discoveryService = DiscoveryService();
+  Get.put(discoveryService);
+
+  final messagingService = MessagingService();
+  Get.put(messagingService);
+
+  final threadService = ThreadService();
+  Get.put(threadService);
+
+  final authRepository = AuthRepository(
+    githubOAuthService: githubOAuthService,
+  );
+  Get.put(authRepository);
+
+  final authController = AuthController(
+    authRepository: authRepository,
+    errorHandler: errorHandler,
+  );
+  Get.put(authController);
+
+  final appController = AppController(
+    errorHandler: errorHandler,
+  );
+  Get.put(appController);
+
+  final networkController = NetworkController();
+  Get.put(networkController);
+
+  runApp(
+    ScreenUtilInit(
+      designSize: const Size(375, 812),
+      minTextAdapt: true,
+      splitScreenMode: true,
+      builder: (context, child) {
+        return GetMaterialApp(
+          title: AppStrings.appName,
+          theme: DevHabitatTheme.lightTheme,
+          darkTheme: DevHabitatTheme.darkTheme,
+          themeMode: ThemeMode.system,
+          locale: const Locale('en', 'US'),
+          fallbackLocale: const Locale('en', 'US'),
+          getPages: AppPages.routes,
+          initialRoute: Routes.INITIAL,
+          debugShowCheckedModeBanner: false,
+        );
+      },
+    ),
+  );
 }
 
 class MyApp extends StatelessWidget {

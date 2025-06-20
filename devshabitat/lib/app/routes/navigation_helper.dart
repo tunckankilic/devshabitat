@@ -2,9 +2,9 @@ import 'package:devshabitat/app/routes/app_pages.dart';
 import 'package:get/get.dart';
 
 class NavigationHelper {
-  // Sayfa geçişleri
+  // Page transitions
   static void toLogin() => Get.toNamed(Routes.LOGIN);
 
-  // Geri dönüş
+  // Go back
   static void back() => Get.back();
 }
