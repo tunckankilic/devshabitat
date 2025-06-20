@@ -30,7 +30,7 @@ class MessageSearchService extends GetxService {
     }
   }
 
-  Future<List<Message>> searchMessages({
+  Future<List<MessageModel>> searchMessages({
     required String searchTerm,
     required Map<String, dynamic> filters,
     DocumentSnapshot? lastDocument,
@@ -55,7 +55,12 @@ class MessageSearchService extends GetxService {
       }
 
       final QuerySnapshot snapshot = await query.get();
-      return snapshot.docs.map((doc) => Message.fromFirestore(doc)).toList();
+      return snapshot.docs
+          .map((doc) => MessageModel.fromMap({
+                ...(doc.data() as Map<String, dynamic>),
+                'id': doc.id,
+              }))
+          .toList();
     } catch (e) {
       print('Mesaj araması sırasında hata: $e');
       return [];
@@ -134,5 +139,26 @@ class MessageSearchService extends GetxService {
 
     final snapshot = await query.get();
     return snapshot.docs;
+  }
+
+  Future<List<String>> getSearchSuggestions(String query) async {
+    try {
+      final QuerySnapshot snapshot = await _firestore
+          .collection('messages')
+          .where('content', isGreaterThanOrEqualTo: query)
+          .where('content', isLessThan: query + 'z')
+          .limit(5)
+          .get();
+
+      return snapshot.docs
+          .map((doc) =>
+              (doc.data() as Map<String, dynamic>)['content'] as String)
+          .where(
+              (content) => content.toLowerCase().contains(query.toLowerCase()))
+          .toList();
+    } catch (e) {
+      print('Öneri getirme hatası: $e');
+      return [];
+    }
   }
 }

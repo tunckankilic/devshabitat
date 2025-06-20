@@ -4,7 +4,7 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:timeago/timeago.dart' as timeago;
 
 class MessageBubble extends StatelessWidget {
-  final Message message;
+  final MessageModel message;
   final String? highlightText;
   final VoidCallback? onMediaLoaded;
   final bool? isOwnMessage;

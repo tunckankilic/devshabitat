@@ -63,13 +63,14 @@ class ChatScreen extends GetView<MessagingController> {
                         messageModel.senderId == controller.currentUserId;
 
                     // MessageModel'i Message'a dönüştür
-                    final message = Message(
+                    final message = MessageModel(
                       id: messageModel.id,
                       conversationId: messageModel.conversationId,
                       content: messageModel.content,
                       senderId: messageModel.senderId,
                       senderName: messageModel.senderName,
                       timestamp: messageModel.timestamp,
+                      isRead: messageModel.isRead,
                       type: MessageType.text, // Default olarak text
                       attachments: [], // Boş liste
                     );
@@ -121,7 +122,8 @@ class ChatScreen extends GetView<MessagingController> {
                   borderSide: BorderSide.none,
                 ),
                 filled: true,
-                fillColor: Theme.of(context).colorScheme.surfaceContainerHighest,
+                fillColor:
+                    Theme.of(context).colorScheme.surfaceContainerHighest,
                 contentPadding: const EdgeInsets.symmetric(
                   horizontal: 16.0,
                   vertical: 8.0,

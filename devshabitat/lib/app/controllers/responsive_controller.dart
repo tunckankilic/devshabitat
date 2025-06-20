@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 class ResponsiveController extends GetxController {
   final Rx<ScreenBreakpoint> currentBreakpoint =
@@ -21,6 +22,31 @@ class ResponsiveController extends GetxController {
     } else {
       currentBreakpoint.value = ScreenBreakpoint.tablet;
     }
+  }
+
+  // ScreenUtil için yardımcı metodlar
+  double get statusBarHeight => ScreenUtil().statusBarHeight;
+  double get bottomBarHeight => ScreenUtil().bottomBarHeight;
+
+  // Responsive boyutlar için yardımcı metodlar
+  double sp(double size) => size.sp;
+  double w(double size) => size.w;
+  double h(double size) => size.h;
+  double r(double size) => size.r;
+
+  // Responsive padding ve margin için yardımcı metodlar
+  EdgeInsets responsivePadding({
+    double left = 0,
+    double top = 0,
+    double right = 0,
+    double bottom = 0,
+  }) {
+    return EdgeInsets.fromLTRB(
+      w(left),
+      h(top),
+      w(right),
+      h(bottom),
+    );
   }
 
   bool get isSmallPhone =>

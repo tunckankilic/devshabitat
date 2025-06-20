@@ -1,18 +1,18 @@
-import 'package:devshabitat/app/controllers/auth_controller.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
+import '../../../controllers/auth_controller.dart';
+import '../../../controllers/responsive_controller.dart';
+import '../../base/base_view.dart';
 import '../widgets/responsive_form_field.dart';
 import '../widgets/social_login_button.dart';
 import '../widgets/adaptive_loading_indicator.dart';
 
-class TabletLogin extends StatelessWidget {
+class TabletLogin extends BaseView<AuthController> {
   const TabletLogin({super.key});
 
   @override
-  Widget build(BuildContext context) {
-    final AuthController authController = Get.find<AuthController>();
-    final emailController = TextEditingController();
-    final passwordController = TextEditingController();
+  Widget buildView(BuildContext context) {
     final formKey = GlobalKey<FormState>();
 
     return Scaffold(
@@ -30,25 +30,28 @@ class TabletLogin extends StatelessWidget {
                     children: [
                       Image.asset(
                         'assets/images/logo.png',
-                        height: 120,
+                        height: 120.h,
                         color: Colors.white,
                       ),
-                      const SizedBox(height: 40),
-                      const Text(
+                      SizedBox(height: 40.h),
+                      Text(
                         'DevHabitat\'a Hoş Geldiniz',
                         style: TextStyle(
-                          fontSize: 32,
+                          fontSize: 32.sp,
                           fontWeight: FontWeight.bold,
                           color: Colors.white,
                         ),
                         textAlign: TextAlign.center,
                       ),
-                      const SizedBox(height: 16),
-                      const Padding(
-                        padding: EdgeInsets.symmetric(horizontal: 48),
+                      SizedBox(height: 16.h),
+                      Padding(
+                        padding: EdgeInsets.symmetric(horizontal: 48.w),
                         child: Text(
                           'Yazılım geliştiriciler için özel bir platform. Projelerinizi paylaşın, işbirliği yapın ve birlikte büyüyün.',
-                          style: TextStyle(fontSize: 18, color: Colors.white70),
+                          style: TextStyle(
+                            fontSize: 18.sp,
+                            color: Colors.white70,
+                          ),
                           textAlign: TextAlign.center,
                         ),
                       ),
@@ -61,9 +64,9 @@ class TabletLogin extends StatelessWidget {
             Expanded(
               flex: 1,
               child: SingleChildScrollView(
-                padding: const EdgeInsets.all(48),
+                padding: EdgeInsets.all(48.w),
                 child: ConstrainedBox(
-                  constraints: const BoxConstraints(maxWidth: 480),
+                  constraints: BoxConstraints(maxWidth: 480.w),
                   child: Form(
                     key: formKey,
                     child: Column(
@@ -74,11 +77,11 @@ class TabletLogin extends StatelessWidget {
                           style: Theme.of(context).textTheme.headlineLarge,
                           textAlign: TextAlign.center,
                         ),
-                        const SizedBox(height: 40),
+                        SizedBox(height: 40.h),
                         ResponsiveFormField(
                           label: 'Email',
                           hint: 'ornek@email.com',
-                          controller: emailController,
+                          controller: controller.emailController,
                           keyboardType: TextInputType.emailAddress,
                           validator: (value) {
                             if (value == null || value.isEmpty) {
@@ -90,11 +93,11 @@ class TabletLogin extends StatelessWidget {
                             return null;
                           },
                         ),
-                        const SizedBox(height: 24),
+                        SizedBox(height: 24.h),
                         ResponsiveFormField(
                           label: 'Şifre',
                           hint: '••••••••',
-                          controller: passwordController,
+                          controller: controller.passwordController,
                           isPassword: true,
                           validator: (value) {
                             if (value == null || value.isEmpty) {
@@ -106,86 +109,88 @@ class TabletLogin extends StatelessWidget {
                             return null;
                           },
                         ),
-                        const SizedBox(height: 16),
+                        SizedBox(height: 16.h),
                         Align(
                           alignment: Alignment.centerRight,
                           child: TextButton(
                             onPressed: () {
                               Get.toNamed('/forgot-password');
                             },
-                            child: const Text('Şifremi Unuttum'),
+                            child: Text(
+                              'Şifremi Unuttum',
+                              style: TextStyle(fontSize: 14.sp),
+                            ),
                           ),
                         ),
-                        const SizedBox(height: 32),
+                        SizedBox(height: 32.h),
                         Obx(() {
-                          final isLoading = authController.isLoading;
+                          final isLoading = controller.isLoading;
                           return ElevatedButton(
-                            onPressed: isLoading
+                            onPressed: isLoading.value
                                 ? null
                                 : () {
                                     if (formKey.currentState!.validate()) {
-                                      authController
-                                          .signInWithEmailAndPassword();
+                                      controller.signInWithEmailAndPassword();
                                     }
                                   },
                             style: ElevatedButton.styleFrom(
-                              padding: const EdgeInsets.symmetric(vertical: 20),
+                              padding: EdgeInsets.symmetric(vertical: 20.h),
                               shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(12),
+                                borderRadius: BorderRadius.circular(12.r),
                               ),
                             ),
-                            child: isLoading
+                            child: isLoading.value
                                 ? const AdaptiveLoadingIndicator(
                                     color: Colors.white,
                                   )
-                                : const Text(
+                                : Text(
                                     'Giriş Yap',
-                                    style: TextStyle(fontSize: 16),
+                                    style: TextStyle(fontSize: 16.sp),
                                   ),
                           );
                         }),
-                        const SizedBox(height: 32),
-                        const Row(
+                        SizedBox(height: 32.h),
+                        Row(
                           children: [
-                            Expanded(child: Divider()),
+                            const Expanded(child: Divider()),
                             Padding(
-                              padding: EdgeInsets.symmetric(horizontal: 24),
+                              padding: EdgeInsets.symmetric(horizontal: 24.w),
                               child: Text(
                                 'veya',
                                 style: TextStyle(
-                                  fontSize: 16,
+                                  fontSize: 16.sp,
                                   color: Colors.grey,
                                 ),
                               ),
                             ),
-                            Expanded(child: Divider()),
+                            const Expanded(child: Divider()),
                           ],
                         ),
-                        const SizedBox(height: 32),
+                        SizedBox(height: 32.h),
                         Row(
                           children: [
                             Expanded(
                               child: SocialLoginButton(
                                 text: 'Google',
                                 iconPath: 'assets/icons/google.png',
-                                onPressed: authController.signInWithGoogle,
+                                onPressed: controller.signInWithGoogle,
                                 backgroundColor: Colors.white,
                                 textColor: Colors.black87,
                               ),
                             ),
-                            const SizedBox(width: 16),
+                            SizedBox(width: 16.w),
                             Expanded(
                               child: SocialLoginButton(
                                 text: 'Facebook',
                                 iconPath: 'assets/icons/facebook.png',
                                 backgroundColor: const Color(0xFF1877F2),
                                 textColor: Colors.white,
-                                onPressed: authController.signInWithFacebook,
+                                onPressed: controller.signInWithFacebook,
                               ),
                             ),
                           ],
                         ),
-                        const SizedBox(height: 16),
+                        SizedBox(height: 16.h),
                         Row(
                           children: [
                             Expanded(
@@ -194,36 +199,36 @@ class TabletLogin extends StatelessWidget {
                                 iconPath: 'assets/icons/github.png',
                                 backgroundColor: Colors.black,
                                 textColor: Colors.white,
-                                onPressed: authController.signInWithGithub,
+                                onPressed: controller.signInWithGithub,
                               ),
                             ),
-                            const SizedBox(width: 16),
+                            SizedBox(width: 16.w),
                             Expanded(
                               child: SocialLoginButton(
                                 text: 'Apple',
                                 iconPath: 'assets/icons/apple.png',
                                 backgroundColor: Colors.black,
                                 textColor: Colors.white,
-                                onPressed: authController.signInWithApple,
+                                onPressed: controller.signInWithApple,
                               ),
                             ),
                           ],
                         ),
-                        const SizedBox(height: 32),
+                        SizedBox(height: 32.h),
                         Row(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
-                            const Text(
+                            Text(
                               'Hesabınız yok mu?',
-                              style: TextStyle(fontSize: 16),
+                              style: TextStyle(fontSize: 16.sp),
                             ),
                             TextButton(
                               onPressed: () {
                                 Get.toNamed('/signup');
                               },
-                              child: const Text(
+                              child: Text(
                                 'Kayıt Ol',
-                                style: TextStyle(fontSize: 16),
+                                style: TextStyle(fontSize: 16.sp),
                               ),
                             ),
                           ],

@@ -4,6 +4,7 @@ import '../models/user_profile_model.dart';
 import '../models/search_filter_model.dart';
 import '../services/discovery_service.dart';
 import '../controllers/auth_controller.dart';
+import 'package:flutter/material.dart';
 
 class DiscoveryController extends GetxController {
   final DiscoveryService _discoveryService = DiscoveryService();
@@ -226,5 +227,41 @@ class DiscoveryController extends GetxController {
         user.skills.isEmpty ? 0.0 : skillMatch / user.skills.length * 100;
 
     return skillPercentage.clamp(0.0, 100.0);
+  }
+
+  void cancelRequest(dynamic request) async {
+    try {
+      // Loading durumunu güncelle
+      isLoadingRequests.value = true;
+
+      // Backend servis çağrısı
+      await _discoveryService.cancelConnectionRequest(request.id);
+
+      // İsteği geri çek
+      outgoingRequests.remove(request);
+
+      // Başarılı bildirim göster
+      Get.snackbar(
+        'Başarılı',
+        'Bağlantı isteği geri çekildi',
+        snackPosition: SnackPosition.BOTTOM,
+        backgroundColor: Colors.green.withOpacity(0.1),
+        colorText: Colors.green,
+        duration: const Duration(seconds: 2),
+      );
+    } catch (e) {
+      // Hata durumunda bildirim göster
+      Get.snackbar(
+        'Hata',
+        'İstek geri çekilirken bir hata oluştu',
+        snackPosition: SnackPosition.BOTTOM,
+        backgroundColor: Colors.red.withOpacity(0.1),
+        colorText: Colors.red,
+        duration: const Duration(seconds: 2),
+      );
+    } finally {
+      // Loading durumunu güncelle
+      isLoadingRequests.value = false;
+    }
   }
 }

@@ -32,17 +32,15 @@ class GithubStatsModel {
   factory GithubStatsModel.fromJson(Map<String, dynamic> json) {
     return GithubStatsModel(
       username: json['username'] as String,
-      totalRepositories: json['totalRepositories'] as int,
-      totalContributions: json['totalContributions'] as int,
-      languageStats: Map<String, int>.from(json['languageStats'] as Map),
-      recentRepositories: List<Map<String, dynamic>>.from(
-        json['recentRepositories'] as List,
-      ),
-      contributionGraph:
-          Map<String, int>.from(json['contributionGraph'] as Map),
+      totalRepositories: json['total_repositories'] as int,
+      totalContributions: json['total_contributions'] as int,
+      languageStats: Map<String, int>.from(json['language_stats']),
+      recentRepositories:
+          List<Map<String, dynamic>>.from(json['recent_repositories']),
+      contributionGraph: Map<String, int>.from(json['contribution_graph']),
       followers: json['followers'] as int,
       following: json['following'] as int,
-      avatarUrl: json['avatarUrl'] as String?,
+      avatarUrl: json['avatar_url'] as String?,
       bio: json['bio'] as String?,
       location: json['location'] as String?,
       website: json['website'] as String?,
@@ -53,14 +51,14 @@ class GithubStatsModel {
   Map<String, dynamic> toJson() {
     return {
       'username': username,
-      'totalRepositories': totalRepositories,
-      'totalContributions': totalContributions,
-      'languageStats': languageStats,
-      'recentRepositories': recentRepositories,
-      'contributionGraph': contributionGraph,
+      'total_repositories': totalRepositories,
+      'total_contributions': totalContributions,
+      'language_stats': languageStats,
+      'recent_repositories': recentRepositories,
+      'contribution_graph': contributionGraph,
       'followers': followers,
       'following': following,
-      'avatarUrl': avatarUrl,
+      'avatar_url': avatarUrl,
       'bio': bio,
       'location': location,
       'website': website,

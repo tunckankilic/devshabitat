@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../../controllers/networking_controller.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 class ProfessionalToolsScreen extends StatelessWidget {
   final NetworkingController controller = Get.find<NetworkingController>();
@@ -9,304 +10,414 @@ class ProfessionalToolsScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final colorScheme = Theme.of(context).colorScheme;
-
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Profesyonel Araçlar'),
-        centerTitle: true,
-        backgroundColor: colorScheme.primaryContainer,
-        foregroundColor: colorScheme.onPrimaryContainer,
+        title: Text('Profesyonel Araçlar', style: TextStyle(fontSize: 18.sp)),
       ),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            _buildSkillGapAnalysis(context),
-            const SizedBox(height: 24),
-            _buildCareerProgressionTracker(context),
-            const SizedBox(height: 24),
-            _buildNetworkingGoals(context),
-            const SizedBox(height: 24),
-            _buildDataExport(context),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildSkillGapAnalysis(BuildContext context) {
-    return Card(
-      elevation: 0,
-      color: Theme.of(context).colorScheme.secondaryContainer,
-      child: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Text(
-                  'Yetenek Analizi',
-                  style: Theme.of(context).textTheme.titleLarge,
-                ),
-                IconButton(
-                  icon: const Icon(Icons.refresh),
-                  onPressed: () => controller.refreshAnalytics(),
-                ),
-              ],
-            ),
-            const SizedBox(height: 16),
-            Obx(() {
-              final stats = controller.networkStats.value;
-              return Column(
-                children: [
-                  for (var skill in stats.topSkills)
-                    Padding(
-                      padding: const EdgeInsets.only(bottom: 8.0),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(skill),
-                          const SizedBox(height: 4),
-                          LinearProgressIndicator(
-                            value: (stats.skillDistribution[skill] ?? 0)
-                                .toDouble(),
-                            backgroundColor: Theme.of(context)
-                                .colorScheme
-                                .onSecondaryContainer
-                                .withOpacity(0.1),
-                            valueColor: AlwaysStoppedAnimation<Color>(
-                              Theme.of(context)
-                                  .colorScheme
-                                  .onSecondaryContainer,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                ],
-              );
-            }),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildCareerProgressionTracker(BuildContext context) {
-    return Card(
-      elevation: 0,
-      color: Theme.of(context).colorScheme.tertiaryContainer,
-      child: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              'Kariyer İlerlemesi',
-              style: Theme.of(context).textTheme.titleLarge,
-            ),
-            const SizedBox(height: 16),
-            LinearProgressIndicator(
-              value: 0.7,
-              backgroundColor: Theme.of(context)
-                  .colorScheme
-                  .onTertiaryContainer
-                  .withOpacity(0.1),
-              valueColor: AlwaysStoppedAnimation<Color>(
-                Theme.of(context).colorScheme.onTertiaryContainer,
+      body: ListView(
+        padding: EdgeInsets.all(16.r),
+        children: [
+          _buildSection(
+            'Profil Araçları',
+            [
+              _buildToolCard(
+                'Profil Analizi',
+                'Profilinizin performansını analiz edin',
+                Icons.analytics,
+                () {},
               ),
-            ),
-            const SizedBox(height: 16),
-            Wrap(
-              spacing: 8,
-              runSpacing: 8,
-              children: [
-                _buildProgressChip(context, 'Mentorluk: 3/5'),
-                _buildProgressChip(context, 'Sertifikalar: 2/3'),
-                _buildProgressChip(context, 'Projeler: 4/5'),
-                _buildProgressChip(context, 'Network: 80%'),
-              ],
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildNetworkingGoals(BuildContext context) {
-    return Card(
-      elevation: 0,
-      color: Theme.of(context).colorScheme.primaryContainer,
-      child: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              'Network Hedefleri',
-              style: Theme.of(context).textTheme.titleLarge,
-            ),
-            const SizedBox(height: 16),
-            _buildGoalItem(
-              context,
-              'Yeni Bağlantılar',
-              'Bu ay 10 yeni bağlantı kur',
-              0.6,
-            ),
-            const SizedBox(height: 8),
-            _buildGoalItem(
-              context,
-              'Mentorluk',
-              '2 yeni mentor bul',
-              0.5,
-            ),
-            const SizedBox(height: 8),
-            _buildGoalItem(
-              context,
-              'Etkinlikler',
-              '3 network etkinliğine katıl',
-              0.33,
-            ),
-            const SizedBox(height: 16),
-            FilledButton.icon(
-              onPressed: () {
-                // Yeni hedef ekleme
-                _showAddGoalDialog(context);
-              },
-              icon: const Icon(Icons.add),
-              label: const Text('Yeni Hedef'),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildDataExport(BuildContext context) {
-    return Card(
-      elevation: 0,
-      color: Theme.of(context).colorScheme.surfaceContainerHighest,
-      child: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              'Veri Dışa Aktarma',
-              style: Theme.of(context).textTheme.titleLarge,
-            ),
-            const SizedBox(height: 16),
-            Wrap(
-              spacing: 8,
-              runSpacing: 8,
-              children: [
-                FilledButton.tonalIcon(
-                  onPressed: () => _exportData(context, 'pdf'),
-                  icon: const Icon(Icons.picture_as_pdf),
-                  label: const Text('PDF Olarak Dışa Aktar'),
-                ),
-                FilledButton.tonalIcon(
-                  onPressed: () => _exportData(context, 'csv'),
-                  icon: const Icon(Icons.table_chart),
-                  label: const Text('CSV Olarak Dışa Aktar'),
-                ),
-                FilledButton.tonalIcon(
-                  onPressed: () => _exportData(context, 'json'),
-                  icon: const Icon(Icons.code),
-                  label: const Text('JSON Olarak Dışa Aktar'),
-                ),
-              ],
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildProgressChip(BuildContext context, String label) {
-    return Chip(
-      label: Text(label),
-      backgroundColor: Theme.of(context).colorScheme.tertiaryContainer,
-      side: BorderSide.none,
-    );
-  }
-
-  Widget _buildGoalItem(
-    BuildContext context,
-    String title,
-    String subtitle,
-    double progress,
-  ) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(title, style: Theme.of(context).textTheme.titleMedium),
-        const SizedBox(height: 4),
-        Text(subtitle, style: Theme.of(context).textTheme.bodyMedium),
-        const SizedBox(height: 8),
-        LinearProgressIndicator(
-          value: progress,
-          backgroundColor:
-              Theme.of(context).colorScheme.onPrimaryContainer.withOpacity(0.1),
-          valueColor: AlwaysStoppedAnimation<Color>(
-            Theme.of(context).colorScheme.onPrimaryContainer,
+              SizedBox(height: 8.h),
+              _buildToolCard(
+                'SEO Optimizasyonu',
+                'Profilinizi arama sonuçlarında öne çıkarın',
+                Icons.search,
+                () {},
+              ),
+            ],
           ),
-        ),
-      ],
-    );
-  }
-
-  void _showAddGoalDialog(BuildContext context) {
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Yeni Hedef Ekle'),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            TextField(
-              decoration: const InputDecoration(
-                labelText: 'Hedef Başlığı',
-                hintText: 'Örn: Yeni Bağlantılar',
+          SizedBox(height: 16.h),
+          _buildSection(
+            'Bağlantı Araçları',
+            [
+              _buildToolCard(
+                'Bağlantı Yöneticisi',
+                'Bağlantılarınızı organize edin',
+                Icons.people,
+                () {},
               ),
-            ),
-            const SizedBox(height: 16),
-            TextField(
-              decoration: const InputDecoration(
-                labelText: 'Hedef Açıklaması',
-                hintText: 'Örn: Bu ay 5 yeni bağlantı kur',
+              SizedBox(height: 8.h),
+              _buildToolCard(
+                'İçerik Paylaşımı',
+                'Bağlantılarınızla içerik paylaşın',
+                Icons.share,
+                () {},
               ),
-            ),
-          ],
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('İptal'),
+            ],
           ),
-          FilledButton(
-            onPressed: () {
-              // Hedef kaydetme işlemi
-              Navigator.pop(context);
-            },
-            child: const Text('Kaydet'),
+          SizedBox(height: 16.h),
+          _buildSection(
+            'İstatistikler',
+            [
+              _buildStatCard(
+                'Profil Görüntülenme',
+                '1.2K',
+                '+15%',
+                Icons.visibility,
+              ),
+              SizedBox(height: 8.h),
+              _buildStatCard(
+                'Etkileşim Oranı',
+                '%78',
+                '+5%',
+                Icons.trending_up,
+              ),
+            ],
           ),
         ],
       ),
     );
   }
 
-  void _exportData(BuildContext context, String format) {
-    // Dışa aktarma işlemi
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text('Veriler $format formatında dışa aktarılıyor...'),
-        behavior: SnackBarBehavior.floating,
+  Widget _buildSection(String title, List<Widget> children) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          title,
+          style: TextStyle(
+            fontSize: 20.sp,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+        SizedBox(height: 16.h),
+        ...children,
+      ],
+    );
+  }
+
+  Widget _buildToolCard(
+    String title,
+    String description,
+    IconData icon,
+    VoidCallback onTap,
+  ) {
+    return Card(
+      child: InkWell(
+        onTap: onTap,
+        child: Padding(
+          padding: EdgeInsets.all(16.r),
+          child: Row(
+            children: [
+              Icon(icon, size: 32.sp),
+              SizedBox(width: 16.w),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      title,
+                      style: TextStyle(
+                        fontSize: 18.sp,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    SizedBox(height: 4.h),
+                    Text(
+                      description,
+                      style: TextStyle(
+                        fontSize: 14.sp,
+                        color: Colors.grey[600],
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              Icon(Icons.chevron_right, size: 24.sp),
+            ],
+          ),
+        ),
       ),
+    );
+  }
+
+  Widget _buildStatCard(
+    String title,
+    String value,
+    String trend,
+    IconData icon,
+  ) {
+    final isPositive = trend.startsWith('+');
+    return Card(
+      child: Padding(
+        padding: EdgeInsets.all(16.r),
+        child: Row(
+          children: [
+            Icon(icon, size: 32.sp),
+            SizedBox(width: 16.w),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    title,
+                    style: TextStyle(
+                      fontSize: 16.sp,
+                      color: Colors.grey[600],
+                    ),
+                  ),
+                  SizedBox(height: 4.h),
+                  Row(
+                    children: [
+                      Text(
+                        value,
+                        style: TextStyle(
+                          fontSize: 24.sp,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      SizedBox(width: 8.w),
+                      Icon(
+                        isPositive ? Icons.arrow_upward : Icons.arrow_downward,
+                        size: 16.sp,
+                        color: isPositive ? Colors.green : Colors.red,
+                      ),
+                      Text(
+                        trend,
+                        style: TextStyle(
+                          fontSize: 14.sp,
+                          color: isPositive ? Colors.green : Colors.red,
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  void _showExportOptions() {
+    Get.bottomSheet(
+      Container(
+        padding: EdgeInsets.all(16.r),
+        decoration: BoxDecoration(
+          color: Theme.of(Get.context!).scaffoldBackgroundColor,
+          borderRadius: BorderRadius.vertical(
+            top: Radius.circular(16.r),
+          ),
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text(
+              'Veri Dışa Aktarma',
+              style: TextStyle(
+                fontSize: 18.sp,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            SizedBox(height: 16.h),
+            ListTile(
+              leading: Icon(Icons.picture_as_pdf, size: 24.sp),
+              title: Text(
+                'PDF Olarak Dışa Aktar',
+                style: TextStyle(fontSize: 16.sp),
+              ),
+              onTap: () {
+                Get.back();
+                _exportData('pdf');
+              },
+            ),
+            ListTile(
+              leading: Icon(Icons.table_chart, size: 24.sp),
+              title: Text(
+                'CSV Olarak Dışa Aktar',
+                style: TextStyle(fontSize: 16.sp),
+              ),
+              onTap: () {
+                Get.back();
+                _exportData('csv');
+              },
+            ),
+            ListTile(
+              leading: Icon(Icons.code, size: 24.sp),
+              title: Text(
+                'JSON Olarak Dışa Aktar',
+                style: TextStyle(fontSize: 16.sp),
+              ),
+              onTap: () {
+                Get.back();
+                _exportData('json');
+              },
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  void _exportData(String format) {
+    Get.snackbar(
+      'Dışa Aktarma',
+      'Veriler $format formatında dışa aktarılıyor...',
+      snackPosition: SnackPosition.BOTTOM,
+      margin: EdgeInsets.all(16.r),
+      borderRadius: 8.r,
+      duration: const Duration(seconds: 2),
+    );
+  }
+
+  void _showAnalyticsDetails() {
+    Get.bottomSheet(
+      Container(
+        padding: EdgeInsets.all(16.r),
+        decoration: BoxDecoration(
+          color: Theme.of(Get.context!).scaffoldBackgroundColor,
+          borderRadius: BorderRadius.vertical(
+            top: Radius.circular(16.r),
+          ),
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text(
+              'Detaylı Analiz',
+              style: TextStyle(
+                fontSize: 18.sp,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            SizedBox(height: 16.h),
+            _buildAnalyticItem(
+              'Profil Görüntülenme',
+              '1.2K',
+              '+15%',
+              Icons.visibility,
+            ),
+            SizedBox(height: 8.h),
+            _buildAnalyticItem(
+              'Etkileşim Oranı',
+              '%78',
+              '+5%',
+              Icons.trending_up,
+            ),
+            SizedBox(height: 8.h),
+            _buildAnalyticItem(
+              'Bağlantı Artışı',
+              '45',
+              '+8%',
+              Icons.people,
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildAnalyticItem(
+    String title,
+    String value,
+    String trend,
+    IconData icon,
+  ) {
+    final isPositive = trend.startsWith('+');
+    return ListTile(
+      leading: Icon(icon, size: 24.sp),
+      title: Text(
+        title,
+        style: TextStyle(fontSize: 16.sp),
+      ),
+      trailing: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Text(
+            value,
+            style: TextStyle(
+              fontSize: 16.sp,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+          SizedBox(width: 8.w),
+          Icon(
+            isPositive ? Icons.arrow_upward : Icons.arrow_downward,
+            size: 16.sp,
+            color: isPositive ? Colors.green : Colors.red,
+          ),
+          Text(
+            trend,
+            style: TextStyle(
+              fontSize: 14.sp,
+              color: isPositive ? Colors.green : Colors.red,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _showSkillGapAnalysis() {
+    Get.bottomSheet(
+      Container(
+        padding: EdgeInsets.all(16.r),
+        decoration: BoxDecoration(
+          color: Theme.of(Get.context!).scaffoldBackgroundColor,
+          borderRadius: BorderRadius.vertical(
+            top: Radius.circular(16.r),
+          ),
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text(
+              'Yetenek Analizi',
+              style: TextStyle(
+                fontSize: 18.sp,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            SizedBox(height: 16.h),
+            _buildSkillBar('Flutter', 85, Colors.blue),
+            SizedBox(height: 8.h),
+            _buildSkillBar('Dart', 80, Colors.green),
+            SizedBox(height: 8.h),
+            _buildSkillBar('Firebase', 75, Colors.orange),
+            SizedBox(height: 8.h),
+            _buildSkillBar('UI/UX', 70, Colors.purple),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildSkillBar(String skill, double percentage, Color color) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Text(
+              skill,
+              style: TextStyle(fontSize: 14.sp),
+            ),
+            Text(
+              '${percentage.toInt()}%',
+              style: TextStyle(fontSize: 14.sp),
+            ),
+          ],
+        ),
+        SizedBox(height: 4.h),
+        LinearProgressIndicator(
+          value: percentage / 100,
+          backgroundColor: color.withOpacity(0.2),
+          valueColor: AlwaysStoppedAnimation<Color>(color),
+          minHeight: 8.h,
+          borderRadius: BorderRadius.circular(4.r),
+        ),
+      ],
     );
   }
 }

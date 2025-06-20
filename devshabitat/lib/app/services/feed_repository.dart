@@ -18,7 +18,9 @@ class FeedRepository {
           .limit(pageSize)
           .startAfter([(page - 1) * pageSize]).get();
 
-      return snapshot.docs.map((doc) => FeedItem.fromFirestore(doc)).toList();
+      return snapshot.docs
+          .map((doc) => FeedItem.fromMap(doc.data(), id: doc.id))
+          .toList();
     } catch (e) {
       rethrow;
     }

@@ -32,7 +32,7 @@ class SocialLoginButton extends StatelessWidget {
       final isLoading = Get.find<AuthController>().isLoading;
 
       return ElevatedButton(
-        onPressed: isLoading ? null : onPressed,
+        onPressed: isLoading.value ? null : onPressed,
         style: ElevatedButton.styleFrom(
           backgroundColor: backgroundColor,
           foregroundColor: textColor,
@@ -58,7 +58,7 @@ class SocialLoginButton extends StatelessWidget {
                 fontWeight: FontWeight.w500,
               ),
             ),
-            if (isLoading) ...[
+            if (isLoading.value) ...[
               const SizedBox(width: 12),
               SizedBox(
                 height: 20,

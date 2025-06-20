@@ -15,7 +15,7 @@ class FeedRepository {
           .get();
 
       return querySnapshot.docs
-          .map((doc) => FeedItem.fromFirestore(doc))
+          .map((doc) => FeedItem.fromMap(doc.data(), id: doc.id))
           .toList();
     } catch (e) {
       throw Exception('Feed öğeleri yüklenirken hata oluştu: $e');
@@ -23,11 +23,11 @@ class FeedRepository {
   }
 
   Future<void> createFeedItem(FeedItem item) async {
-    await _firestore.collection('feed').add(item.toJson());
+    await _firestore.collection('feed').add(item.toMap());
   }
 
   Future<void> updateFeedItem(FeedItem item) async {
-    await _firestore.collection('feed').doc(item.id).update(item.toJson());
+    await _firestore.collection('feed').doc(item.id).update(item.toMap());
   }
 
   Future<void> deleteFeedItem(String id) async {

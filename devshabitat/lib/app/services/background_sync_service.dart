@@ -4,7 +4,7 @@ import 'package:get/get.dart';
 import 'package:devshabitat/app/models/message_model.dart';
 
 class BackgroundSyncService extends GetxService {
-  final _syncQueue = <Message>[].obs;
+  final _syncQueue = <MessageModel>[].obs;
   final _isSyncing = false.obs;
   final _networkStatus = Rx<ConnectivityResult>(ConnectivityResult.none);
   final _syncStatus = ''.obs;
@@ -44,7 +44,7 @@ class BackgroundSyncService extends GetxService {
     });
   }
 
-  Future<void> addToSyncQueue(Message message) async {
+  Future<void> addToSyncQueue(MessageModel message) async {
     _syncQueue.add(message);
     _updateSyncStatus(
         'Senkronizasyon kuyruğuna eklendi: ${_syncQueue.length} öğe');
@@ -85,7 +85,7 @@ class BackgroundSyncService extends GetxService {
     }
   }
 
-  Future<void> _syncMessage(Message message) async {
+  Future<void> _syncMessage(MessageModel message) async {
     // Sunucu ile senkronizasyon mantığı burada uygulanacak
     await Future.delayed(
         const Duration(seconds: 1)); // Simüle edilmiş ağ gecikmesi

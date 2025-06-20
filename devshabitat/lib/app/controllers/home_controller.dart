@@ -7,16 +7,22 @@ import '../repositories/feed_repository.dart';
 import 'package:flutter/foundation.dart';
 import '../models/notification_model.dart';
 import '../services/notification_service.dart';
+import '../services/feed_service.dart';
+import '../services/connection_service.dart';
+import '../controllers/auth_controller.dart';
 
 class HomeController extends GetxController {
   final _authRepository = Get.find<AuthRepository>();
   final _githubService = Get.find<GithubService>();
   final _notificationService = Get.find<NotificationService>();
   final FeedRepository _feedRepository;
+  final FeedService _feedService = Get.find();
+  final ConnectionService _connectionService = Get.find();
+  final AuthController _authController = Get.find();
 
   final RxBool isLoading = false.obs;
   final RxList activityFeed = [].obs;
-  final RxMap githubStats = {}.obs;
+  final RxMap<String, dynamic> githubStats = <String, dynamic>{}.obs;
   final RxInt connectionCount = 0.obs;
   final RxBool hasError = false.obs;
   final RxString errorMessage = ''.obs;
@@ -67,7 +73,7 @@ class HomeController extends GetxController {
   }
 
   Future<void> refreshData() async {
-    await loadDashboardData();
+    await loadData();
   }
 
   Future<void> loadData() async {
@@ -76,13 +82,63 @@ class HomeController extends GetxController {
       hasError.value = false;
       errorMessage.value = '';
 
-      items.value = await _feedRepository.getFeedItems();
+      // Paralel veri yükleme
+      await Future.wait([
+        _loadFeedItems(),
+        _loadConnectionCount(),
+        _loadGithubStats(),
+      ]);
     } catch (e) {
       hasError.value = true;
-      errorMessage.value = 'Veriler yüklenirken bir hata oluştu';
-      SnackbarService.showError('Veriler yüklenemedi');
+      errorMessage.value =
+          'Veriler yüklenirken bir hata oluştu: ${e.toString()}';
     } finally {
       isLoading.value = false;
+    }
+  }
+
+  Future<void> _loadFeedItems() async {
+    try {
+      final feedItems = await _feedService.getFeedItems();
+      items.assignAll(feedItems);
+    } catch (e) {
+      print('Feed yüklenirken hata: $e');
+      rethrow;
+    }
+  }
+
+  Future<void> _loadConnectionCount() async {
+    try {
+      final count = await _connectionService.getConnectionCount();
+      connectionCount.value = count;
+    } catch (e) {
+      print('Bağlantı sayısı yüklenirken hata: $e');
+      rethrow;
+    }
+  }
+
+  Future<void> _loadGithubStats() async {
+    try {
+      final username = _authController.currentUser?.displayName;
+      if (username == null) return;
+
+      final userInfo = await _githubService.getUserInfo(username);
+      final repos = await _githubService.getUserRepos(username);
+      final contributedRepos =
+          await _githubService.getContributedRepos(username);
+      final starredRepos = await _githubService.getStarredRepos(username);
+      final commitStats = await _githubService.getCommitStats(username);
+
+      githubStats.assignAll({
+        'userInfo': userInfo,
+        'repos': repos,
+        'contributedRepos': contributedRepos,
+        'starredRepos': starredRepos,
+        'commitStats': commitStats,
+      });
+    } catch (e) {
+      print('GitHub istatistikleri yüklenirken hata: $e');
+      rethrow;
     }
   }
 
@@ -93,16 +149,14 @@ class HomeController extends GetxController {
 
   void onLike(FeedItem item) async {
     try {
-      await _feedRepository.likeFeedItem(item.id);
-      final index = items.indexWhere((i) => i.id == item.id);
-      if (index != -1) {
-        items[index] = item.copyWith(
-          likesCount: item.likesCount + 1,
-          isLiked: true,
-        );
-      }
+      await _feedService.likeFeedItem(item.id);
+      await _loadFeedItems(); // Güncel listeyi yükle
     } catch (e) {
-      Get.snackbar('Hata', 'Beğeni işlemi başarısız oldu');
+      Get.snackbar(
+        'Hata',
+        'Beğeni işlemi başarısız oldu',
+        snackPosition: SnackPosition.BOTTOM,
+      );
     }
   }
 
@@ -112,17 +166,14 @@ class HomeController extends GetxController {
 
   void onShare(FeedItem item) async {
     try {
-      await _feedRepository.shareFeedItem(item.id);
-      final index = items.indexWhere((i) => i.id == item.id);
-      if (index != -1) {
-        items[index] = item.copyWith(
-          sharesCount: item.sharesCount + 1,
-          isShared: true,
-        );
-      }
-      Get.snackbar('Başarılı', 'Gönderi paylaşıldı');
+      await _feedService.shareFeedItem(item.id);
+      await _loadFeedItems(); // Güncel listeyi yükle
     } catch (e) {
-      Get.snackbar('Hata', 'Paylaşım işlemi başarısız oldu');
+      Get.snackbar(
+        'Hata',
+        'Paylaşım işlemi başarısız oldu',
+        snackPosition: SnackPosition.BOTTOM,
+      );
     }
   }
 

@@ -1,17 +1,18 @@
-import 'package:devshabitat/app/controllers/auth_controller.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import '../../../controllers/auth_controller.dart';
+import '../../../controllers/responsive_controller.dart';
+import '../../base/base_view.dart';
 import '../widgets/responsive_form_field.dart';
 import '../widgets/social_login_button.dart';
 import '../widgets/adaptive_loading_indicator.dart';
 
-class SmallPhoneLogin extends StatelessWidget {
+class SmallPhoneLogin extends BaseView<AuthController> {
   const SmallPhoneLogin({super.key});
 
   @override
-  Widget build(BuildContext context) {
-    final AuthController authController = Get.find<AuthController>();
+  Widget buildView(BuildContext context) {
     final formKey = GlobalKey<FormState>();
 
     return Scaffold(
@@ -46,7 +47,7 @@ class SmallPhoneLogin extends StatelessWidget {
                 ResponsiveFormField(
                   label: 'Email',
                   hint: 'ornek@email.com',
-                  controller: authController.emailController,
+                  controller: controller.emailController,
                   keyboardType: TextInputType.emailAddress,
                   validator: (value) {
                     if (value == null || value.isEmpty) {
@@ -62,7 +63,7 @@ class SmallPhoneLogin extends StatelessWidget {
                 ResponsiveFormField(
                   label: 'Şifre',
                   hint: '••••••••',
-                  controller: authController.passwordController,
+                  controller: controller.passwordController,
                   isPassword: true,
                   validator: (value) {
                     if (value == null || value.isEmpty) {
@@ -86,13 +87,13 @@ class SmallPhoneLogin extends StatelessWidget {
                 ),
                 SizedBox(height: 24.h),
                 Obx(() {
-                  final isLoading = authController.isLoading;
+                  final isLoading = controller.isLoading;
                   return ElevatedButton(
-                    onPressed: isLoading
+                    onPressed: isLoading.value
                         ? null
                         : () {
                             if (formKey.currentState!.validate()) {
-                              authController.signInWithEmailAndPassword();
+                              controller.signInWithEmailAndPassword();
                             }
                           },
                     style: ElevatedButton.styleFrom(
@@ -101,7 +102,7 @@ class SmallPhoneLogin extends StatelessWidget {
                         borderRadius: BorderRadius.circular(8.r),
                       ),
                     ),
-                    child: isLoading
+                    child: isLoading.value
                         ? const AdaptiveLoadingIndicator(color: Colors.white)
                         : const Text('Giriş Yap'),
                   );
@@ -121,7 +122,7 @@ class SmallPhoneLogin extends StatelessWidget {
                 SocialLoginButton(
                   text: 'Google ile Giriş Yap',
                   iconPath: 'assets/icons/google.png',
-                  onPressed: authController.signInWithGoogle,
+                  onPressed: controller.signInWithGoogle,
                   backgroundColor: Colors.white,
                   textColor: Colors.black87,
                 ),
@@ -131,7 +132,7 @@ class SmallPhoneLogin extends StatelessWidget {
                   iconPath: 'assets/icons/facebook.png',
                   backgroundColor: const Color(0xFF1877F2),
                   textColor: Colors.white,
-                  onPressed: authController.signInWithFacebook,
+                  onPressed: controller.signInWithFacebook,
                 ),
                 SizedBox(height: 12.h),
                 SocialLoginButton(
@@ -139,7 +140,7 @@ class SmallPhoneLogin extends StatelessWidget {
                   iconPath: 'assets/icons/github.png',
                   backgroundColor: Colors.black,
                   textColor: Colors.white,
-                  onPressed: authController.signInWithGithub,
+                  onPressed: controller.signInWithGithub,
                 ),
                 SizedBox(height: 12.h),
                 SocialLoginButton(
@@ -147,7 +148,7 @@ class SmallPhoneLogin extends StatelessWidget {
                   iconPath: 'assets/icons/apple.png',
                   backgroundColor: Colors.black,
                   textColor: Colors.white,
-                  onPressed: authController.signInWithApple,
+                  onPressed: controller.signInWithApple,
                 ),
                 SizedBox(height: 24.h),
                 Row(

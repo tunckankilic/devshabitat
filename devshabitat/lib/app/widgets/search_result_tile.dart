@@ -3,7 +3,7 @@ import 'package:devshabitat/app/models/message_model.dart';
 import 'package:timeago/timeago.dart' as timeago;
 
 class SearchResultTile extends StatelessWidget {
-  final Message searchResult;
+  final MessageModel searchResult;
   final VoidCallback onTap;
   final String highlightText;
 

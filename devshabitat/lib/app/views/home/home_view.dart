@@ -2,100 +2,84 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import '../../controllers/home_controller.dart';
+import '../../controllers/responsive_controller.dart';
+import '../base/base_view.dart';
 import 'widgets/profile_summary_card.dart';
 import 'widgets/connections_overview_card.dart';
 import 'widgets/quick_actions_card.dart';
 import 'widgets/activity_feed_card.dart';
 import 'widgets/github_stats_card.dart';
 import '../../widgets/loading_widget.dart';
-import '../base/refreshable_view.dart';
 
-class HomeView extends RefreshableView<HomeController> {
+class HomeView extends BaseView<HomeController> {
   const HomeView({super.key});
 
   @override
-  Future<void> onRefresh() async {
-    await controller.loadData();
-  }
+  Widget buildView(BuildContext context) {
+    final ResponsiveController responsive = Get.find<ResponsiveController>();
 
-  @override
-  Widget buildContent(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Ana Sayfa'),
+        title: Text(
+          'Ana Sayfa',
+          style: TextStyle(fontSize: 20.sp),
+        ),
+        actions: [
+          IconButton(
+            icon: Icon(Icons.notifications_none, size: 24.sp),
+            onPressed: () => Get.toNamed('/notifications'),
+          ),
+          IconButton(
+            icon: Icon(Icons.search, size: 24.sp),
+            onPressed: () => Get.toNamed('/search'),
+          ),
+        ],
       ),
-      body: Obx(() {
-        if (controller.isLoading.value) {
-          return const LoadingList();
-        }
-
-        if (controller.hasError.value) {
-          return Center(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                const Icon(Icons.error_outline, size: 48, color: Colors.red),
-                const SizedBox(height: 16),
-                Text(controller.errorMessage.value),
-                const SizedBox(height: 16),
-                ElevatedButton(
-                  onPressed: controller.loadData,
-                  child: const Text('Tekrar Dene'),
-                ),
-              ],
-            ),
-          );
-        }
-
-        if (controller.items.isEmpty) {
-          return const Center(
-            child: Text('Henüz içerik yok'),
-          );
-        }
-
-        return ListView.separated(
-          padding: const EdgeInsets.all(16),
-          itemCount: controller.items.length,
-          separatorBuilder: (_, __) => const SizedBox(height: 16),
-          itemBuilder: (context, index) {
-            final item = controller.items[index];
-            return Card(
-              child: ListTile(
-                leading: CircleAvatar(
-                  backgroundImage: item.imageUrl != null
-                      ? NetworkImage(item.imageUrl!)
-                      : null,
-                  child:
-                      item.imageUrl == null ? const Icon(Icons.person) : null,
-                ),
-                title: Text(item.content),
-                trailing: const Icon(Icons.chevron_right),
-                onTap: () => controller.onItemTap(item),
-              ),
-            );
-          },
-        );
-      }),
-    );
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
       body: SafeArea(
         child: Padding(
           padding: EdgeInsets.all(16.w),
-          child: LayoutBuilder(
-            builder: (context, constraints) {
-              if (constraints.maxWidth > 1200) {
-                return _buildDesktopLayout();
-              } else if (constraints.maxWidth > 600) {
-                return _buildTabletLayout();
-              } else {
-                return _buildMobileLayout();
-              }
-            },
-          ),
+          child: Obx(() {
+            if (controller.isLoading.value) {
+              return const LoadingList();
+            }
+
+            if (controller.hasError.value) {
+              return Center(
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Icon(Icons.error_outline, size: 48.sp, color: Colors.red),
+                    SizedBox(height: 16.h),
+                    Text(
+                      controller.errorMessage.value,
+                      style: TextStyle(fontSize: 16.sp),
+                      textAlign: TextAlign.center,
+                    ),
+                    SizedBox(height: 16.h),
+                    ElevatedButton(
+                      onPressed: controller.loadData,
+                      child: Text(
+                        'Tekrar Dene',
+                        style: TextStyle(fontSize: 16.sp),
+                      ),
+                    ),
+                  ],
+                ),
+              );
+            }
+
+            return LayoutBuilder(
+              builder: (context, constraints) {
+                if (constraints.maxWidth > 1200.w) {
+                  return _buildDesktopLayout();
+                } else if (constraints.maxWidth > 600.w) {
+                  return _buildTabletLayout();
+                } else {
+                  return _buildMobileLayout();
+                }
+              },
+            );
+          }),
         ),
       ),
     );
@@ -122,7 +106,12 @@ class HomeView extends RefreshableView<HomeController> {
             children: [
               Obx(() {
                 if (controller.items.isEmpty) {
-                  return const Center(child: Text('Henüz içerik yok'));
+                  return Center(
+                    child: Text(
+                      'Henüz içerik yok',
+                      style: TextStyle(fontSize: 16.sp),
+                    ),
+                  );
                 }
                 return ActivityFeedCard(
                   feedItem: controller.items.first,
@@ -182,7 +171,12 @@ class HomeView extends RefreshableView<HomeController> {
         SizedBox(height: 16.h),
         Obx(() {
           if (controller.items.isEmpty) {
-            return const Center(child: Text('Henüz içerik yok'));
+            return Center(
+              child: Text(
+                'Henüz içerik yok',
+                style: TextStyle(fontSize: 16.sp),
+              ),
+            );
           }
           return ActivityFeedCard(
             feedItem: controller.items.first,
@@ -209,7 +203,12 @@ class HomeView extends RefreshableView<HomeController> {
           SizedBox(height: 16.h),
           Obx(() {
             if (controller.items.isEmpty) {
-              return const Center(child: Text('Henüz içerik yok'));
+              return Center(
+                child: Text(
+                  'Henüz içerik yok',
+                  style: TextStyle(fontSize: 16.sp),
+                ),
+              );
             }
             return ActivityFeedCard(
               feedItem: controller.items.first,

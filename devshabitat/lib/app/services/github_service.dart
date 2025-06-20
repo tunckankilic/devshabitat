@@ -14,127 +14,174 @@ class GithubService extends GetxService {
       final response = await http.get(
         Uri.parse('$_baseUrl/users/$username'),
         headers: {
-          'Accept': 'application/vnd.github.v3+json',
           'Authorization': 'Bearer $_token',
+          'Accept': 'application/vnd.github.v3+json',
         },
       );
 
       if (response.statusCode == 200) {
         return json.decode(response.body);
       } else {
-        throw Exception(
-            'GitHub kullanıcı bilgileri alınamadı: ${response.statusCode}');
+        throw 'GitHub API error: ${response.statusCode}';
       }
     } catch (e) {
-      throw Exception(
-          'GitHub kullanıcı bilgileri alınırken bir hata oluştu: $e');
+      print('GitHub kullanıcı bilgileri alınırken hata: $e');
+      rethrow;
     }
   }
 
-  // GitHub repo istatistiklerini getir
-  Future<List<Map<String, dynamic>>> getRepositories(String username) async {
+  // Kullanıcının repolarını getir
+  Future<List<Map<String, dynamic>>> getUserRepos(String username) async {
     try {
       final response = await http.get(
         Uri.parse('$_baseUrl/users/$username/repos'),
         headers: {
-          'Accept': 'application/vnd.github.v3+json',
           'Authorization': 'Bearer $_token',
+          'Accept': 'application/vnd.github.v3+json',
         },
       );
 
       if (response.statusCode == 200) {
-        return List<Map<String, dynamic>>.from(json.decode(response.body));
+        final List<dynamic> repos = json.decode(response.body);
+        return repos.cast<Map<String, dynamic>>();
       } else {
-        throw Exception(
-            'GitHub repo bilgileri alınamadı: ${response.statusCode}');
+        throw 'GitHub API error: ${response.statusCode}';
       }
     } catch (e) {
-      throw Exception('GitHub repo bilgileri alınırken bir hata oluştu: $e');
+      print('GitHub repoları alınırken hata: $e');
+      rethrow;
     }
   }
 
-  // GitHub katkı grafiğini getir
-  Future<Map<String, int>> getContributionGraph(String username) async {
+  // Kullanıcının katkıda bulunduğu repoları getir
+  Future<List<Map<String, dynamic>>> getContributedRepos(
+      String username) async {
     try {
       final response = await http.get(
-        Uri.parse('$_baseUrl/users/$username/contributions'),
+        Uri.parse('$_baseUrl/search/repositories?q=user:$username+fork:true'),
         headers: {
-          'Accept': 'application/vnd.github.v3+json',
           'Authorization': 'Bearer $_token',
+          'Accept': 'application/vnd.github.v3+json',
         },
       );
 
       if (response.statusCode == 200) {
-        // GitHub katkı grafiği HTML formatında döner
-        // Burada HTML'i parse edip Map'e çevirmeniz gerekiyor
-        // Örnek bir implementasyon:
-        final Map<String, int> contributions = {};
-        // HTML parsing işlemleri...
-        return contributions;
+        final Map<String, dynamic> data = json.decode(response.body);
+        final List<dynamic> repos = data['items'];
+        return repos.cast<Map<String, dynamic>>();
       } else {
-        throw Exception(
-            'GitHub katkı grafiği alınamadı: ${response.statusCode}');
+        throw 'GitHub API error: ${response.statusCode}';
       }
     } catch (e) {
-      throw Exception('GitHub katkı grafiği alınırken bir hata oluştu: $e');
+      print('GitHub katkıda bulunulan repolar alınırken hata: $e');
+      rethrow;
     }
   }
 
-  // GitHub dil istatistiklerini getir
-  Future<Map<String, int>> getLanguageStats(String username) async {
+  // Kullanıcının yıldızladığı repoları getir
+  Future<List<Map<String, dynamic>>> getStarredRepos(String username) async {
     try {
-      final repos = await getRepositories(username);
-      final Map<String, int> languageStats = {};
+      final response = await http.get(
+        Uri.parse('$_baseUrl/users/$username/starred'),
+        headers: {
+          'Authorization': 'Bearer $_token',
+          'Accept': 'application/vnd.github.v3+json',
+        },
+      );
+
+      if (response.statusCode == 200) {
+        final List<dynamic> repos = json.decode(response.body);
+        return repos.cast<Map<String, dynamic>>();
+      } else {
+        throw 'GitHub API error: ${response.statusCode}';
+      }
+    } catch (e) {
+      print('GitHub yıldızlı repolar alınırken hata: $e');
+      rethrow;
+    }
+  }
+
+  // Kullanıcının commit istatistiklerini getir
+  Future<Map<String, dynamic>> getCommitStats(String username) async {
+    try {
+      final response = await http.get(
+        Uri.parse('$_baseUrl/search/commits?q=author:$username'),
+        headers: {
+          'Authorization': 'Bearer $_token',
+          'Accept': 'application/vnd.github.cloak-preview+json',
+        },
+      );
+
+      if (response.statusCode == 200) {
+        return json.decode(response.body);
+      } else {
+        throw 'GitHub API error: ${response.statusCode}';
+      }
+    } catch (e) {
+      print('GitHub commit istatistikleri alınırken hata: $e');
+      rethrow;
+    }
+  }
+
+  Future<Map<String, dynamic>> getRepositoryStats(String username) async {
+    try {
+      final repos = await getUserRepos(username);
+
+      int totalStars = 0;
+      int totalForks = 0;
+      Map<String, int> languages = {};
 
       for (var repo in repos) {
-        final response = await http.get(
-          Uri.parse('$_baseUrl/repos/$username/${repo['name']}/languages'),
-          headers: {
-            'Accept': 'application/vnd.github.v3+json',
-            'Authorization': 'Bearer $_token',
-          },
-        );
+        totalStars += repo['stargazers_count'] as int;
+        totalForks += repo['forks_count'] as int;
 
-        if (response.statusCode == 200) {
-          final Map<String, int> repoLanguages =
-              Map<String, int>.from(json.decode(response.body));
-          repoLanguages.forEach((language, bytes) {
-            languageStats[language] = (languageStats[language] ?? 0) + bytes;
-          });
+        if (repo['language'] != null) {
+          languages[repo['language']] = (languages[repo['language']] ?? 0) + 1;
         }
       }
 
-      return languageStats;
+      final languageList = languages.entries.toList();
+      languageList.sort((a, b) => b.value.compareTo(a.value));
+      final topLanguages = languageList.take(5).map((e) => e.key).toList();
+
+      return {
+        'totalStars': totalStars,
+        'totalForks': totalForks,
+        'topLanguages': topLanguages,
+        'contributions': await _getContributionsCount(username),
+      };
     } catch (e) {
-      throw Exception(
-          'GitHub dil istatistikleri alınırken bir hata oluştu: $e');
+      print('GitHub repo istatistikleri alınırken hata: $e');
+      throw Exception('GitHub repo istatistikleri alınamadı');
     }
   }
 
-  // GitHub istatistiklerini getir
+  Future<int> _getContributionsCount(String username) async {
+    try {
+      final now = DateTime.now();
+      final oneYearAgo = DateTime(now.year - 1, now.month, now.day);
+
+      final events = await getUserRepos(username);
+
+      return events.length;
+    } catch (e) {
+      print('GitHub katkı sayısı alınırken hata: $e');
+      return 0;
+    }
+  }
+
   Future<GithubStatsModel> getGithubStats(String username) async {
     try {
       final userInfo = await getUserInfo(username);
-      final repos = await getRepositories(username);
-      final languageStats = await getLanguageStats(username);
-      final contributionGraph = await getContributionGraph(username);
+      final repoStats = await getRepositoryStats(username);
 
       return GithubStatsModel(
         username: username,
-        totalRepositories: repos.length,
-        totalContributions: userInfo['public_repos'] ?? 0,
-        languageStats: languageStats,
-        recentRepositories: repos
-            .take(5)
-            .map((repo) => {
-                  'name': repo['name'],
-                  'description': repo['description'],
-                  'stars': repo['stargazers_count'],
-                  'forks': repo['forks_count'],
-                  'language': repo['language'],
-                })
-            .toList(),
-        contributionGraph: contributionGraph,
+        totalRepositories: userInfo['public_repos'] ?? 0,
+        totalContributions: repoStats['contributions'] ?? 0,
+        languageStats: Map<String, int>.from(repoStats['languageStats'] ?? {}),
+        recentRepositories: [],
+        contributionGraph: {},
         followers: userInfo['followers'] ?? 0,
         following: userInfo['following'] ?? 0,
         avatarUrl: userInfo['avatar_url'],
@@ -144,29 +191,30 @@ class GithubService extends GetxService {
         company: userInfo['company'],
       );
     } catch (e) {
-      throw Exception('GitHub istatistikleri alınırken bir hata oluştu: $e');
+      print('GitHub istatistikleri alınırken hata: $e');
+      throw Exception('GitHub istatistikleri alınamadı');
     }
   }
 
-  // GitHub aktivitelerini getir
   Future<List<Map<String, dynamic>>> getUserActivities(String username) async {
     try {
       final response = await http.get(
         Uri.parse('$_baseUrl/users/$username/events'),
         headers: {
-          'Accept': 'application/vnd.github.v3+json',
           'Authorization': 'Bearer $_token',
+          'Accept': 'application/vnd.github.v3+json',
         },
       );
 
       if (response.statusCode == 200) {
-        return List<Map<String, dynamic>>.from(json.decode(response.body));
+        final List<dynamic> events = json.decode(response.body);
+        return events.cast<Map<String, dynamic>>();
       } else {
-        throw Exception(
-            'GitHub aktiviteleri alınamadı: ${response.statusCode}');
+        throw 'GitHub API error: ${response.statusCode}';
       }
     } catch (e) {
-      throw Exception('GitHub aktiviteleri alınırken bir hata oluştu: $e');
+      print('GitHub aktiviteleri alınırken hata: $e');
+      return [];
     }
   }
 }

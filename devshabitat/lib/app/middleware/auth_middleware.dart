@@ -2,6 +2,7 @@ import 'package:devshabitat/app/controllers/auth_controller.dart';
 import 'package:devshabitat/app/routes/app_pages.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import '../controllers/auth_state_controller.dart';
 
 class AuthMiddleware extends GetMiddleware {
   @override

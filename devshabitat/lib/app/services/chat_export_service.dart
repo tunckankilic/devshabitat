@@ -14,7 +14,7 @@ class ChatExportService extends GetxService {
 
   Future<void> exportToJson({
     required String conversationId,
-    required List<Message> messages,
+    required List<MessageModel> messages,
     String? title,
   }) async {
     _isExporting.value = true;
@@ -66,7 +66,7 @@ class ChatExportService extends GetxService {
 
   Future<void> exportToCsv({
     required String conversationId,
-    required List<Message> messages,
+    required List<MessageModel> messages,
     String? title,
   }) async {
     _isExporting.value = true;
