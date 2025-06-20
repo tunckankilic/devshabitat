@@ -6,6 +6,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:logger/logger.dart';
 import 'package:get/get.dart';
 import '../services/github_oauth_service.dart';
+import '../constants/app_strings.dart';
 
 abstract class IAuthRepository {
   Future<UserCredential> signInWithEmailAndPassword(
@@ -40,6 +41,11 @@ class AuthRepository implements IAuthRepository {
   final FacebookAuth _facebookAuth;
   final GitHubOAuthService _githubOAuthService;
   final Logger _logger;
+
+  // Getters for auth instances
+  FirebaseAuth get auth => _auth;
+  GoogleSignIn get googleSignIn => _googleSignIn;
+  FacebookAuth get facebookAuth => _facebookAuth;
 
   AuthRepository({
     FirebaseAuth? auth,
@@ -99,7 +105,7 @@ class AuthRepository implements IAuthRepository {
   Future<UserCredential> signInWithGoogle() async {
     try {
       final GoogleSignInAccount? googleUser = await _googleSignIn.signIn();
-      if (googleUser == null) throw Exception('Google girişi iptal edildi');
+      if (googleUser == null) throw Exception(AppStrings.googleLoginCancelled);
 
       final GoogleSignInAuthentication googleAuth =
           await googleUser.authentication;
@@ -109,7 +115,7 @@ class AuthRepository implements IAuthRepository {
       );
 
       final userCredential = await _auth.signInWithCredential(credential);
-      await _handleSocialSignIn(userCredential.user!);
+      await handleSocialSignIn(userCredential.user!);
       return userCredential;
     } catch (e) {
       throw _handleAuthException(e);
@@ -119,43 +125,37 @@ class AuthRepository implements IAuthRepository {
   @override
   Future<UserCredential> signInWithGithub() async {
     try {
-      // GitHub OAuth akışını başlat
       final accessToken = await _githubOAuthService.getAccessToken();
 
       if (accessToken == null) {
-        _logger.w(
-            'GitHub OAuth akışı başarısız oldu veya kullanıcı tarafından iptal edildi');
-        throw Exception('GitHub ile giriş yapılamadı. Lütfen tekrar deneyin.');
+        _logger.w('GitHub OAuth flow failed or was cancelled by user');
+        throw Exception(AppStrings.githubLoginFailed);
       }
 
-      // Firebase kimlik doğrulaması
       final githubAuthCredential = GithubAuthProvider.credential(accessToken);
       final userCredential =
           await _auth.signInWithCredential(githubAuthCredential);
 
       if (userCredential.user == null) {
-        _logger.e('Firebase kimlik doğrulaması başarısız oldu');
-        throw Exception('Kimlik doğrulama hatası. Lütfen tekrar deneyin.');
+        _logger.e('Firebase authentication failed');
+        throw Exception(AppStrings.errorAuth);
       }
 
-      // Kullanıcı bilgilerini Firestore'a kaydet
-      await _handleSocialSignIn(userCredential.user!);
+      await handleSocialSignIn(userCredential.user!);
 
-      _logger.i('GitHub ile giriş başarılı: ${userCredential.user?.email}');
+      _logger.i('GitHub login successful: ${userCredential.user?.email}');
       return userCredential;
     } catch (e) {
-      _logger.e('GitHub ile giriş yaparken hata: $e');
+      _logger.e('Error during GitHub login: $e');
 
       if (e is FirebaseAuthException) {
         if (e.code == 'account-exists-with-different-credential') {
-          // Hesap zaten başka bir yöntemle kayıtlı
           final existingEmail = e.email;
           if (existingEmail != null) {
             final methods =
                 await _auth.fetchSignInMethodsForEmail(existingEmail);
-            throw Exception(
-                'Bu e-posta adresi ($existingEmail) zaten ${methods.join(", ")} ile kayıtlı. '
-                'Lütfen bu yöntemlerden birini kullanın.');
+            throw Exception(AppStrings.emailAlreadyInUseWithProvider
+                .replaceAll('{provider}', methods.join(", ")));
           }
         }
       }
@@ -180,7 +180,7 @@ class AuthRepository implements IAuthRepository {
       );
 
       final userCredential = await _auth.signInWithCredential(oauthCredential);
-      await _handleSocialSignIn(userCredential.user!);
+      await handleSocialSignIn(userCredential.user!);
       return userCredential;
     } catch (e) {
       throw _handleAuthException(e);
@@ -192,7 +192,7 @@ class AuthRepository implements IAuthRepository {
     try {
       final LoginResult result = await _facebookAuth.login();
       if (result.status != LoginStatus.success) {
-        throw Exception('Facebook girişi başarısız');
+        throw Exception(AppStrings.facebookLoginFailed);
       }
 
       final AccessToken accessToken = result.accessToken!;
@@ -200,7 +200,7 @@ class AuthRepository implements IAuthRepository {
           FacebookAuthProvider.credential(accessToken.token);
 
       final userCredential = await _auth.signInWithCredential(credential);
-      await _handleSocialSignIn(userCredential.user!);
+      await handleSocialSignIn(userCredential.user!);
       return userCredential;
     } catch (e) {
       throw _handleAuthException(e);
@@ -435,8 +435,8 @@ class AuthRepository implements IAuthRepository {
   @override
   User? get currentUser => _auth.currentUser;
 
-  // Yardımcı metodlar
-  Future<void> _handleSocialSignIn(User user) async {
+  // Sosyal giriş işleme metodunu public yap
+  Future<void> handleSocialSignIn(User user) async {
     try {
       final userDoc = await _firestore.collection('users').doc(user.uid).get();
 
@@ -476,35 +476,52 @@ class AuthRepository implements IAuthRepository {
     if (e is FirebaseAuthException) {
       switch (e.code) {
         case 'user-not-found':
-          return Exception('Kullanıcı bulunamadı');
+          return Exception(AppStrings.errorUserNotFound);
         case 'wrong-password':
-          return Exception('Hatalı şifre');
+          return Exception(AppStrings.errorWrongPassword);
         case 'email-already-in-use':
-          return Exception('Bu e-posta adresi zaten kullanımda');
+          return Exception(AppStrings.errorEmailInUse);
         case 'weak-password':
-          return Exception('Şifre çok zayıf');
+          return Exception(AppStrings.errorWeakPassword);
         case 'invalid-email':
-          return Exception('Geçersiz e-posta adresi');
+          return Exception(AppStrings.errorInvalidEmail);
         case 'operation-not-allowed':
-          return Exception('Bu işlem şu anda kullanılamıyor');
+          return Exception(AppStrings.errorOperationNotAllowed);
         case 'account-exists-with-different-credential':
-          return Exception(
-              'Bu e-posta adresi farklı bir giriş yöntemi ile kullanılıyor');
+          return Exception(AppStrings.errorAccountExists);
         case 'requires-recent-login':
-          return Exception(
-              'Bu işlem için son zamanlarda giriş yapmanız gerekiyor');
+          return Exception(AppStrings.errorRequiresRecentLogin);
         case 'credential-already-in-use':
-          return Exception('Bu kimlik bilgisi zaten kullanımda');
+          return Exception(AppStrings.errorCredentialInUse);
         case 'provider-already-linked':
-          return Exception('Bu giriş yöntemi zaten bağlı');
+          return Exception(AppStrings.errorProviderAlreadyLinked);
         case 'no-such-provider':
-          return Exception('Böyle bir giriş yöntemi bulunamadı');
+          return Exception(AppStrings.errorNoSuchProvider);
         case 'invalid-credential':
-          return Exception('Geçersiz kimlik bilgisi');
+          return Exception(AppStrings.errorInvalidCredential);
         default:
-          return Exception('Kimlik doğrulama hatası: ${e.message}');
+          return Exception('${AppStrings.errorGeneric}: ${e.message}');
       }
     }
-    return Exception('Beklenmeyen bir hata oluştu: $e');
+    return Exception('${AppStrings.errorGeneric}: $e');
+  }
+
+  // GitHub metodları
+  Future<String?> getGithubAccessToken() async {
+    try {
+      return await _githubOAuthService.getAccessToken();
+    } catch (e) {
+      _logger.e('GitHub access token alınamadı: $e');
+      throw _handleAuthException(e);
+    }
+  }
+
+  Future<Map<String, dynamic>?> getGithubUserInfo(String accessToken) async {
+    try {
+      return await _githubOAuthService.getUserInfo(accessToken);
+    } catch (e) {
+      _logger.e('GitHub kullanıcı bilgileri alınamadı: $e');
+      throw _handleAuthException(e);
+    }
   }
 }

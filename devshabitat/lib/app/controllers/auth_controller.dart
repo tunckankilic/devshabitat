@@ -4,6 +4,9 @@ import 'package:firebase_auth/firebase_auth.dart';
 import '../repositories/auth_repository.dart';
 import '../core/services/error_handler_service.dart';
 import '../routes/app_pages.dart';
+import 'package:google_sign_in/google_sign_in.dart';
+import 'package:sign_in_with_apple/sign_in_with_apple.dart';
+import 'package:flutter_facebook_auth/flutter_facebook_auth.dart';
 
 enum AuthState {
   initial,
@@ -109,7 +112,37 @@ class AuthController extends GetxController {
     try {
       _isLoading.value = true;
       _lastError.value = '';
-      await _authRepository.signInWithGoogle();
+
+      // Google ile giriş yap
+      final GoogleSignInAccount? googleUser =
+          await _authRepository.googleSignIn.signIn();
+      if (googleUser == null) throw Exception('Google girişi iptal edildi');
+
+      // Email kontrolü yap
+      final methods = await _authRepository.auth
+          .fetchSignInMethodsForEmail(googleUser.email);
+      if (methods.isEmpty) {
+        // Kullanıcı kayıtlı değil, kayıt sayfasına yönlendir
+        Get.toNamed(Routes.REGISTER, arguments: {
+          'email': googleUser.email,
+          'displayName': googleUser.displayName,
+          'photoURL': googleUser.photoUrl,
+          'provider': 'google'
+        });
+        return;
+      }
+
+      // Kullanıcı kayıtlı, normal giriş işlemine devam et
+      final GoogleSignInAuthentication googleAuth =
+          await googleUser.authentication;
+      final credential = GoogleAuthProvider.credential(
+        accessToken: googleAuth.accessToken,
+        idToken: googleAuth.idToken,
+      );
+
+      final userCredential =
+          await _authRepository.auth.signInWithCredential(credential);
+      await _authRepository.handleSocialSignIn(userCredential.user!);
       _errorHandler.handleSuccess('Google ile giriş başarılı');
     } catch (e) {
       _lastError.value = e.toString();
@@ -123,7 +156,41 @@ class AuthController extends GetxController {
     try {
       _isLoading.value = true;
       _lastError.value = '';
-      await _authRepository.signInWithApple();
+
+      // Apple ile giriş yap
+      final appleCredential = await SignInWithApple.getAppleIDCredential(
+        scopes: [
+          AppleIDAuthorizationScopes.email,
+          AppleIDAuthorizationScopes.fullName,
+        ],
+      );
+
+      if (appleCredential.email != null) {
+        // Email kontrolü yap
+        final methods = await _authRepository.auth
+            .fetchSignInMethodsForEmail(appleCredential.email!);
+        if (methods.isEmpty) {
+          // Kullanıcı kayıtlı değil, kayıt sayfasına yönlendir
+          Get.toNamed(Routes.REGISTER, arguments: {
+            'email': appleCredential.email,
+            'displayName':
+                '${appleCredential.givenName ?? ''} ${appleCredential.familyName ?? ''}'
+                    .trim(),
+            'provider': 'apple'
+          });
+          return;
+        }
+      }
+
+      // Kullanıcı kayıtlı veya email null, normal giriş işlemine devam et
+      final oauthCredential = OAuthProvider('apple.com').credential(
+        idToken: appleCredential.identityToken,
+        accessToken: appleCredential.authorizationCode,
+      );
+
+      final userCredential =
+          await _authRepository.auth.signInWithCredential(oauthCredential);
+      await _authRepository.handleSocialSignIn(userCredential.user!);
       _errorHandler.handleSuccess('Apple ile giriş başarılı');
     } catch (e) {
       _lastError.value = e.toString();
@@ -137,7 +204,40 @@ class AuthController extends GetxController {
     try {
       _isLoading.value = true;
       _lastError.value = '';
-      await _authRepository.signInWithFacebook();
+
+      // Facebook ile giriş yap
+      final LoginResult result = await _authRepository.facebookAuth.login();
+      if (result.status != LoginStatus.success) {
+        throw Exception('Facebook girişi başarısız');
+      }
+
+      // Facebook kullanıcı bilgilerini al
+      final userData = await _authRepository.facebookAuth.getUserData();
+      if (userData['email'] == null) {
+        throw Exception('Facebook email bilgisi alınamadı');
+      }
+
+      // Email kontrolü yap
+      final methods = await _authRepository.auth
+          .fetchSignInMethodsForEmail(userData['email']);
+      if (methods.isEmpty) {
+        // Kullanıcı kayıtlı değil, kayıt sayfasına yönlendir
+        Get.toNamed(Routes.REGISTER, arguments: {
+          'email': userData['email'],
+          'displayName': userData['name'],
+          'photoURL': userData['picture']?['data']?['url'],
+          'provider': 'facebook'
+        });
+        return;
+      }
+
+      // Kullanıcı kayıtlı, normal giriş işlemine devam et
+      final AccessToken accessToken = result.accessToken!;
+      final OAuthCredential credential =
+          FacebookAuthProvider.credential(accessToken.token);
+      final userCredential =
+          await _authRepository.auth.signInWithCredential(credential);
+      await _authRepository.handleSocialSignIn(userCredential.user!);
       _errorHandler.handleSuccess('Facebook ile giriş başarılı');
     } catch (e) {
       _lastError.value = e.toString();
@@ -151,7 +251,39 @@ class AuthController extends GetxController {
     try {
       _isLoading.value = true;
       _lastError.value = '';
-      await _authRepository.signInWithGithub();
+
+      // GitHub OAuth akışını başlat
+      final accessToken = await _authRepository.getGithubAccessToken();
+      if (accessToken == null) {
+        throw Exception('GitHub ile giriş yapılamadı. Lütfen tekrar deneyin.');
+      }
+
+      // GitHub kullanıcı bilgilerini al
+      final githubUser = await _authRepository.getGithubUserInfo(accessToken);
+      if (githubUser == null || githubUser['email'] == null) {
+        throw Exception('GitHub kullanıcı bilgileri alınamadı.');
+      }
+
+      // Email kontrolü yap
+      final methods = await _authRepository.auth
+          .fetchSignInMethodsForEmail(githubUser['email']);
+      if (methods.isEmpty) {
+        // Kullanıcı kayıtlı değil, kayıt sayfasına yönlendir
+        Get.toNamed(Routes.REGISTER, arguments: {
+          'email': githubUser['email'],
+          'displayName': githubUser['name'] ?? githubUser['login'],
+          'photoURL': githubUser['avatar_url'],
+          'provider': 'github',
+          'githubUsername': githubUser['login']
+        });
+        return;
+      }
+
+      // Kullanıcı kayıtlı, normal giriş işlemine devam et
+      final githubAuthCredential = GithubAuthProvider.credential(accessToken);
+      final userCredential =
+          await _authRepository.auth.signInWithCredential(githubAuthCredential);
+      await _authRepository.handleSocialSignIn(userCredential.user!);
       _errorHandler.handleSuccess('GitHub ile giriş başarılı');
     } catch (e) {
       _lastError.value = e.toString();
