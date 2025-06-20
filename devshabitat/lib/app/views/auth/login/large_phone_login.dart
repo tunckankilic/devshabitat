@@ -1,17 +1,17 @@
-import 'package:devshabitat/app/controllers/auth_controller.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import '../../../controllers/auth_controller.dart';
+import '../../../controllers/responsive_controller.dart';
+import '../../base/base_view.dart';
 import '../widgets/responsive_form_field.dart';
 import '../widgets/social_login_button.dart';
 
-class LargePhoneLogin extends StatelessWidget {
-  final AuthController controller = Get.find<AuthController>();
-
-  LargePhoneLogin({super.key});
+class LargePhoneLogin extends BaseView<AuthController> {
+  const LargePhoneLogin({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget buildView(BuildContext context) {
     return Scaffold(
       body: SafeArea(
         child: SingleChildScrollView(

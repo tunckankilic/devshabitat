@@ -182,12 +182,12 @@ class DiscoveryService {
         id: '',
         fromUserId: senderId,
         toUserId: recipientId,
-        message: message,
         status: ConnectionStatus.pending,
         createdAt: DateTime.now(),
+        updatedAt: DateTime.now(),
       );
 
-      await _connectionsCollection.add(connection.toFirestore());
+      await _connectionsCollection.add(connection.toMap());
 
       // Update analytics
       await _updateConnectionAnalytics(senderId);
@@ -280,12 +280,12 @@ class DiscoveryService {
         id: '',
         fromUserId: currentUserId,
         toUserId: userId,
-        message: 'User blocked',
         status: ConnectionStatus.blocked,
         createdAt: DateTime.now(),
+        updatedAt: DateTime.now(),
       );
 
-      await _connectionsCollection.add(connection.toFirestore());
+      await _connectionsCollection.add(connection.toMap());
 
       // Remove any existing connections
       final existingConnections = await _connectionsCollection
@@ -654,6 +654,18 @@ class DiscoveryService {
     } catch (e) {
       print('Error getting nearby users: $e');
       return [];
+    }
+  }
+
+  Future<void> cancelConnectionRequest(String requestId) async {
+    try {
+      // Firebase veya başka bir backend servisine istek gönder
+      await _firestore
+          .collection('connection_requests')
+          .doc(requestId)
+          .delete();
+    } catch (e) {
+      throw 'Bağlantı isteği geri çekilirken bir hata oluştu: $e';
     }
   }
 }

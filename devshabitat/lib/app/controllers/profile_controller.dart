@@ -1,32 +1,39 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import '../models/developer_profile_model.dart';
-import '../models/skill_model.dart';
-import '../models/github_stats_model.dart';
-import '../services/profile_service.dart';
+import '../models/user_model.dart';
 import '../services/auth_service.dart';
+import '../services/storage_service.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import '../services/github_service.dart';
 
 class ProfileController extends GetxController {
-  final ProfileService _profileService = Get.find<ProfileService>();
   final AuthService _authService = Get.find<AuthService>();
-  final Rx<DeveloperProfile?> _profile = Rx<DeveloperProfile?>(null);
-  final RxList<SkillModel> _skills = <SkillModel>[].obs;
-  final Rx<GithubStatsModel?> _githubStats = Rx<GithubStatsModel?>(null);
-  final RxBool _isLoading = false.obs;
-  final RxString _error = ''.obs;
+  final StorageService _storageService = Get.find<StorageService>();
+  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
 
+  // State variables
+  final _user = Rxn<UserModel>();
+  final _isLoading = false.obs;
+  final _error = ''.obs;
+
+  // Form controllers
   final nameController = TextEditingController();
   final bioController = TextEditingController();
   final locationController = TextEditingController();
+  final titleController = TextEditingController();
+  final companyController = TextEditingController();
   final githubUsernameController = TextEditingController();
+  final photoUrlController = TextEditingController();
 
-  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
+  // Getters
+  UserModel? get user => _user.value;
+  bool get isLoading => _isLoading.value;
+  String get error => _error.value;
 
   @override
   void onInit() {
     super.onInit();
-    _loadUserData();
+    loadProfile();
   }
 
   @override
@@ -34,40 +41,33 @@ class ProfileController extends GetxController {
     nameController.dispose();
     bioController.dispose();
     locationController.dispose();
+    titleController.dispose();
+    companyController.dispose();
     githubUsernameController.dispose();
+    photoUrlController.dispose();
     super.onClose();
   }
 
-  Future<void> _loadUserData() async {
-    final user = _authService.currentUser.value;
-    if (user != null) {
-      final userData = await _firestore.collection('users').doc(user.uid).get();
-      if (userData.exists) {
-        final data = userData.data()!;
-        nameController.text = data['displayName'] ?? '';
-        bioController.text = data['bio'] ?? '';
-        locationController.text = data['location'] ?? '';
-        githubUsernameController.text = data['githubUsername'] ?? '';
-      }
-    }
-  }
-
-  // Getters
-  DeveloperProfile? get profile => _profile.value;
-  List<SkillModel> get skills => _skills;
-  GithubStatsModel? get githubStats => _githubStats.value;
-  bool get isLoading => _isLoading.value;
-  String get error => _error.value;
-
-  // Profile yükleme
-  Future<void> loadProfile(String userId) async {
+  Future<void> loadProfile() async {
     try {
       _isLoading.value = true;
       _error.value = '';
 
-      _profile.value = await _profileService.getProfile(userId);
-      await loadSkills();
-      await loadGithubStats();
+      final currentUser = _authService.currentUser.value;
+      if (currentUser == null) {
+        _error.value = 'Kullanıcı bulunamadı';
+        return;
+      }
+
+      final doc =
+          await _firestore.collection('users').doc(currentUser.uid).get();
+      if (!doc.exists) {
+        _error.value = 'Profil bulunamadı';
+        return;
+      }
+
+      _user.value = UserModel.fromFirestore(doc);
+      _loadFormData();
     } catch (e) {
       _error.value = 'Profil yüklenirken bir hata oluştu: $e';
     } finally {
@@ -75,69 +75,131 @@ class ProfileController extends GetxController {
     }
   }
 
-  // Yetenekleri yükleme
-  Future<void> loadSkills() async {
-    try {
-      if (_profile.value != null) {
-        _skills.value = await _profileService.getSkills(_profile.value!.id);
-      }
-    } catch (e) {
-      _error.value = 'Yetenekler yüklenirken bir hata oluştu: $e';
+  void _loadFormData() {
+    if (_user.value != null) {
+      nameController.text = _user.value!.displayName;
+      bioController.text = _user.value!.bio ?? '';
+      locationController.text = _user.value!.locationName ?? '';
+      titleController.text = _user.value!.title ?? '';
+      companyController.text = _user.value!.company ?? '';
+      githubUsernameController.text = _user.value!.githubUsername ?? '';
+      photoUrlController.text = _user.value!.photoURL ?? '';
     }
   }
 
-  // GitHub istatistiklerini yükleme
-  Future<void> loadGithubStats() async {
-    try {
-      if (_profile.value != null) {
-        final githubUsername =
-            _profile.value!.githubStats['username'] as String?;
-        if (githubUsername != null) {
-          _githubStats.value =
-              await _profileService.getGithubStats(githubUsername);
-        }
-      }
-    } catch (e) {
-      _error.value = 'GitHub istatistikleri yüklenirken bir hata oluştu: $e';
-    }
-  }
-
-  // Profil güncelleme
   Future<void> updateProfile() async {
     try {
-      await _authService.updateUserProfile(
-        name: nameController.text,
-        bio: bioController.text,
-        location: locationController.text,
-        githubUsername: githubUsernameController.text,
+      _isLoading.value = true;
+      _error.value = '';
+
+      final currentUser = _authService.currentUser.value;
+      if (currentUser == null) {
+        _error.value = 'Kullanıcı bulunamadı';
+        return;
+      }
+
+      final updates = {
+        'displayName': nameController.text,
+        'bio': bioController.text,
+        'locationName': locationController.text,
+        'title': titleController.text,
+        'company': companyController.text,
+        'githubUsername': githubUsernameController.text,
+        'photoURL': photoUrlController.text,
+        'updatedAt': FieldValue.serverTimestamp(),
+      };
+
+      await _firestore.collection('users').doc(currentUser.uid).update(updates);
+      await loadProfile();
+
+      Get.snackbar(
+        'Başarılı',
+        'Profil güncellendi',
+        snackPosition: SnackPosition.BOTTOM,
+        backgroundColor: Colors.green,
+        colorText: Colors.white,
       );
-      Get.snackbar('Başarılı', 'Profil güncellendi');
     } catch (e) {
-      Get.snackbar('Hata', 'Profil güncellenirken bir hata oluştu');
+      _error.value = 'Profil güncellenirken bir hata oluştu: $e';
+      Get.snackbar(
+        'Hata',
+        'Profil güncellenirken bir hata oluştu',
+        snackPosition: SnackPosition.BOTTOM,
+        backgroundColor: Colors.red,
+        colorText: Colors.white,
+      );
+    } finally {
+      _isLoading.value = false;
     }
   }
 
-  // Yetenek ekleme
-  Future<void> addSkill(SkillModel skill) async {
+  Future<void> updateProfilePhoto(String localPath) async {
     try {
-      if (_profile.value != null) {
-        await _profileService.addSkill(_profile.value!.id, skill);
-        _skills.add(skill);
+      _isLoading.value = true;
+      _error.value = '';
+
+      final currentUser = _authService.currentUser.value;
+      if (currentUser == null) {
+        _error.value = 'Kullanıcı bulunamadı';
+        return;
+      }
+
+      final downloadUrl = await _storageService.uploadProfileImage(
+        currentUser.uid,
+        localPath,
+      );
+
+      if (downloadUrl != null) {
+        await _firestore.collection('users').doc(currentUser.uid).update({
+          'photoURL': downloadUrl,
+          'updatedAt': FieldValue.serverTimestamp(),
+        });
+
+        photoUrlController.text = downloadUrl;
+        await loadProfile();
+
+        Get.snackbar(
+          'Başarılı',
+          'Profil fotoğrafı güncellendi',
+          snackPosition: SnackPosition.BOTTOM,
+          backgroundColor: Colors.green,
+          colorText: Colors.white,
+        );
       }
     } catch (e) {
-      _error.value = 'Yetenek eklenirken bir hata oluştu: $e';
+      _error.value = 'Profil fotoğrafı güncellenirken bir hata oluştu: $e';
+      Get.snackbar(
+        'Hata',
+        'Profil fotoğrafı güncellenirken bir hata oluştu',
+        snackPosition: SnackPosition.BOTTOM,
+        backgroundColor: Colors.red,
+        colorText: Colors.white,
+      );
+    } finally {
+      _isLoading.value = false;
     }
   }
 
-  // Yetenek silme
-  Future<void> removeSkill(String skillId) async {
+  Future<Map<String, dynamic>> fetchGithubRepoData(String username) async {
     try {
-      if (_profile.value != null) {
-        await _profileService.removeSkill(_profile.value!.id, skillId);
-        _skills.removeWhere((skill) => skill.id == skillId);
+      final repos = await Get.find<GithubService>().getUserRepos(username);
+      if (repos.isEmpty) {
+        throw Exception('Kullanıcının repository\'si bulunamadı');
       }
+      // En çok yıldızlı repo'yu döndür
+      final repo = repos.reduce((curr, next) =>
+          (curr['stargazers_count'] ?? 0) > (next['stargazers_count'] ?? 0)
+              ? curr
+              : next);
+      return {
+        'name': repo['name'],
+        'description': repo['description'],
+        'language': repo['language'],
+        'stars': repo['stargazers_count'] ?? 0,
+        'forks': repo['forks_count'] ?? 0,
+      };
     } catch (e) {
-      _error.value = 'Yetenek silinirken bir hata oluştu: $e';
+      throw Exception('GitHub verisi alınamadı: $e');
     }
   }
 }

@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 class MyNetworkScreen extends StatelessWidget {
   const MyNetworkScreen({super.key});
@@ -9,9 +11,10 @@ class MyNetworkScreen extends StatelessWidget {
       length: 3,
       child: Scaffold(
         appBar: AppBar(
-          title: const Text('Ağım'),
-          bottom: const TabBar(
-            tabs: [
+          title: Text('Ağım', style: TextStyle(fontSize: 18.sp)),
+          bottom: TabBar(
+            labelStyle: TextStyle(fontSize: 14.sp),
+            tabs: const [
               Tab(text: 'Genel Bakış'),
               Tab(text: 'Bağlantılar'),
               Tab(text: 'Analitik'),
@@ -34,15 +37,17 @@ class _OverviewTab extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return SingleChildScrollView(
-      padding: const EdgeInsets.all(16),
+      padding: EdgeInsets.all(16.r),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           _buildStatCards(),
-          const SizedBox(height: 24),
+          SizedBox(height: 24.h),
           _buildWeeklyGrowthChart(),
-          const SizedBox(height: 24),
+          SizedBox(height: 24.h),
           _buildTopSkills(),
+          SizedBox(height: 24.h),
+          _buildRecentActivity(),
         ],
       ),
     );
@@ -52,10 +57,10 @@ class _OverviewTab extends StatelessWidget {
     return GridView.count(
       shrinkWrap: true,
       physics: const NeverScrollableScrollPhysics(),
-      crossAxisCount: 2,
-      mainAxisSpacing: 16,
-      crossAxisSpacing: 16,
-      childAspectRatio: 1.5,
+      crossAxisCount: MediaQuery.of(Get.context!).size.width > 600 ? 3 : 2,
+      mainAxisSpacing: 16.h,
+      crossAxisSpacing: 16.w,
+      childAspectRatio: 1.5.w,
       children: [
         _StatCard(
           title: 'Toplam Bağlantı',
@@ -92,20 +97,20 @@ class _OverviewTab extends StatelessWidget {
   Widget _buildWeeklyGrowthChart() {
     return Card(
       child: Padding(
-        padding: const EdgeInsets.all(16),
+        padding: EdgeInsets.all(16.r),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Text(
+            Text(
               'Haftalık Büyüme',
               style: TextStyle(
-                fontSize: 18,
+                fontSize: 18.sp,
                 fontWeight: FontWeight.bold,
               ),
             ),
-            const SizedBox(height: 16),
+            SizedBox(height: 16.h),
             SizedBox(
-              height: 200,
+              height: 200.h,
               child: _SimpleBarChart(
                 data: [
                   _ChartData('Pzt', 45),
@@ -127,40 +132,81 @@ class _OverviewTab extends StatelessWidget {
   Widget _buildTopSkills() {
     return Card(
       child: Padding(
-        padding: const EdgeInsets.all(16),
+        padding: EdgeInsets.all(16.r),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Text(
+            Text(
               'En İyi Yetenekler',
               style: TextStyle(
-                fontSize: 18,
+                fontSize: 18.sp,
                 fontWeight: FontWeight.bold,
               ),
             ),
-            const SizedBox(height: 16),
+            SizedBox(height: 16.h),
             _SkillBar(
               skill: 'Flutter',
               percentage: 85,
               color: Colors.blue,
             ),
-            const SizedBox(height: 8),
+            SizedBox(height: 8.h),
             _SkillBar(
               skill: 'Dart',
               percentage: 80,
               color: Colors.green,
             ),
-            const SizedBox(height: 8),
+            SizedBox(height: 8.h),
             _SkillBar(
               skill: 'Firebase',
               percentage: 75,
               color: Colors.orange,
             ),
-            const SizedBox(height: 8),
+            SizedBox(height: 8.h),
             _SkillBar(
               skill: 'UI/UX',
               percentage: 70,
               color: Colors.purple,
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildRecentActivity() {
+    return Card(
+      child: Padding(
+        padding: EdgeInsets.all(16.r),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              'Son Aktiviteler',
+              style: TextStyle(
+                fontSize: 18.sp,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            SizedBox(height: 16.h),
+            _ActivityItem(
+              title: 'Yeni Bağlantı',
+              description: 'Ahmet Y. ile bağlantı kuruldu',
+              time: '2 saat önce',
+              icon: Icons.person_add,
+            ),
+            SizedBox(height: 8.h),
+            _ActivityItem(
+              title: 'Profil Görüntüleme',
+              description: 'Profiliniz 25 kez görüntülendi',
+              time: '1 gün önce',
+              icon: Icons.visibility,
+            ),
+            SizedBox(height: 8.h),
+            _ActivityItem(
+              title: 'Yetenek Onayı',
+              description: 'Flutter yeteneğiniz 3 kişi tarafından onaylandı',
+              time: '2 gün önce',
+              icon: Icons.verified,
             ),
           ],
         ),
@@ -172,25 +218,57 @@ class _OverviewTab extends StatelessWidget {
 class _ConnectionsTab extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    return ListView.builder(
-      padding: const EdgeInsets.all(16),
-      itemCount: 20,
-      itemBuilder: (context, index) {
-        return Card(
-          margin: const EdgeInsets.only(bottom: 8),
-          child: ListTile(
-            leading: CircleAvatar(
-              child: Text('${index + 1}'),
-            ),
-            title: Text('Bağlantı ${index + 1}'),
-            subtitle: Text('Flutter Developer'),
-            trailing: IconButton(
-              icon: const Icon(Icons.message_outlined),
-              onPressed: () {},
-            ),
+    return Column(
+      children: [
+        Padding(
+          padding: EdgeInsets.all(16.r),
+          child: Row(
+            children: [
+              Expanded(
+                child: TextField(
+                  style: TextStyle(fontSize: 16.sp),
+                  decoration: InputDecoration(
+                    hintText: 'Bağlantılarda ara...',
+                    hintStyle: TextStyle(fontSize: 16.sp),
+                    prefixIcon: Icon(Icons.search, size: 24.sp),
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12.r),
+                    ),
+                  ),
+                ),
+              ),
+              SizedBox(width: 8.w),
+              IconButton(
+                icon: Icon(Icons.filter_list, size: 24.sp),
+                onPressed: () => _showFilterDialog(),
+              ),
+              IconButton(
+                icon: Icon(Icons.sort, size: 24.sp),
+                onPressed: () => _showSortDialog(),
+              ),
+            ],
           ),
-        );
-      },
+        ),
+        Expanded(
+          child: GridView.builder(
+            padding: EdgeInsets.all(16.r),
+            gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+              crossAxisCount: MediaQuery.of(context).size.width > 600 ? 3 : 2,
+              childAspectRatio: 0.8.w,
+              crossAxisSpacing: 16.w,
+              mainAxisSpacing: 16.h,
+            ),
+            itemCount: 10, // Örnek veri
+            itemBuilder: (context, index) {
+              return _buildConnectionCard(
+                'Kullanıcı ${index + 1}',
+                'Flutter Developer',
+                'https://via.placeholder.com/150',
+              );
+            },
+          ),
+        ),
+      ],
     );
   }
 }
@@ -199,7 +277,7 @@ class _AnalyticsTab extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return SingleChildScrollView(
-      padding: const EdgeInsets.all(16),
+      padding: EdgeInsets.all(16.r),
       child: Column(
         children: [
           _buildAnalyticCard(
@@ -212,12 +290,12 @@ class _AnalyticsTab extends StatelessWidget {
               ],
             ),
           ),
-          const SizedBox(height: 16),
+          SizedBox(height: 16.h),
           _buildAnalyticCard(
             'Etkileşim Analizi',
             _InteractionChart(),
           ),
-          const SizedBox(height: 16),
+          SizedBox(height: 16.h),
           _buildAnalyticCard(
             'Büyüme Trendi',
             _TrendLineChart(),
@@ -230,20 +308,20 @@ class _AnalyticsTab extends StatelessWidget {
   Widget _buildAnalyticCard(String title, Widget chart) {
     return Card(
       child: Padding(
-        padding: const EdgeInsets.all(16),
+        padding: EdgeInsets.all(16.r),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
               title,
-              style: const TextStyle(
-                fontSize: 18,
+              style: TextStyle(
+                fontSize: 18.sp,
                 fontWeight: FontWeight.bold,
               ),
             ),
-            const SizedBox(height: 16),
+            SizedBox(height: 16.h),
             SizedBox(
-              height: 200,
+              height: 200.h,
               child: chart,
             ),
           ],
@@ -272,18 +350,18 @@ class _StatCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return Card(
       child: Padding(
-        padding: const EdgeInsets.all(16),
+        padding: EdgeInsets.all(16.r),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Row(
               children: [
-                Icon(icon, size: 24),
-                const SizedBox(width: 8),
+                Icon(icon, size: 24.sp),
+                SizedBox(width: 8.w),
                 Text(
                   title,
-                  style: const TextStyle(
-                    fontSize: 14,
+                  style: TextStyle(
+                    fontSize: 14.sp,
                     fontWeight: FontWeight.w500,
                   ),
                 ),
@@ -292,17 +370,17 @@ class _StatCard extends StatelessWidget {
             const Spacer(),
             Text(
               value,
-              style: const TextStyle(
-                fontSize: 24,
+              style: TextStyle(
+                fontSize: 24.sp,
                 fontWeight: FontWeight.bold,
               ),
             ),
-            const SizedBox(height: 4),
+            SizedBox(height: 4.h),
             Row(
               children: [
                 Icon(
                   isPositive ? Icons.arrow_upward : Icons.arrow_downward,
-                  size: 16,
+                  size: 16.sp,
                   color: isPositive ? Colors.green : Colors.red,
                 ),
                 Text(
@@ -310,6 +388,7 @@ class _StatCard extends StatelessWidget {
                   style: TextStyle(
                     color: isPositive ? Colors.green : Colors.red,
                     fontWeight: FontWeight.w500,
+                    fontSize: 14.sp,
                   ),
                 ),
               ],
@@ -319,48 +398,6 @@ class _StatCard extends StatelessWidget {
       ),
     );
   }
-}
-
-class _SimpleBarChart extends StatelessWidget {
-  final List<_ChartData> data;
-
-  const _SimpleBarChart({required this.data});
-
-  @override
-  Widget build(BuildContext context) {
-    final maxValue = data.map((e) => e.value).reduce((a, b) => a > b ? a : b);
-
-    return Row(
-      crossAxisAlignment: CrossAxisAlignment.end,
-      children: data.map((item) {
-        final height = (item.value / maxValue) * 150;
-        return Expanded(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.end,
-            children: [
-              Container(
-                height: height,
-                margin: const EdgeInsets.symmetric(horizontal: 4),
-                decoration: BoxDecoration(
-                  color: Theme.of(context).primaryColor,
-                  borderRadius: BorderRadius.circular(4),
-                ),
-              ),
-              const SizedBox(height: 8),
-              Text(item.label),
-            ],
-          ),
-        );
-      }).toList(),
-    );
-  }
-}
-
-class _ChartData {
-  final String label;
-  final double value;
-
-  _ChartData(this.label, this.value);
 }
 
 class _SkillBar extends StatelessWidget {
@@ -382,19 +419,118 @@ class _SkillBar extends StatelessWidget {
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            Text(skill),
-            Text('$percentage%'),
+            Text(skill, style: TextStyle(fontSize: 14.sp)),
+            Text('$percentage%', style: TextStyle(fontSize: 14.sp)),
           ],
         ),
-        const SizedBox(height: 4),
+        SizedBox(height: 4.h),
         LinearProgressIndicator(
           value: percentage / 100,
           backgroundColor: color.withOpacity(0.2),
           valueColor: AlwaysStoppedAnimation<Color>(color),
+          minHeight: 8.h,
+          borderRadius: BorderRadius.circular(4.r),
         ),
       ],
     );
   }
+}
+
+class _ActivityItem extends StatelessWidget {
+  final String title;
+  final String description;
+  final String time;
+  final IconData icon;
+
+  const _ActivityItem({
+    required this.title,
+    required this.description,
+    required this.time,
+    required this.icon,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      children: [
+        CircleAvatar(
+          radius: 20.r,
+          backgroundColor: Theme.of(context).primaryColor.withOpacity(0.1),
+          child: Icon(icon, size: 24.sp, color: Theme.of(context).primaryColor),
+        ),
+        SizedBox(width: 12.w),
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                title,
+                style: TextStyle(
+                  fontSize: 16.sp,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              SizedBox(height: 4.h),
+              Text(
+                description,
+                style: TextStyle(fontSize: 14.sp),
+              ),
+              SizedBox(height: 4.h),
+              Text(
+                time,
+                style: TextStyle(
+                  fontSize: 12.sp,
+                  color: Colors.grey[600],
+                ),
+              ),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+class _SimpleBarChart extends StatelessWidget {
+  final List<_ChartData> data;
+
+  const _SimpleBarChart({required this.data});
+
+  @override
+  Widget build(BuildContext context) {
+    final maxValue = data.map((e) => e.value).reduce((a, b) => a > b ? a : b);
+
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.end,
+      children: data.map((item) {
+        final height = (item.value / maxValue) * 150.h;
+        return Expanded(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.end,
+            children: [
+              Container(
+                height: height,
+                margin: EdgeInsets.symmetric(horizontal: 4.w),
+                decoration: BoxDecoration(
+                  color: Theme.of(context).primaryColor,
+                  borderRadius: BorderRadius.circular(4.r),
+                ),
+              ),
+              SizedBox(height: 8.h),
+              Text(item.label, style: TextStyle(fontSize: 12.sp)),
+            ],
+          ),
+        );
+      }).toList(),
+    );
+  }
+}
+
+class _ChartData {
+  final String label;
+  final double value;
+
+  _ChartData(this.label, this.value);
 }
 
 class _PieChartWidget extends StatelessWidget {
@@ -406,7 +542,7 @@ class _PieChartWidget extends StatelessWidget {
   Widget build(BuildContext context) {
     return CustomPaint(
       painter: _PieChartPainter(segments),
-      size: const Size(200, 200),
+      size: Size(200.w, 200.h),
     );
   }
 }
@@ -457,7 +593,7 @@ class _InteractionChart extends StatelessWidget {
   Widget build(BuildContext context) {
     return CustomPaint(
       painter: _InteractionPainter(),
-      size: const Size(double.infinity, 200),
+      size: Size(double.infinity, 200.h),
     );
   }
 }
@@ -467,7 +603,7 @@ class _InteractionPainter extends CustomPainter {
   void paint(Canvas canvas, Size size) {
     final paint = Paint()
       ..color = Colors.blue
-      ..strokeWidth = 2
+      ..strokeWidth = 2.w
       ..style = PaintingStyle.stroke;
 
     final path = Path();
@@ -497,7 +633,7 @@ class _TrendLineChart extends StatelessWidget {
   Widget build(BuildContext context) {
     return CustomPaint(
       painter: _TrendLinePainter(),
-      size: const Size(double.infinity, 200),
+      size: Size(double.infinity, 200.h),
     );
   }
 }
@@ -507,7 +643,7 @@ class _TrendLinePainter extends CustomPainter {
   void paint(Canvas canvas, Size size) {
     final paint = Paint()
       ..color = Colors.green
-      ..strokeWidth = 2
+      ..strokeWidth = 2.w
       ..style = PaintingStyle.stroke;
 
     final path = Path();
@@ -523,4 +659,171 @@ class _TrendLinePainter extends CustomPainter {
 
   @override
   bool shouldRepaint(_TrendLinePainter oldDelegate) => false;
+}
+
+void _showFilterDialog() {
+  Get.dialog(
+    AlertDialog(
+      title: Text(
+        'Filtreleme Seçenekleri',
+        style: TextStyle(fontSize: 18.sp),
+      ),
+      content: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          ListTile(
+            title: Text(
+              'Tüm Bağlantılar',
+              style: TextStyle(fontSize: 16.sp),
+            ),
+            leading: Icon(Icons.people, size: 24.sp),
+            onTap: () {
+              Get.back();
+              // Tüm bağlantıları göster
+            },
+          ),
+          ListTile(
+            title: Text(
+              'Yeni Bağlantılar',
+              style: TextStyle(fontSize: 16.sp),
+            ),
+            leading: Icon(Icons.person_add, size: 24.sp),
+            onTap: () {
+              Get.back();
+              // Yeni bağlantıları göster
+            },
+          ),
+          ListTile(
+            title: Text(
+              'Aktif Bağlantılar',
+              style: TextStyle(fontSize: 16.sp),
+            ),
+            leading: Icon(Icons.star, size: 24.sp),
+            onTap: () {
+              Get.back();
+              // Aktif bağlantıları göster
+            },
+          ),
+        ],
+      ),
+      actions: [
+        TextButton(
+          onPressed: () => Get.back(),
+          child: Text(
+            'İptal',
+            style: TextStyle(fontSize: 14.sp),
+          ),
+        ),
+      ],
+    ),
+  );
+}
+
+void _showSortDialog() {
+  Get.dialog(
+    AlertDialog(
+      title: Text(
+        'Sıralama Seçenekleri',
+        style: TextStyle(fontSize: 18.sp),
+      ),
+      content: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          ListTile(
+            title: Text(
+              'İsme Göre',
+              style: TextStyle(fontSize: 16.sp),
+            ),
+            leading: Icon(Icons.sort_by_alpha, size: 24.sp),
+            onTap: () {
+              Get.back();
+              // İsme göre sırala
+            },
+          ),
+          ListTile(
+            title: Text(
+              'Bağlantı Tarihine Göre',
+              style: TextStyle(fontSize: 16.sp),
+            ),
+            leading: Icon(Icons.date_range, size: 24.sp),
+            onTap: () {
+              Get.back();
+              // Tarihe göre sırala
+            },
+          ),
+          ListTile(
+            title: Text(
+              'Etkileşime Göre',
+              style: TextStyle(fontSize: 16.sp),
+            ),
+            leading: Icon(Icons.trending_up, size: 24.sp),
+            onTap: () {
+              Get.back();
+              // Etkileşime göre sırala
+            },
+          ),
+        ],
+      ),
+      actions: [
+        TextButton(
+          onPressed: () => Get.back(),
+          child: Text(
+            'İptal',
+            style: TextStyle(fontSize: 14.sp),
+          ),
+        ),
+      ],
+    ),
+  );
+}
+
+Widget _buildConnectionCard(String name, String title, String imageUrl) {
+  return Card(
+    child: Padding(
+      padding: EdgeInsets.all(12.r),
+      child: Column(
+        children: [
+          CircleAvatar(
+            radius: 32.r,
+            backgroundImage: NetworkImage(imageUrl),
+          ),
+          SizedBox(height: 8.h),
+          Text(
+            name,
+            style: TextStyle(
+              fontSize: 16.sp,
+              fontWeight: FontWeight.bold,
+            ),
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+          ),
+          SizedBox(height: 4.h),
+          Text(
+            title,
+            style: TextStyle(
+              fontSize: 14.sp,
+              color: Colors.grey[600],
+            ),
+            maxLines: 2,
+            overflow: TextOverflow.ellipsis,
+            textAlign: TextAlign.center,
+          ),
+          SizedBox(height: 8.h),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+            children: [
+              IconButton(
+                icon: Icon(Icons.message, size: 24.sp),
+                onPressed: () {},
+              ),
+              IconButton(
+                icon: Icon(Icons.person, size: 24.sp),
+                onPressed: () {},
+              ),
+            ],
+          ),
+        ],
+      ),
+    ),
+  );
 }

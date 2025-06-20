@@ -1,59 +1,64 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import '../services/navigation_service.dart';
 
 class NavigationController extends GetxController {
-  // Mevcut seçili index
-  final RxInt selectedIndex = 0.obs;
+  final NavigationService _navigationService;
+  final RxInt currentIndex = 0.obs;
 
-  // NavigationDestination listesi
-  final List<NavigationDestination> destinations = [
-    const NavigationDestination(
-      icon: Icon(Icons.home_outlined),
-      selectedIcon: Icon(Icons.home),
-      label: 'Ana Sayfa',
-    ),
-    const NavigationDestination(
-      icon: Icon(Icons.explore_outlined),
-      selectedIcon: Icon(Icons.explore),
-      label: 'Keşfet',
-    ),
-    const NavigationDestination(
-      icon: Icon(Icons.person_outline),
-      selectedIcon: Icon(Icons.person),
-      label: 'Profil',
-    ),
-  ];
+  NavigationController(this._navigationService);
 
-  // Ekran boyutuna göre navigasyon tipini belirle
-  bool isTablet(BuildContext context) {
-    return MediaQuery.of(context).size.width >= 600;
+  Future<void> navigateToPage(String routeName, {dynamic arguments}) async {
+    await _navigationService.navigateTo(routeName, arguments: arguments);
   }
 
-  // Index değiştirme metodu
+  void goBack() {
+    _navigationService.goBack();
+  }
+
+  Future<void> navigateToAndRemoveUntil(String routeName,
+      {dynamic arguments}) async {
+    await _navigationService.navigateToAndRemoveUntil(routeName,
+        arguments: arguments);
+  }
+
+  Future<void> navigateToAndReplace(String routeName,
+      {dynamic arguments}) async {
+    await _navigationService.navigateToAndReplace(routeName,
+        arguments: arguments);
+  }
+
+  void popUntil(String routeName) {
+    _navigationService.popUntil(routeName);
+  }
+
+  Future<T?> showCustomDialog<T>({
+    required Widget child,
+    bool barrierDismissible = true,
+  }) async {
+    final result = await _navigationService.showCustomDialog(
+      child: child,
+      barrierDismissible: barrierDismissible,
+    );
+    return result as T?;
+  }
+
+  Future<T?> showCustomBottomSheet<T>({
+    required Widget child,
+    bool isDismissible = true,
+    bool enableDrag = true,
+    Color? backgroundColor,
+  }) async {
+    final result = await _navigationService.showCustomBottomSheet(
+      child: child,
+      isDismissible: isDismissible,
+      enableDrag: enableDrag,
+      backgroundColor: backgroundColor,
+    );
+    return result as T?;
+  }
+
   void changePage(int index) {
-    selectedIndex.value = index;
-  }
-
-  // Responsive navigasyon widget'ı oluşturma
-  Widget buildResponsiveNavigation(BuildContext context) {
-    if (isTablet(context)) {
-      return NavigationRail(
-        selectedIndex: selectedIndex.value,
-        onDestinationSelected: changePage,
-        destinations: destinations
-            .map((dest) => NavigationRailDestination(
-                  icon: dest.icon,
-                  selectedIcon: dest.selectedIcon,
-                  label: Text(dest.label),
-                ))
-            .toList(),
-      );
-    } else {
-      return NavigationBar(
-        selectedIndex: selectedIndex.value,
-        onDestinationSelected: changePage,
-        destinations: destinations,
-      );
-    }
+    currentIndex.value = index;
   }
 }

@@ -7,132 +7,152 @@ import '../routes/app_pages.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:sign_in_with_apple/sign_in_with_apple.dart';
 import 'package:flutter_facebook_auth/flutter_facebook_auth.dart';
-
-enum AuthState {
-  initial,
-  loading,
-  authenticated,
-  unauthenticated,
-  error,
-}
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'social_auth_controller.dart';
+import 'email_auth_controller.dart';
+import 'auth_state_controller.dart';
+import '../core/config/github_config.dart';
+import '../services/auth_service.dart';
+import '../services/storage_service.dart';
 
 class AuthController extends GetxController {
-  final AuthRepository _authRepository;
-  final ErrorHandlerService _errorHandler;
+  final SocialAuthController _socialAuth;
+  final EmailAuthController _emailAuth;
+  final AuthStateController _authState;
+  final FirebaseAuth _auth = FirebaseAuth.instance;
+  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
+  final GoogleSignIn _googleSignIn = GoogleSignIn();
+  final AuthService _authService = Get.find();
+  final StorageService _storageService = Get.find();
 
-  // Form controllers
-  final emailController = TextEditingController();
-  final passwordController = TextEditingController();
-  final confirmPasswordController = TextEditingController();
-  final usernameController = TextEditingController();
+  final Rx<User?> _firebaseUser = Rx<User?>(null);
+  final RxMap<String, dynamic> _userProfile = RxMap<String, dynamic>();
+  final RxBool isLoading = false.obs;
   final githubUsernameController = TextEditingController();
 
-  // Reactive state variables
-  final _isLoading = false.obs;
-  final _currentUser = Rxn<User>();
-  final _userProfile = Rxn<Map<String, dynamic>>();
-  final _authState = AuthState.initial.obs;
-  final _lastError = ''.obs;
-
-  // Getters
-  bool get isLoading => _isLoading.value;
-  User? get currentUser => _currentUser.value;
-  Map<String, dynamic>? get userProfile => _userProfile.value;
-  AuthState get authState => _authState.value;
-  String get lastError => _lastError.value;
-
   AuthController({
-    required AuthRepository authRepository,
-    required ErrorHandlerService errorHandler,
-  })  : _authRepository = authRepository,
-        _errorHandler = errorHandler;
+    required SocialAuthController socialAuth,
+    required EmailAuthController emailAuth,
+    required AuthStateController authState,
+  })  : _socialAuth = socialAuth,
+        _emailAuth = emailAuth,
+        _authState = authState;
+
+  User? get currentUser => _firebaseUser.value;
+  Map<String, dynamic> get userProfile => _userProfile;
 
   @override
   void onInit() {
     super.onInit();
-    _initializeAuthState();
+    _firebaseUser.bindStream(_auth.authStateChanges());
+    ever(_firebaseUser, _setInitialScreen);
   }
 
-  void _initializeAuthState() {
-    _authRepository.authStateChanges.listen((user) async {
-      _currentUser.value = user;
-      if (user != null) {
-        _authState.value = AuthState.authenticated;
-        // Kullanıcı profilini yükle
-        _userProfile.value = await _authRepository.getUserProfile(user.uid);
-        Get.offAllNamed(Routes.MAIN);
-      } else {
-        _authState.value = AuthState.unauthenticated;
-        _userProfile.value = null;
-        Get.offAllNamed(Routes.LOGIN);
-      }
-    });
-  }
-
-  Future<void> signInWithEmailAndPassword() async {
-    try {
-      _isLoading.value = true;
-      _lastError.value = '';
-      await _authRepository.signInWithEmailAndPassword(
-        emailController.text,
-        passwordController.text,
-      );
-      _errorHandler.handleSuccess('Giriş başarılı');
-    } catch (e) {
-      _lastError.value = e.toString();
-      _errorHandler.handleError(e);
-    } finally {
-      _isLoading.value = false;
+  void _setInitialScreen(User? user) {
+    if (user == null) {
+      Get.offAllNamed('/login');
+    } else {
+      _loadUserProfile();
+      Get.offAllNamed('/home');
     }
   }
 
-  Future<void> createUserWithEmailAndPassword() async {
+  Future<void> _loadUserProfile() async {
     try {
-      if (passwordController.text != confirmPasswordController.text) {
-        throw Exception('Şifreler eşleşmiyor');
+      if (_firebaseUser.value != null) {
+        final doc = await _firestore
+            .collection('users')
+            .doc(_firebaseUser.value!.uid)
+            .get();
+        if (doc.exists) {
+          _userProfile.assignAll(doc.data() ?? {});
+        }
       }
-
-      _isLoading.value = true;
-      _lastError.value = '';
-      await _authRepository.createUserWithEmailAndPassword(
-        emailController.text,
-        passwordController.text,
-        usernameController.text,
-      );
-      _errorHandler.handleSuccess('Hesap oluşturuldu');
     } catch (e) {
-      _lastError.value = e.toString();
-      _errorHandler.handleError(e);
+      print('Kullanıcı profili yüklenirken hata: $e');
+    }
+  }
+
+  Future<String?> getGithubToken() async {
+    try {
+      if (_firebaseUser.value != null) {
+        final doc = await _firestore
+            .collection('users')
+            .doc(_firebaseUser.value!.uid)
+            .collection('connections')
+            .doc('github')
+            .get();
+        if (doc.exists) {
+          return doc.data()?['accessToken'];
+        }
+      }
+      return null;
+    } catch (e) {
+      print('GitHub token alınırken hata: $e');
+      return null;
+    }
+  }
+
+  Future<String?> getGithubUsername() async {
+    try {
+      if (_firebaseUser.value != null) {
+        final doc = await _firestore
+            .collection('users')
+            .doc(_firebaseUser.value!.uid)
+            .collection('connections')
+            .doc('github')
+            .get();
+        if (doc.exists) {
+          return doc.data()?['username'];
+        }
+      }
+      return null;
+    } catch (e) {
+      print('GitHub kullanıcı adı alınırken hata: $e');
+      return null;
+    }
+  }
+
+  Future<void> signInWithGithub() async {
+    try {
+      isLoading.value = true;
+      final token = await _socialAuth.signInWithGithub();
+
+      if (token != null) {
+        final githubAuthCredential = GithubAuthProvider.credential(token);
+        final userCredential =
+            await _auth.signInWithCredential(githubAuthCredential);
+
+        // GitHub bilgilerini kaydet
+        await _firestore
+            .collection('users')
+            .doc(userCredential.user!.uid)
+            .collection('connections')
+            .doc('github')
+            .set({
+          'accessToken': token,
+          'username': githubUsernameController.text,
+          'updatedAt': FieldValue.serverTimestamp(),
+        });
+      }
+    } catch (e) {
+      print('GitHub ile giriş yapılırken hata: $e');
+      Get.snackbar(
+        'Hata',
+        'GitHub ile giriş yapılamadı',
+        snackPosition: SnackPosition.BOTTOM,
+      );
     } finally {
-      _isLoading.value = false;
+      isLoading.value = false;
     }
   }
 
   Future<void> signInWithGoogle() async {
     try {
-      _isLoading.value = true;
-      _lastError.value = '';
+      isLoading.value = true;
+      final GoogleSignInAccount? googleUser = await _googleSignIn.signIn();
+      if (googleUser == null) return;
 
-      // Google ile giriş yap
-      final GoogleSignInAccount? googleUser =
-          await _authRepository.googleSignIn.signIn();
-      if (googleUser == null) throw Exception('Google girişi iptal edildi');
-
-      // Email kontrolü yap
-      final methods = await _authRepository.auth
-          .fetchSignInMethodsForEmail(googleUser.email);
-      if (methods.isEmpty) {
-        // Kullanıcı kayıtlı değil, kayıt sayfasına yönlendir
-        Get.toNamed(Routes.REGISTER, arguments: {
-          'email': googleUser.email,
-          'displayName': googleUser.displayName,
-          'photoURL': googleUser.photoUrl,
-          'provider': 'google'
-        });
-        return;
-      }
-
-      // Kullanıcı kayıtlı, normal giriş işlemine devam et
       final GoogleSignInAuthentication googleAuth =
           await googleUser.authentication;
       final credential = GoogleAuthProvider.credential(
@@ -140,260 +160,57 @@ class AuthController extends GetxController {
         idToken: googleAuth.idToken,
       );
 
-      final userCredential =
-          await _authRepository.auth.signInWithCredential(credential);
-      await _authRepository.handleSocialSignIn(userCredential.user!);
-      _errorHandler.handleSuccess('Google ile giriş başarılı');
+      await _auth.signInWithCredential(credential);
     } catch (e) {
-      _lastError.value = e.toString();
-      _errorHandler.handleError(e);
-    } finally {
-      _isLoading.value = false;
-    }
-  }
-
-  Future<void> signInWithApple() async {
-    try {
-      _isLoading.value = true;
-      _lastError.value = '';
-
-      // Apple ile giriş yap
-      final appleCredential = await SignInWithApple.getAppleIDCredential(
-        scopes: [
-          AppleIDAuthorizationScopes.email,
-          AppleIDAuthorizationScopes.fullName,
-        ],
+      print('Google ile giriş yapılırken hata: $e');
+      Get.snackbar(
+        'Hata',
+        'Google ile giriş yapılamadı',
+        snackPosition: SnackPosition.BOTTOM,
       );
-
-      if (appleCredential.email != null) {
-        // Email kontrolü yap
-        final methods = await _authRepository.auth
-            .fetchSignInMethodsForEmail(appleCredential.email!);
-        if (methods.isEmpty) {
-          // Kullanıcı kayıtlı değil, kayıt sayfasına yönlendir
-          Get.toNamed(Routes.REGISTER, arguments: {
-            'email': appleCredential.email,
-            'displayName':
-                '${appleCredential.givenName ?? ''} ${appleCredential.familyName ?? ''}'
-                    .trim(),
-            'provider': 'apple'
-          });
-          return;
-        }
-      }
-
-      // Kullanıcı kayıtlı veya email null, normal giriş işlemine devam et
-      final oauthCredential = OAuthProvider('apple.com').credential(
-        idToken: appleCredential.identityToken,
-        accessToken: appleCredential.authorizationCode,
-      );
-
-      final userCredential =
-          await _authRepository.auth.signInWithCredential(oauthCredential);
-      await _authRepository.handleSocialSignIn(userCredential.user!);
-      _errorHandler.handleSuccess('Apple ile giriş başarılı');
-    } catch (e) {
-      _lastError.value = e.toString();
-      _errorHandler.handleError(e);
     } finally {
-      _isLoading.value = false;
+      isLoading.value = false;
     }
   }
 
-  Future<void> signInWithFacebook() async {
-    try {
-      _isLoading.value = true;
-      _lastError.value = '';
+  Future<void> signInWithEmailAndPassword() =>
+      _emailAuth.signInWithEmailAndPassword();
+  Future<void> createUserWithEmailAndPassword() =>
+      _emailAuth.createUserWithEmailAndPassword();
+  Future<void> sendPasswordResetEmail() => _emailAuth.sendPasswordResetEmail();
+  Future<void> updatePassword(String newPassword) =>
+      _emailAuth.updatePassword(newPassword);
+  Future<void> updateEmail(String newEmail) => _emailAuth.updateEmail(newEmail);
+  Future<void> reauthenticate(String email, String password) =>
+      _emailAuth.reauthenticate(email, password);
 
-      // Facebook ile giriş yap
-      final LoginResult result = await _authRepository.facebookAuth.login();
-      if (result.status != LoginStatus.success) {
-        throw Exception('Facebook girişi başarısız');
-      }
+  // Sosyal medya işlemleri
+  Future<void> signInWithApple() => _socialAuth.signInWithApple();
+  Future<void> signInWithFacebook() => _socialAuth.signInWithFacebook();
 
-      // Facebook kullanıcı bilgilerini al
-      final userData = await _authRepository.facebookAuth.getUserData();
-      if (userData['email'] == null) {
-        throw Exception('Facebook email bilgisi alınamadı');
-      }
+  // Auth state işlemleri
+  Future<void> signOut() => _authState.signOut();
+  Future<void> deleteAccount() => _authState.deleteAccount();
+  Future<void> verifyEmail() => _authState.verifyEmail();
 
-      // Email kontrolü yap
-      final methods = await _authRepository.auth
-          .fetchSignInMethodsForEmail(userData['email']);
-      if (methods.isEmpty) {
-        // Kullanıcı kayıtlı değil, kayıt sayfasına yönlendir
-        Get.toNamed(Routes.REGISTER, arguments: {
-          'email': userData['email'],
-          'displayName': userData['name'],
-          'photoURL': userData['picture']?['data']?['url'],
-          'provider': 'facebook'
-        });
-        return;
-      }
+  // Getters
+  bool get isAuthLoading => _emailAuth.isLoading || _socialAuth.isLoading;
+  String get lastError => _emailAuth.lastError.isEmpty
+      ? _socialAuth.lastError
+      : _emailAuth.lastError;
+  AuthState get authState => _authState.authState;
+  Map<String, dynamic>? get authProfile => _authState.userProfile;
 
-      // Kullanıcı kayıtlı, normal giriş işlemine devam et
-      final AccessToken accessToken = result.accessToken!;
-      final OAuthCredential credential =
-          FacebookAuthProvider.credential(accessToken.token);
-      final userCredential =
-          await _authRepository.auth.signInWithCredential(credential);
-      await _authRepository.handleSocialSignIn(userCredential.user!);
-      _errorHandler.handleSuccess('Facebook ile giriş başarılı');
-    } catch (e) {
-      _lastError.value = e.toString();
-      _errorHandler.handleError(e);
-    } finally {
-      _isLoading.value = false;
-    }
-  }
-
-  Future<void> signInWithGithub() async {
-    try {
-      _isLoading.value = true;
-      _lastError.value = '';
-
-      // GitHub OAuth akışını başlat
-      final accessToken = await _authRepository.getGithubAccessToken();
-      if (accessToken == null) {
-        throw Exception('GitHub ile giriş yapılamadı. Lütfen tekrar deneyin.');
-      }
-
-      // GitHub kullanıcı bilgilerini al
-      final githubUser = await _authRepository.getGithubUserInfo(accessToken);
-      if (githubUser == null || githubUser['email'] == null) {
-        throw Exception('GitHub kullanıcı bilgileri alınamadı.');
-      }
-
-      // Email kontrolü yap
-      final methods = await _authRepository.auth
-          .fetchSignInMethodsForEmail(githubUser['email']);
-      if (methods.isEmpty) {
-        // Kullanıcı kayıtlı değil, kayıt sayfasına yönlendir
-        Get.toNamed(Routes.REGISTER, arguments: {
-          'email': githubUser['email'],
-          'displayName': githubUser['name'] ?? githubUser['login'],
-          'photoURL': githubUser['avatar_url'],
-          'provider': 'github',
-          'githubUsername': githubUser['login']
-        });
-        return;
-      }
-
-      // Kullanıcı kayıtlı, normal giriş işlemine devam et
-      final githubAuthCredential = GithubAuthProvider.credential(accessToken);
-      final userCredential =
-          await _authRepository.auth.signInWithCredential(githubAuthCredential);
-      await _authRepository.handleSocialSignIn(userCredential.user!);
-      _errorHandler.handleSuccess('GitHub ile giriş başarılı');
-    } catch (e) {
-      _lastError.value = e.toString();
-      _errorHandler.handleError(e);
-    } finally {
-      _isLoading.value = false;
-    }
-  }
-
-  Future<void> signOut() async {
-    try {
-      _isLoading.value = true;
-      await _authRepository.signOut();
-      _errorHandler.handleSuccess('Çıkış yapıldı');
-    } catch (e) {
-      _lastError.value = e.toString();
-      _errorHandler.handleError(e);
-    } finally {
-      _isLoading.value = false;
-    }
-  }
-
-  Future<void> sendPasswordResetEmail() async {
-    try {
-      if (emailController.text.isEmpty) {
-        throw Exception('Lütfen e-posta adresinizi girin');
-      }
-
-      _isLoading.value = true;
-      await _authRepository.sendPasswordResetEmail(emailController.text);
-      _errorHandler.handleSuccess('Şifre sıfırlama bağlantısı gönderildi');
-    } catch (e) {
-      _lastError.value = e.toString();
-      _errorHandler.handleError(e);
-    } finally {
-      _isLoading.value = false;
-    }
-  }
-
-  Future<void> verifyEmail() async {
-    try {
-      _isLoading.value = true;
-      await _authRepository.verifyEmail();
-      _errorHandler.handleSuccess('Doğrulama e-postası gönderildi');
-    } catch (e) {
-      _lastError.value = e.toString();
-      _errorHandler.handleError(e);
-    } finally {
-      _isLoading.value = false;
-    }
-  }
-
-  Future<void> updatePassword(String newPassword) async {
-    try {
-      _isLoading.value = true;
-      await _authRepository.updatePassword(newPassword);
-      _errorHandler.handleSuccess('Şifre güncellendi');
-    } catch (e) {
-      _lastError.value = e.toString();
-      _errorHandler.handleError(e);
-    } finally {
-      _isLoading.value = false;
-    }
-  }
-
-  Future<void> updateEmail(String newEmail) async {
-    try {
-      _isLoading.value = true;
-      await _authRepository.updateEmail(newEmail);
-      _errorHandler.handleSuccess('E-posta güncellendi');
-    } catch (e) {
-      _lastError.value = e.toString();
-      _errorHandler.handleError(e);
-    } finally {
-      _isLoading.value = false;
-    }
-  }
-
-  Future<void> deleteAccount() async {
-    try {
-      _isLoading.value = true;
-      await _authRepository.deleteAccount();
-      _errorHandler.handleSuccess('Hesap silindi');
-    } catch (e) {
-      _lastError.value = e.toString();
-      _errorHandler.handleError(e);
-    } finally {
-      _isLoading.value = false;
-    }
-  }
-
-  Future<void> reauthenticate(String email, String password) async {
-    try {
-      _isLoading.value = true;
-      await _authRepository.reauthenticate(email, password);
-      _errorHandler.handleSuccess('Kimlik doğrulama başarılı');
-    } catch (e) {
-      _lastError.value = e.toString();
-      _errorHandler.handleError(e);
-    } finally {
-      _isLoading.value = false;
-    }
-  }
+  // Form controllers
+  TextEditingController get emailController => _emailAuth.emailController;
+  TextEditingController get passwordController => _emailAuth.passwordController;
+  TextEditingController get confirmPasswordController =>
+      _emailAuth.confirmPasswordController;
+  TextEditingController get usernameController => _emailAuth.usernameController;
 
   @override
   void onClose() {
-    emailController.dispose();
-    passwordController.dispose();
-    confirmPasswordController.dispose();
-    usernameController.dispose();
+    _emailAuth.dispose();
     githubUsernameController.dispose();
     super.onClose();
   }

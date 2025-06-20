@@ -7,7 +7,7 @@ import 'package:devshabitat/app/models/message_model.dart';
 class ChatSettingsDialog extends StatelessWidget {
   final String conversationId;
   final String conversationTitle;
-  final List<Message> messages;
+  final List<MessageModel> messages;
   final bool isArchived;
   final bool notificationsEnabled;
   final VoidCallback? onNotificationToggle;
@@ -262,7 +262,7 @@ class ChatSettingsDialog extends StatelessWidget {
   static void show({
     required String conversationId,
     required String conversationTitle,
-    required List<Message> messages,
+    required List<MessageModel> messages,
     bool isArchived = false,
     bool notificationsEnabled = true,
     VoidCallback? onNotificationToggle,

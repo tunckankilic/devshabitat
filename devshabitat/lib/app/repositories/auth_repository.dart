@@ -30,6 +30,7 @@ abstract class IAuthRepository {
   Future<Map<String, dynamic>?> getUserProfile(String userId);
   Future<void> linkWithGithub();
   Future<void> unlinkProvider(String providerId);
+  Future<void> updateUserProfile(Map<String, dynamic> data);
   Stream<User?> get authStateChanges;
   User? get currentUser;
 }
@@ -425,6 +426,22 @@ class AuthRepository implements IAuthRepository {
       await _auth.currentUser?.unlink(providerId);
     } catch (e) {
       _logger.e('Provider bağlantısı kesilirken hata: $e');
+      throw _handleAuthException(e);
+    }
+  }
+
+  @override
+  Future<void> updateUserProfile(Map<String, dynamic> data) async {
+    try {
+      final user = _auth.currentUser;
+      if (user != null) {
+        await _firestore.collection('users').doc(user.uid).update({
+          ...data,
+          'updatedAt': FieldValue.serverTimestamp(),
+        });
+      }
+    } catch (e) {
+      _logger.e('Profil güncellenirken hata: $e');
       throw _handleAuthException(e);
     }
   }

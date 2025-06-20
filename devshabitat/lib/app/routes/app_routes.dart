@@ -11,7 +11,7 @@ abstract class Routes {
   static const SETTINGS = '/settings';
   static const FORGOT_PASSWORD = '/forgot-password';
   static const MESSAGES = '/messages';
-  static const CHAT = '/chat';
+  static const CHAT = '/chat/:id';
   static const NEW_CHAT = '/new-chat';
   static const DISCOVERY = '/discovery';
   static const NETWORKING = '/networking';
@@ -20,4 +20,5 @@ abstract class Routes {
   static const USER_PROFILE = '/user-profile';
   static const EDIT_PROFILE = '/edit-profile';
   static const NOTIFICATIONS = '/notifications';
+  static const MESSAGE_SEARCH = '/message-search/:id?';
 }

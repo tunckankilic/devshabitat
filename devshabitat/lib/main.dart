@@ -23,95 +23,18 @@ import 'app/routes/app_pages.dart';
 import 'app/core/theme/dev_habitat_theme.dart';
 import 'app/constants/app_strings.dart';
 import 'firebase_options.dart';
+import 'app/bindings/app_binding.dart';
+import 'app/bindings/navigation_binding.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+
+  // Firebase'i başlat
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
   );
 
-  // Initialize services
-  final logger = Logger();
-  Get.put(logger);
-
-  final errorHandler = ErrorHandlerService();
-  Get.put(errorHandler);
-
-  final profileService = ProfileService();
-  Get.put(profileService);
-
-  final githubService = GithubService();
-  Get.put(githubService);
-
-  final githubOAuthService = GitHubOAuthService(
-    logger: logger,
-    errorHandler: errorHandler,
-  );
-  Get.put(githubOAuthService);
-
-  final imageUploadService = ImageUploadService();
-  Get.put(imageUploadService);
-
-  final lazyLoadingService = LazyLoadingService();
-  Get.put(lazyLoadingService);
-
-  final assetOptimizationService = AssetOptimizationService();
-  Get.put(assetOptimizationService);
-
-  final feedRepository = FeedRepository();
-  Get.put(feedRepository);
-
-  final networkAnalyticsService = NetworkAnalyticsService();
-  Get.put(networkAnalyticsService);
-
-  final discoveryService = DiscoveryService();
-  Get.put(discoveryService);
-
-  final messagingService = MessagingService();
-  Get.put(messagingService);
-
-  final threadService = ThreadService();
-  Get.put(threadService);
-
-  final authRepository = AuthRepository(
-    githubOAuthService: githubOAuthService,
-  );
-  Get.put(authRepository);
-
-  final authController = AuthController(
-    authRepository: authRepository,
-    errorHandler: errorHandler,
-  );
-  Get.put(authController);
-
-  final appController = AppController(
-    errorHandler: errorHandler,
-  );
-  Get.put(appController);
-
-  final networkController = NetworkController();
-  Get.put(networkController);
-
-  runApp(
-    ScreenUtilInit(
-      designSize: const Size(375, 812),
-      minTextAdapt: true,
-      splitScreenMode: true,
-      builder: (context, child) {
-        return GetMaterialApp(
-          title: AppStrings.appName,
-          theme: DevHabitatTheme.lightTheme,
-          darkTheme: DevHabitatTheme.darkTheme,
-          themeMode: ThemeMode.system,
-          locale: const Locale('en', 'US'),
-          fallbackLocale: const Locale('en', 'US'),
-          getPages: AppPages.routes,
-          initialRoute: Routes.INITIAL,
-          debugShowCheckedModeBanner: false,
-        );
-      },
-    ),
-  );
+  runApp(const MyApp());
 }
 
 class MyApp extends StatelessWidget {
@@ -120,7 +43,7 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ScreenUtilInit(
-      designSize: const Size(375, 812),
+      designSize: const Size(375, 812), // iPhone X tasarım boyutları
       minTextAdapt: true,
       splitScreenMode: true,
       builder: (context, child) {
@@ -128,22 +51,13 @@ class MyApp extends StatelessWidget {
           title: 'DevsHabitat',
           theme: DevHabitatTheme.lightTheme,
           darkTheme: DevHabitatTheme.darkTheme,
-          themeMode: ThemeMode.system,
-          initialRoute: Routes.LOGIN,
+          initialRoute: AppPages.INITIAL,
           getPages: AppPages.routes,
+          initialBinding: AppBinding(),
           defaultTransition: Transition.fade,
-          debugShowCheckedModeBanner: false,
           locale: const Locale('tr', 'TR'),
-          fallbackLocale: const Locale('tr', 'TR'),
-          builder: (context, child) {
-            return ScrollConfiguration(
-              behavior: ScrollBehavior().copyWith(
-                physics: const BouncingScrollPhysics(),
-                scrollbars: false,
-              ),
-              child: child!,
-            );
-          },
+          fallbackLocale: const Locale('en', 'US'),
+          debugShowCheckedModeBanner: false,
         );
       },
     );

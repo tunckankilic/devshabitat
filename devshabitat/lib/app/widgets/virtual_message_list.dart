@@ -3,7 +3,7 @@ import 'package:devshabitat/app/models/message_model.dart';
 import 'package:devshabitat/app/widgets/message_bubble.dart';
 
 class VirtualMessageList extends StatefulWidget {
-  final List<Message> messages;
+  final List<MessageModel> messages;
   final ScrollController? controller;
   final bool reverse;
   final EdgeInsets padding;
@@ -151,7 +151,7 @@ class _VirtualMessageListState extends State<VirtualMessageList> {
 }
 
 class _MessageItem extends StatefulWidget {
-  final Message message;
+  final MessageModel message;
   final String? highlightText;
   final ValueChanged<Size> onSizeChanged;
 

@@ -2,36 +2,51 @@ import 'package:devshabitat/app/repositories/auth_repository.dart';
 import 'package:get/get.dart';
 import 'package:flutter/material.dart';
 import '../core/services/error_handler_service.dart';
+import '../models/user_model.dart';
 
 enum RegistrationStep {
-  initial,
-  personalInfo,
-  accountDetails,
-  verification,
-  completed,
+  basicInfo, // Email, şifre ve isim (zorunlu)
+  personalInfo, // Bio, konum, fotoğraf (opsiyonel)
+  professionalInfo, // İş deneyimi, eğitim (opsiyonel)
+  skillsInfo, // Yetenekler, diller (opsiyonel)
+  completed
 }
 
 class RegistrationController extends GetxController {
   final AuthRepository _authRepository;
   final ErrorHandlerService _errorHandler;
 
+  // Form keys
+  final basicInfoFormKey = GlobalKey<FormState>();
+
   // Reactive state variables
-  final _currentStep = RegistrationStep.initial.obs;
+  final _currentStep = RegistrationStep.basicInfo.obs;
   final _isLoading = false.obs;
   final _lastError = RxnString();
   final _isEmailValid = false.obs;
   final _isPasswordValid = false.obs;
-  final _isUsernameValid = false.obs;
-  final _socialAuthData = Rxn<Map<String, dynamic>>();
+  final _isDisplayNameValid = false.obs;
 
-  // Form controllers
+  // Basic Info Controllers (Zorunlu)
   final emailController = TextEditingController();
   final passwordController = TextEditingController();
   final confirmPasswordController = TextEditingController();
-  final usernameController = TextEditingController();
-  final firstNameController = TextEditingController();
-  final lastNameController = TextEditingController();
-  final githubUsernameController = TextEditingController();
+  final displayNameController = TextEditingController();
+
+  // Personal Info Controllers (Opsiyonel)
+  final bioController = TextEditingController();
+  final locationController = TextEditingController();
+  final photoUrlController = TextEditingController();
+
+  // Professional Info Controllers (Opsiyonel)
+  final titleController = TextEditingController();
+  final companyController = TextEditingController();
+  final yearsOfExperienceController = TextEditingController();
+
+  // Skills Info Controllers (Opsiyonel)
+  final RxList<String> selectedSkills = <String>[].obs;
+  final RxList<String> selectedLanguages = <String>[].obs;
+  final RxList<String> selectedFrameworks = <String>[].obs;
 
   // Getters
   bool get isLoading => _isLoading.value;
@@ -39,10 +54,22 @@ class RegistrationController extends GetxController {
   String? get lastError => _lastError.value;
   bool get isEmailValid => _isEmailValid.value;
   bool get isPasswordValid => _isPasswordValid.value;
-  bool get isUsernameValid => _isUsernameValid.value;
-  bool get canProceed =>
-      _isEmailValid.value && _isPasswordValid.value && _isUsernameValid.value;
-  Map<String, dynamic>? get socialAuthData => _socialAuthData.value;
+  bool get isDisplayNameValid => _isDisplayNameValid.value;
+  bool get canProceedToNextStep {
+    switch (_currentStep.value) {
+      case RegistrationStep.basicInfo:
+        return _isEmailValid.value &&
+            _isPasswordValid.value &&
+            _isDisplayNameValid.value &&
+            passwordController.text == confirmPasswordController.text;
+      case RegistrationStep.personalInfo:
+      case RegistrationStep.professionalInfo:
+      case RegistrationStep.skillsInfo:
+        return true; // Opsiyonel adımlar
+      case RegistrationStep.completed:
+        return true;
+    }
+  }
 
   RegistrationController({
     required AuthRepository authRepository,
@@ -54,31 +81,6 @@ class RegistrationController extends GetxController {
   void onInit() {
     super.onInit();
     _setupValidationListeners();
-    _handleSocialAuthData();
-  }
-
-  void _handleSocialAuthData() {
-    final args = Get.arguments;
-    if (args != null && args is Map<String, dynamic>) {
-      _socialAuthData.value = args;
-
-      // Form alanlarını doldur
-      emailController.text = args['email'] ?? '';
-      if (args['displayName'] != null) {
-        final names = args['displayName'].toString().split(' ');
-        firstNameController.text = names.first;
-        if (names.length > 1) {
-          lastNameController.text = names.sublist(1).join(' ');
-        }
-      }
-      if (args['githubUsername'] != null) {
-        githubUsernameController.text = args['githubUsername'];
-      }
-
-      // Email ve kullanıcı adı validasyonlarını tetikle
-      _validateEmail(emailController.text);
-      _validateUsername(usernameController.text);
-    }
   }
 
   void _setupValidationListeners() {
@@ -90,8 +92,8 @@ class RegistrationController extends GetxController {
       _validatePassword(passwordController.text);
     });
 
-    usernameController.addListener(() {
-      _validateUsername(usernameController.text);
+    displayNameController.addListener(() {
+      _validateDisplayName(displayNameController.text);
     });
   }
 
@@ -107,125 +109,184 @@ class RegistrationController extends GetxController {
         password.contains(RegExp(r'[0-9]'));
   }
 
-  void _validateUsername(String username) {
-    _isUsernameValid.value = username.length >= 3 &&
-        username.length <= 20 &&
-        RegExp(r'^[a-zA-Z0-9_]+$').hasMatch(username);
+  void _validateDisplayName(String displayName) {
+    _isDisplayNameValid.value = displayName.length >= 3 &&
+        displayName.length <= 50 &&
+        RegExp(r'^[a-zA-ZğüşıöçĞÜŞİÖÇ\s]+$').hasMatch(displayName);
   }
 
-  void nextStep() {
+  Future<void> proceedToNextStep() async {
+    if (!canProceedToNextStep) return;
+
     switch (_currentStep.value) {
-      case RegistrationStep.initial:
-        _currentStep.value = RegistrationStep.personalInfo;
-        break;
-      case RegistrationStep.personalInfo:
-        if (_validatePersonalInfo()) {
-          _currentStep.value = RegistrationStep.accountDetails;
+      case RegistrationStep.basicInfo:
+        if (await _registerBasicInfo()) {
+          _currentStep.value = RegistrationStep.personalInfo;
         }
         break;
-      case RegistrationStep.accountDetails:
-        if (_validateAccountDetails()) {
-          _currentStep.value = RegistrationStep.verification;
-          _startVerification();
+      case RegistrationStep.personalInfo:
+        if (await _updatePersonalInfo()) {
+          _currentStep.value = RegistrationStep.professionalInfo;
         }
         break;
-      case RegistrationStep.verification:
-        _currentStep.value = RegistrationStep.completed;
+      case RegistrationStep.professionalInfo:
+        if (await _updateProfessionalInfo()) {
+          _currentStep.value = RegistrationStep.skillsInfo;
+        }
         break;
-      default:
+      case RegistrationStep.skillsInfo:
+        if (await _updateSkillsInfo()) {
+          _currentStep.value = RegistrationStep.completed;
+          Get.offAllNamed(
+              '/home'); // Kayıt tamamlandığında ana sayfaya yönlendir
+        }
         break;
-    }
-  }
-
-  void previousStep() {
-    switch (_currentStep.value) {
-      case RegistrationStep.personalInfo:
-        _currentStep.value = RegistrationStep.initial;
-        break;
-      case RegistrationStep.accountDetails:
-        _currentStep.value = RegistrationStep.personalInfo;
-        break;
-      case RegistrationStep.verification:
-        _currentStep.value = RegistrationStep.accountDetails;
-        break;
-      default:
+      case RegistrationStep.completed:
         break;
     }
   }
 
-  bool _validatePersonalInfo() {
-    if (firstNameController.value.text.isEmpty ||
-        lastNameController.value.text.isEmpty) {
-      _errorHandler.handleError('Ad ve soyad alanları zorunludur');
-      return false;
-    }
-    return true;
-  }
-
-  bool _validateAccountDetails() {
-    if (!_isEmailValid.value ||
-        !_isPasswordValid.value ||
-        !_isUsernameValid.value) {
-      _errorHandler.handleError('Lütfen tüm alanları doğru şekilde doldurun');
-      return false;
-    }
-
-    if (passwordController.value.text != confirmPasswordController.value.text) {
-      _errorHandler.handleError('Şifreler eşleşmiyor');
-      return false;
-    }
-
-    return true;
-  }
-
-  Future<void> _startVerification() async {
+  Future<bool> _registerBasicInfo() async {
     try {
       _isLoading.value = true;
-
-      // Email kontrolü
-      final methods = await _authRepository.auth
-          .fetchSignInMethodsForEmail(emailController.text);
-      if (methods.isNotEmpty) {
-        _errorHandler.handleError('Bu email adresi zaten kullanımda');
-        return;
-      }
-
-      // Kullanıcı oluştur
       final userCredential =
           await _authRepository.createUserWithEmailAndPassword(
-        emailController.value.text,
-        passwordController.value.text,
-        usernameController.value.text,
+        emailController.text,
+        passwordController.text,
+        displayNameController.text,
       );
 
-      // Sosyal auth provider'ı bağla
-      if (_socialAuthData.value != null) {
-        final provider = _socialAuthData.value!['provider'];
-        if (provider == 'github') {
-          await _authRepository.linkWithGithub();
-        }
-        // Diğer provider'lar için de benzer işlemler eklenebilir
+      if (userCredential.user != null) {
+        return true;
       }
-
-      await _authRepository.verifyEmail();
-      _errorHandler.handleSuccess('Doğrulama e-postası gönderildi');
+      return false;
     } catch (e) {
       _errorHandler.handleError(e);
-      _lastError.value = e.toString();
+      return false;
     } finally {
       _isLoading.value = false;
     }
   }
 
+  Future<bool> _updatePersonalInfo() async {
+    try {
+      _isLoading.value = true;
+      final user = _authRepository.currentUser;
+      if (user == null) return false;
+
+      await _authRepository.updateUserProfile({
+        'bio': bioController.text,
+        'location': locationController.text,
+        'photoURL': photoUrlController.text,
+      });
+
+      return true;
+    } catch (e) {
+      _errorHandler.handleError(e);
+      return false;
+    } finally {
+      _isLoading.value = false;
+    }
+  }
+
+  Future<bool> _updateProfessionalInfo() async {
+    try {
+      _isLoading.value = true;
+      final user = _authRepository.currentUser;
+      if (user == null) return false;
+
+      await _authRepository.updateUserProfile({
+        'title': titleController.text,
+        'company': companyController.text,
+        'yearsOfExperience':
+            int.tryParse(yearsOfExperienceController.text) ?? 0,
+      });
+
+      return true;
+    } catch (e) {
+      _errorHandler.handleError(e);
+      return false;
+    } finally {
+      _isLoading.value = false;
+    }
+  }
+
+  Future<bool> _updateSkillsInfo() async {
+    try {
+      _isLoading.value = true;
+      final user = _authRepository.currentUser;
+      if (user == null) return false;
+
+      await _authRepository.updateUserProfile({
+        'skills': selectedSkills,
+        'languages': selectedLanguages,
+        'frameworks': selectedFrameworks,
+      });
+
+      return true;
+    } catch (e) {
+      _errorHandler.handleError(e);
+      return false;
+    } finally {
+      _isLoading.value = false;
+    }
+  }
+
+  void goBack() {
+    switch (_currentStep.value) {
+      case RegistrationStep.personalInfo:
+        _currentStep.value = RegistrationStep.basicInfo;
+        break;
+      case RegistrationStep.professionalInfo:
+        _currentStep.value = RegistrationStep.personalInfo;
+        break;
+      case RegistrationStep.skillsInfo:
+        _currentStep.value = RegistrationStep.professionalInfo;
+        break;
+      default:
+        break;
+    }
+  }
+
+  void skipCurrentStep() {
+    switch (_currentStep.value) {
+      case RegistrationStep.personalInfo:
+        _currentStep.value = RegistrationStep.professionalInfo;
+        break;
+      case RegistrationStep.professionalInfo:
+        _currentStep.value = RegistrationStep.skillsInfo;
+        break;
+      case RegistrationStep.skillsInfo:
+        _currentStep.value = RegistrationStep.completed;
+        Get.offAllNamed('/home');
+        break;
+      default:
+        break;
+    }
+  }
+
+  String? getCurrentUserId() {
+    return _authRepository.currentUser?.uid;
+  }
+
   @override
   void onClose() {
+    // Basic Info Controllers
     emailController.dispose();
     passwordController.dispose();
     confirmPasswordController.dispose();
-    usernameController.dispose();
-    firstNameController.dispose();
-    lastNameController.dispose();
-    githubUsernameController.dispose();
+    displayNameController.dispose();
+
+    // Personal Info Controllers
+    bioController.dispose();
+    locationController.dispose();
+    photoUrlController.dispose();
+
+    // Professional Info Controllers
+    titleController.dispose();
+    companyController.dispose();
+    yearsOfExperienceController.dispose();
+
     super.onClose();
   }
 }

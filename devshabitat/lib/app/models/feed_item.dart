@@ -8,9 +8,9 @@ class FeedItem {
   final int likesCount;
   final int commentsCount;
   final int sharesCount;
-  final DateTime createdAt;
   final bool isLiked;
   final bool isShared;
+  final DateTime createdAt;
 
   FeedItem({
     required this.id,
@@ -20,38 +20,38 @@ class FeedItem {
     required this.likesCount,
     required this.commentsCount,
     required this.sharesCount,
-    required this.createdAt,
     required this.isLiked,
     required this.isShared,
+    required this.createdAt,
   });
 
-  factory FeedItem.fromFirestore(DocumentSnapshot doc) {
-    final data = doc.data() as Map<String, dynamic>;
+  factory FeedItem.fromMap(Map<String, dynamic> map, {String? id}) {
     return FeedItem(
-      id: doc.id,
-      userId: data['userId'] as String,
-      content: data['content'] as String,
-      imageUrl: data['imageUrl'] as String?,
-      likesCount: data['likesCount'] as int,
-      commentsCount: data['commentsCount'] as int,
-      sharesCount: data['sharesCount'] as int,
-      createdAt: (data['createdAt'] as Timestamp).toDate(),
-      isLiked: data['isLiked'] as bool? ?? false,
-      isShared: data['isShared'] as bool? ?? false,
+      id: id ?? map['id'] ?? '',
+      userId: map['userId'] ?? '',
+      content: map['content'] ?? '',
+      imageUrl: map['imageUrl'],
+      likesCount: map['likesCount'] ?? 0,
+      commentsCount: map['commentsCount'] ?? 0,
+      sharesCount: map['sharesCount'] ?? 0,
+      isLiked: map['isLiked'] ?? false,
+      isShared: map['isShared'] ?? false,
+      createdAt: (map['createdAt'] as Timestamp?)?.toDate() ?? DateTime.now(),
     );
   }
 
-  Map<String, dynamic> toJson() {
+  Map<String, dynamic> toMap() {
     return {
+      'id': id,
       'userId': userId,
       'content': content,
       'imageUrl': imageUrl,
       'likesCount': likesCount,
       'commentsCount': commentsCount,
       'sharesCount': sharesCount,
-      'createdAt': Timestamp.fromDate(createdAt),
       'isLiked': isLiked,
       'isShared': isShared,
+      'createdAt': Timestamp.fromDate(createdAt),
     };
   }
 
@@ -63,9 +63,9 @@ class FeedItem {
     int? likesCount,
     int? commentsCount,
     int? sharesCount,
-    DateTime? createdAt,
     bool? isLiked,
     bool? isShared,
+    DateTime? createdAt,
   }) {
     return FeedItem(
       id: id ?? this.id,
@@ -75,9 +75,9 @@ class FeedItem {
       likesCount: likesCount ?? this.likesCount,
       commentsCount: commentsCount ?? this.commentsCount,
       sharesCount: sharesCount ?? this.sharesCount,
-      createdAt: createdAt ?? this.createdAt,
       isLiked: isLiked ?? this.isLiked,
       isShared: isShared ?? this.isShared,
+      createdAt: createdAt ?? this.createdAt,
     );
   }
 }

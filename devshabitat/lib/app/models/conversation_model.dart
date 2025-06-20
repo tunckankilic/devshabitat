@@ -80,3 +80,61 @@ class ConversationModel {
     );
   }
 }
+
+class Conversation {
+  final String id;
+  final List<String> participants;
+  final String lastMessage;
+  final DateTime lastMessageTime;
+  final Map<String, bool> unreadCount;
+  final Map<String, bool> typing;
+
+  Conversation({
+    required this.id,
+    required this.participants,
+    required this.lastMessage,
+    required this.lastMessageTime,
+    required this.unreadCount,
+    required this.typing,
+  });
+
+  factory Conversation.fromFirestore(DocumentSnapshot doc) {
+    final data = doc.data() as Map<String, dynamic>;
+    return Conversation(
+      id: doc.id,
+      participants: List<String>.from(data['participants'] ?? []),
+      lastMessage: data['lastMessage'] ?? '',
+      lastMessageTime: (data['lastMessageTime'] as Timestamp).toDate(),
+      unreadCount: Map<String, bool>.from(data['unreadCount'] ?? {}),
+      typing: Map<String, bool>.from(data['typing'] ?? {}),
+    );
+  }
+
+  Map<String, dynamic> toMap() {
+    return {
+      'participants': participants,
+      'lastMessage': lastMessage,
+      'lastMessageTime': Timestamp.fromDate(lastMessageTime),
+      'unreadCount': unreadCount,
+      'typing': typing,
+    };
+  }
+
+  Conversation copyWith({
+    String? id,
+    List<String>? participants,
+    String? lastMessage,
+    DateTime? lastMessageTime,
+    Map<String, bool>? unreadCount,
+    Map<String, bool>? typing,
+  }) {
+    return Conversation(
+      id: id ?? this.id,
+      participants: participants ?? this.participants,
+      lastMessage: lastMessage ?? this.lastMessage,
+      lastMessageTime: lastMessageTime ?? this.lastMessageTime,
+      unreadCount: unreadCount ?? this.unreadCount,
+      typing: typing ?? this.typing,
+    );
+  }
+}
