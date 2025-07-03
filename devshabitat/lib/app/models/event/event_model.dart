@@ -17,6 +17,7 @@ class EventModel {
   final EventLocation location;
   final String? venueAddress;
   final String? onlineMeetingUrl;
+  final String? coverImageUrl;
   final DateTime startDate;
   final DateTime endDate;
   final int participantLimit;
@@ -35,6 +36,7 @@ class EventModel {
     required this.location,
     this.venueAddress,
     this.onlineMeetingUrl,
+    this.coverImageUrl,
     required this.startDate,
     required this.endDate,
     required this.participantLimit,
@@ -67,6 +69,7 @@ class EventModel {
     EventLocation? location,
     String? venueAddress,
     String? onlineMeetingUrl,
+    String? coverImageUrl,
     DateTime? startDate,
     DateTime? endDate,
     int? participantLimit,
@@ -85,6 +88,7 @@ class EventModel {
       location: location ?? this.location,
       venueAddress: venueAddress ?? this.venueAddress,
       onlineMeetingUrl: onlineMeetingUrl ?? this.onlineMeetingUrl,
+      coverImageUrl: coverImageUrl ?? this.coverImageUrl,
       startDate: startDate ?? this.startDate,
       endDate: endDate ?? this.endDate,
       participantLimit: participantLimit ?? this.participantLimit,

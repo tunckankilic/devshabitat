@@ -79,21 +79,6 @@ class AuthService extends GetxService {
     }
   }
 
-  Future<void> updateProfile({
-    String? displayName,
-    String? photoURL,
-  }) async {
-    try {
-      if (_auth.currentUser != null) {
-        await _auth.currentUser!.updateDisplayName(displayName);
-        await _auth.currentUser!.updatePhotoURL(photoURL);
-      }
-    } catch (e) {
-      _logger.e('Profil güncellenirken hata: $e');
-      rethrow;
-    }
-  }
-
   Future<void> updatePassword(String newPassword) async {
     try {
       await _auth.currentUser?.updatePassword(newPassword);
@@ -108,15 +93,6 @@ class AuthService extends GetxService {
       await _auth.currentUser?.updateEmail(newEmail);
     } catch (e) {
       print('E-posta güncellenirken hata: $e');
-      rethrow;
-    }
-  }
-
-  Future<void> deleteAccount() async {
-    try {
-      await _auth.currentUser?.delete();
-    } catch (e) {
-      print('Hesap silinirken hata: $e');
       rethrow;
     }
   }

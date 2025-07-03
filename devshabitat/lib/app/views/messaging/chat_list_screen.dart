@@ -108,7 +108,7 @@ class ChatListScreen extends GetView<MessagingController> {
                 conversation: conversation,
                 onTap: () {
                   controller.selectConversation(conversation);
-                  Get.toNamed(Routes.CHAT, arguments: conversation);
+                  Get.toNamed(AppRoutes.CHAT, arguments: conversation);
                 },
               );
             },
@@ -116,7 +116,7 @@ class ChatListScreen extends GetView<MessagingController> {
         }),
       ),
       floatingActionButton: FloatingActionButton(
-        onPressed: () => Get.toNamed(Routes.NEW_CHAT),
+        onPressed: () => Get.toNamed(AppPages.NEW_CHAT),
         child: const Icon(Icons.add),
       ),
     );

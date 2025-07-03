@@ -32,35 +32,51 @@ import '../views/video/video_call_view.dart';
 import '../views/video/call_history_view.dart';
 import '../views/video/incoming_call_view.dart';
 import 'package:devshabitat/app/bindings/event_binding.dart';
-import 'package:devshabitat/app/routes/app_routes.dart';
 import 'package:devshabitat/app/views/event/events_view.dart';
 import 'package:devshabitat/app/views/event/event_create_view.dart';
 import 'package:devshabitat/app/views/event/event_details_view.dart';
 import 'package:devshabitat/app/views/event/event_discovery_view.dart';
+import 'package:devshabitat/app/views/event/my_events_view.dart';
+import '../views/community/community_discovery_view.dart';
+import '../views/community/community_detail_view.dart';
+import '../views/community/community_create_view.dart';
+import '../views/community/my_communities_view.dart';
+import '../views/community/community_manage_view.dart';
+import '../bindings/community/community_discovery_binding.dart';
+import '../bindings/community/community_detail_binding.dart';
+import '../bindings/community/community_create_binding.dart';
+import '../bindings/community/my_communities_binding.dart';
+import '../bindings/community/community_manage_binding.dart';
+import 'package:devshabitat/app/routes/app_routes.dart';
+import 'package:devshabitat/app/views/map/developer_map_view.dart';
+import 'package:devshabitat/app/views/map/event_map_view.dart';
+import 'package:devshabitat/app/views/map/location_settings_view.dart';
+import 'package:devshabitat/app/bindings/location_binding.dart';
+import '../views/event/event_detail_view.dart';
+import '../bindings/event_detail_binding.dart';
+import '../views/community/community_event_view.dart';
+import '../bindings/community_event_binding.dart';
+import '../views/event/nearby_events_view.dart';
+import '../bindings/nearby_events_binding.dart';
 
 part 'app_routes.dart';
 
 class AppPages {
-  static const INITIAL = Routes.LOGIN;
+  static const INITIAL = AppRoutes.login;
 
   static final routes = [
     GetPage(
-      name: Routes.INITIAL,
+      name: AppRoutes.login,
       page: () => const LoginView(),
       binding: AuthBinding(),
     ),
     GetPage(
-      name: Routes.LOGIN,
-      page: () => const LoginView(),
-      binding: AuthBinding(),
-    ),
-    GetPage(
-      name: Routes.REGISTER,
+      name: AppRoutes.register,
       page: () => const RegisterView(),
       binding: AuthBinding(),
     ),
     GetPage(
-      name: Routes.MAIN,
+      name: AppRoutes.home,
       page: () => MainWrapper(),
       bindings: [
         NavigationBinding(),
@@ -69,93 +85,42 @@ class AppPages {
       middlewares: [AuthMiddleware()],
     ),
     GetPage(
-      name: Routes.FORGOT_PASSWORD,
+      name: AppRoutes.forgotPassword,
       page: () => ForgotPasswordView(),
       binding: AuthBinding(),
     ),
     GetPage(
-      name: Routes.MESSAGES,
-      page: () => MessageView(),
-      binding: MessagingBinding(),
-    ),
-    GetPage(
-      name: Routes.CHAT,
-      page: () => ChatView(),
-      binding: MessagingBinding(),
-    ),
-    GetPage(
-      name: Routes.MESSAGE_SEARCH,
-      page: () => MessageSearchView(),
-      binding: MessagingBinding(),
-    ),
-    GetPage(
-      name: Routes.DISCOVERY,
-      page: () => const DiscoveryScreen(),
-      binding: DiscoveryBinding(),
-      middlewares: [AuthMiddleware()],
-    ),
-    GetPage(
-      name: Routes.NETWORKING,
-      page: () => const MyNetworkScreen(),
-      binding: NetworkingBinding(),
-      middlewares: [AuthMiddleware()],
-    ),
-    GetPage(
-      name: Routes.COMMENTS,
-      page: () => const CommentsView(),
-      binding: HomeBinding(),
-      middlewares: [AuthMiddleware()],
-    ),
-    GetPage(
-      name: Routes.ITEM_DETAIL,
-      page: () => const ItemDetailView(),
-      binding: HomeBinding(),
-      middlewares: [AuthMiddleware()],
-    ),
-    GetPage(
-      name: Routes.USER_PROFILE,
-      page: () => const ProfileView(),
-      binding: ProfileBinding(),
-      middlewares: [AuthMiddleware()],
-    ),
-    GetPage(
-      name: Routes.EDIT_PROFILE,
-      page: () => const EditProfileView(),
-      binding: ProfileBinding(),
-      middlewares: [AuthMiddleware()],
-    ),
-    GetPage(
-      name: Routes.NOTIFICATIONS,
+      name: AppRoutes.notifications,
       page: () => const NotificationsView(),
       binding: HomeBinding(),
       middlewares: [AuthMiddleware()],
     ),
     GetPage(
-      name: Routes.SETTINGS,
+      name: AppRoutes.settings,
       page: () => const SettingsView(),
       binding: SettingsBinding(),
       middlewares: [AuthMiddleware()],
     ),
     GetPage(
-      name: Routes.SEARCH,
+      name: AppRoutes.search,
       page: () => const SearchView(),
       binding: SearchBinding(),
       middlewares: [AuthMiddleware()],
     ),
     GetPage(
-      name: Routes.VIDEO_CALL,
+      name: AppRoutes.videoCall,
       page: () => const VideoCallView(),
       binding: VideoBinding(),
       transition: Transition.fadeIn,
     ),
     GetPage(
-      name: Routes.incomingCall,
+      name: AppRoutes.incomingCall,
       page: () => const IncomingCallView(),
       binding: VideoBinding(),
       transition: Transition.fadeIn,
     ),
     GetPage(
-      name: Routes.callHistory,
+      name: AppRoutes.callHistory,
       page: () => const CallHistoryView(),
       binding: VideoBinding(),
       transition: Transition.fadeIn,
@@ -179,6 +144,66 @@ class AppPages {
       name: AppRoutes.eventDiscovery,
       page: () => const EventDiscoveryView(),
       binding: EventBinding(),
+    ),
+    GetPage(
+      name: AppRoutes.myEvents,
+      page: () => const MyEventsView(),
+      binding: EventBinding(),
+    ),
+    GetPage(
+      name: Routes.COMMUNITY_DISCOVERY,
+      page: () => const CommunityDiscoveryView(),
+      binding: CommunityDiscoveryBinding(),
+    ),
+    GetPage(
+      name: Routes.COMMUNITY_DETAIL,
+      page: () => const CommunityDetailView(),
+      binding: CommunityDetailBinding(),
+    ),
+    GetPage(
+      name: Routes.COMMUNITY_CREATE,
+      page: () => const CommunityCreateView(),
+      binding: CommunityCreateBinding(),
+    ),
+    GetPage(
+      name: Routes.MY_COMMUNITIES,
+      page: () => const MyCommunitiesView(),
+      binding: MyCommunitiesBinding(),
+    ),
+    GetPage(
+      name: Routes.COMMUNITY_MANAGE,
+      page: () => const CommunityManageView(),
+      binding: CommunityManageBinding(),
+    ),
+    GetPage(
+      name: Routes.developerMap,
+      page: () => const DeveloperMapView(),
+      binding: LocationBinding(),
+    ),
+    GetPage(
+      name: Routes.eventMap,
+      page: () => const EventMapView(),
+      binding: LocationBinding(),
+    ),
+    GetPage(
+      name: Routes.locationSettings,
+      page: () => const LocationSettingsView(),
+      binding: LocationBinding(),
+    ),
+    GetPage(
+      name: Routes.EVENT_DETAIL,
+      page: () => EventDetailView(),
+      binding: EventDetailBinding(),
+    ),
+    GetPage(
+      name: Routes.COMMUNITY_EVENT,
+      page: () => CommunityEventView(),
+      binding: CommunityEventBinding(),
+    ),
+    GetPage(
+      name: Routes.NEARBY_EVENTS,
+      page: () => NearbyEventsView(),
+      binding: NearbyEventsBinding(),
     ),
   ];
 }

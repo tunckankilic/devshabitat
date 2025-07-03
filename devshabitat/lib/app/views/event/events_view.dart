@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:devshabitat/app/controllers/event/event_controller.dart';
 import 'package:devshabitat/app/models/event/event_model.dart';
-import 'package:devshabitat/app/routes/app_routes.dart';
+import 'package:devshabitat/app/routes/app_pages.dart';
 
 class EventsView extends GetView<EventController> {
   const EventsView({Key? key}) : super(key: key);
