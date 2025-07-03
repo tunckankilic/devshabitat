@@ -229,6 +229,13 @@ class SignalingService extends GetxService {
     }
   }
 
+  Future<void> rejectCall({required String roomId}) async {
+    await _firestore.collection('calls').doc(roomId).update({
+      'status': CallStatus.rejected.toString(),
+      'endTime': FieldValue.serverTimestamp(),
+    });
+  }
+
   void dispose() {
     _messageController.close();
   }

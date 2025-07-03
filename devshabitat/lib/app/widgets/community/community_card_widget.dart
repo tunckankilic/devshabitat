@@ -1,6 +1,6 @@
+import 'package:devshabitat/app/routes/app_pages.dart';
 import 'package:flutter/material.dart';
 import '../../models/community/community_model.dart';
-import '../../routes/app_routes.dart';
 import 'package:get/get.dart';
 
 class CommunityCardWidget extends StatelessWidget {
@@ -25,7 +25,7 @@ class CommunityCardWidget extends StatelessWidget {
       child: InkWell(
         onTap: onTap ??
             () => Get.toNamed(
-                  Routes.COMMUNITY_DETAIL,
+                  AppRoutes.COMMUNITY_DETAIL,
                   arguments: community,
                 ),
         child: Column(

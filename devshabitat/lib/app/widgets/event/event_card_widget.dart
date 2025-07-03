@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:devshabitat/app/models/event/event_model.dart';
-import 'package:devshabitat/app/routes/app_routes.dart';
+import 'package:devshabitat/app/routes/app_pages.dart';
 
 class EventCard extends StatelessWidget {
   final EventModel event;
@@ -23,7 +23,7 @@ class EventCard extends StatelessWidget {
       ),
       child: InkWell(
         onTap: () => Get.toNamed(
-          AppRoutes.eventDetails,
+          AppRoutes.EVENT_DETAIL,
           arguments: event,
         ),
         borderRadius: BorderRadius.circular(12),
@@ -195,6 +195,8 @@ class EventCard extends StatelessWidget {
         return Colors.blue;
       case EventType.conference:
         return Colors.green;
+      case EventType.other:
+        return Colors.grey;
     }
   }
 
@@ -208,6 +210,8 @@ class EventCard extends StatelessWidget {
         return Icons.code;
       case EventType.conference:
         return Icons.business;
+      case EventType.other:
+        return Icons.event;
     }
   }
 
@@ -221,6 +225,8 @@ class EventCard extends StatelessWidget {
         return 'Hackathon';
       case EventType.conference:
         return 'Konferans';
+      case EventType.other:
+        return 'Diğer';
     }
   }
 

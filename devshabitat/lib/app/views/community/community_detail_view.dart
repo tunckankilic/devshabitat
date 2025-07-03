@@ -4,6 +4,7 @@ import '../../controllers/community/community_controller.dart';
 import '../../widgets/community/community_stats_widget.dart';
 import '../../widgets/community/member_list_widget.dart';
 import '../../widgets/community/membership_request_widget.dart';
+import '../../routes/app_pages.dart';
 
 class CommunityDetailView extends GetView<CommunityController> {
   const CommunityDetailView({Key? key}) : super(key: key);
@@ -28,7 +29,8 @@ class CommunityDetailView extends GetView<CommunityController> {
                   ),
                   const SizedBox(height: 16),
                   ElevatedButton(
-                    onPressed: controller.loadCommunity,
+                    onPressed: () => controller
+                        .loadCommunity(controller.community.value?.id ?? ''),
                     child: const Text('Tekrar Dene'),
                   ),
                 ],
@@ -65,7 +67,7 @@ class CommunityDetailView extends GetView<CommunityController> {
                     IconButton(
                       icon: const Icon(Icons.settings),
                       onPressed: () => Get.toNamed(
-                        Routes.COMMUNITY_MANAGE,
+                        AppRoutes.COMMUNITY_MANAGE,
                         arguments: community,
                       ),
                       tooltip: 'Topluluk Yönetimi',

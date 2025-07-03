@@ -124,6 +124,8 @@ class EventDetailsView extends GetView<EventController> {
         return Icons.code;
       case EventType.conference:
         return Icons.business;
+      case EventType.other:
+        return Icons.event;
     }
   }
 
@@ -137,6 +139,8 @@ class EventDetailsView extends GetView<EventController> {
         return 'Hackathon';
       case EventType.conference:
         return 'Konferans';
+      case EventType.other:
+        return 'Diğer';
     }
   }
 

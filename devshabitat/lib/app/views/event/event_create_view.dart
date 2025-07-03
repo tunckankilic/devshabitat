@@ -236,6 +236,8 @@ class EventCreateView extends GetView<EventCreateController> {
         return 'Hackathon';
       case EventType.conference:
         return 'Konferans';
+      case EventType.other:
+        return 'Diğer';
     }
   }
 

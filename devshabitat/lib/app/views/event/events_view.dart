@@ -149,6 +149,10 @@ class EventCard extends StatelessWidget {
         return Icons.code;
       case EventType.conference:
         return Icons.business;
+      case EventType.other:
+        return Icons.event;
+      default:
+        return Icons.event;
     }
   }
 
@@ -162,6 +166,10 @@ class EventCard extends StatelessWidget {
         return 'Hackathon';
       case EventType.conference:
         return 'Konferans';
+      case EventType.other:
+        return 'Diğer';
+      default:
+        return 'Diğer';
     }
   }
 

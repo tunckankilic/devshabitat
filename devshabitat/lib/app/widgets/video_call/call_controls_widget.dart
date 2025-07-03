@@ -12,10 +12,10 @@ class CallControlsWidget extends GetView<VideoCallController> {
       children: [
         _buildControlButton(
           icon: Obx(() => Icon(
-                controller.isAudioEnabled.value ? Icons.mic : Icons.mic_off,
+                controller.isAudioEnabled ? Icons.mic : Icons.mic_off,
                 color: Colors.white,
               )),
-          backgroundColor: controller.isAudioEnabled.value
+          backgroundColor: controller.isAudioEnabled
               ? Colors.grey.shade800
               : Theme.of(context).colorScheme.error,
           onPressed: controller.toggleAudio,
@@ -23,12 +23,10 @@ class CallControlsWidget extends GetView<VideoCallController> {
         ),
         _buildControlButton(
           icon: Obx(() => Icon(
-                controller.isVideoEnabled.value
-                    ? Icons.videocam
-                    : Icons.videocam_off,
+                controller.isVideoEnabled ? Icons.videocam : Icons.videocam_off,
                 color: Colors.white,
               )),
-          backgroundColor: controller.isVideoEnabled.value
+          backgroundColor: controller.isVideoEnabled
               ? Colors.grey.shade800
               : Theme.of(context).colorScheme.error,
           onPressed: controller.toggleVideo,
@@ -42,12 +40,12 @@ class CallControlsWidget extends GetView<VideoCallController> {
         ),
         _buildControlButton(
           icon: Obx(() => Icon(
-                controller.isScreenSharing.value
+                controller.isScreenSharing
                     ? Icons.screen_share
                     : Icons.stop_screen_share,
                 color: Colors.white,
               )),
-          backgroundColor: controller.isScreenSharing.value
+          backgroundColor: controller.isScreenSharing
               ? Theme.of(context).colorScheme.primary
               : Colors.grey.shade800,
           onPressed: controller.toggleScreenShare,

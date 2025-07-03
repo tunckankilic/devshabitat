@@ -1,3 +1,4 @@
+import 'package:devshabitat/app/repositories/auth_repository.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -5,7 +6,6 @@ import '../../controllers/message/message_chat_controller.dart';
 import '../../controllers/message/message_interaction_controller.dart';
 import '../../models/message_model.dart';
 import '../base/base_view.dart';
-import '../../services/auth_service.dart';
 
 class ChatView extends BaseView<MessageChatController> {
   final MessageInteractionController interactionController = Get.find();
@@ -128,8 +128,8 @@ class ChatView extends BaseView<MessageChatController> {
   }
 
   Widget _buildMessageTile(MessageModel message) {
-    final authService = Get.find<AuthService>();
-    final isMe = message.senderId == authService.currentUser.value?.uid;
+    final authService = Get.find<AuthRepository>();
+    final isMe = message.senderId == authService.currentUser?.uid;
 
     return Padding(
       padding: EdgeInsets.symmetric(
@@ -244,8 +244,8 @@ class ChatView extends BaseView<MessageChatController> {
   }
 
   void _showMessageOptions(MessageModel message) {
-    final authService = Get.find<AuthService>();
-    final isMe = message.senderId == authService.currentUser.value?.uid;
+    final authService = Get.find<AuthRepository>();
+    final isMe = message.senderId == authService.currentUser?.uid;
 
     Get.bottomSheet(
       Container(

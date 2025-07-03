@@ -40,4 +40,8 @@ abstract class AppRoutes {
   static const eventMap = '/event-map';
   static const locationSettings = '/location-settings';
   static const locationHistory = '/location-history';
+
+  // Chat routes
+  static const CHAT = '/chat';
+  static const NEW_CHAT = '/new-chat';
 }

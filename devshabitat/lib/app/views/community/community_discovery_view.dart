@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../../controllers/community/community_discovery_controller.dart';
 import '../../widgets/community/community_card_widget.dart';
+import '../../routes/app_pages.dart';
 
 class CommunityDiscoveryView extends GetView<CommunityDiscoveryController> {
   const CommunityDiscoveryView({Key? key}) : super(key: key);
@@ -32,13 +33,13 @@ class CommunityDiscoveryView extends GetView<CommunityDiscoveryController> {
               return const Center(child: CircularProgressIndicator());
             }
 
-            if (controller.error.value.isNotEmpty) {
+            if (controller.hasError.value) {
               return Center(
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     Text(
-                      'Hata: ${controller.error.value}',
+                      'Hata: ${controller.errorMessage.value}',
                       textAlign: TextAlign.center,
                     ),
                     const SizedBox(height: 16),
@@ -72,7 +73,7 @@ class CommunityDiscoveryView extends GetView<CommunityDiscoveryController> {
         ),
       ),
       floatingActionButton: FloatingActionButton.extended(
-        onPressed: () => Get.toNamed(Routes.COMMUNITY_CREATE),
+        onPressed: () => Get.toNamed(AppRoutes.COMMUNITY_CREATE),
         icon: const Icon(Icons.add),
         label: const Text('Topluluk Oluştur'),
       ),

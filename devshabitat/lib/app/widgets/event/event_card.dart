@@ -1,6 +1,6 @@
+import 'package:devshabitat/app/routes/app_pages.dart';
 import 'package:flutter/material.dart';
 import '../../models/event/event_model.dart';
-import '../../routes/app_routes.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
 

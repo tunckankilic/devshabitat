@@ -8,8 +8,8 @@ class CallStatusWidget extends GetView<VideoCallController> {
   @override
   Widget build(BuildContext context) {
     return Obx(() {
-      final status = controller.callStatus.value;
-      final duration = controller.callDuration.value;
+      final status = controller.callStatus;
+      final duration = controller.callDuration;
 
       return Row(
         children: [
@@ -28,7 +28,7 @@ class CallStatusWidget extends GetView<VideoCallController> {
   }
 
   Widget _buildStatusIndicator(CallConnectionStatus status) {
-    Color indicatorColor;
+    Color indicatorColor = Colors.grey; // Varsayılan renk
     switch (status) {
       case CallConnectionStatus.connecting:
         indicatorColor = Colors.orange;

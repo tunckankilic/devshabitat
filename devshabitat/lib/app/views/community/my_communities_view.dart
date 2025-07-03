@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../../controllers/community/my_communities_controller.dart';
 import '../../widgets/community/community_card_widget.dart';
+import '../../routes/app_pages.dart';
 
 class MyCommunitiesView extends GetView<MyCommunitiesController> {
   const MyCommunitiesView({Key? key}) : super(key: key);
@@ -122,7 +123,7 @@ class MyCommunitiesView extends GetView<MyCommunitiesController> {
           ],
         ),
         floatingActionButton: FloatingActionButton.extended(
-          onPressed: () => Get.toNamed(Routes.COMMUNITY_CREATE),
+          onPressed: () => Get.toNamed(AppRoutes.COMMUNITY_CREATE),
           icon: const Icon(Icons.add),
           label: const Text('Topluluk Oluştur'),
         ),

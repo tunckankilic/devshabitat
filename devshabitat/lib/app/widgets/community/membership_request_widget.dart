@@ -45,15 +45,17 @@ class MembershipRequestWidget extends StatelessWidget {
               final member = pendingMembers[index];
               return ListTile(
                 leading: CircleAvatar(
-                  backgroundImage: member.photoURL != null
-                      ? NetworkImage(member.photoURL!)
+                  backgroundImage: member.photoUrl != null
+                      ? NetworkImage(member.photoUrl!)
                       : null,
-                  child: member.photoURL == null
-                      ? Text(member.displayName[0].toUpperCase())
+                  child: member.photoUrl == null && member.displayName != null
+                      ? Text(member.displayName!.characters.first.toUpperCase())
                       : null,
                 ),
-                title: Text(member.displayName),
-                subtitle: member.title != null ? Text(member.title!) : null,
+                title: Text(member.displayName ?? member.email),
+                subtitle: member.metadata?['title'] != null
+                    ? Text(member.metadata!['title'] as String)
+                    : null,
                 trailing: Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [

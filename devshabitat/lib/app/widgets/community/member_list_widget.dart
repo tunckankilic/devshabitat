@@ -28,13 +28,15 @@ class MemberListWidget extends StatelessWidget {
         return ListTile(
           leading: CircleAvatar(
             backgroundImage:
-                member.photoURL != null ? NetworkImage(member.photoURL!) : null,
-            child: member.photoURL == null
-                ? Text(member.displayName[0].toUpperCase())
+                member.photoUrl != null ? NetworkImage(member.photoUrl!) : null,
+            child: member.photoUrl == null && member.displayName != null
+                ? Text(member.displayName!.characters.first.toUpperCase())
                 : null,
           ),
-          title: Text(member.displayName),
-          subtitle: Text(member.title ?? ''),
+          title: Text(member.displayName ?? member.email),
+          subtitle: member.metadata?['title'] != null
+              ? Text(member.metadata!['title'] as String)
+              : null,
           onTap: onMemberTap != null ? () => onMemberTap!(member) : null,
           trailing: isAdmin
               ? PopupMenuButton<String>(

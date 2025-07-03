@@ -8,11 +8,19 @@ import 'package:devshabitat/app/models/video/call_settings_model.dart';
 import 'package:devshabitat/app/services/video/webrtc_service.dart';
 import 'package:devshabitat/app/services/video/signaling_service.dart';
 
+enum CallConnectionStatus {
+  connecting,
+  connected,
+  reconnecting,
+  disconnected,
+}
+
 class VideoCallController extends GetxController {
   final WebRTCService _webRTCService;
   final SignalingService _signalingService;
   final String roomId;
   final bool isInitiator;
+  final caller = Get.arguments['caller'];
 
   VideoCallController({
     required WebRTCService webRTCService,
@@ -309,6 +317,23 @@ class VideoCallController extends GetxController {
       Get.back();
     } catch (e) {
       print('End call error: $e');
+    }
+  }
+
+  Future<void> acceptCall() async {
+    try {
+      await _initializeCall();
+    } catch (e) {
+      print('Accept call error: $e');
+    }
+  }
+
+  Future<void> rejectCall() async {
+    try {
+      await _signalingService.rejectCall(roomId: roomId);
+      Get.back();
+    } catch (e) {
+      print('Reject call error: $e');
     }
   }
 }

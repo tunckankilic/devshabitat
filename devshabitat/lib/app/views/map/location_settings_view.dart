@@ -16,7 +16,7 @@ class LocationSettingsView extends GetView<MapController> {
         children: [
           _buildLocationPermissionSection(),
           const Divider(),
-          _buildLocationTrackingSection(),
+          _buildLocationTrackingSection(context),
           const Divider(),
           _buildNotificationSection(),
           const Divider(),
@@ -65,7 +65,7 @@ class LocationSettingsView extends GetView<MapController> {
     );
   }
 
-  Widget _buildLocationTrackingSection() {
+  Widget _buildLocationTrackingSection(BuildContext context) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [

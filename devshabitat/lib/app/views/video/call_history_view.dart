@@ -20,7 +20,7 @@ class CallHistoryView extends GetView<CallHistoryController> {
         ],
       ),
       body: Obx(
-        () => controller.isLoading.value
+        () => controller.isLoading
             ? const Center(child: CircularProgressIndicator())
             : controller.calls.isEmpty
                 ? _buildEmptyState()
@@ -72,7 +72,8 @@ class _CallHistoryTile extends StatelessWidget {
   Widget build(BuildContext context) {
     return ListTile(
       leading: CircleAvatar(
-        backgroundImage: NetworkImage(call.participants.first.profileImage),
+        backgroundImage:
+            NetworkImage(call.participants.first.profileImage ?? ""),
         backgroundColor: Theme.of(context).colorScheme.primary.withOpacity(0.1),
       ),
       title: Text(

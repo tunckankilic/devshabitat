@@ -116,7 +116,7 @@ class ChatListScreen extends GetView<MessagingController> {
         }),
       ),
       floatingActionButton: FloatingActionButton(
-        onPressed: () => Get.toNamed(AppPages.NEW_CHAT),
+        onPressed: () => Get.toNamed(AppRoutes.NEW_CHAT),
         child: const Icon(Icons.add),
       ),
     );
