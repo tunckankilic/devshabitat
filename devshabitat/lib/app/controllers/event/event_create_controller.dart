@@ -53,7 +53,7 @@ class EventCreateController extends GetxController {
         id: '', // Will be set by Firestore
         title: title.value,
         description: description.value,
-        organizerId: Get.find<AuthController>().currentUser.value!.id,
+        organizerId: Get.find<AuthController>().currentUser?.uid ?? '',
         type: type.value!,
         location: location.value!,
         venueAddress: venueAddress.value,

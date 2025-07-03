@@ -1,6 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:get/get.dart';
+import 'location/location_model.dart';
 
 class EnhancedUserModel {
   final String uid;
@@ -19,6 +20,8 @@ class EnhancedUserModel {
   final Map<String, dynamic>? githubData;
   final List<String>? skills;
   final List<Map<String, dynamic>>? experience;
+  final LocationModel? location;
+  final int yearsOfExperience;
 
   // Reactive properties
   final RxString id;
@@ -36,6 +39,8 @@ class EnhancedUserModel {
   final RxMap<String, dynamic>? githubDataRx;
   final RxList<String>? skillsRx;
   final RxList<Map<String, dynamic>>? experienceRx;
+  final Rx<LocationModel?> locationRx;
+  final RxInt yearsOfExperienceRx;
 
   EnhancedUserModel({
     required this.uid,
@@ -54,6 +59,8 @@ class EnhancedUserModel {
     this.githubData,
     this.skills,
     this.experience,
+    this.location,
+    this.yearsOfExperience = 0,
   })  : id = uid.obs,
         emailRx = email.obs,
         displayNameRx = displayName?.obs,
@@ -68,7 +75,9 @@ class EnhancedUserModel {
         githubIdRx = githubId?.obs,
         githubDataRx = githubData?.obs,
         skillsRx = skills?.obs,
-        experienceRx = experience?.obs;
+        experienceRx = experience?.obs,
+        locationRx = Rx<LocationModel?>(location),
+        yearsOfExperienceRx = yearsOfExperience.obs;
 
   factory EnhancedUserModel.fromFirebase(User user) {
     return EnhancedUserModel(
@@ -108,6 +117,10 @@ class EnhancedUserModel {
       experience: (json['experience'] as List<dynamic>?)
           ?.map((e) => e as Map<String, dynamic>)
           .toList(),
+      location: json['location'] != null
+          ? LocationModel.fromJson(json['location'] as Map<String, dynamic>)
+          : null,
+      yearsOfExperience: json['yearsOfExperience'] as int? ?? 0,
     );
   }
 
@@ -129,6 +142,8 @@ class EnhancedUserModel {
       'githubData': githubData,
       'skills': skills,
       'experience': experience,
+      'location': location?.toJson(),
+      'yearsOfExperience': yearsOfExperience,
     };
   }
 
@@ -149,6 +164,8 @@ class EnhancedUserModel {
     Map<String, dynamic>? githubData,
     List<String>? skills,
     List<Map<String, dynamic>>? experience,
+    LocationModel? location,
+    int? yearsOfExperience,
   }) {
     return EnhancedUserModel(
       uid: uid ?? this.uid,
@@ -167,6 +184,8 @@ class EnhancedUserModel {
       githubData: githubData ?? this.githubData,
       skills: skills ?? this.skills,
       experience: experience ?? this.experience,
+      location: location ?? this.location,
+      yearsOfExperience: yearsOfExperience ?? this.yearsOfExperience,
     );
   }
 

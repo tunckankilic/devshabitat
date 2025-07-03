@@ -10,7 +10,7 @@ class AuthService extends GetxService {
   final FirebaseAuth _auth = FirebaseAuth.instance;
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
   final Logger _logger = Logger();
-  final GoogleSignIn _googleSignIn = GoogleSignIn();
+  final GoogleSignIn _googleSignIn = GoogleSignIn.instance;
 
   Rx<User?> currentUser = Rx<User?>(null);
 
@@ -18,6 +18,7 @@ class AuthService extends GetxService {
   void onInit() {
     super.onInit();
     currentUser.bindStream(_auth.authStateChanges());
+    _googleSignIn.initialize();
   }
 
   Future<User?> signInWithEmailAndPassword(
@@ -156,20 +157,25 @@ class AuthService extends GetxService {
   // Sign in with Google
   Future<UserModel> signInWithGoogle() async {
     try {
-      final GoogleSignInAccount? googleUser = await _googleSignIn.signIn();
+      await _googleSignIn.initialize();
+
+      final GoogleSignInAccount? googleUser =
+          await _googleSignIn.authenticate();
       if (googleUser == null) throw Exception('Google hesabı seçilmedi');
 
       final GoogleSignInAuthentication googleAuth =
           await googleUser.authentication;
+
+      // Firebase kimlik bilgilerini oluştur
       final credential = GoogleAuthProvider.credential(
-        accessToken: googleAuth.accessToken,
         idToken: googleAuth.idToken,
       );
 
+      // Firebase ile giriş yap
       final userCredential = await _auth.signInWithCredential(credential);
       final user = userCredential.user!;
 
-      // Save additional user data to Firestore
+      // Firestore'a kullanıcı bilgilerini kaydet
       await _firestore.collection('users').doc(user.uid).set({
         'email': user.email,
         'displayName': user.displayName,
@@ -315,6 +321,37 @@ class AuthService extends GetxService {
       await user.delete();
     } catch (e) {
       throw Exception('Hesap silinirken bir hata oluştu');
+    }
+  }
+
+  // Sign in with GitHub
+  Future<UserModel> signInWithGithub() async {
+    try {
+      final githubProvider = GithubAuthProvider();
+      final userCredential = await _auth.signInWithPopup(githubProvider);
+      final user = userCredential.user!;
+
+      // Save additional user data to Firestore
+      await _firestore.collection('users').doc(user.uid).set({
+        'email': user.email,
+        'displayName': user.displayName,
+        'photoUrl': user.photoURL,
+        'provider': 'github',
+        'lastSignInTime': FieldValue.serverTimestamp(),
+      }, SetOptions(merge: true));
+
+      return UserModel(
+        id: user.uid,
+        email: user.email!,
+        displayName: user.displayName,
+        photoUrl: user.photoURL,
+        phoneNumber: user.phoneNumber,
+        emailVerified: user.emailVerified,
+        createdAt: DateTime.now(),
+        updatedAt: DateTime.now(),
+      );
+    } catch (e) {
+      throw Exception('GitHub ile giriş yapılırken bir hata oluştu');
     }
   }
 }

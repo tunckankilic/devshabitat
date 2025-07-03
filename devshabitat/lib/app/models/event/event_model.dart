@@ -99,4 +99,15 @@ class EventModel {
       updatedAt: updatedAt ?? this.updatedAt,
     );
   }
+
+  // Etkinliğin başlayıp başlamadığını kontrol eden getter
+  bool get isStarting {
+    final now = DateTime.now();
+    return now.isAfter(startDate) && now.isBefore(endDate);
+  }
+
+  // Etkinliğin bitip bitmediğini kontrol eden getter
+  bool get isEnding {
+    return DateTime.now().isAfter(endDate);
+  }
 }

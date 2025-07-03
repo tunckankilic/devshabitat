@@ -10,7 +10,7 @@ class AuthMiddleware extends GetMiddleware {
     final authController = Get.find<AuthController>();
 
     if (authController.authState == AuthState.unauthenticated) {
-      return const RouteSettings(name: Routes.LOGIN);
+      return RouteSettings(name: AppRoutes.login);
     }
 
     return null;

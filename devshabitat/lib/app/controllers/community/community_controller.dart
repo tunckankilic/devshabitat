@@ -61,12 +61,13 @@ class CommunityController extends GetxController {
       communitySettings.value = settings;
 
       // Load membership status for current user
-      final userId = Get.find<String>(); // Assuming user ID is registered
-      final membership = await _membershipService.getMemberStatus(
-        communityId: communityId,
-        userId: userId,
-      );
-      membershipStatus.value = membership;
+      if (currentUser != null) {
+        final membership = await _membershipService.getMemberStatus(
+          communityId: communityId,
+          userId: currentUser.uid,
+        );
+        membershipStatus.value = membership;
+      }
     } catch (e) {
       error.value = 'Topluluk bilgileri yüklenirken bir hata oluştu: $e';
     } finally {
@@ -169,7 +170,7 @@ class CommunityController extends GetxController {
 
       await _membershipService.acceptMembership(
         communityId: community.value!.id,
-        userId: user.uid,
+        userId: user.id,
       );
 
       pendingMembers.remove(user);
@@ -196,7 +197,7 @@ class CommunityController extends GetxController {
 
       await _membershipService.rejectMembership(
         communityId: community.value!.id,
-        userId: user.uid,
+        userId: user.id,
       );
 
       pendingMembers.remove(user);
@@ -222,7 +223,7 @@ class CommunityController extends GetxController {
 
       await _membershipService.removeMember(
         communityId: community.value!.id,
-        userId: user.uid,
+        userId: user.id,
       );
 
       await loadMembers();
@@ -248,7 +249,7 @@ class CommunityController extends GetxController {
 
       await _membershipService.promoteToModerator(
         communityId: community.value!.id,
-        userId: user.uid,
+        userId: user.id,
       );
 
       await loadCommunity(community.value!.id);
@@ -332,7 +333,7 @@ class CommunityController extends GetxController {
   }
 
   // Get community members
-  Future<List<MembershipModel>> getMembers({
+  Future<List<UserModel>> getMembers({
     MembershipRole? role,
     MembershipStatus? status,
     int limit = 20,
@@ -341,13 +342,10 @@ class CommunityController extends GetxController {
     if (community.value == null) return [];
 
     try {
-      return await _membershipService.getCommunityMembers(
-        communityId: community.value!.id,
-        role: role,
-        status: status,
-        limit: limit,
-        startAfter: startAfter,
+      final memberships = await _membershipService.getCommunityMembers(
+        community.value!.id,
       );
+      return memberships;
     } catch (e) {
       Get.snackbar('Hata', 'Üyeler yüklenirken bir hata oluştu');
       return [];

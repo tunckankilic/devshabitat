@@ -1,4 +1,6 @@
+import 'dart:async';
 import 'package:get/get.dart';
+import 'package:location/location.dart';
 import '../../models/location/location_model.dart';
 import '../../services/location/location_tracking_service.dart';
 import '../../services/location/maps_service.dart';
@@ -13,6 +15,19 @@ class LocationController extends GetxController {
   final isTrackingEnabled = false.obs;
   final locationPermissionGranted = false.obs;
   final locationServicesEnabled = false.obs;
+  StreamSubscription<LocationData?>? _locationSubscription;
+
+  LocationModel _convertToLocationModel(LocationData data) {
+    return LocationModel(
+      latitude: data.latitude ?? 0,
+      longitude: data.longitude ?? 0,
+      accuracy: data.accuracy,
+      altitude: data.altitude,
+      speed: data.speed,
+      heading: data.heading,
+      timestamp: DateTime.fromMillisecondsSinceEpoch(data.time?.toInt() ?? 0),
+    );
+  }
 
   @override
   void onInit() {
@@ -22,8 +37,9 @@ class LocationController extends GetxController {
 
   Future<void> _initializeLocation() async {
     try {
-      final location = await _trackingService.getCurrentLocation();
-      if (location != null) {
+      final locationData = await _trackingService.getCurrentLocation();
+      if (locationData != null) {
+        final location = _convertToLocationModel(locationData);
         currentLocation.value = location;
         lastKnownLocation.value = location;
       }
@@ -45,7 +61,6 @@ class LocationController extends GetxController {
 
   Future<bool> _checkLocationServices() async {
     try {
-      // Geolocator servisi üzerinden kontrol
       return await _trackingService.getCurrentLocation() != null;
     } catch (e) {
       return false;
@@ -54,7 +69,6 @@ class LocationController extends GetxController {
 
   Future<bool> _checkLocationPermission() async {
     try {
-      // Konum izinlerini kontrol et
       await _trackingService.getCurrentLocation();
       return true;
     } catch (e) {
@@ -68,20 +82,31 @@ class LocationController extends GetxController {
     }
 
     if (locationPermissionGranted.value && locationServicesEnabled.value) {
-      _trackingService.startTracking();
+      _locationSubscription?.cancel();
+      _locationSubscription = _trackingService.getLocationStream().listen(
+        (locationData) {
+          if (locationData != null) {
+            currentLocation.value = _convertToLocationModel(locationData);
+          }
+        },
+        onError: (error) {
+          print('Konum takip hatası: $error');
+        },
+      );
       isTrackingEnabled.value = true;
     }
   }
 
   void stopLocationTracking() {
-    _trackingService.stopTracking();
+    _locationSubscription?.cancel();
+    _locationSubscription = null;
     isTrackingEnabled.value = false;
   }
 
   Future<void> updateCurrentLocation() async {
-    final location = await _trackingService.getCurrentLocation();
-    if (location != null) {
-      currentLocation.value = location;
+    final locationData = await _trackingService.getCurrentLocation();
+    if (locationData != null) {
+      currentLocation.value = _convertToLocationModel(locationData);
     }
   }
 
@@ -106,6 +131,7 @@ class LocationController extends GetxController {
   @override
   void onClose() {
     stopLocationTracking();
+    _locationSubscription?.cancel();
     super.onClose();
   }
 }

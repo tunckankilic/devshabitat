@@ -3,7 +3,7 @@ import 'package:get/get.dart';
 
 class NavigationHelper {
   // Page transitions
-  static void toLogin() => Get.toNamed(Routes.LOGIN);
+  static void toLogin() => Get.toNamed(AppRoutes.LOGIN);
 
   // Go back
   static void back() => Get.back();

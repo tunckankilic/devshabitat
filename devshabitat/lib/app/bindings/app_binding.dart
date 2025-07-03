@@ -11,7 +11,6 @@ import '../controllers/app_controller.dart';
 import '../controllers/responsive_controller.dart';
 import '../controllers/auth_state_controller.dart';
 import '../controllers/email_auth_controller.dart';
-import '../controllers/social_auth_controller.dart';
 
 class AppBinding extends Bindings {
   @override
@@ -40,13 +39,9 @@ class AppBinding extends Bindings {
       errorHandler: errorHandler,
     ));
 
-    final socialAuthController = Get.put(SocialAuthController(
+    Get.put(AuthController(
       authRepository: authRepository,
       errorHandler: errorHandler,
-    ));
-
-    Get.put(AuthController(
-      socialAuth: socialAuthController,
       emailAuth: emailAuthController,
       authState: authStateController,
     ));

@@ -62,7 +62,7 @@ class NotificationController extends GetxController {
       switch (data['type']) {
         case 'community_event':
           Get.toNamed(
-            Routes.EVENT_DETAIL,
+            AppRoutes.EVENT_DETAIL,
             arguments: {
               'eventId': data['eventId'],
               'communityId': data['communityId'],
@@ -72,7 +72,7 @@ class NotificationController extends GetxController {
 
         case 'nearby_event':
           Get.toNamed(
-            Routes.EVENT_DETAIL,
+            AppRoutes.EVENT_DETAIL,
             arguments: {'eventId': data['eventId']},
           );
           break;

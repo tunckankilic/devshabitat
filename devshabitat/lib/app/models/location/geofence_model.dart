@@ -1,5 +1,5 @@
 import 'package:json_annotation/json_annotation.dart';
-
+import 'dart:math';
 part 'geofence_model.g.dart';
 
 @JsonSerializable()

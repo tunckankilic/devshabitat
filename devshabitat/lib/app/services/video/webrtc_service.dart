@@ -92,13 +92,13 @@ class WebRTCService {
     return _localStream!;
   }
 
-  Future<void> createOffer() async {
+  Future<RTCSessionDescription> createOffer() async {
     final offer = await _peerConnection!.createOffer();
     await _peerConnection!.setLocalDescription(offer);
     return offer;
   }
 
-  Future<void> createAnswer() async {
+  Future<RTCSessionDescription> createAnswer() async {
     final answer = await _peerConnection!.createAnswer();
     await _peerConnection!.setLocalDescription(answer);
     return answer;
@@ -106,6 +106,31 @@ class WebRTCService {
 
   Future<void> setRemoteDescription(RTCSessionDescription description) async {
     await _peerConnection!.setRemoteDescription(description);
+  }
+
+  Future<RTCSessionDescription> handleOffer(
+      Map<String, dynamic> message) async {
+    await setRemoteDescription(
+      RTCSessionDescription(message['sdp'], message['type']),
+    );
+    final answer = await createAnswer();
+    return answer;
+  }
+
+  Future<void> handleAnswer(Map<String, dynamic> message) async {
+    await setRemoteDescription(
+      RTCSessionDescription(message['sdp'], message['type']),
+    );
+  }
+
+  Future<void> handleIceCandidate(Map<String, dynamic> message) async {
+    await addCandidate(
+      RTCIceCandidate(
+        message['candidate'],
+        message['sdpMid'],
+        message['sdpMLineIndex'],
+      ),
+    );
   }
 
   Future<void> addCandidate(RTCIceCandidate candidate) async {

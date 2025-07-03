@@ -1,5 +1,6 @@
 import 'package:get/get.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:flutter/services.dart' show rootBundle;
 import '../../models/location/location_model.dart';
 import '../../models/location/map_marker_model.dart';
 import '../../services/location/maps_service.dart';
@@ -73,7 +74,7 @@ class MapController extends GetxController {
         : 'assets/map_styles/light_style.json';
 
     try {
-      mapStyle.value = await Get.rootBundle.loadString(style);
+      mapStyle.value = await rootBundle.loadString(style);
       await mapController.value?.setMapStyle(mapStyle.value);
     } catch (e) {
       print('Harita stili yükleme hatası: $e');

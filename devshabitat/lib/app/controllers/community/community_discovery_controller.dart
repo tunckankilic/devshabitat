@@ -1,4 +1,5 @@
 import 'package:get/get.dart';
+import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:devshabitat/app/models/community/community_model.dart';
 import 'package:devshabitat/app/services/community/community_service.dart';
@@ -90,9 +91,11 @@ class CommunityDiscoveryController extends GetxController {
   // Load user's communities
   Future<void> loadUserCommunities() async {
     try {
-      final userId = Get.find<String>();
+      final currentUser = _authService.currentUser.value;
+      if (currentUser == null) return;
+
       final communityIds = await _membershipService.getUserCommunities(
-        userId: userId,
+        userId: currentUser.uid,
       );
 
       final communities = await Future.wait(

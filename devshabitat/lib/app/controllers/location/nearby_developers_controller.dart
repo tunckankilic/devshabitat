@@ -1,14 +1,15 @@
 import 'package:get/get.dart';
 import '../../models/location/location_model.dart';
-import '../../models/user_model.dart';
+import '../../models/enhanced_user_model.dart';
 import '../../services/location/maps_service.dart';
-import '../../services/user_service.dart';
+import '../../services/user_service.dart' as user_service;
 
 class NearbyDevelopersController extends GetxController {
   final MapsService _mapsService = Get.find<MapsService>();
-  final UserService _userService = Get.find<UserService>();
+  final user_service.UserService _userService =
+      Get.find<user_service.UserService>();
 
-  final nearbyDevelopers = <UserModel>[].obs;
+  final nearbyDevelopers = <EnhancedUserModel>[].obs;
   final searchRadius = 5.0.obs; // km cinsinden
   final isLoading = false.obs;
   final currentLocation = Rxn<LocationModel>();
@@ -27,7 +28,7 @@ class NearbyDevelopersController extends GetxController {
 
       // Yakındaki geliştiricileri getir
       final developers = await _userService.getAllDevelopers();
-      final nearbyDevs = <UserModel>[];
+      final nearbyDevs = <EnhancedUserModel>[];
 
       for (final developer in developers) {
         if (developer.location == null) continue;
@@ -72,7 +73,7 @@ class NearbyDevelopersController extends GetxController {
     refreshNearbyDevelopers();
   }
 
-  String getDistanceText(UserModel developer) {
+  String getDistanceText(EnhancedUserModel developer) {
     if (currentLocation.value == null || developer.location == null) {
       return 'Mesafe bilinmiyor';
     }
@@ -89,13 +90,13 @@ class NearbyDevelopersController extends GetxController {
     }
   }
 
-  List<UserModel> filterDevelopersBySkills(List<String> skills) {
+  List<EnhancedUserModel> filterDevelopersBySkills(List<String> skills) {
     return nearbyDevelopers.where((developer) {
       return developer.skills?.any((skill) => skills.contains(skill)) ?? false;
     }).toList();
   }
 
-  List<UserModel> filterDevelopersByExperience(int minYears) {
+  List<EnhancedUserModel> filterDevelopersByExperience(int minYears) {
     return nearbyDevelopers.where((developer) {
       return developer.yearsOfExperience >= minYears;
     }).toList();

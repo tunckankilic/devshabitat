@@ -26,7 +26,7 @@ class CommunityTheme {
 
     return baseTheme.copyWith(
       colorScheme: colorScheme,
-      cardTheme: CardTheme(
+      cardTheme: CardThemeData(
         elevation: 2,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(cardBorderRadius),

@@ -47,17 +47,10 @@ import '../bindings/community/community_detail_binding.dart';
 import '../bindings/community/community_create_binding.dart';
 import '../bindings/community/my_communities_binding.dart';
 import '../bindings/community/community_manage_binding.dart';
-import 'package:devshabitat/app/routes/app_routes.dart';
 import 'package:devshabitat/app/views/map/developer_map_view.dart';
 import 'package:devshabitat/app/views/map/event_map_view.dart';
 import 'package:devshabitat/app/views/map/location_settings_view.dart';
 import 'package:devshabitat/app/bindings/location_binding.dart';
-import '../views/event/event_detail_view.dart';
-import '../bindings/event_detail_binding.dart';
-import '../views/community/community_event_view.dart';
-import '../bindings/community_event_binding.dart';
-import '../views/event/nearby_events_view.dart';
-import '../bindings/nearby_events_binding.dart';
 
 part 'app_routes.dart';
 
@@ -151,52 +144,52 @@ class AppPages {
       binding: EventBinding(),
     ),
     GetPage(
-      name: Routes.COMMUNITY_DISCOVERY,
+      name: AppRoutes.COMMUNITY_DISCOVERY,
       page: () => const CommunityDiscoveryView(),
       binding: CommunityDiscoveryBinding(),
     ),
     GetPage(
-      name: Routes.COMMUNITY_DETAIL,
+      name: AppRoutes.COMMUNITY_DETAIL,
       page: () => const CommunityDetailView(),
       binding: CommunityDetailBinding(),
     ),
     GetPage(
-      name: Routes.COMMUNITY_CREATE,
+      name: AppRoutes.COMMUNITY_CREATE,
       page: () => const CommunityCreateView(),
       binding: CommunityCreateBinding(),
     ),
     GetPage(
-      name: Routes.MY_COMMUNITIES,
+      name: AppRoutes.MY_COMMUNITIES,
       page: () => const MyCommunitiesView(),
       binding: MyCommunitiesBinding(),
     ),
     GetPage(
-      name: Routes.COMMUNITY_MANAGE,
+      name: AppRoutes.COMMUNITY_MANAGE,
       page: () => const CommunityManageView(),
       binding: CommunityManageBinding(),
     ),
     GetPage(
-      name: Routes.developerMap,
+      name: AppRoutes.developerMap,
       page: () => const DeveloperMapView(),
       binding: LocationBinding(),
     ),
     GetPage(
-      name: Routes.eventMap,
+      name: AppRoutes.eventMap,
       page: () => const EventMapView(),
       binding: LocationBinding(),
     ),
     GetPage(
-      name: Routes.locationSettings,
+      name: AppRoutes.locationSettings,
       page: () => const LocationSettingsView(),
       binding: LocationBinding(),
     ),
     GetPage(
-      name: Routes.EVENT_DETAIL,
+      name: AppRoutes.EVENT_DETAIL,
       page: () => EventDetailView(),
       binding: EventDetailBinding(),
     ),
     GetPage(
-      name: Routes.COMMUNITY_EVENT,
+      name: AppRoutes.COMMUNITY_EVENT,
       page: () => CommunityEventView(),
       binding: CommunityEventBinding(),
     ),

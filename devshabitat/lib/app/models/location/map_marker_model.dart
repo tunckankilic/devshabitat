@@ -10,6 +10,7 @@ class MapMarkerModel {
   final double longitude;
   final String title;
   final String? snippet;
+  @JsonKey(ignore: true)
   final BitmapDescriptor? icon;
   final bool isVisible;
   final bool isDraggable;

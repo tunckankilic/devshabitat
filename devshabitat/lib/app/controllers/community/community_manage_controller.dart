@@ -5,7 +5,7 @@ import '../../models/user_model.dart';
 import '../../services/community/community_service.dart';
 import '../../services/community/membership_service.dart';
 import '../../services/storage_service.dart';
-import '../../routes/app_routes.dart';
+import '../../routes/app_pages.dart';
 
 class CommunityManageController extends GetxController {
   final CommunityService _communityService = Get.find<CommunityService>();
@@ -165,7 +165,7 @@ class CommunityManageController extends GetxController {
         snackPosition: SnackPosition.BOTTOM,
       );
 
-      Get.offAllNamed(Routes.HOME);
+      Get.offAllNamed(AppRoutes.HOME);
     } catch (e) {
       Get.snackbar(
         'Hata',
@@ -181,7 +181,7 @@ class CommunityManageController extends GetxController {
     try {
       await _membershipService.acceptMembership(
         communityId: communityId,
-        userId: user.uid,
+        userId: user.id,
       );
 
       pendingMembers.remove(user);
@@ -205,7 +205,7 @@ class CommunityManageController extends GetxController {
     try {
       await _membershipService.rejectMembership(
         communityId: communityId,
-        userId: user.uid,
+        userId: user.id,
       );
 
       pendingMembers.remove(user);
@@ -228,7 +228,7 @@ class CommunityManageController extends GetxController {
     try {
       await _membershipService.removeMember(
         communityId: communityId,
-        userId: user.uid,
+        userId: user.id,
       );
 
       await loadMembers();
@@ -251,7 +251,7 @@ class CommunityManageController extends GetxController {
     try {
       await _membershipService.promoteToModerator(
         communityId: communityId,
-        userId: user.uid,
+        userId: user.id,
       );
 
       await loadCommunity();

@@ -58,7 +58,10 @@ class EventController extends GetxController {
   // Register for event
   Future<void> registerForEvent(String eventId) async {
     try {
-      final userId = Get.find<AuthController>().currentUser.value!.id;
+      final userId = Get.find<AuthController>().currentUser?.uid;
+      if (userId == null) {
+        throw Exception('Kullanıcı oturum açmamış');
+      }
       final registration = await _registrationService.registerForEvent(
         eventId,
         userId,
@@ -96,7 +99,10 @@ class EventController extends GetxController {
   // Get user registrations
   Future<List<EventRegistrationModel>> getUserRegistrations() async {
     try {
-      final userId = Get.find<AuthController>().currentUser.value!.id;
+      final userId = Get.find<AuthController>().currentUser?.uid;
+      if (userId == null) {
+        throw Exception('Kullanıcı oturum açmamış');
+      }
       return await _registrationService.getRegistrationsByUser(userId);
     } catch (e) {
       Get.snackbar('Hata', 'Kayıtlarınız alınırken bir hata oluştu');

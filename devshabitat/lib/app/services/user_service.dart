@@ -1,54 +1,14 @@
 import 'package:get/get.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-
-class UserModel {
-  final String id;
-  final String displayName;
-  final String? email;
-  final String? photoURL;
-
-  const UserModel({
-    required this.id,
-    required this.displayName,
-    this.email,
-    this.photoURL,
-  });
-
-  factory UserModel.fromFirebaseUser(User user) {
-    return UserModel(
-      id: user.uid,
-      displayName: user.displayName ?? 'Anonim Kullanıcı',
-      email: user.email,
-      photoURL: user.photoURL,
-    );
-  }
-
-  Map<String, dynamic> toJson() {
-    return {
-      'id': id,
-      'displayName': displayName,
-      'email': email,
-      'photoURL': photoURL,
-    };
-  }
-
-  factory UserModel.fromJson(Map<String, dynamic> json) {
-    return UserModel(
-      id: json['id'] as String,
-      displayName: json['displayName'] as String,
-      email: json['email'] as String?,
-      photoURL: json['photoURL'] as String?,
-    );
-  }
-}
+import '../models/enhanced_user_model.dart';
 
 class UserService extends GetxService {
   final FirebaseAuth _auth = FirebaseAuth.instance;
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
-  final Rxn<UserModel> _currentUser = Rxn<UserModel>();
+  final Rxn<EnhancedUserModel> _currentUser = Rxn<EnhancedUserModel>();
 
-  UserModel? get currentUser => _currentUser.value;
+  EnhancedUserModel? get currentUser => _currentUser.value;
 
   @override
   void onInit() {
@@ -62,9 +22,17 @@ class UserService extends GetxService {
         final userDoc =
             await _firestore.collection('users').doc(user.uid).get();
         if (userDoc.exists) {
-          _currentUser.value = UserModel.fromJson(userDoc.data()!);
+          _currentUser.value = EnhancedUserModel.fromJson(userDoc.data()!);
         } else {
-          final newUser = UserModel.fromFirebaseUser(user);
+          final newUser = EnhancedUserModel(
+            uid: user.uid,
+            email: user.email ?? '',
+            displayName: user.displayName,
+            photoURL: user.photoURL,
+            createdAt: DateTime.now(),
+            updatedAt: DateTime.now(),
+            lastSeen: DateTime.now(),
+          );
           await _firestore
               .collection('users')
               .doc(user.uid)
@@ -75,6 +43,13 @@ class UserService extends GetxService {
         _currentUser.value = null;
       }
     });
+  }
+
+  Future<List<EnhancedUserModel>> getAllDevelopers() async {
+    final querySnapshot = await _firestore.collection('users').get();
+    return querySnapshot.docs
+        .map((doc) => EnhancedUserModel.fromJson(doc.data()))
+        .toList();
   }
 
   Future<void> updateUserProfile({
@@ -91,11 +66,14 @@ class UserService extends GetxService {
       await user.updatePhotoURL(photoURL);
     }
 
-    final updatedUser = UserModel(
-      id: user.uid,
-      displayName: displayName ?? user.displayName ?? 'Anonim Kullanıcı',
-      email: user.email,
+    final updatedUser = EnhancedUserModel(
+      uid: user.uid,
+      email: user.email ?? '',
+      displayName: displayName ?? user.displayName,
       photoURL: photoURL ?? user.photoURL,
+      createdAt: _currentUser.value?.createdAt ?? DateTime.now(),
+      updatedAt: DateTime.now(),
+      lastSeen: DateTime.now(),
     );
 
     await _firestore

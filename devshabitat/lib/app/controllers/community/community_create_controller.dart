@@ -4,7 +4,7 @@ import '../../models/community/community_model.dart';
 import '../../services/community/community_service.dart';
 import '../../services/auth_service.dart';
 import '../../services/storage_service.dart';
-import '../../routes/app_routes.dart';
+import '../../routes/app_pages.dart';
 
 class CommunityCreateController extends GetxController {
   final CommunityService _communityService = Get.find<CommunityService>();
@@ -93,7 +93,7 @@ class CommunityCreateController extends GetxController {
       );
 
       Get.offNamed(
-        Routes.COMMUNITY_DETAIL,
+        AppRoutes.COMMUNITY_DETAIL,
         arguments: createdCommunity.id,
       );
     } catch (e) {
