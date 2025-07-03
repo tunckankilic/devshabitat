@@ -203,7 +203,6 @@ class EditProfileView extends GetView<ProfileController> {
         final croppedFile = await ImageCropper().cropImage(
           sourcePath: pickedFile.path,
           aspectRatio: const CropAspectRatio(ratioX: 1, ratioY: 1),
-          cropStyle: CropStyle.circle,
           compressQuality: 80,
           uiSettings: [
             AndroidUiSettings(

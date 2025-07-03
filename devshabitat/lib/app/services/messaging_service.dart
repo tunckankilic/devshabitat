@@ -1,10 +1,10 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:devshabitat/app/repositories/auth_repository.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:get/get.dart';
 import '../models/message_model.dart';
 import '../models/conversation_model.dart';
 import '../core/services/error_handler_service.dart';
-import '../services/auth_service.dart';
 import 'package:logger/logger.dart';
 
 /// Mesajlaşma servisi sınıfı
@@ -49,8 +49,8 @@ class MessagingService extends GetxService {
 
   Future<ConversationModel> startConversation(String userId) async {
     try {
-      final authService = Get.find<AuthService>();
-      final currentUser = authService.currentUser.value?.uid;
+      final authService = Get.find<AuthRepository>();
+      final currentUser = authService.currentUser?.uid;
       if (currentUser == null) throw _handleError('Kullanıcı bulunamadı');
 
       final doc = await _firestore.collection('conversations').add({
@@ -106,8 +106,8 @@ class MessagingService extends GetxService {
     String? replyToId,
   }) async {
     try {
-      final authService = Get.find<AuthService>();
-      final currentUser = authService.currentUser.value?.uid;
+      final authService = Get.find<AuthRepository>();
+      final currentUser = authService.currentUser?.uid;
       if (currentUser == null) throw _handleError('Kullanıcı bulunamadı');
 
       final messageDoc = await _firestore.collection('messages').add({
@@ -443,8 +443,8 @@ class MessagingService extends GetxService {
 
   Future<ConversationModel> createConversation(String userId) async {
     try {
-      final authService = Get.find<AuthService>();
-      final currentUser = authService.currentUser.value?.uid;
+      final authService = Get.find<AuthRepository>();
+      final currentUser = authService.currentUser?.uid;
       if (currentUser == null) throw _handleError('Kullanıcı bulunamadı');
 
       final doc = await _firestore.collection('conversations').add({

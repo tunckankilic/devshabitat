@@ -37,8 +37,8 @@ class ThreadService extends GetxService {
 
     final threadData = ThreadModel(
       id: '',
-      authorId: currentUser.id,
-      authorName: currentUser.displayName,
+      authorId: currentUser.id.value,
+      authorName: currentUser.displayName ?? "",
       content: content,
       createdAt: DateTime.now(),
       attachments: [],
@@ -54,8 +54,8 @@ class ThreadService extends GetxService {
 
     final replyData = ThreadReply(
       id: '',
-      authorId: currentUser.id,
-      authorName: currentUser.displayName,
+      authorId: currentUser.id.value,
+      authorName: currentUser.displayName ?? "",
       content: content,
       createdAt: DateTime.now(),
       attachments: [],

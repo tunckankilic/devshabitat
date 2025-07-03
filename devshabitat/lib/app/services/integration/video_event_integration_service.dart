@@ -1,0 +1,56 @@
+import 'package:get/get.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import '../video/call_manager_service.dart';
+import '../event/event_service.dart';
+import '../../models/event/event_model.dart';
+import '../../models/video/call_model.dart';
+import '../../models/video/participant_model.dart';
+
+class VideoEventIntegrationService extends GetxService {
+  final CallManagerService _callManagerService = Get.find();
+  final EventService _eventService = Get.find();
+  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
+
+  Future<void> startEventVideoCall(EventModel event) async {
+    try {
+      final String callId = DateTime.now().millisecondsSinceEpoch.toString();
+      final CallModel call = CallModel(
+        id: callId,
+        roomId: 'room_$callId',
+        callType: CallType.video,
+        status: CallStatus.completed,
+        startTime: DateTime.now(),
+        duration: const Duration(seconds: 0),
+        participants: [], // Boş liste ile başlat
+        metadata: {
+          'eventId': event.id,
+          'title': 'Event: ${event.title}',
+        },
+      );
+
+      await _callManagerService.initiateCall(
+        participantIds: [], // Boş liste ile başlat
+        initiatorId: event.organizerId,
+        initiatorName: 'Event Host', // TODO: Get organizer name
+        type: CallType.video,
+      );
+
+      // Event servisine call status metodunu ekleyelim
+      await _eventService.updateEventCallStatus(event.id!, true);
+    } catch (e) {
+      print('Error starting event video call: $e');
+      rethrow;
+    }
+  }
+
+  Future<void> endEventVideoCall(String eventId) async {
+    try {
+      await _callManagerService.endCall();
+      // Event servisine call status metodunu ekleyelim
+      await _eventService.updateEventCallStatus(eventId, false);
+    } catch (e) {
+      print('Error ending event video call: $e');
+      rethrow;
+    }
+  }
+}

@@ -1,18 +1,18 @@
+import 'package:devshabitat/app/repositories/auth_repository.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import '../models/user_model.dart';
-import '../services/auth_service.dart';
+import '../models/enhanced_user_model.dart';
 import '../services/storage_service.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import '../services/github_service.dart';
 
 class ProfileController extends GetxController {
-  final AuthService _authService = Get.find<AuthService>();
+  final AuthRepository _authService = Get.find<AuthRepository>();
   final StorageService _storageService = Get.find<StorageService>();
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
 
   // State variables
-  final _user = Rxn<UserModel>();
+  final _user = Rxn<EnhancedUserModel>();
   final _isLoading = false.obs;
   final _error = ''.obs;
 
@@ -26,7 +26,7 @@ class ProfileController extends GetxController {
   final photoUrlController = TextEditingController();
 
   // Getters
-  UserModel? get user => _user.value;
+  EnhancedUserModel? get user => _user.value;
   bool get isLoading => _isLoading.value;
   String get error => _error.value;
 
@@ -53,7 +53,7 @@ class ProfileController extends GetxController {
       _isLoading.value = true;
       _error.value = '';
 
-      final currentUser = _authService.currentUser.value;
+      final currentUser = _authService.currentUser;
       if (currentUser == null) {
         _error.value = 'Kullanıcı bulunamadı';
         return;
@@ -66,7 +66,11 @@ class ProfileController extends GetxController {
         return;
       }
 
-      _user.value = UserModel.fromFirestore(doc);
+      final data = doc.data() as Map<String, dynamic>;
+      _user.value = EnhancedUserModel.fromJson({
+        'uid': doc.id,
+        ...data,
+      });
       _loadFormData();
     } catch (e) {
       _error.value = 'Profil yüklenirken bir hata oluştu: $e';
@@ -77,11 +81,11 @@ class ProfileController extends GetxController {
 
   void _loadFormData() {
     if (_user.value != null) {
-      nameController.text = _user.value!.displayName;
+      nameController.text = _user.value!.displayName ?? '';
       bioController.text = _user.value!.bio ?? '';
-      locationController.text = _user.value!.locationName ?? '';
-      titleController.text = _user.value!.title ?? '';
-      companyController.text = _user.value!.company ?? '';
+      locationController.text = _user.value!.location?.address ?? '';
+      titleController.text = _user.value!.preferences?['title'] ?? '';
+      companyController.text = _user.value!.preferences?['company'] ?? '';
       githubUsernameController.text = _user.value!.githubUsername ?? '';
       photoUrlController.text = _user.value!.photoURL ?? '';
     }
@@ -92,7 +96,7 @@ class ProfileController extends GetxController {
       _isLoading.value = true;
       _error.value = '';
 
-      final currentUser = _authService.currentUser.value;
+      final currentUser = _authService.currentUser;
       if (currentUser == null) {
         _error.value = 'Kullanıcı bulunamadı';
         return;
@@ -101,9 +105,13 @@ class ProfileController extends GetxController {
       final updates = {
         'displayName': nameController.text,
         'bio': bioController.text,
-        'locationName': locationController.text,
-        'title': titleController.text,
-        'company': companyController.text,
+        'location': {
+          'address': locationController.text,
+        },
+        'preferences': {
+          'title': titleController.text,
+          'company': companyController.text,
+        },
         'githubUsername': githubUsernameController.text,
         'photoURL': photoUrlController.text,
         'updatedAt': FieldValue.serverTimestamp(),
@@ -138,7 +146,7 @@ class ProfileController extends GetxController {
       _isLoading.value = true;
       _error.value = '';
 
-      final currentUser = _authService.currentUser.value;
+      final currentUser = _authService.currentUser;
       if (currentUser == null) {
         _error.value = 'Kullanıcı bulunamadı';
         return;

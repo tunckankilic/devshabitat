@@ -1,7 +1,6 @@
 import 'package:get/get.dart';
 import 'package:logger/logger.dart';
 import '../controllers/auth_controller.dart';
-import '../controllers/social_auth_controller.dart';
 import '../controllers/email_auth_controller.dart';
 import '../controllers/auth_state_controller.dart';
 import '../controllers/registration_controller.dart';
@@ -28,12 +27,6 @@ class AuthBinding extends Bindings {
     );
 
     // Controllers
-    Get.lazyPut<SocialAuthController>(
-      () => SocialAuthController(
-        authRepository: Get.find<AuthRepository>(),
-        errorHandler: Get.find<ErrorHandlerService>(),
-      ),
-    );
 
     Get.lazyPut<EmailAuthController>(
       () => EmailAuthController(
@@ -50,7 +43,8 @@ class AuthBinding extends Bindings {
 
     Get.lazyPut<AuthController>(
       () => AuthController(
-        socialAuth: Get.find<SocialAuthController>(),
+        errorHandler: Get.find<ErrorHandlerService>(),
+        authRepository: Get.find<AuthRepository>(),
         emailAuth: Get.find<EmailAuthController>(),
         authState: Get.find<AuthStateController>(),
       ),

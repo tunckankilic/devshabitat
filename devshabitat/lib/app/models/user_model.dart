@@ -1,214 +1,67 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:json_annotation/json_annotation.dart';
 
+part 'user_model.g.dart';
+
+@JsonSerializable()
 class UserModel {
   final String id;
   final String email;
-  final String displayName;
-  final String? photoURL;
-  final String? bio;
-  final String? title;
-  final String? company;
-  final GeoPoint? location;
-  final String? locationName;
-  final List<String> skills;
-  final List<String> interests;
-  final List<String> languages;
-  final List<String> frameworks;
-  final int yearsOfExperience;
-  final bool isAvailableForWork;
-  final Map<String, dynamic> githubData;
-  final String? githubUsername;
-  final List<String> portfolioUrls;
-  final List<WorkExperience> workExperience;
-  final List<Education> education;
-  final List<Project> projects;
-  final List<Certificate> certificates;
+  final String? displayName;
+  final String? photoUrl;
+  final String? phoneNumber;
+  final bool emailVerified;
+  final Map<String, dynamic>? metadata;
   final DateTime createdAt;
   final DateTime updatedAt;
-  final DateTime? lastSeen;
-  final bool isOnline;
-  final Map<String, dynamic> socialLinks;
-  final Map<String, dynamic> preferences;
 
   UserModel({
     required this.id,
     required this.email,
-    required this.displayName,
-    this.photoURL,
-    this.bio,
-    this.title,
-    this.company,
-    this.location,
-    this.locationName,
-    this.skills = const [],
-    this.interests = const [],
-    this.languages = const [],
-    this.frameworks = const [],
-    this.yearsOfExperience = 0,
-    this.isAvailableForWork = true,
-    this.githubData = const {},
-    this.githubUsername,
-    this.portfolioUrls = const [],
-    this.workExperience = const [],
-    this.education = const [],
-    this.projects = const [],
-    this.certificates = const [],
+    this.displayName,
+    this.photoUrl,
+    this.phoneNumber,
+    this.emailVerified = false,
+    this.metadata,
     required this.createdAt,
     required this.updatedAt,
-    this.lastSeen,
-    this.isOnline = false,
-    this.socialLinks = const {},
-    this.preferences = const {},
   });
 
-  factory UserModel.fromFirebaseUser(User user) {
-    return UserModel(
-      id: user.uid,
-      email: user.email!,
-      displayName: user.displayName ?? '',
-      photoURL: user.photoURL,
-      createdAt: DateTime.now(),
-      updatedAt: DateTime.now(),
-      lastSeen: DateTime.now(),
-    );
-  }
+  factory UserModel.fromJson(Map<String, dynamic> json) =>
+      _$UserModelFromJson(json);
+
+  Map<String, dynamic> toJson() => _$UserModelToJson(this);
 
   factory UserModel.fromFirestore(DocumentSnapshot doc) {
     final data = doc.data() as Map<String, dynamic>;
-    return UserModel(
-      id: doc.id,
-      email: data['email'] ?? '',
-      displayName: data['displayName'] ?? '',
-      photoURL: data['photoURL'],
-      bio: data['bio'],
-      title: data['title'],
-      company: data['company'],
-      location: data['location'] as GeoPoint?,
-      locationName: data['locationName'],
-      skills: List<String>.from(data['skills'] ?? []),
-      interests: List<String>.from(data['interests'] ?? []),
-      languages: List<String>.from(data['languages'] ?? []),
-      frameworks: List<String>.from(data['frameworks'] ?? []),
-      yearsOfExperience: data['yearsOfExperience'] ?? 0,
-      isAvailableForWork: data['isAvailableForWork'] ?? true,
-      githubData: Map<String, dynamic>.from(data['githubData'] ?? {}),
-      githubUsername: data['githubUsername'],
-      portfolioUrls: List<String>.from(data['portfolioUrls'] ?? []),
-      workExperience: (data['workExperience'] as List<dynamic>? ?? [])
-          .map((e) => WorkExperience.fromMap(e as Map<String, dynamic>))
-          .toList(),
-      education: (data['education'] as List<dynamic>? ?? [])
-          .map((e) => Education.fromMap(e as Map<String, dynamic>))
-          .toList(),
-      projects: (data['projects'] as List<dynamic>? ?? [])
-          .map((e) => Project.fromMap(e as Map<String, dynamic>))
-          .toList(),
-      certificates: (data['certificates'] as List<dynamic>? ?? [])
-          .map((e) => Certificate.fromMap(e as Map<String, dynamic>))
-          .toList(),
-      createdAt: (data['createdAt'] as Timestamp).toDate(),
-      updatedAt: (data['updatedAt'] as Timestamp).toDate(),
-      lastSeen: data['lastSeen'] != null
-          ? (data['lastSeen'] as Timestamp).toDate()
-          : null,
-      isOnline: data['isOnline'] ?? false,
-      socialLinks: Map<String, dynamic>.from(data['socialLinks'] ?? {}),
-      preferences: Map<String, dynamic>.from(data['preferences'] ?? {}),
-    );
-  }
-
-  Map<String, dynamic> toMap() {
-    return {
-      'email': email,
-      'displayName': displayName,
-      'photoURL': photoURL,
-      'bio': bio,
-      'title': title,
-      'company': company,
-      'location': location,
-      'locationName': locationName,
-      'skills': skills,
-      'interests': interests,
-      'languages': languages,
-      'frameworks': frameworks,
-      'yearsOfExperience': yearsOfExperience,
-      'isAvailableForWork': isAvailableForWork,
-      'githubData': githubData,
-      'githubUsername': githubUsername,
-      'portfolioUrls': portfolioUrls,
-      'workExperience': workExperience.map((e) => e.toMap()).toList(),
-      'education': education.map((e) => e.toMap()).toList(),
-      'projects': projects.map((e) => e.toMap()).toList(),
-      'certificates': certificates.map((e) => e.toMap()).toList(),
-      'createdAt': Timestamp.fromDate(createdAt),
-      'updatedAt': Timestamp.fromDate(updatedAt),
-      'lastSeen': lastSeen != null ? Timestamp.fromDate(lastSeen!) : null,
-      'isOnline': isOnline,
-      'socialLinks': socialLinks,
-      'preferences': preferences,
-    };
+    return UserModel.fromJson({
+      'id': doc.id,
+      ...data,
+    });
   }
 
   UserModel copyWith({
     String? id,
     String? email,
     String? displayName,
-    String? photoURL,
-    String? bio,
-    String? title,
-    String? company,
-    GeoPoint? location,
-    String? locationName,
-    List<String>? skills,
-    List<String>? interests,
-    List<String>? languages,
-    List<String>? frameworks,
-    int? yearsOfExperience,
-    bool? isAvailableForWork,
-    Map<String, dynamic>? githubData,
-    String? githubUsername,
-    List<String>? portfolioUrls,
-    List<WorkExperience>? workExperience,
-    List<Education>? education,
-    List<Project>? projects,
-    List<Certificate>? certificates,
+    String? photoUrl,
+    String? phoneNumber,
+    bool? emailVerified,
+    Map<String, dynamic>? metadata,
     DateTime? createdAt,
     DateTime? updatedAt,
-    DateTime? lastSeen,
-    bool? isOnline,
-    Map<String, dynamic>? socialLinks,
-    Map<String, dynamic>? preferences,
   }) {
     return UserModel(
       id: id ?? this.id,
       email: email ?? this.email,
       displayName: displayName ?? this.displayName,
-      photoURL: photoURL ?? this.photoURL,
-      bio: bio ?? this.bio,
-      title: title ?? this.title,
-      company: company ?? this.company,
-      location: location ?? this.location,
-      locationName: locationName ?? this.locationName,
-      skills: skills ?? this.skills,
-      interests: interests ?? this.interests,
-      languages: languages ?? this.languages,
-      frameworks: frameworks ?? this.frameworks,
-      yearsOfExperience: yearsOfExperience ?? this.yearsOfExperience,
-      isAvailableForWork: isAvailableForWork ?? this.isAvailableForWork,
-      githubData: githubData ?? this.githubData,
-      githubUsername: githubUsername ?? this.githubUsername,
-      portfolioUrls: portfolioUrls ?? this.portfolioUrls,
-      workExperience: workExperience ?? this.workExperience,
-      education: education ?? this.education,
-      projects: projects ?? this.projects,
-      certificates: certificates ?? this.certificates,
+      photoUrl: photoUrl ?? this.photoUrl,
+      phoneNumber: phoneNumber ?? this.phoneNumber,
+      emailVerified: emailVerified ?? this.emailVerified,
+      metadata: metadata ?? this.metadata,
       createdAt: createdAt ?? this.createdAt,
       updatedAt: updatedAt ?? this.updatedAt,
-      lastSeen: lastSeen ?? this.lastSeen,
-      isOnline: isOnline ?? this.isOnline,
-      socialLinks: socialLinks ?? this.socialLinks,
-      preferences: preferences ?? this.preferences,
     );
   }
 }

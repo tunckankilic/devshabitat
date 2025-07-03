@@ -126,7 +126,7 @@ class TabletLogin extends BaseView<AuthController> {
                         Obx(() {
                           final isLoading = controller.isLoading;
                           return ElevatedButton(
-                            onPressed: isLoading.value
+                            onPressed: isLoading
                                 ? null
                                 : () {
                                     if (formKey.currentState!.validate()) {
@@ -139,7 +139,7 @@ class TabletLogin extends BaseView<AuthController> {
                                 borderRadius: BorderRadius.circular(12.r),
                               ),
                             ),
-                            child: isLoading.value
+                            child: isLoading
                                 ? const AdaptiveLoadingIndicator(
                                     color: Colors.white,
                                   )

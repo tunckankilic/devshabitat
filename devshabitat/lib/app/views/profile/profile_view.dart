@@ -67,7 +67,7 @@ class ProfileView extends BaseView<ProfileController> {
                       ),
                       SizedBox(height: 16.h),
                       Text(
-                        user.displayName,
+                        user.displayName ?? "",
                         style: TextStyle(
                           fontSize: 24.sp,
                           fontWeight: FontWeight.bold,
@@ -113,7 +113,7 @@ class ProfileView extends BaseView<ProfileController> {
                 ],
 
                 // Yetenekler
-                if (user.skills.isNotEmpty) ...[
+                if (user.skills?.isNotEmpty == true) ...[
                   Text(
                     'Yetenekler',
                     style: TextStyle(
@@ -125,7 +125,7 @@ class ProfileView extends BaseView<ProfileController> {
                   Wrap(
                     spacing: 8.w,
                     runSpacing: 8.h,
-                    children: user.skills
+                    children: user.skills!
                         .map((skill) => Chip(
                               label: Text(
                                 skill,
@@ -138,7 +138,7 @@ class ProfileView extends BaseView<ProfileController> {
                 ],
 
                 // Programlama Dilleri
-                if (user.languages.isNotEmpty) ...[
+                if (user.languages?.isNotEmpty == true) ...[
                   Text(
                     'Programlama Dilleri',
                     style: TextStyle(
@@ -150,7 +150,7 @@ class ProfileView extends BaseView<ProfileController> {
                   Wrap(
                     spacing: 8.w,
                     runSpacing: 8.h,
-                    children: user.languages
+                    children: user.languages!
                         .map((lang) => Chip(
                               label: Text(
                                 lang,
@@ -163,7 +163,7 @@ class ProfileView extends BaseView<ProfileController> {
                 ],
 
                 // Frameworks
-                if (user.frameworks.isNotEmpty) ...[
+                if (user.frameworks?.isNotEmpty == true) ...[
                   Text(
                     'Frameworks',
                     style: TextStyle(
@@ -175,7 +175,7 @@ class ProfileView extends BaseView<ProfileController> {
                   Wrap(
                     spacing: 8.w,
                     runSpacing: 8.h,
-                    children: user.frameworks
+                    children: user.frameworks!
                         .map((framework) => Chip(
                               label: Text(
                                 framework,
@@ -223,7 +223,7 @@ class ProfileView extends BaseView<ProfileController> {
                 ],
 
                 // İş Deneyimi
-                if (user.workExperience.isNotEmpty) ...[
+                if (user.workExperience?.isNotEmpty == true) ...[
                   Text(
                     'İş Deneyimi',
                     style: TextStyle(
@@ -235,9 +235,9 @@ class ProfileView extends BaseView<ProfileController> {
                   ListView.builder(
                     shrinkWrap: true,
                     physics: const NeverScrollableScrollPhysics(),
-                    itemCount: user.workExperience.length,
+                    itemCount: user.workExperience!.length,
                     itemBuilder: (context, index) {
-                      final experience = user.workExperience[index];
+                      final experience = user.workExperience![index];
                       return ListTile(
                         title: Text(
                           experience.title,
@@ -258,7 +258,7 @@ class ProfileView extends BaseView<ProfileController> {
                 ],
 
                 // Eğitim
-                if (user.education.isNotEmpty) ...[
+                if (user.education?.isNotEmpty == true) ...[
                   Text(
                     'Eğitim',
                     style: TextStyle(
@@ -270,9 +270,9 @@ class ProfileView extends BaseView<ProfileController> {
                   ListView.builder(
                     shrinkWrap: true,
                     physics: const NeverScrollableScrollPhysics(),
-                    itemCount: user.education.length,
+                    itemCount: user.education!.length,
                     itemBuilder: (context, index) {
-                      final education = user.education[index];
+                      final education = user.education![index];
                       return ListTile(
                         title: Text(
                           education.school,
