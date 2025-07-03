@@ -22,7 +22,7 @@ class AuthController extends GetxController {
   final FirebaseAuth _auth = FirebaseAuth.instance;
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
   final GoogleSignIn _googleSignIn = GoogleSignIn();
-  final AuthService _authService = Get.find();
+  final AuthService _authService = AuthService();
   final StorageService _storageService = Get.find();
 
   final Rx<User?> _firebaseUser = Rx<User?>(null);
@@ -115,61 +115,19 @@ class AuthController extends GetxController {
 
   Future<void> signInWithGithub() async {
     try {
-      isLoading.value = true;
-      final token = await _socialAuth.signInWithGithub();
-
-      if (token != null) {
-        final githubAuthCredential = GithubAuthProvider.credential(token);
-        final userCredential =
-            await _auth.signInWithCredential(githubAuthCredential);
-
-        // GitHub bilgilerini kaydet
-        await _firestore
-            .collection('users')
-            .doc(userCredential.user!.uid)
-            .collection('connections')
-            .doc('github')
-            .set({
-          'accessToken': token,
-          'username': githubUsernameController.text,
-          'updatedAt': FieldValue.serverTimestamp(),
-        });
-      }
+      await _authService.signInWithGithub();
     } catch (e) {
-      print('GitHub ile giriş yapılırken hata: $e');
-      Get.snackbar(
-        'Hata',
-        'GitHub ile giriş yapılamadı',
-        snackPosition: SnackPosition.BOTTOM,
-      );
-    } finally {
-      isLoading.value = false;
+      Get.snackbar('Hata', 'Github ile giriş yapılırken bir hata oluştu');
+      rethrow;
     }
   }
 
   Future<void> signInWithGoogle() async {
     try {
-      isLoading.value = true;
-      final GoogleSignInAccount? googleUser = await _googleSignIn.signIn();
-      if (googleUser == null) return;
-
-      final GoogleSignInAuthentication googleAuth =
-          await googleUser.authentication;
-      final credential = GoogleAuthProvider.credential(
-        accessToken: googleAuth.accessToken,
-        idToken: googleAuth.idToken,
-      );
-
-      await _auth.signInWithCredential(credential);
+      await _authService.signInWithGoogle();
     } catch (e) {
-      print('Google ile giriş yapılırken hata: $e');
-      Get.snackbar(
-        'Hata',
-        'Google ile giriş yapılamadı',
-        snackPosition: SnackPosition.BOTTOM,
-      );
-    } finally {
-      isLoading.value = false;
+      Get.snackbar('Hata', 'Google ile giriş yapılırken bir hata oluştu');
+      rethrow;
     }
   }
 
@@ -185,12 +143,37 @@ class AuthController extends GetxController {
       _emailAuth.reauthenticate(email, password);
 
   // Sosyal medya işlemleri
-  Future<void> signInWithApple() => _socialAuth.signInWithApple();
+  Future<void> signInWithApple() async {
+    try {
+      await _authService.signInWithApple();
+    } catch (e) {
+      Get.snackbar('Hata', 'Apple ile giriş yapılırken bir hata oluştu');
+      rethrow;
+    }
+  }
+
   Future<void> signInWithFacebook() => _socialAuth.signInWithFacebook();
 
   // Auth state işlemleri
-  Future<void> signOut() => _authState.signOut();
-  Future<void> deleteAccount() => _authState.deleteAccount();
+  Future<void> signOut() async {
+    try {
+      await _authService.signOut();
+    } catch (e) {
+      Get.snackbar('Hata', 'Çıkış yapılırken bir hata oluştu');
+      rethrow;
+    }
+  }
+
+  Future<void> deleteAccount() async {
+    try {
+      await _authService.deleteAccount();
+      Get.snackbar('Başarılı', 'Hesabınız başarıyla silindi');
+    } catch (e) {
+      Get.snackbar('Hata', 'Hesap silinirken bir hata oluştu');
+      rethrow;
+    }
+  }
+
   Future<void> verifyEmail() => _authState.verifyEmail();
 
   // Getters
