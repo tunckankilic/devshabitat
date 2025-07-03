@@ -77,9 +77,9 @@
 	
 	<!-- Location Permissions -->
 	<key>NSLocationWhenInUseUsageDescription</key>
-	<string>Yakındaki geliştiricileri bulabilmek için konumunuza ihtiyacımız var.</string>
+	<string>Bu uygulama konum servislerini kullanarak size yakın etkinlikleri ve toplulukları bulmanızı sağlar.</string>
 	<key>NSLocationAlwaysUsageDescription</key>
-	<string>Arka planda konum güncellemeleri alabilmek için sürekli konum erişimine ihtiyacımız var.</string>
+	<string>Bu uygulama arka planda çalışırken bile size yakın etkinlikleri ve toplulukları bulmanızı sağlar.</string>
 	<key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
 	<string>Yakındaki geliştiricileri bulabilmek ve arka planda konum güncellemeleri alabilmek için konumunuza ihtiyacımız var.</string>
 	

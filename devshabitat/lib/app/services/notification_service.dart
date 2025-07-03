@@ -1,3 +1,4 @@
+import 'package:devshabitat/app/repositories/auth_repository.dart';
 import 'package:get/get.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:firebase_core/firebase_core.dart';
@@ -5,7 +6,6 @@ import 'package:logger/logger.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import '../models/notification_model.dart';
-import './auth_service.dart';
 
 class NotificationService extends GetxService {
   final FirebaseMessaging _fcm = FirebaseMessaging.instance;
@@ -83,7 +83,7 @@ class NotificationService extends GetxService {
 
   Future<void> _saveTokenToFirestore(String token) async {
     try {
-      final String? userId = Get.find<AuthService>().currentUser.value?.uid;
+      final String? userId = Get.find<AuthRepository>().currentUser?.uid;
       if (userId != null) {
         await _firestore.collection('users').doc(userId).update({
           'fcmTokens': FieldValue.arrayUnion([token]),
@@ -180,7 +180,7 @@ class NotificationService extends GetxService {
 
   Future<void> saveNotification(RemoteMessage message) async {
     try {
-      final String? userId = Get.find<AuthService>().currentUser.value?.uid;
+      final String? userId = Get.find<AuthRepository>().currentUser?.uid;
       if (userId != null) {
         final notification = NotificationModel(
           id: DateTime.now().millisecondsSinceEpoch.toString(),
@@ -207,7 +207,7 @@ class NotificationService extends GetxService {
 
   Future<void> loadNotifications() async {
     try {
-      final String? userId = Get.find<AuthService>().currentUser.value?.uid;
+      final String? userId = Get.find<AuthRepository>().currentUser?.uid;
       if (userId != null) {
         final querySnapshot = await _firestore
             .collection('users')
@@ -228,7 +228,7 @@ class NotificationService extends GetxService {
 
   Future<void> markNotificationAsRead(String notificationId) async {
     try {
-      final String? userId = Get.find<AuthService>().currentUser.value?.uid;
+      final String? userId = Get.find<AuthRepository>().currentUser?.uid;
       if (userId != null) {
         await _firestore
             .collection('users')

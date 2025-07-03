@@ -118,4 +118,12 @@ class EventService {
         .doc(eventId)
         .update({'currentParticipants': count});
   }
+
+  // Update event call status
+  Future<void> updateEventCallStatus(String eventId, bool hasActiveCall) async {
+    await _firestore.collection(_collection).doc(eventId).update({
+      'hasActiveCall': hasActiveCall,
+      'lastCallUpdateTime': FieldValue.serverTimestamp(),
+    });
+  }
 }

@@ -1,11 +1,11 @@
+import 'package:devshabitat/app/repositories/auth_repository.dart';
 import 'package:get/get.dart';
 import '../../models/community/community_model.dart';
 import '../../services/community/community_service.dart';
-import '../../services/auth_service.dart';
 
 class MyCommunitiesController extends GetxController {
   final CommunityService _communityService = Get.find<CommunityService>();
-  final AuthService _authService = Get.find<AuthService>();
+  final AuthRepository _authService = Get.find<AuthRepository>();
 
   final memberCommunities = <CommunityModel>[].obs;
   final managedCommunities = <CommunityModel>[].obs;
@@ -20,7 +20,7 @@ class MyCommunitiesController extends GetxController {
   }
 
   Future<void> loadCommunities() async {
-    final currentUser = _authService.currentUser.value;
+    final currentUser = _authService.currentUser;
     if (currentUser == null) {
       error.value = 'Oturum açmanız gerekmektedir';
       return;

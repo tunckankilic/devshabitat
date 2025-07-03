@@ -151,6 +151,8 @@ class EventCalendarWidget extends StatelessWidget {
         return Colors.blue;
       case EventType.conference:
         return Colors.green;
+      case EventType.other:
+        return Colors.grey;
     }
   }
 
@@ -164,6 +166,8 @@ class EventCalendarWidget extends StatelessWidget {
         return Icons.code;
       case EventType.conference:
         return Icons.business;
+      case EventType.other:
+        return Icons.event;
     }
   }
 

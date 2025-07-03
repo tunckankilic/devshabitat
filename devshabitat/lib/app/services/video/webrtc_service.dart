@@ -8,6 +8,7 @@ class WebRTCService {
   MediaStream? _remoteStream;
   RTCDataChannel? _dataChannel;
   bool _isInitialized = false;
+  String? _currentRoomId;
 
   // Callback fonksiyonları
   Function(RTCTrackEvent)? onTrack;
@@ -219,5 +220,36 @@ class WebRTCService {
     _peerConnection = null;
     _dataChannel = null;
     _isInitialized = false;
+  }
+
+  Future<void> joinRoom(String roomId) async {
+    if (_currentRoomId != null) {
+      await leaveRoom();
+    }
+
+    await initialize(settings: CallSettingsModel());
+    await createLocalStream();
+    _currentRoomId = roomId;
+  }
+
+  Future<void> leaveRoom() async {
+    if (_currentRoomId == null) return;
+
+    await dispose();
+    _currentRoomId = null;
+  }
+
+  Future<void> enableVideo(bool enabled) async {
+    if (_localStream != null) {
+      final videoTrack = _localStream!.getVideoTracks().first;
+      videoTrack.enabled = enabled;
+    }
+  }
+
+  Future<void> enableAudio(bool enabled) async {
+    if (_localStream != null) {
+      final audioTrack = _localStream!.getAudioTracks().first;
+      audioTrack.enabled = enabled;
+    }
   }
 }

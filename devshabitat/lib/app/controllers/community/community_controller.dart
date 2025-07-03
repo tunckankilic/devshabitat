@@ -1,3 +1,4 @@
+import 'package:devshabitat/app/repositories/auth_repository.dart';
 import 'package:get/get.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:devshabitat/app/models/community/community_model.dart';
@@ -7,13 +8,12 @@ import 'package:devshabitat/app/services/community/community_service.dart';
 import 'package:devshabitat/app/services/community/membership_service.dart';
 import 'package:devshabitat/app/services/community/moderation_service.dart';
 import 'package:devshabitat/app/models/user_model.dart';
-import 'package:devshabitat/app/services/auth_service.dart';
 
 class CommunityController extends GetxController {
   final CommunityService _communityService = Get.find<CommunityService>();
   final MembershipService _membershipService = Get.find<MembershipService>();
   final ModerationService _moderationService = ModerationService();
-  final AuthService _authService = Get.find<AuthService>();
+  final AuthRepository _authService = Get.find<AuthRepository>();
 
   final community = Rxn<CommunityModel>();
   final communitySettings = Rx<CommunitySettingsModel?>(null);
@@ -41,7 +41,7 @@ class CommunityController extends GetxController {
       community.value = await _communityService.getCommunity(communityId);
 
       // Kullanıcı rollerini kontrol et
-      final currentUser = _authService.currentUser.value;
+      final currentUser = _authService.currentUser;
       if (currentUser != null && community.value != null) {
         isUserModerator.value = community.value!.isModerator(currentUser.uid);
         isMember.value = community.value!.isMember(currentUser.uid);
@@ -79,9 +79,8 @@ class CommunityController extends GetxController {
     try {
       if (community.value == null) return;
 
-      final membersList = await _membershipService.getCommunityMembers(
-        community.value!.id,
-      );
+      final membersList = await _membershipService
+          .getCommunityMembersDetailed(community.value!.id);
       members.assignAll(membersList);
     } catch (e) {
       error.value = 'Üyeler yüklenirken bir hata oluştu: $e';
@@ -105,7 +104,7 @@ class CommunityController extends GetxController {
     try {
       if (community.value == null) return;
 
-      final currentUser = _authService.currentUser.value;
+      final currentUser = _authService.currentUser;
       if (currentUser == null) {
         error.value = 'Oturum açmanız gerekmektedir';
         return;
@@ -135,7 +134,7 @@ class CommunityController extends GetxController {
     try {
       if (community.value == null) return;
 
-      final currentUser = _authService.currentUser.value;
+      final currentUser = _authService.currentUser;
       if (currentUser == null) {
         error.value = 'Oturum açmanız gerekmektedir';
         return;
@@ -342,9 +341,8 @@ class CommunityController extends GetxController {
     if (community.value == null) return [];
 
     try {
-      final memberships = await _membershipService.getCommunityMembers(
-        community.value!.id,
-      );
+      final memberships = await _membershipService
+          .getCommunityMembersDetailed(community.value!.id);
       return memberships;
     } catch (e) {
       Get.snackbar('Hata', 'Üyeler yüklenirken bir hata oluştu');

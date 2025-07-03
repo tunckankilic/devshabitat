@@ -3,7 +3,7 @@ import 'package:json_annotation/json_annotation.dart';
 
 part 'event_model.g.dart';
 
-enum EventType { meetup, workshop, hackathon, conference }
+enum EventType { workshop, meetup, conference, hackathon, other }
 
 enum EventLocation { online, offline }
 
@@ -54,10 +54,31 @@ class EventModel {
 
   factory EventModel.fromFirestore(DocumentSnapshot doc) {
     final data = doc.data() as Map<String, dynamic>;
-    return EventModel.fromJson({
-      'id': doc.id,
-      ...data,
-    });
+    return EventModel(
+      id: doc.id,
+      title: data['title'] ?? '',
+      description: data['description'] ?? '',
+      organizerId: data['organizerId'] ?? '',
+      type: EventType.values.firstWhere(
+        (e) => e.toString() == data['type'],
+        orElse: () => EventType.other,
+      ),
+      location: EventLocation.values.firstWhere(
+        (e) => e.toString() == data['location'],
+        orElse: () => EventLocation.offline,
+      ),
+      venueAddress: data['venueAddress'],
+      onlineMeetingUrl: data['onlineMeetingUrl'],
+      coverImageUrl: data['coverImageUrl'],
+      startDate: (data['startDate'] as Timestamp).toDate(),
+      endDate: (data['endDate'] as Timestamp).toDate(),
+      participantLimit: data['participantLimit'] ?? 0,
+      currentParticipants: data['currentParticipants'] ?? 0,
+      categoryIds: List<String>.from(data['categoryIds'] ?? []),
+      createdAt: (data['createdAt'] as Timestamp).toDate(),
+      updatedAt: (data['updatedAt'] as Timestamp).toDate(),
+      isActive: data['isActive'] ?? true,
+    );
   }
 
   EventModel copyWith({

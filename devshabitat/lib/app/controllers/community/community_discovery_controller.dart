@@ -1,15 +1,15 @@
+import 'package:devshabitat/app/repositories/auth_repository.dart';
 import 'package:get/get.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:devshabitat/app/models/community/community_model.dart';
 import 'package:devshabitat/app/services/community/community_service.dart';
 import 'package:devshabitat/app/services/community/membership_service.dart';
-import 'package:devshabitat/app/services/auth_service.dart';
 
 class CommunityDiscoveryController extends GetxController {
   final CommunityService _communityService = Get.find<CommunityService>();
   final MembershipService _membershipService = MembershipService();
-  final AuthService _authService = Get.find<AuthService>();
+  final AuthRepository _authService = Get.find<AuthRepository>();
 
   final communities = <CommunityModel>[].obs;
   final trendingCommunities = <CommunityModel>[].obs;
@@ -91,7 +91,7 @@ class CommunityDiscoveryController extends GetxController {
   // Load user's communities
   Future<void> loadUserCommunities() async {
     try {
-      final currentUser = _authService.currentUser.value;
+      final currentUser = _authService.currentUser;
       if (currentUser == null) return;
 
       final communityIds = await _membershipService.getUserCommunities(
@@ -262,7 +262,7 @@ class CommunityDiscoveryController extends GetxController {
   }
 
   bool isUserModerator(CommunityModel community) {
-    final currentUser = _authService.currentUser.value;
+    final currentUser = _authService.currentUser;
     if (currentUser == null) return false;
     return community.isModerator(currentUser.uid);
   }

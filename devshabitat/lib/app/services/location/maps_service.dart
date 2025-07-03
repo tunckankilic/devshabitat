@@ -3,6 +3,7 @@ import 'package:geocoding/geocoding.dart';
 import 'package:get/get.dart';
 import '../../models/location/location_model.dart';
 import '../../models/location/map_marker_model.dart';
+import 'dart:math';
 
 class MapsService extends GetxService {
   final markers = <Marker>{}.obs;

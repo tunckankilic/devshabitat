@@ -35,7 +35,7 @@ class SignalingService extends GetxService {
 
   Future<void> endCall(String callId) async {
     await _callsCollection.doc(callId).update({
-      'status': CallStatus.ended.toString(),
+      'status': CallStatus.completed.toString(),
       'endTime': FieldValue.serverTimestamp(),
     });
   }

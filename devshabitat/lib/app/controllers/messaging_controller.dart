@@ -1,9 +1,9 @@
 import 'dart:async';
+import 'package:devshabitat/app/repositories/auth_repository.dart';
 import 'package:get/get.dart';
 import '../models/conversation_model.dart';
 import '../models/message_model.dart';
 import '../services/messaging_service.dart';
-import '../services/auth_service.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:logger/logger.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -11,7 +11,7 @@ import '../core/services/error_handler_service.dart';
 
 class MessagingController extends GetxController {
   final MessagingService _messagingService;
-  final AuthService _authService;
+  final AuthRepository _authService;
   final FirebaseFirestore _firestore;
   final FirebaseAuth _auth;
   final ErrorHandlerService _errorHandler;
@@ -39,7 +39,7 @@ class MessagingController extends GetxController {
 
   MessagingController({
     required MessagingService messagingService,
-    required AuthService authService,
+    required AuthRepository authService,
     required ErrorHandlerService errorHandler,
     FirebaseFirestore? firestore,
     FirebaseAuth? auth,

@@ -4,14 +4,9 @@ import 'package:firebase_auth/firebase_auth.dart';
 import '../repositories/auth_repository.dart';
 import '../core/services/error_handler_service.dart';
 import '../routes/app_pages.dart';
-import 'package:google_sign_in/google_sign_in.dart';
-import 'package:sign_in_with_apple/sign_in_with_apple.dart';
-import 'package:flutter_facebook_auth/flutter_facebook_auth.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'email_auth_controller.dart';
 import 'auth_state_controller.dart';
 import '../core/config/github_config.dart';
-import '../services/auth_service.dart';
 import '../services/storage_service.dart';
 
 class AuthController extends GetxController {
@@ -19,11 +14,6 @@ class AuthController extends GetxController {
   final AuthStateController _authState;
   final AuthRepository _authRepository;
   final ErrorHandlerService _errorHandler;
-  final FirebaseAuth _auth = FirebaseAuth.instance;
-  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
-  final GoogleSignIn _googleSignIn = GoogleSignIn.instance;
-  final FacebookAuth _facebookAuth = FacebookAuth.instance;
-  final AuthService _authService = AuthService();
   final StorageService _storageService = Get.find();
 
   final Rx<User?> _firebaseUser = Rx<User?>(null);
@@ -50,7 +40,7 @@ class AuthController extends GetxController {
   @override
   void onInit() {
     super.onInit();
-    _firebaseUser.bindStream(_auth.authStateChanges());
+    _firebaseUser.bindStream(_authRepository.authStateChanges);
     ever(_firebaseUser, _setInitialScreen);
   }
 
@@ -66,16 +56,14 @@ class AuthController extends GetxController {
   Future<void> _loadUserProfile() async {
     try {
       if (_firebaseUser.value != null) {
-        final doc = await _firestore
-            .collection('users')
-            .doc(_firebaseUser.value!.uid)
-            .get();
-        if (doc.exists) {
-          _userProfile.assignAll(doc.data() ?? {});
+        final profile =
+            await _authRepository.getUserProfile(_firebaseUser.value!.uid);
+        if (profile != null) {
+          _userProfile.assignAll(profile);
         }
       }
     } catch (e) {
-      print('Kullanıcı profili yüklenirken hata: $e');
+      _errorHandler.handleError(e);
     }
   }
 
@@ -84,31 +72,7 @@ class AuthController extends GetxController {
       _isLoading.value = true;
       _lastError.value = '';
 
-      await _googleSignIn.initialize();
-
-      final GoogleSignInAccount? googleUser =
-          await _googleSignIn.authenticate();
-      if (googleUser == null) throw Exception('Google girişi iptal edildi');
-
-      final methods = await _auth.fetchSignInMethodsForEmail(googleUser.email);
-      if (methods.isEmpty) {
-        Get.toNamed('/register', arguments: {
-          'email': googleUser.email,
-          'displayName': googleUser.displayName,
-          'photoURL': googleUser.photoUrl,
-          'provider': 'google'
-        });
-        return;
-      }
-
-      final GoogleSignInAuthentication googleAuth =
-          await googleUser.authentication;
-      final credential = GoogleAuthProvider.credential(
-        idToken: googleAuth.idToken,
-      );
-
-      final userCredential = await _auth.signInWithCredential(credential);
-      await _handleSocialSignIn(userCredential.user!);
+      final credential = await _authRepository.signInWithGoogle();
       _errorHandler.handleSuccess('Google ile giriş başarılı');
     } catch (e) {
       _lastError.value = e.toString();
@@ -123,35 +87,7 @@ class AuthController extends GetxController {
       _isLoading.value = true;
       _lastError.value = '';
 
-      final appleCredential = await SignInWithApple.getAppleIDCredential(
-        scopes: [
-          AppleIDAuthorizationScopes.email,
-          AppleIDAuthorizationScopes.fullName,
-        ],
-      );
-
-      if (appleCredential.email != null) {
-        final methods =
-            await _auth.fetchSignInMethodsForEmail(appleCredential.email!);
-        if (methods.isEmpty) {
-          Get.toNamed('/register', arguments: {
-            'email': appleCredential.email,
-            'displayName':
-                '${appleCredential.givenName ?? ''} ${appleCredential.familyName ?? ''}'
-                    .trim(),
-            'provider': 'apple'
-          });
-          return;
-        }
-      }
-
-      final oauthCredential = OAuthProvider('apple.com').credential(
-        idToken: appleCredential.identityToken,
-        accessToken: appleCredential.authorizationCode,
-      );
-
-      final userCredential = await _auth.signInWithCredential(oauthCredential);
-      await _handleSocialSignIn(userCredential.user!);
+      final credential = await _authRepository.signInWithApple();
       _errorHandler.handleSuccess('Apple ile giriş başarılı');
     } catch (e) {
       _lastError.value = e.toString();
@@ -166,32 +102,7 @@ class AuthController extends GetxController {
       _isLoading.value = true;
       _lastError.value = '';
 
-      final LoginResult result = await _facebookAuth.login();
-      if (result.status != LoginStatus.success) {
-        throw Exception('Facebook girişi başarısız');
-      }
-
-      final userData = await _facebookAuth.getUserData();
-      if (userData['email'] == null) {
-        throw Exception('Facebook email bilgisi alınamadı');
-      }
-
-      final methods = await _auth.fetchSignInMethodsForEmail(userData['email']);
-      if (methods.isEmpty) {
-        Get.toNamed('/register', arguments: {
-          'email': userData['email'],
-          'displayName': userData['name'],
-          'photoURL': userData['picture']?['data']?['url'],
-          'provider': 'facebook'
-        });
-        return;
-      }
-
-      final AccessToken accessToken = result.accessToken!;
-      final OAuthCredential credential =
-          FacebookAuthProvider.credential(accessToken.token);
-      final userCredential = await _auth.signInWithCredential(credential);
-      await _handleSocialSignIn(userCredential.user!);
+      final credential = await _authRepository.signInWithFacebook();
       _errorHandler.handleSuccess('Facebook ile giriş başarılı');
     } catch (e) {
       _lastError.value = e.toString();
@@ -221,34 +132,16 @@ class AuthController extends GetxController {
     }
   }
 
-  Future<void> _handleSocialSignIn(User user) async {
-    await _firestore.collection('users').doc(user.uid).set({
-      'id': user.uid,
-      'email': user.email,
-      'displayName': user.displayName,
-      'photoURL': user.photoURL,
-      'createdAt': FieldValue.serverTimestamp(),
-      'updatedAt': FieldValue.serverTimestamp(),
-      'lastSeen': FieldValue.serverTimestamp(),
-    }, SetOptions(merge: true));
-  }
-
   Future<String?> getGithubToken() async {
     try {
       if (_firebaseUser.value != null) {
-        final doc = await _firestore
-            .collection('users')
-            .doc(_firebaseUser.value!.uid)
-            .collection('connections')
-            .doc('github')
-            .get();
-        if (doc.exists) {
-          return doc.data()?['accessToken'];
-        }
+        final profile =
+            await _authRepository.getUserProfile(_firebaseUser.value!.uid);
+        return profile?['githubToken'];
       }
       return null;
     } catch (e) {
-      print('GitHub token alınırken hata: $e');
+      _errorHandler.handleError(e);
       return null;
     }
   }
@@ -256,23 +149,18 @@ class AuthController extends GetxController {
   Future<String?> getGithubUsername() async {
     try {
       if (_firebaseUser.value != null) {
-        final doc = await _firestore
-            .collection('users')
-            .doc(_firebaseUser.value!.uid)
-            .collection('connections')
-            .doc('github')
-            .get();
-        if (doc.exists) {
-          return doc.data()?['username'];
-        }
+        final profile =
+            await _authRepository.getUserProfile(_firebaseUser.value!.uid);
+        return profile?['githubUsername'];
       }
       return null;
     } catch (e) {
-      print('GitHub kullanıcı adı alınırken hata: $e');
+      _errorHandler.handleError(e);
       return null;
     }
   }
 
+  // Email auth delegations
   Future<void> signInWithEmailAndPassword() =>
       _emailAuth.signInWithEmailAndPassword();
   Future<void> createUserWithEmailAndPassword() =>
@@ -286,20 +174,18 @@ class AuthController extends GetxController {
 
   Future<void> signOut() async {
     try {
-      await _authService.signOut();
+      await _authRepository.signOut();
     } catch (e) {
-      Get.snackbar('Hata', 'Çıkış yapılırken bir hata oluştu');
-      rethrow;
+      _errorHandler.handleError(e);
     }
   }
 
   Future<void> deleteAccount() async {
     try {
-      await _authService.deleteAccount();
-      Get.snackbar('Başarılı', 'Hesabınız başarıyla silindi');
+      await _authRepository.deleteAccount();
+      _errorHandler.handleSuccess('Hesabınız başarıyla silindi');
     } catch (e) {
-      Get.snackbar('Hata', 'Hesap silinirken bir hata oluştu');
-      rethrow;
+      _errorHandler.handleError(e);
     }
   }
 

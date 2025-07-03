@@ -1,13 +1,13 @@
+import 'package:devshabitat/app/repositories/auth_repository.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../models/enhanced_user_model.dart';
-import '../services/auth_service.dart';
 import '../services/storage_service.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import '../services/github_service.dart';
 
 class ProfileController extends GetxController {
-  final AuthService _authService = Get.find<AuthService>();
+  final AuthRepository _authService = Get.find<AuthRepository>();
   final StorageService _storageService = Get.find<StorageService>();
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
 
@@ -53,7 +53,7 @@ class ProfileController extends GetxController {
       _isLoading.value = true;
       _error.value = '';
 
-      final currentUser = _authService.currentUser.value;
+      final currentUser = _authService.currentUser;
       if (currentUser == null) {
         _error.value = 'Kullanıcı bulunamadı';
         return;
@@ -96,7 +96,7 @@ class ProfileController extends GetxController {
       _isLoading.value = true;
       _error.value = '';
 
-      final currentUser = _authService.currentUser.value;
+      final currentUser = _authService.currentUser;
       if (currentUser == null) {
         _error.value = 'Kullanıcı bulunamadı';
         return;
@@ -146,7 +146,7 @@ class ProfileController extends GetxController {
       _isLoading.value = true;
       _error.value = '';
 
-      final currentUser = _authService.currentUser.value;
+      final currentUser = _authService.currentUser;
       if (currentUser == null) {
         _error.value = 'Kullanıcı bulunamadı';
         return;

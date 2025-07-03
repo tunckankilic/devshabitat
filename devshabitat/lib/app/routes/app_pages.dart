@@ -3,40 +3,25 @@ import 'package:get/get.dart';
 import '../views/auth/login_view.dart';
 import '../views/auth/forgot_password/forgot_password_view.dart';
 import '../views/main_wrapper.dart';
-import '../views/messaging/chat_list_screen.dart';
-import '../views/messaging/chat_screen.dart';
-import '../views/discovery/discovery_screen.dart';
-import '../views/networking/my_network_screen.dart';
-import '../views/home/widgets/comments_view.dart';
-import '../views/home/widgets/item_detail_view.dart';
-import '../views/profile/profile_view.dart';
-import '../views/profile/edit_profile_view.dart';
 import '../views/notifications/notifications_view.dart';
 import '../views/settings/settings_view.dart';
 import '../views/search/search_view.dart';
 import '../bindings/auth_binding.dart';
 import '../bindings/navigation_binding.dart';
 import '../bindings/home_binding.dart';
-import '../bindings/messaging_binding.dart';
-import '../bindings/discovery_binding.dart';
-import '../bindings/networking_binding.dart';
-import '../bindings/profile_binding.dart';
 import '../bindings/settings_binding.dart';
 import '../bindings/search_binding.dart';
 import '../middleware/auth_middleware.dart';
-import '../views/messaging/message_view.dart';
-import '../views/messaging/chat_view.dart';
-import '../views/messaging/message_search_view.dart';
 import '../bindings/video_binding.dart';
 import '../views/video/video_call_view.dart';
 import '../views/video/call_history_view.dart';
 import '../views/video/incoming_call_view.dart';
-import 'package:devshabitat/app/bindings/event_binding.dart';
-import 'package:devshabitat/app/views/event/events_view.dart';
-import 'package:devshabitat/app/views/event/event_create_view.dart';
-import 'package:devshabitat/app/views/event/event_details_view.dart';
-import 'package:devshabitat/app/views/event/event_discovery_view.dart';
-import 'package:devshabitat/app/views/event/my_events_view.dart';
+import '../bindings/event_binding.dart';
+import '../views/event/events_view.dart';
+import '../views/event/event_create_view.dart';
+import '../views/event/event_details_view.dart';
+import '../views/event/event_discovery_view.dart';
+import '../views/event/my_events_view.dart';
 import '../views/community/community_discovery_view.dart';
 import '../views/community/community_detail_view.dart';
 import '../views/community/community_create_view.dart';
@@ -47,10 +32,15 @@ import '../bindings/community/community_detail_binding.dart';
 import '../bindings/community/community_create_binding.dart';
 import '../bindings/community/my_communities_binding.dart';
 import '../bindings/community/community_manage_binding.dart';
-import 'package:devshabitat/app/views/map/developer_map_view.dart';
-import 'package:devshabitat/app/views/map/event_map_view.dart';
-import 'package:devshabitat/app/views/map/location_settings_view.dart';
-import 'package:devshabitat/app/bindings/location_binding.dart';
+import '../views/map/developer_map_view.dart';
+import '../views/map/event_map_view.dart';
+import '../views/map/location_settings_view.dart';
+import '../bindings/location_binding.dart';
+import '../views/community/community_event_view.dart';
+import '../views/event/nearby_events_view.dart';
+import '../bindings/event/event_detail_binding.dart';
+import '../bindings/community/community_event_binding.dart';
+import '../bindings/event/nearby_events_binding.dart';
 
 part 'app_routes.dart';
 
@@ -185,17 +175,17 @@ class AppPages {
     ),
     GetPage(
       name: AppRoutes.EVENT_DETAIL,
-      page: () => EventDetailView(),
+      page: () => const EventDetailsView(),
       binding: EventDetailBinding(),
     ),
     GetPage(
       name: AppRoutes.COMMUNITY_EVENT,
-      page: () => CommunityEventView(),
+      page: () => const CommunityEventView(),
       binding: CommunityEventBinding(),
     ),
     GetPage(
-      name: Routes.NEARBY_EVENTS,
-      page: () => NearbyEventsView(),
+      name: AppRoutes.NEARBY_EVENTS,
+      page: () => const NearbyEventsView(),
       binding: NearbyEventsBinding(),
     ),
   ];

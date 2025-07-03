@@ -71,7 +71,7 @@ class CommunityManageController extends GetxController {
   Future<void> loadMembers() async {
     try {
       final membersList =
-          await _membershipService.getCommunityMembers(communityId);
+          await _membershipService.getCommunityMembersDetailed(communityId);
       members.assignAll(membersList);
     } catch (e) {
       error.value = 'Üyeler yüklenirken bir hata oluştu: $e';
@@ -165,7 +165,7 @@ class CommunityManageController extends GetxController {
         snackPosition: SnackPosition.BOTTOM,
       );
 
-      Get.offAllNamed(AppRoutes.HOME);
+      Get.offAllNamed(AppRoutes.home);
     } catch (e) {
       Get.snackbar(
         'Hata',

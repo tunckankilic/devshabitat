@@ -369,8 +369,9 @@ class MembershipService {
     }
   }
 
-  // Topluluk üyelerini getirme
-  Future<List<UserModel>> getCommunityMembers(String communityId) async {
+  // Topluluk üyelerini detaylı getirme
+  Future<List<UserModel>> getCommunityMembersDetailed(
+      String communityId) async {
     try {
       final communityDoc =
           await _firestore.collection('communities').doc(communityId).get();

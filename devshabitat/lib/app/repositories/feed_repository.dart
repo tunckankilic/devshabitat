@@ -1,10 +1,19 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:devshabitat/app/repositories/auth_repository.dart';
 import '../models/feed_item.dart';
-import '../services/auth_service.dart';
+import '../services/github_oauth_service.dart';
+import '../core/services/error_handler_service.dart';
+import 'package:get/get.dart';
+import 'package:logger/logger.dart';
 
 class FeedRepository {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
-  final AuthService _authService = AuthService();
+  final AuthRepository _authService = AuthRepository(
+    githubOAuthService: GitHubOAuthService(
+      logger: Get.find<Logger>(),
+      errorHandler: Get.find<ErrorHandlerService>(),
+    ),
+  );
 
   Future<List<FeedItem>> getFeedItems({int page = 1, int pageSize = 10}) async {
     try {
@@ -61,8 +70,7 @@ class FeedRepository {
       final docRef = _firestore.collection('feed').doc(itemId);
       await docRef.update({
         'sharesCount': FieldValue.increment(1),
-        'sharedBy':
-            FieldValue.arrayUnion([_authService.currentUser.value?.uid]),
+        'sharedBy': FieldValue.arrayUnion([_authService.currentUser?.uid]),
       });
     } catch (e) {
       throw Exception('Paylaşım işlemi başarısız oldu: $e');

@@ -1,14 +1,14 @@
+import 'package:devshabitat/app/repositories/auth_repository.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../../models/community/community_model.dart';
 import '../../services/community/community_service.dart';
-import '../../services/auth_service.dart';
 import '../../services/storage_service.dart';
 import '../../routes/app_pages.dart';
 
 class CommunityCreateController extends GetxController {
   final CommunityService _communityService = Get.find<CommunityService>();
-  final AuthService _authService = Get.find<AuthService>();
+  final AuthRepository _authService = Get.find<AuthRepository>();
   final StorageService _storageService = Get.find<StorageService>();
 
   final formKey = GlobalKey<FormState>();
@@ -49,7 +49,7 @@ class CommunityCreateController extends GetxController {
     try {
       isLoading.value = true;
 
-      final currentUser = _authService.currentUser.value;
+      final currentUser = _authService.currentUser;
       if (currentUser == null) {
         throw Exception('Oturum açmanız gerekmektedir');
       }

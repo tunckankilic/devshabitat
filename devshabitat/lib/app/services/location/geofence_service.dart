@@ -1,79 +1,56 @@
-import 'package:geofence_service/geofence_service.dart';
+import 'dart:async';
+import 'package:geofence_flutter/geofence_flutter.dart';
 import 'package:get/get.dart';
 import '../../models/location/geofence_model.dart';
 import '../../models/location/location_model.dart';
 
 class GeofenceService extends GetxService {
-  final _geofenceService = GeofenceService.instance;
   final activeGeofences = <GeofenceModel>[].obs;
-  final geofenceStatus = GeofenceStatus.idle.obs;
+  StreamSubscription<GeofenceEvent>? _geofenceEventStream;
 
   Future<void> initializeGeofencing() async {
-    await _geofenceService.setup(
-      interval: 5000,
-      accuracy: 100,
-      loiteringDelayMs: 60000,
-      statusChangeDelayMs: 10000,
-      useActivityRecognition: true,
-      allowMockLocations: false,
-      printDevLog: false,
+    await Geofence.startGeofenceService(
+      pointedLatitude: "0.0", // Varsayılan değer, addGeofence ile güncellenecek
+      pointedLongitude:
+          "0.0", // Varsayılan değer, addGeofence ile güncellenecek
+      radiusMeter: "100.0", // Varsayılan değer, addGeofence ile güncellenecek
+      eventPeriodInSeconds: 10,
     );
 
-    _geofenceService
-      ..addGeofenceStatusChangeListener(_onGeofenceStatusChanged)
-      ..addLocationChangeListener(_onLocationChanged)
-      ..addLocationServicesStatusChangeListener(
-          _onLocationServicesStatusChanged)
-      ..addActivityChangeListener(_onActivityChanged);
-  }
-
-  void _onGeofenceStatusChanged(Geofence geofence,
-      GeofenceRadius geofenceRadius, GeofenceStatus geofenceStatus) {
-    print('Geofence Status: $geofenceStatus');
-    this.geofenceStatus.value = geofenceStatus;
-  }
-
-  void _onLocationChanged(Location location) {
-    print('Location: ${location.latitude}, ${location.longitude}');
-  }
-
-  void _onLocationServicesStatusChanged(bool status) {
-    print('Location Services Status: $status');
-  }
-
-  void _onActivityChanged(Activity activity) {
-    print('Activity: ${activity.type}');
+    _geofenceEventStream = Geofence.getGeofenceStream()?.listen(
+      (GeofenceEvent event) {
+        print('Geofence Event: ${event.toString()}');
+      },
+    );
   }
 
   Future<void> startGeofencing() async {
-    await _geofenceService.start();
+    // Geofence servisi zaten initializeGeofencing ile başlatılıyor
   }
 
   Future<void> stopGeofencing() async {
-    await _geofenceService.stop();
+    await Geofence.stopGeofenceService();
+    await _geofenceEventStream?.cancel();
   }
 
-  void addGeofence(GeofenceModel geofence) {
-    final newGeofence = Geofence(
-      id: geofence.id,
-      latitude: geofence.latitude,
-      longitude: geofence.longitude,
-      radius: [
-        GeofenceRadius(id: 'radius_${geofence.id}', length: geofence.radius),
-      ],
+  void addGeofence(GeofenceModel geofence) async {
+    await Geofence.startGeofenceService(
+      pointedLatitude: geofence.latitude.toString(),
+      pointedLongitude: geofence.longitude.toString(),
+      radiusMeter: geofence.radius.toString(),
+      eventPeriodInSeconds: 10,
     );
-
-    _geofenceService.addGeofence(newGeofence);
     activeGeofences.add(geofence);
   }
 
   void removeGeofence(String geofenceId) {
-    _geofenceService.removeGeofence(geofenceId);
+    // Mevcut implementasyonda tek bir geofence destekleniyor
+    stopGeofencing();
     activeGeofences.removeWhere((geofence) => geofence.id == geofenceId);
   }
 
   void clearGeofences() {
-    _geofenceService.clearGeofenceList();
+    stopGeofencing();
     activeGeofences.clear();
   }
 

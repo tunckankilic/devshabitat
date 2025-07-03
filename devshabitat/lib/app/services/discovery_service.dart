@@ -1,6 +1,6 @@
 import 'dart:async';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:devshabitat/app/services/auth_service.dart';
+import 'package:devshabitat/app/repositories/auth_repository.dart';
 import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
 import '../models/search_filter_model.dart';
@@ -165,7 +165,7 @@ class DiscoveryService {
   // Send connection request
   Future<bool> sendConnectionRequest(String recipientId, String message) async {
     try {
-      final String senderId = Get.find<AuthService>().currentUser.value!.uid;
+      final String senderId = Get.find<AuthRepository>().currentUser!.uid;
 
       // Check if connection already exists
       final existingConnection = await _connectionsCollection
@@ -272,8 +272,7 @@ class DiscoveryService {
   // Block user
   Future<bool> blockUser(String userId) async {
     try {
-      final String currentUserId =
-          Get.find<AuthService>().currentUser.value!.uid;
+      final String currentUserId = Get.find<AuthRepository>().currentUser!.uid;
 
       // Create blocking connection
       final connection = ConnectionModel(

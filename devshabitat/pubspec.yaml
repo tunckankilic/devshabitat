@@ -48,7 +48,7 @@ dependencies:
   flutter_secure_storage: ^10.0.0-beta.4
   flutter_slidable: ^4.0.0
   flutter_highlight: ^0.7.0
-  geolocator: ^10.1.0
+  geolocator: ^9.0.2
   get: ^4.6.6
   get_storage: ^2.1.1
   google_fonts: ^6.1.0
@@ -90,7 +90,7 @@ dependencies:
   google_maps_flutter: ^2.5.0
   location: ^8.0.1
   geocoding: ^4.0.0
-  geofence_service: ^6.0.0+1
+  geofence_flutter: ^2.0.0
   lottie: ^2.7.0
   flutter_animate: ^4.3.0
 

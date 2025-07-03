@@ -89,7 +89,7 @@ class SmallPhoneLogin extends BaseView<AuthController> {
                 Obx(() {
                   final isLoading = controller.isLoading;
                   return ElevatedButton(
-                    onPressed: isLoading.value
+                    onPressed: isLoading
                         ? null
                         : () {
                             if (formKey.currentState!.validate()) {
@@ -102,7 +102,7 @@ class SmallPhoneLogin extends BaseView<AuthController> {
                         borderRadius: BorderRadius.circular(8.r),
                       ),
                     ),
-                    child: isLoading.value
+                    child: isLoading
                         ? const AdaptiveLoadingIndicator(color: Colors.white)
                         : const Text('Giriş Yap'),
                   );

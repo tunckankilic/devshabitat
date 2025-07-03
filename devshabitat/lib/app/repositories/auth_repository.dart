@@ -56,7 +56,7 @@ class AuthRepository implements IAuthRepository {
     required GitHubOAuthService githubOAuthService,
   })  : _auth = auth ?? FirebaseAuth.instance,
         _firestore = firestore ?? FirebaseFirestore.instance,
-        _googleSignIn = googleSignIn ?? GoogleSignIn.instance,
+        _googleSignIn = googleSignIn ?? GoogleSignIn(),
         _facebookAuth = facebookAuth ?? FacebookAuth.instance,
         _githubOAuthService = githubOAuthService,
         _logger = Get.find<Logger>();

@@ -1,5 +1,6 @@
 import 'package:get/get.dart';
 import 'package:uuid/uuid.dart';
+import 'package:flutter_webrtc/flutter_webrtc.dart';
 import 'package:devshabitat/app/models/video/call_model.dart';
 import 'package:devshabitat/app/models/video/participant_model.dart';
 import 'package:devshabitat/app/models/video/call_settings_model.dart';
@@ -22,7 +23,7 @@ class CallManagerService extends GetxService {
     required String initiatorId,
     required String initiatorName,
     String? initiatorAvatarUrl,
-    CallType type = CallType.oneToOne,
+    CallType type = CallType.video,
     CallSettingsModel? settings,
   }) async {
     if (settings != null) {
@@ -30,33 +31,37 @@ class CallManagerService extends GetxService {
     }
 
     final callId = const Uuid().v4();
-    final channelName = 'channel_$callId';
-    // TODO: Implement token generation service
-    final token = 'YOUR_AGORA_TOKEN';
+    final roomId = 'room_$callId';
+    final renderer = RTCVideoRenderer();
+    await renderer.initialize();
 
     final participants = [
       ParticipantModel(
-        userId: initiatorId,
+        id: initiatorId,
         name: initiatorName,
-        avatarUrl: initiatorAvatarUrl,
-        joinedAt: DateTime.now(),
+        profileImage: initiatorAvatarUrl,
+        videoRenderer: renderer,
       ),
-      ...participantIds.map((id) => ParticipantModel(
-            userId: id,
-            name: 'User $id', // TODO: Fetch user details
-            joinedAt: DateTime.now(),
-          )),
+      ...await Future.wait(participantIds.map((id) async {
+        final renderer = RTCVideoRenderer();
+        await renderer.initialize();
+        return ParticipantModel(
+          id: id,
+          name: 'User $id', // TODO: Fetch user details
+          videoRenderer: renderer,
+        );
+      })),
     ];
 
     final call = CallModel(
       id: callId,
-      channelName: channelName,
-      token: token,
-      initiatorId: initiatorId,
-      participants: participants,
-      type: type,
-      status: CallStatus.pending,
+      roomId: roomId,
+      callType: type,
+      status: CallStatus.completed, // Başlangıç durumu
       startTime: DateTime.now(),
+      duration: Duration.zero,
+      participants: participants,
+      isGroupCall: participantIds.length > 1,
     );
 
     await _signalingService.createCall(call);
@@ -70,8 +75,8 @@ class CallManagerService extends GetxService {
   }
 
   Future<void> joinCall(CallModel call) async {
-    await _webRTCService.joinChannel(call.channelName, call.token);
-    await _signalingService.updateCallStatus(call.id, CallStatus.active);
+    await _webRTCService.joinRoom(call.roomId);
+    await _signalingService.updateCallStatus(call.id, CallStatus.completed);
 
     // Listen for call updates
     _signalingService.watchCall(call.id).listen((updatedCall) {
@@ -91,22 +96,27 @@ class CallManagerService extends GetxService {
     if (_currentCall.value == null) return;
 
     final callId = _currentCall.value!.id;
-    await _webRTCService.leaveChannel();
+    await _webRTCService.leaveRoom();
     await _signalingService.endCall(callId);
     await _signalingService.cleanupSignals(callId);
+
+    // Cleanup renderers
+    for (final participant in _participants.values) {
+      participant.videoRenderer.dispose();
+    }
 
     _currentCall.value = null;
     _participants.clear();
   }
 
   Future<void> toggleCamera(bool enabled) async {
-    await _webRTCService.toggleCamera(enabled);
+    await _webRTCService.enableVideo(enabled);
     _updateLocalParticipantState('isVideoEnabled', enabled);
   }
 
   Future<void> toggleMicrophone(bool enabled) async {
-    await _webRTCService.toggleMicrophone(enabled);
-    _updateLocalParticipantState('isAudioEnabled', enabled);
+    await _webRTCService.enableAudio(enabled);
+    _updateLocalParticipantState('isMuted', !enabled);
   }
 
   Future<void> switchCamera() async {
@@ -114,35 +124,34 @@ class CallManagerService extends GetxService {
   }
 
   Future<void> startScreenShare() async {
-    await _webRTCService.startScreenShare();
+    await _webRTCService.startScreenSharing();
     _updateLocalParticipantState('isScreenSharing', true);
   }
 
   void _updateParticipants(List<ParticipantModel> participants) {
     _participants.clear();
     for (final participant in participants) {
-      _participants[participant.userId] = participant;
+      _participants[participant.id] = participant;
     }
   }
 
   void _updateLocalParticipantState(String key, dynamic value) {
     if (_currentCall.value == null) return;
 
-    final localUserId = _currentCall.value!.initiatorId;
+    final localUserId = _currentCall.value!.participants
+        .firstWhere((p) => p.id == _currentCall.value!.id)
+        .id;
+
     if (_participants.containsKey(localUserId)) {
-      final participant = _participants[localUserId]!;
-      switch (key) {
-        case 'isVideoEnabled':
-          participant.isVideoEnabled = value as bool;
-          break;
-        case 'isAudioEnabled':
-          participant.isAudioEnabled = value as bool;
-          break;
-        case 'isScreenSharing':
-          participant.isScreenSharing = value as bool;
-          break;
-      }
-      _participants[localUserId] = participant;
+      final oldParticipant = _participants[localUserId]!;
+      final newParticipant = oldParticipant.copyWith(
+        isMuted: key == 'isMuted' ? value : oldParticipant.isMuted,
+        isVideoEnabled:
+            key == 'isVideoEnabled' ? value : oldParticipant.isVideoEnabled,
+        isScreenSharing:
+            key == 'isScreenSharing' ? value : oldParticipant.isScreenSharing,
+      );
+      _participants[localUserId] = newParticipant;
     }
   }
 
@@ -164,26 +173,20 @@ class CallManagerService extends GetxService {
   void _handleParticipantStateChange(Map<String, dynamic> data) {
     final userId = data['userId'] as String;
     if (_participants.containsKey(userId)) {
-      final participant = _participants[userId]!;
-      if (data.containsKey('isVideoEnabled')) {
-        participant.isVideoEnabled = data['isVideoEnabled'] as bool;
-      }
-      if (data.containsKey('isAudioEnabled')) {
-        participant.isAudioEnabled = data['isAudioEnabled'] as bool;
-      }
-      if (data.containsKey('isScreenSharing')) {
-        participant.isScreenSharing = data['isScreenSharing'] as bool;
-      }
-      _participants[userId] = participant;
+      final oldParticipant = _participants[userId]!;
+      final newParticipant = oldParticipant.copyWith(
+        isVideoEnabled: data['isVideoEnabled'] as bool?,
+        isMuted: data['isMuted'] as bool?,
+        isScreenSharing: data['isScreenSharing'] as bool?,
+      );
+      _participants[userId] = newParticipant;
     }
   }
 
   void _handleParticipantLeft(Map<String, dynamic> data) {
     final userId = data['userId'] as String;
     if (_participants.containsKey(userId)) {
-      final participant = _participants[userId]!;
-      participant.leftAt = DateTime.now();
-      _participants[userId] = participant;
+      _participants.remove(userId);
     }
   }
 
