@@ -21,7 +21,8 @@ class GitHubOAuthService extends GetxService {
 
   Future<String?> signInWithGitHub() async {
     if (!GitHubConfig.isConfigured) {
-      _errorHandler.handleError(AppStrings.errorOperationNotAllowed);
+      _errorHandler.handleError(
+          AppStrings.errorOperationNotAllowed, ErrorHandlerService.AUTH_ERROR);
       return null;
     }
 
@@ -52,14 +53,16 @@ class GitHubOAuthService extends GetxService {
       return await _getUserEmail(accessToken);
     } catch (e) {
       _logger.e('GitHub login error: $e');
-      _errorHandler.handleError(AppStrings.githubLoginFailed);
+      _errorHandler.handleError(
+          AppStrings.githubLoginFailed, ErrorHandlerService.AUTH_ERROR);
       return null;
     }
   }
 
   Future<String?> getAccessToken() async {
     if (!GitHubConfig.isConfigured) {
-      _errorHandler.handleError(AppStrings.errorOperationNotAllowed);
+      _errorHandler.handleError(
+          AppStrings.errorOperationNotAllowed, ErrorHandlerService.AUTH_ERROR);
       return null;
     }
 
@@ -86,7 +89,8 @@ class GitHubOAuthService extends GetxService {
       return await _getAccessToken(code);
     } catch (e) {
       _logger.e('GitHub access token error: $e');
-      _errorHandler.handleError(AppStrings.githubLoginFailed);
+      _errorHandler.handleError(
+          AppStrings.githubLoginFailed, ErrorHandlerService.AUTH_ERROR);
       return null;
     }
   }
@@ -98,14 +102,16 @@ class GitHubOAuthService extends GetxService {
 
       final code = uri.queryParameters['code'];
       if (code == null) {
-        _errorHandler.handleError(AppStrings.githubLoginFailed);
+        _errorHandler.handleError(
+            AppStrings.githubLoginFailed, ErrorHandlerService.AUTH_ERROR);
         return null;
       }
 
       return code;
     } on PlatformException catch (e) {
       _logger.e('Platform error: $e');
-      _errorHandler.handleError(AppStrings.errorGeneric);
+      _errorHandler.handleError(
+          AppStrings.errorGeneric, ErrorHandlerService.AUTH_ERROR);
       return null;
     }
   }
@@ -126,7 +132,8 @@ class GitHubOAuthService extends GetxService {
       );
 
       if (response.statusCode != 200) {
-        _errorHandler.handleError(AppStrings.githubLoginFailed);
+        _errorHandler.handleError(
+            AppStrings.githubLoginFailed, ErrorHandlerService.AUTH_ERROR);
         return null;
       }
 
@@ -134,7 +141,8 @@ class GitHubOAuthService extends GetxService {
       return data['access_token'];
     } catch (e) {
       _logger.e('Token error: $e');
-      _errorHandler.handleError(AppStrings.githubLoginFailed);
+      _errorHandler.handleError(
+          AppStrings.githubLoginFailed, ErrorHandlerService.AUTH_ERROR);
       return null;
     }
   }
@@ -150,7 +158,8 @@ class GitHubOAuthService extends GetxService {
       );
 
       if (response.statusCode != 200) {
-        _errorHandler.handleError(AppStrings.githubUserInfoFailed);
+        _errorHandler.handleError(
+            AppStrings.githubUserInfoFailed, ErrorHandlerService.AUTH_ERROR);
         return null;
       }
 
@@ -163,7 +172,8 @@ class GitHubOAuthService extends GetxService {
       return primaryEmail['email'];
     } catch (e) {
       _logger.e('User email error: $e');
-      _errorHandler.handleError(AppStrings.githubUserInfoFailed);
+      _errorHandler.handleError(
+          AppStrings.githubUserInfoFailed, ErrorHandlerService.AUTH_ERROR);
       return null;
     }
   }
@@ -179,7 +189,8 @@ class GitHubOAuthService extends GetxService {
       );
 
       if (response.statusCode != 200) {
-        _errorHandler.handleError(AppStrings.githubUserInfoFailed);
+        _errorHandler.handleError(
+            AppStrings.githubUserInfoFailed, ErrorHandlerService.AUTH_ERROR);
         return null;
       }
 
@@ -206,7 +217,8 @@ class GitHubOAuthService extends GetxService {
       return userData;
     } catch (e) {
       _logger.e('GitHub user info error: $e');
-      _errorHandler.handleError(AppStrings.githubUserInfoFailed);
+      _errorHandler.handleError(
+          AppStrings.githubUserInfoFailed, ErrorHandlerService.AUTH_ERROR);
       return null;
     }
   }

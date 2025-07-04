@@ -28,7 +28,7 @@ class NetworkController extends GetxController {
       final results = await _connectivity.checkConnectivity();
       _updateConnectionStatus(results.first);
     } catch (e) {
-      _errorHandler.handleError(e);
+      _errorHandler.handleError(e, ErrorHandlerService.NETWORK_ERROR);
     }
   }
 
@@ -46,7 +46,8 @@ class NetworkController extends GetxController {
     _isConnected.value = result != ConnectivityResult.none;
 
     if (!_isConnected.value) {
-      _errorHandler.handleError(AppStrings.errorNetwork);
+      _errorHandler.handleError(
+          AppStrings.errorNetwork, ErrorHandlerService.NETWORK_ERROR);
     }
   }
 
@@ -61,7 +62,7 @@ class NetworkController extends GetxController {
       final results = await _connectivity.checkConnectivity();
       _updateConnectionStatus(results.first);
     } catch (e) {
-      _errorHandler.handleError(e);
+      _errorHandler.handleError(e, ErrorHandlerService.NETWORK_ERROR);
     }
   }
 }

@@ -29,7 +29,7 @@ abstract class MessageBaseController extends GetxController {
 
   void handleError(dynamic error) {
     _lastError.value = error.toString();
-    _errorHandler.handleError(error);
+    _errorHandler.handleError(error, ErrorHandlerService.SERVER_ERROR);
   }
 
   MessagingService get messagingService => _messagingService;

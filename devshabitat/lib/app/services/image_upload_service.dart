@@ -6,6 +6,8 @@ import 'package:firebase_storage/firebase_storage.dart';
 import 'package:uuid/uuid.dart';
 import 'package:image/image.dart' as img;
 import '../core/services/error_handler_service.dart';
+import 'package:flutter_image_compress/flutter_image_compress.dart';
+import 'package:path_provider/path_provider.dart';
 
 typedef ProgressCallback = void Function(double progress);
 
@@ -17,6 +19,11 @@ class ImageUploadService extends GetxService {
   static const int _maxFileSize = 10 * 1024 * 1024; // 10MB
   static const int _chunkSize = 1024 * 1024; // 1MB
   static const int _maxDimension = 2048; // Maximum image dimension
+  static const int _thumbnailDimension = 300; // Thumbnail dimension
+  static const int _defaultQuality = 85; // Default compression quality
+
+  final Map<String, String> _imageCache = {};
+  final int _maxCacheSize = 100; // Maximum number of cached URLs
 
   ImageUploadService({
     FirebaseStorage? storage,
@@ -28,6 +35,10 @@ class ImageUploadService extends GetxService {
     String imagePath, {
     ProgressCallback? onProgress,
     bool shouldCompress = true,
+    bool generateThumbnail = true,
+    int? customQuality,
+    int? maxWidth,
+    int? maxHeight,
   }) async {
     try {
       final file = File(imagePath);
@@ -35,15 +46,23 @@ class ImageUploadService extends GetxService {
         throw Exception('Dosya bulunamadı');
       }
 
+      // Cache kontrolü
+      final cacheKey = await _generateCacheKey(file);
+      if (_imageCache.containsKey(cacheKey)) {
+        return _imageCache[cacheKey];
+      }
+
       var fileToUpload = file;
       var fileSize = await file.length();
 
       // Dosya boyutu kontrolü ve sıkıştırma
-      if (fileSize > _maxFileSize) {
-        if (!shouldCompress) {
-          throw Exception('Dosya boyutu 10MB\'dan büyük olamaz');
-        }
-        fileToUpload = await _compressImage(file);
+      if (fileSize > _maxFileSize || shouldCompress) {
+        fileToUpload = await _optimizeImage(
+          file,
+          quality: customQuality ?? _defaultQuality,
+          maxWidth: maxWidth ?? _maxDimension,
+          maxHeight: maxHeight ?? _maxDimension,
+        );
         fileSize = await fileToUpload.length();
 
         if (fileSize > _maxFileSize) {
@@ -56,19 +75,119 @@ class ImageUploadService extends GetxService {
         throw Exception('Desteklenmeyen dosya formatı');
       }
 
-      final ref = _storage.ref().child('images/${_uuid.v4()}$ext');
+      final fileName = '${_uuid.v4()}$ext';
+      final ref = _storage.ref().child('images/$fileName');
 
+      String? downloadUrl;
       if (fileSize > _chunkSize) {
         await _uploadInChunks(fileToUpload, ref, onProgress);
       } else {
         await _uploadDirect(fileToUpload, ref, onProgress);
       }
 
-      return await ref.getDownloadURL();
+      downloadUrl = await ref.getDownloadURL();
+
+      // Thumbnail oluştur
+      if (generateThumbnail) {
+        final thumbnailFile = await _generateThumbnail(fileToUpload);
+        final thumbnailRef = _storage.ref().child('thumbnails/$fileName');
+        await _uploadDirect(thumbnailFile, thumbnailRef, null);
+        await thumbnailFile.delete();
+      }
+
+      // Cache'e ekle
+      _addToCache(cacheKey, downloadUrl);
+
+      return downloadUrl;
     } catch (e) {
-      _errorHandler.handleError('Resim yükleme hatası: $e');
+      _errorHandler.handleError(
+          'Resim yükleme hatası: $e', ErrorHandlerService.AUTH_ERROR);
       return null;
     }
+  }
+
+  Future<File> _optimizeImage(
+    File file, {
+    int quality = _defaultQuality,
+    int? maxWidth,
+    int? maxHeight,
+  }) async {
+    final bytes = await file.readAsBytes();
+    var image = img.decodeImage(bytes);
+
+    if (image == null) {
+      throw Exception('Resim okunamadı');
+    }
+
+    // EXIF rotasyonunu düzelt
+    image = img.bakeOrientation(image);
+
+    // Boyut kontrolü ve yeniden boyutlandırma
+    if (image.width > (maxWidth ?? _maxDimension) ||
+        image.height > (maxHeight ?? _maxDimension)) {
+      image = img.copyResize(
+        image,
+        width: image.width > image.height ? (maxWidth ?? _maxDimension) : null,
+        height:
+            image.height >= image.width ? (maxHeight ?? _maxDimension) : null,
+        interpolation: img.Interpolation.linear,
+      );
+    }
+
+    // WebP formatına dönüştür ve sıkıştır
+    final tempDir = await getTemporaryDirectory();
+    final optimizedFile = File('${tempDir.path}/${_uuid.v4()}.webp');
+
+    final compressedBytes = await FlutterImageCompress.compressWithList(
+      img.encodeJpg(image, quality: quality), // JPG olarak encode et
+      quality: quality,
+    );
+
+    await optimizedFile.writeAsBytes(compressedBytes);
+    return optimizedFile;
+  }
+
+  Future<File> _generateThumbnail(File file) async {
+    final bytes = await file.readAsBytes();
+    var image = img.decodeImage(bytes);
+
+    if (image == null) {
+      throw Exception('Thumbnail oluşturulamadı');
+    }
+
+    // EXIF rotasyonunu düzelt
+    image = img.bakeOrientation(image);
+
+    // Thumbnail boyutuna ölçekle
+    image = img.copyResize(
+      image,
+      width: _thumbnailDimension,
+      height: _thumbnailDimension,
+      interpolation: img.Interpolation.linear,
+    );
+
+    final tempDir = await getTemporaryDirectory();
+    final thumbnailFile = File('${tempDir.path}/${_uuid.v4()}_thumb.jpg');
+    await thumbnailFile.writeAsBytes(img.encodeJpg(image, quality: 70));
+
+    return thumbnailFile;
+  }
+
+  Future<String> _generateCacheKey(File file) async {
+    final bytes = await file.readAsBytes();
+    return bytes.length.toString() +
+        file.lastModifiedSync().millisecondsSinceEpoch.toString();
+  }
+
+  void _addToCache(String key, String url) {
+    if (_imageCache.length >= _maxCacheSize) {
+      _imageCache.remove(_imageCache.keys.first);
+    }
+    _imageCache[key] = url;
+  }
+
+  void clearCache() {
+    _imageCache.clear();
   }
 
   Future<void> _uploadInChunks(
@@ -119,31 +238,6 @@ class ImageUploadService extends GetxService {
     await uploadTask;
   }
 
-  Future<File> _compressImage(File file) async {
-    final bytes = await file.readAsBytes();
-    var image = img.decodeImage(bytes);
-
-    if (image == null) {
-      throw Exception('Resim okunamadı');
-    }
-
-    // Boyut kontrolü ve yeniden boyutlandırma
-    if (image.width > _maxDimension || image.height > _maxDimension) {
-      image = img.copyResize(
-        image,
-        width: image.width > image.height ? _maxDimension : null,
-        height: image.height >= image.width ? _maxDimension : null,
-      );
-    }
-
-    // Kalite ayarı ile sıkıştırma
-    final compressedBytes = img.encodeJpg(image, quality: 85);
-    final compressedFile = File('${file.path}_compressed.jpg');
-    await compressedFile.writeAsBytes(compressedBytes);
-
-    return compressedFile;
-  }
-
   String _getContentType(String extension) {
     switch (extension.toLowerCase()) {
       case '.jpg':
@@ -170,7 +264,8 @@ class ImageUploadService extends GetxService {
       final ref = _storage.refFromURL(imageUrl);
       await ref.delete();
     } catch (e) {
-      _errorHandler.handleError('Resim silme hatası: $e');
+      _errorHandler.handleError(
+          'Resim silme hatası: $e', ErrorHandlerService.AUTH_ERROR);
     }
   }
 }

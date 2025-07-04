@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../../controllers/settings_controller.dart';
+import '../../routes/app_pages.dart';
 import 'widgets/settings_list_tile.dart';
 
 class SettingsView extends GetView<SettingsController> {
@@ -49,6 +50,13 @@ class SettingsView extends GetView<SettingsController> {
                   _buildSection(
                     'Bildirimler',
                     [
+                      SettingsListTile(
+                        title: 'Bildirim Ayarları',
+                        icon: Icons.notifications_active,
+                        isLargeScreen: isLargeScreen,
+                        onTap: () =>
+                            Get.toNamed(AppRoutes.notificationSettings),
+                      ),
                       Obx(
                         () => SettingsListTile(
                           title: 'Bildirimleri Etkinleştir',

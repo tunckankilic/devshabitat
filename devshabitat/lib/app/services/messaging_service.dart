@@ -29,7 +29,7 @@ class MessagingService extends GetxService {
 
   // Yardımcı metodlar
   String _handleError(String message) {
-    _errorHandler.handleError(message);
+    _errorHandler.handleError(message, ErrorHandlerService.AUTH_ERROR);
     return message;
   }
 

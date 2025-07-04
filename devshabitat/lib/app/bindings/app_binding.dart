@@ -2,11 +2,13 @@ import 'package:devshabitat/app/controllers/auth_controller.dart';
 import 'package:devshabitat/app/repositories/auth_repository.dart';
 import 'package:get/get.dart';
 import 'package:logger/logger.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import '../core/services/error_handler_service.dart';
 import '../services/github_oauth_service.dart';
 import '../services/post_service.dart';
 import '../services/lazy_loading_service.dart';
 import '../services/asset_optimization_service.dart';
+import '../services/notification_service.dart';
 import '../controllers/app_controller.dart';
 import '../controllers/responsive_controller.dart';
 import '../controllers/auth_state_controller.dart';
@@ -14,10 +16,18 @@ import '../controllers/email_auth_controller.dart';
 
 class AppBinding extends Bindings {
   @override
-  void dependencies() {
+  void dependencies() async {
     // Core Services
     final logger = Get.put(Logger());
     final errorHandler = Get.put(ErrorHandlerService());
+
+    // SharedPreferences
+    final prefs = await SharedPreferences.getInstance();
+    Get.put<SharedPreferences>(prefs);
+
+    // Notification Service
+    final notificationService = Get.put(NotificationService(prefs));
+    await notificationService.init();
 
     // Auth Related Services
     final githubOAuthService = Get.put(GitHubOAuthService(

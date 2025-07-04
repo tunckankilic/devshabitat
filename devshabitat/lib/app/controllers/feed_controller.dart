@@ -42,7 +42,7 @@ class FeedController extends GetxController {
       );
       return items;
     } catch (e) {
-      _errorHandler.handleError(e);
+      _errorHandler.handleError(e, ErrorHandlerService.SERVER_ERROR);
       return [];
     }
   }
@@ -56,7 +56,7 @@ class FeedController extends GetxController {
       _hasError.value = false;
     } catch (e) {
       _hasError.value = true;
-      _errorHandler.handleError(e);
+      _errorHandler.handleError(e, ErrorHandlerService.SERVER_ERROR);
     }
   }
 
@@ -72,7 +72,7 @@ class FeedController extends GetxController {
         _feedItems[index] = updatedItem;
       }
     } catch (e) {
-      _errorHandler.handleError(e);
+      _errorHandler.handleError(e, ErrorHandlerService.SERVER_ERROR);
     }
   }
 
@@ -81,7 +81,7 @@ class FeedController extends GetxController {
       // Yorum yapma işlemi
       Get.toNamed('/comments', arguments: itemId);
     } catch (e) {
-      _errorHandler.handleError(e);
+      _errorHandler.handleError(e, ErrorHandlerService.SERVER_ERROR);
     }
   }
 
@@ -96,7 +96,7 @@ class FeedController extends GetxController {
         _feedItems[index] = updatedItem;
       }
     } catch (e) {
-      _errorHandler.handleError(e);
+      _errorHandler.handleError(e, ErrorHandlerService.SERVER_ERROR);
     }
   }
 

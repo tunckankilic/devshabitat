@@ -30,7 +30,7 @@ class GitHubCodeViewerService extends GetxService {
             : '',
       };
     } catch (e) {
-      _errorHandler.handleError(e);
+      _errorHandler.handleError(e, ErrorHandlerService.SERVER_ERROR);
       return null;
     }
   }
@@ -55,7 +55,7 @@ class GitHubCodeViewerService extends GetxService {
         throw Exception('GitHub API hatası: ${response.statusCode}');
       }
     } catch (e) {
-      _errorHandler.handleError(e);
+      _errorHandler.handleError(e, ErrorHandlerService.SERVER_ERROR);
       return [];
     }
   }
@@ -84,7 +84,7 @@ class GitHubCodeViewerService extends GetxService {
       }
       return null;
     } catch (e) {
-      _errorHandler.handleError(e);
+      _errorHandler.handleError(e, ErrorHandlerService.SERVER_ERROR);
       return null;
     }
   }
@@ -110,7 +110,7 @@ class GitHubCodeViewerService extends GetxService {
       }
       return null;
     } catch (e) {
-      _errorHandler.handleError(e);
+      _errorHandler.handleError(e, ErrorHandlerService.SERVER_ERROR);
       return null;
     }
   }
