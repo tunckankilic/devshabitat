@@ -2,6 +2,8 @@ import 'package:get/get.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import '../models/enhanced_user_model.dart';
+import '../models/privacy_settings_model.dart';
+import '../models/user_model.dart';
 
 class UserService extends GetxService {
   final FirebaseAuth _auth = FirebaseAuth.instance;
@@ -82,5 +84,30 @@ class UserService extends GetxService {
         .update(updatedUser.toJson());
 
     _currentUser.value = updatedUser;
+  }
+
+  Future<PrivacySettings> getPrivacySettings() async {
+    final userId = Get.find<UserModel>().id;
+    final doc = await _firestore
+        .collection('users')
+        .doc(userId)
+        .collection('settings')
+        .doc('privacy')
+        .get();
+
+    if (doc.exists) {
+      return PrivacySettings.fromJson(doc.data()!);
+    }
+    return PrivacySettings(); // Return default settings
+  }
+
+  Future<void> updatePrivacySettings(PrivacySettings settings) async {
+    final userId = Get.find<UserModel>().id;
+    await _firestore
+        .collection('users')
+        .doc(userId)
+        .collection('settings')
+        .doc('privacy')
+        .set(settings.toJson());
   }
 }

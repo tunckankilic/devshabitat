@@ -8,9 +8,18 @@ part of 'user_model.dart';
 
 UserModel _$UserModelFromJson(Map<String, dynamic> json) => UserModel(
       id: json['id'] as String,
-      email: json['email'] as String,
       displayName: json['displayName'] as String?,
+      email: json['email'] as String?,
       photoUrl: json['photoUrl'] as String?,
+      bio: json['bio'] as String?,
+      technologies: (json['technologies'] as List<dynamic>?)
+              ?.map((e) => e as String)
+              .toList() ??
+          const [],
+      privacySettings: json['privacySettings'] == null
+          ? null
+          : PrivacySettings.fromJson(
+              json['privacySettings'] as Map<String, dynamic>),
       phoneNumber: json['phoneNumber'] as String?,
       emailVerified: json['emailVerified'] as bool? ?? false,
       metadata: json['metadata'] as Map<String, dynamic>?,
@@ -20,9 +29,12 @@ UserModel _$UserModelFromJson(Map<String, dynamic> json) => UserModel(
 
 Map<String, dynamic> _$UserModelToJson(UserModel instance) => <String, dynamic>{
       'id': instance.id,
-      'email': instance.email,
       'displayName': instance.displayName,
+      'email': instance.email,
       'photoUrl': instance.photoUrl,
+      'bio': instance.bio,
+      'technologies': instance.technologies,
+      'privacySettings': instance.privacySettings,
       'phoneNumber': instance.phoneNumber,
       'emailVerified': instance.emailVerified,
       'metadata': instance.metadata,

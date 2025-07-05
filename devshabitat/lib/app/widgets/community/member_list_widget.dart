@@ -33,7 +33,7 @@ class MemberListWidget extends StatelessWidget {
                 ? Text(member.displayName!.characters.first.toUpperCase())
                 : null,
           ),
-          title: Text(member.displayName ?? member.email),
+          title: Text(member.displayName ?? member.email ?? 'İsimsiz Üye'),
           subtitle: member.metadata?['title'] != null
               ? Text(member.metadata!['title'] as String)
               : null,

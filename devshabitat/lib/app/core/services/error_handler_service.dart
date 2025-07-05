@@ -16,6 +16,9 @@ class ErrorHandlerService extends GetxService {
   static const String AUTH_ERROR = 'AUTH_ERROR';
   static const String FILE_ERROR = 'FILE_ERROR';
   static const String SERVER_ERROR = 'SERVER_ERROR';
+  static const String DISCUSSION_ERROR = 'DISCUSSION_ERROR';
+  static const String PORTFOLIO_ERROR = 'PORTFOLIO_ERROR';
+  static const String MATCHING_ERROR = 'MATCHING_ERROR';
 
   Future<void> handleError(
     dynamic error,
@@ -63,6 +66,18 @@ class ErrorHandlerService extends GetxService {
         break;
       case SERVER_ERROR:
         message = 'Bir sunucu hatası oluştu. Lütfen daha sonra tekrar deneyin.';
+        break;
+      case DISCUSSION_ERROR:
+        message =
+            'Bir tartışma hatası oluştu. Lütfen daha sonra tekrar deneyin.';
+        break;
+      case PORTFOLIO_ERROR:
+        message =
+            'Bir portföy hatası oluştu. Lütfen daha sonra tekrar deneyin.';
+        break;
+      case MATCHING_ERROR:
+        message =
+            'Bir eşleştirme hatası oluştu. Lütfen daha sonra tekrar deneyin.';
         break;
       default:
         message =

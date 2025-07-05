@@ -1,15 +1,19 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:json_annotation/json_annotation.dart';
+import 'privacy_settings_model.dart';
 
 part 'user_model.g.dart';
 
 @JsonSerializable()
 class UserModel {
   final String id;
-  final String email;
   final String? displayName;
+  final String? email;
   final String? photoUrl;
+  final String? bio;
+  final List<String> technologies;
+  final PrivacySettings privacySettings;
   final String? phoneNumber;
   final bool emailVerified;
   final Map<String, dynamic>? metadata;
@@ -18,15 +22,18 @@ class UserModel {
 
   UserModel({
     required this.id,
-    required this.email,
     this.displayName,
+    this.email,
     this.photoUrl,
+    this.bio,
+    this.technologies = const [],
+    PrivacySettings? privacySettings,
     this.phoneNumber,
     this.emailVerified = false,
     this.metadata,
     required this.createdAt,
     required this.updatedAt,
-  });
+  }) : privacySettings = privacySettings ?? PrivacySettings();
 
   factory UserModel.fromJson(Map<String, dynamic> json) =>
       _$UserModelFromJson(json);
@@ -43,9 +50,12 @@ class UserModel {
 
   UserModel copyWith({
     String? id,
-    String? email,
     String? displayName,
+    String? email,
     String? photoUrl,
+    String? bio,
+    List<String>? technologies,
+    PrivacySettings? privacySettings,
     String? phoneNumber,
     bool? emailVerified,
     Map<String, dynamic>? metadata,
@@ -54,9 +64,12 @@ class UserModel {
   }) {
     return UserModel(
       id: id ?? this.id,
-      email: email ?? this.email,
       displayName: displayName ?? this.displayName,
+      email: email ?? this.email,
       photoUrl: photoUrl ?? this.photoUrl,
+      bio: bio ?? this.bio,
+      technologies: technologies ?? this.technologies,
+      privacySettings: privacySettings ?? this.privacySettings,
       phoneNumber: phoneNumber ?? this.phoneNumber,
       emailVerified: emailVerified ?? this.emailVerified,
       metadata: metadata ?? this.metadata,
