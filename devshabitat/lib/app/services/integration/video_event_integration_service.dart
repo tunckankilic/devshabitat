@@ -28,10 +28,11 @@ class VideoEventIntegrationService extends GetxService {
         },
       );
 
+      final organizerName = await getOrganizerName(event.id);
       await _callManagerService.initiateCall(
         participantIds: [], // Boş liste ile başlat
         initiatorId: event.organizerId,
-        initiatorName: 'Event Host', // TODO: Get organizer name
+        initiatorName: organizerName,
         type: CallType.video,
       );
 
@@ -51,6 +52,29 @@ class VideoEventIntegrationService extends GetxService {
     } catch (e) {
       print('Error ending event video call: $e');
       rethrow;
+    }
+  }
+
+  Future<String> getOrganizerName(String eventId) async {
+    try {
+      final eventDoc = await _firestore.collection('events').doc(eventId).get();
+
+      if (!eventDoc.exists) {
+        return 'Unknown Organizer';
+      }
+
+      final organizerId = eventDoc.data()?['organizerId'];
+      if (organizerId == null) {
+        return 'Unknown Organizer';
+      }
+
+      final organizerDoc =
+          await _firestore.collection('users').doc(organizerId).get();
+
+      return organizerDoc.data()?['name'] ?? 'Unknown Organizer';
+    } catch (e) {
+      print('Error fetching organizer name: $e');
+      return 'Unknown Organizer';
     }
   }
 }

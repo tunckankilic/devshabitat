@@ -214,7 +214,7 @@ class EventCreateView extends GetView<EventCreateController> {
                 runSpacing: 8,
                 children: controller.selectedCategories.map((categoryId) {
                   return Chip(
-                    label: Text(categoryId), // TODO: Get category name
+                    label: Text(controller.getCategoryName(categoryId)),
                     onDeleted: () => controller.toggleCategory(categoryId),
                   );
                 }).toList(),

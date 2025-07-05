@@ -1,5 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:devshabitat/app/models/event/event_model.dart';
+import 'package:devshabitat/app/models/event/event_category_model.dart';
 
 class EventService {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
@@ -125,5 +126,13 @@ class EventService {
       'hasActiveCall': hasActiveCall,
       'lastCallUpdateTime': FieldValue.serverTimestamp(),
     });
+  }
+
+  // Get event categories
+  Future<List<EventCategoryModel>> getEventCategories() async {
+    final querySnapshot = await _firestore.collection('event_categories').get();
+    return querySnapshot.docs
+        .map((doc) => EventCategoryModel.fromFirestore(doc))
+        .toList();
   }
 }

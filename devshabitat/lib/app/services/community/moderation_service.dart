@@ -284,7 +284,60 @@ class ModerationService extends GetxService {
     ContentType contentType,
     Map<String, dynamic> content,
   ) async {
-    // TODO: Implement auto-moderation rules
+    // İçerik metnini al
+    final contentText = content['text'] ?? content['description'] ?? '';
+    // Otomatik moderasyon kurallarını uygula
+    return await applyAutoModerationRules(contentText);
+  }
+
+  Future<bool> applyAutoModerationRules(String content) async {
+    // Yasaklı kelimeler kontrolü
+    final bannedWords = await _getBannedWords();
+    if (_containsBannedWords(content, bannedWords)) {
+      return false;
+    }
+
+    // Spam kontrolü
+    if (_isSpam(content)) {
+      return false;
+    }
+
+    // Link kontrolü
+    if (_hasUnsafeLinks(content)) {
+      return false;
+    }
+
     return true;
+  }
+
+  Future<List<String>> _getBannedWords() async {
+    final snapshot =
+        await _firestore.collection('moderation').doc('banned_words').get();
+    return List<String>.from(snapshot.data()?['words'] ?? []);
+  }
+
+  bool _containsBannedWords(String content, List<String> bannedWords) {
+    return bannedWords
+        .any((word) => content.toLowerCase().contains(word.toLowerCase()));
+  }
+
+  bool _isSpam(String content) {
+    // Basit spam kontrolü
+    final repeatedChars = RegExp(r'(.)\1{4,}');
+    if (repeatedChars.hasMatch(content)) return true;
+
+    final allCaps = content.toUpperCase() == content && content.length > 20;
+    if (allCaps) return true;
+
+    return false;
+  }
+
+  bool _hasUnsafeLinks(String content) {
+    final urlPattern = RegExp(
+        r'(http|https)://[\w-]+(\.[\w-]+)+([\w.,@?^=%&amp;:/~+#-]*[\w@?^=%&amp;/~+#-])?');
+    final urls = urlPattern.allMatches(content);
+
+    // URL güvenlik kontrolü yapılabilir
+    return false; // Şimdilik tüm linklere izin ver
   }
 }

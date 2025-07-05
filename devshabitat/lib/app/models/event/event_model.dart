@@ -3,6 +3,27 @@ import 'package:json_annotation/json_annotation.dart';
 
 part 'event_model.g.dart';
 
+@JsonSerializable()
+class GeoPointConverter
+    implements JsonConverter<GeoPoint?, Map<String, dynamic>?> {
+  const GeoPointConverter();
+
+  @override
+  GeoPoint? fromJson(Map<String, dynamic>? json) {
+    if (json == null) return null;
+    return GeoPoint(json['latitude'] as double, json['longitude'] as double);
+  }
+
+  @override
+  Map<String, dynamic>? toJson(GeoPoint? geoPoint) {
+    if (geoPoint == null) return null;
+    return {
+      'latitude': geoPoint.latitude,
+      'longitude': geoPoint.longitude,
+    };
+  }
+}
+
 enum EventType { workshop, meetup, conference, hackathon, other }
 
 enum EventLocation { online, offline }
@@ -15,9 +36,11 @@ class EventModel {
   final String organizerId;
   final EventType type;
   final EventLocation location;
+  @GeoPointConverter()
+  final GeoPoint? geoPoint;
+  final String? coverImageUrl;
   final String? venueAddress;
   final String? onlineMeetingUrl;
-  final String? coverImageUrl;
   final DateTime startDate;
   final DateTime endDate;
   final int participantLimit;
@@ -34,9 +57,10 @@ class EventModel {
     required this.organizerId,
     required this.type,
     required this.location,
+    this.geoPoint,
+    this.coverImageUrl,
     this.venueAddress,
     this.onlineMeetingUrl,
-    this.coverImageUrl,
     required this.startDate,
     required this.endDate,
     required this.participantLimit,
@@ -59,25 +83,20 @@ class EventModel {
       title: data['title'] ?? '',
       description: data['description'] ?? '',
       organizerId: data['organizerId'] ?? '',
-      type: EventType.values.firstWhere(
-        (e) => e.toString() == data['type'],
-        orElse: () => EventType.other,
-      ),
-      location: EventLocation.values.firstWhere(
-        (e) => e.toString() == data['location'],
-        orElse: () => EventLocation.offline,
-      ),
+      type: EventType.values[data['type'] ?? 0],
+      location: EventLocation.values[data['location'] ?? 0],
+      geoPoint: data['geoPoint'] as GeoPoint?,
+      coverImageUrl: data['coverImageUrl'],
       venueAddress: data['venueAddress'],
       onlineMeetingUrl: data['onlineMeetingUrl'],
-      coverImageUrl: data['coverImageUrl'],
       startDate: (data['startDate'] as Timestamp).toDate(),
       endDate: (data['endDate'] as Timestamp).toDate(),
       participantLimit: data['participantLimit'] ?? 0,
       currentParticipants: data['currentParticipants'] ?? 0,
       categoryIds: List<String>.from(data['categoryIds'] ?? []),
+      isActive: data['isActive'] ?? true,
       createdAt: (data['createdAt'] as Timestamp).toDate(),
       updatedAt: (data['updatedAt'] as Timestamp).toDate(),
-      isActive: data['isActive'] ?? true,
     );
   }
 
@@ -88,9 +107,10 @@ class EventModel {
     String? organizerId,
     EventType? type,
     EventLocation? location,
+    GeoPoint? geoPoint,
+    String? coverImageUrl,
     String? venueAddress,
     String? onlineMeetingUrl,
-    String? coverImageUrl,
     DateTime? startDate,
     DateTime? endDate,
     int? participantLimit,
@@ -107,9 +127,10 @@ class EventModel {
       organizerId: organizerId ?? this.organizerId,
       type: type ?? this.type,
       location: location ?? this.location,
+      geoPoint: geoPoint ?? this.geoPoint,
+      coverImageUrl: coverImageUrl ?? this.coverImageUrl,
       venueAddress: venueAddress ?? this.venueAddress,
       onlineMeetingUrl: onlineMeetingUrl ?? this.onlineMeetingUrl,
-      coverImageUrl: coverImageUrl ?? this.coverImageUrl,
       startDate: startDate ?? this.startDate,
       endDate: endDate ?? this.endDate,
       participantLimit: participantLimit ?? this.participantLimit,

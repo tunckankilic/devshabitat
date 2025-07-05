@@ -2,6 +2,7 @@ import 'package:get/get.dart';
 import 'package:devshabitat/app/models/event/event_model.dart';
 import 'package:devshabitat/app/services/event/event_service.dart';
 import 'package:devshabitat/app/controllers/auth_controller.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 
 class EventCreateController extends GetxController {
   final EventService _eventService = EventService();
@@ -16,7 +17,30 @@ class EventCreateController extends GetxController {
   final endDate = Rx<DateTime?>(null);
   final participantLimit = 0.obs;
   final selectedCategories = <String>[].obs;
+  final selectedLocation = Rx<GeoPoint?>(null);
   final isLoading = false.obs;
+  final _categoryNames = <String, String>{}.obs;
+
+  @override
+  void onInit() {
+    super.onInit();
+    _loadCategoryNames();
+  }
+
+  Future<void> _loadCategoryNames() async {
+    try {
+      final categories = await _eventService.getEventCategories();
+      for (var category in categories) {
+        _categoryNames[category.id] = category.name;
+      }
+    } catch (e) {
+      print('Error loading category names: $e');
+    }
+  }
+
+  String getCategoryName(String categoryId) {
+    return _categoryNames[categoryId] ?? categoryId;
+  }
 
   // Form validation
   bool get isFormValid =>
@@ -39,6 +63,11 @@ class EventCreateController extends GetxController {
     return false;
   }
 
+  // Update location coordinates
+  void updateLocationCoordinates(double latitude, double longitude) {
+    selectedLocation.value = GeoPoint(latitude, longitude);
+  }
+
   // Create event
   Future<void> createEvent() async {
     if (!isFormValid) {
@@ -56,6 +85,9 @@ class EventCreateController extends GetxController {
         organizerId: Get.find<AuthController>().currentUser?.uid ?? '',
         type: type.value!,
         location: location.value!,
+        geoPoint: location.value == EventLocation.offline
+            ? selectedLocation.value
+            : null,
         venueAddress: venueAddress.value,
         onlineMeetingUrl: onlineMeetingUrl.value,
         startDate: startDate.value!,

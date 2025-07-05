@@ -5,6 +5,7 @@ import 'package:devshabitat/app/models/event/event_model.dart';
 import 'package:devshabitat/app/models/event/event_category_model.dart';
 import 'package:devshabitat/app/services/event/event_service.dart';
 import 'package:devshabitat/app/services/location/location_tracking_service.dart';
+import 'dart:math';
 
 class EventDiscoveryController extends GetxController {
   final EventService _eventService = EventService();
@@ -118,19 +119,33 @@ class EventDiscoveryController extends GetxController {
     }
   }
 
-  void _updateVisibleEvents() {
-    // TODO: Implement event filtering and marker creation logic
-    // Bu metod, mevcut konum, arama yarıçapı ve filtrelere göre
-    // görünür etkinlikleri ve marker'ları güncelleyecek
+  void _updateVisibleEvents() async {
+    await filterAndCreateMarkers();
+    visibleEvents.value = events.where((event) {
+      if (event.geoPoint == null) return false;
+
+      final distance = calculateDistance(
+        currentPosition.value.latitude,
+        currentPosition.value.longitude,
+        event.geoPoint!.latitude,
+        event.geoPoint!.longitude,
+      );
+
+      return distance <= searchRadius.value;
+    }).toList();
   }
 
   // Load categories
   Future<void> loadCategories() async {
     try {
-      // TODO: Implement category loading from Firestore
-      // This will be implemented when we create the category service
+      final snapshot =
+          await FirebaseFirestore.instance.collection('event_categories').get();
+
+      categories.value = snapshot.docs
+          .map((doc) => EventCategoryModel.fromFirestore(doc))
+          .toList();
     } catch (e) {
-      Get.snackbar('Hata', 'Kategoriler yüklenirken bir hata oluştu');
+      print('Error loading categories: $e');
     }
   }
 
@@ -245,5 +260,92 @@ class EventDiscoveryController extends GetxController {
     showUpcomingOnly.value = true;
     searchQuery.value = '';
     loadEvents(refresh: true);
+  }
+
+  Future<void> filterAndCreateMarkers() async {
+    try {
+      final events = await _eventService.getEvents();
+      final filteredEvents = events.where((event) {
+        // Kategori filtresi
+        if (selectedEventCategories.isNotEmpty &&
+            !selectedEventCategories.contains(event.categoryIds.first)) {
+          return false;
+        }
+
+        // Tarih filtresi
+        if (selectedDay.value != null) {
+          if (!isSameDay(event.startDate, selectedDay.value!)) {
+            return false;
+          }
+        }
+
+        // Konum filtresi
+        if (currentPosition.value != null && event.geoPoint != null) {
+          final distance = calculateDistance(
+            currentPosition.value.latitude,
+            currentPosition.value.longitude,
+            event.geoPoint!.latitude,
+            event.geoPoint!.longitude,
+          );
+          if (distance > searchRadius.value) {
+            return false;
+          }
+        }
+
+        return true;
+      }).toList();
+
+      // Marker'ları oluştur
+      eventMarkers.clear();
+      for (final event in filteredEvents) {
+        if (event.geoPoint != null) {
+          final marker = Marker(
+            markerId: MarkerId(event.id),
+            position:
+                LatLng(event.geoPoint!.latitude, event.geoPoint!.longitude),
+            infoWindow: InfoWindow(
+              title: event.title,
+              snippet: event.description,
+            ),
+            onTap: () => navigateToEventDetail(event.id),
+          );
+          eventMarkers.add(marker);
+        }
+      }
+    } catch (e) {
+      print('Error filtering events: $e');
+    }
+  }
+
+  bool isSameDay(DateTime date1, DateTime date2) {
+    return date1.year == date2.year &&
+        date1.month == date2.month &&
+        date1.day == date2.day;
+  }
+
+  double calculateDistance(
+    double lat1,
+    double lon1,
+    double lat2,
+    double lon2,
+  ) {
+    const double earthRadius = 6371; // Dünya'nın yarıçapı (km)
+    final dLat = _toRadians(lat2 - lat1);
+    final dLon = _toRadians(lon2 - lon1);
+    final a = sin(dLat / 2) * sin(dLat / 2) +
+        cos(_toRadians(lat1)) *
+            cos(_toRadians(lat2)) *
+            sin(dLon / 2) *
+            sin(dLon / 2);
+    final c = 2 * atan2(sqrt(a), sqrt(1 - a));
+    return earthRadius * c;
+  }
+
+  double _toRadians(double degree) {
+    return degree * pi / 180;
+  }
+
+  void navigateToEventDetail(String eventId) {
+    Get.toNamed('/event/$eventId');
   }
 }

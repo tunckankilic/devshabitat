@@ -30,10 +30,15 @@ class EventCategoryModel {
 
   factory EventCategoryModel.fromFirestore(DocumentSnapshot doc) {
     final data = doc.data() as Map<String, dynamic>;
-    return EventCategoryModel.fromJson({
-      'id': doc.id,
-      ...data,
-    });
+    return EventCategoryModel(
+      id: doc.id,
+      name: data['name'] ?? '',
+      description: data['description'] ?? '',
+      iconUrl: data['iconUrl'],
+      isActive: data['isActive'] ?? true,
+      createdAt: (data['createdAt'] as Timestamp).toDate(),
+      updatedAt: (data['updatedAt'] as Timestamp).toDate(),
+    );
   }
 
   EventCategoryModel copyWith({

@@ -360,13 +360,44 @@ class WebRTCService {
 
     _isBackgroundBlurEnabled = !_isBackgroundBlurEnabled;
     if (_localStream != null) {
-      await _applyBackgroundBlur(_localStream!);
+      await applyBackgroundBlur();
     }
   }
 
-  Future<void> _applyBackgroundBlur(MediaStream stream) async {
-    // TODO: Implement background blur using platform-specific solution
-    print('Background blur is not implemented yet');
+  Future<void> applyBackgroundBlur() async {
+    try {
+      if (Platform.isIOS) {
+        await _applyIOSBackgroundBlur();
+      } else if (Platform.isAndroid) {
+        await _applyAndroidBackgroundBlur();
+      } else {
+        print('Background blur not supported on this platform');
+      }
+    } catch (e) {
+      print('Error applying background blur: $e');
+    }
+  }
+
+  Future<void> _applyIOSBackgroundBlur() async {
+    // iOS spesifik implementasyon
+    final localVideoTrack = _localStream?.getVideoTracks().first;
+    if (localVideoTrack != null) {
+      await localVideoTrack.applyConstraints({
+        'backgroundBlur': true,
+        'blurStrength': 15,
+      });
+    }
+  }
+
+  Future<void> _applyAndroidBackgroundBlur() async {
+    // Android spesifik implementasyon
+    final localVideoTrack = _localStream?.getVideoTracks().first;
+    if (localVideoTrack != null) {
+      await localVideoTrack.applyConstraints({
+        'backgroundBlur': true,
+        'blurStrength': 15,
+      });
+    }
   }
 
   Future<void> startRecording() async {
