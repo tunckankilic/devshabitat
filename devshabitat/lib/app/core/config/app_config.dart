@@ -18,6 +18,8 @@ class AppConfig extends GetxService {
   static const int maxLoginAttempts = 5;
   static const Duration lockoutDuration = Duration(minutes: 30);
 
+  static const String googleMapsApiKey = 'YOUR_GOOGLE_MAPS_API_KEY';
+
   @override
   void onInit() {
     super.onInit();

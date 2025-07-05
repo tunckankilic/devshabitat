@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:flutter_webrtc/flutter_webrtc.dart';
 import 'package:devshabitat/app/controllers/video/video_call_controller.dart';
-import 'package:devshabitat/app/widgets/video_call/video_renderer_widget.dart';
+import 'package:devshabitat/app/widgets/video_call/connection_quality_indicator.dart';
+import 'package:devshabitat/app/services/video/webrtc_service.dart';
 import 'package:devshabitat/app/widgets/video_call/call_controls_widget.dart';
 import 'package:devshabitat/app/widgets/video_call/participant_grid_widget.dart';
 import 'package:devshabitat/app/widgets/video_call/call_status_widget.dart';
@@ -12,19 +14,25 @@ class VideoCallView extends GetView<VideoCallController> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Theme.of(context).colorScheme.background,
+      backgroundColor: Colors.black,
       body: SafeArea(
         child: Stack(
           children: [
-            // Katılımcı Grid
-            Positioned.fill(
-              child: Obx(() => ParticipantGridWidget(
-                    participants: controller.participants,
-                    isGroupCall: controller.isGroupCall,
-                  )),
-            ),
+            // Video görüntüleri
+            Obx(() {
+              if (controller.participants.isEmpty) {
+                return const Center(
+                  child: CircularProgressIndicator(),
+                );
+              }
 
-            // Üst Bilgi Çubuğu
+              return ParticipantGridWidget(
+                participants: controller.participants,
+                isGroupCall: controller.isGroupCall,
+              );
+            }),
+
+            // Üst bilgi çubuğu
             Positioned(
               top: 0,
               left: 0,
@@ -43,51 +51,37 @@ class VideoCallView extends GetView<VideoCallController> {
                 ),
                 child: Row(
                   children: [
-                    IconButton(
-                      icon: const Icon(Icons.arrow_back, color: Colors.white),
-                      onPressed: () => controller.endCall(),
+                    // Bağlantı kalitesi göstergesi
+                    ConnectionQualityStream(
+                      webRTCService: Get.find<WebRTCService>(),
                     ),
-                    const SizedBox(width: 16),
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Obx(() => Text(
-                                controller.callTitle,
-                                style: const TextStyle(
-                                  color: Colors.white,
-                                  fontSize: 18,
-                                  fontWeight: FontWeight.bold,
-                                ),
-                              )),
-                          const SizedBox(height: 4),
-                          const CallStatusWidget(),
-                        ],
-                      ),
+                    const SizedBox(width: 8),
+                    // Görüşme durumu
+                    CallStatusWidget(
+                      duration: controller.callDuration,
+                      isRecording: controller.isRecording,
                     ),
                   ],
                 ),
               ),
             ),
 
-            // Kontrol Butonları
+            // Alt kontrol çubuğu
             Positioned(
               bottom: 0,
               left: 0,
               right: 0,
-              child: Container(
-                padding: const EdgeInsets.symmetric(vertical: 24),
-                decoration: BoxDecoration(
-                  gradient: LinearGradient(
-                    begin: Alignment.bottomCenter,
-                    end: Alignment.topCenter,
-                    colors: [
-                      Colors.black.withOpacity(0.7),
-                      Colors.transparent,
-                    ],
-                  ),
-                ),
-                child: const CallControlsWidget(),
+              child: CallControlsWidget(
+                isAudioEnabled: controller.isAudioEnabled,
+                isVideoEnabled: controller.isVideoEnabled,
+                isBackgroundBlurEnabled: controller.isBackgroundBlurEnabled,
+                isRecording: controller.isRecording,
+                onToggleAudio: controller.toggleAudio,
+                onToggleVideo: controller.toggleVideo,
+                onToggleBackgroundBlur: controller.toggleBackgroundBlur,
+                onStartRecording: controller.startRecording,
+                onStopRecording: controller.stopRecording,
+                onEndCall: controller.endCall,
               ),
             ),
           ],

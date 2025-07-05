@@ -2,65 +2,107 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:devshabitat/app/controllers/video/video_call_controller.dart';
 
-class CallControlsWidget extends GetView<VideoCallController> {
-  const CallControlsWidget({Key? key}) : super(key: key);
+class CallControlsWidget extends StatelessWidget {
+  final bool isAudioEnabled;
+  final bool isVideoEnabled;
+  final bool isBackgroundBlurEnabled;
+  final bool isRecording;
+  final VoidCallback onToggleAudio;
+  final VoidCallback onToggleVideo;
+  final VoidCallback onToggleBackgroundBlur;
+  final VoidCallback onStartRecording;
+  final VoidCallback onStopRecording;
+  final VoidCallback onEndCall;
+
+  const CallControlsWidget({
+    Key? key,
+    required this.isAudioEnabled,
+    required this.isVideoEnabled,
+    required this.isBackgroundBlurEnabled,
+    required this.isRecording,
+    required this.onToggleAudio,
+    required this.onToggleVideo,
+    required this.onToggleBackgroundBlur,
+    required this.onStartRecording,
+    required this.onStopRecording,
+    required this.onEndCall,
+  }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-      children: [
-        _buildControlButton(
-          icon: Obx(() => Icon(
-                controller.isAudioEnabled ? Icons.mic : Icons.mic_off,
-                color: Colors.white,
-              )),
-          backgroundColor: controller.isAudioEnabled
-              ? Colors.grey.shade800
-              : Theme.of(context).colorScheme.error,
-          onPressed: controller.toggleAudio,
-          tooltip: 'Mikrofon',
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          begin: Alignment.bottomCenter,
+          end: Alignment.topCenter,
+          colors: [
+            Colors.black.withOpacity(0.7),
+            Colors.transparent,
+          ],
         ),
-        _buildControlButton(
-          icon: Obx(() => Icon(
-                controller.isVideoEnabled ? Icons.videocam : Icons.videocam_off,
-                color: Colors.white,
-              )),
-          backgroundColor: controller.isVideoEnabled
-              ? Colors.grey.shade800
-              : Theme.of(context).colorScheme.error,
-          onPressed: controller.toggleVideo,
-          tooltip: 'Kamera',
-        ),
-        _buildControlButton(
-          icon: const Icon(Icons.switch_camera, color: Colors.white),
-          backgroundColor: Colors.grey.shade800,
-          onPressed: controller.switchCamera,
-          tooltip: 'Kamera Değiştir',
-        ),
-        _buildControlButton(
-          icon: Obx(() => Icon(
-                controller.isScreenSharing
-                    ? Icons.screen_share
-                    : Icons.stop_screen_share,
-                color: Colors.white,
-              )),
-          backgroundColor: controller.isScreenSharing
-              ? Theme.of(context).colorScheme.primary
-              : Colors.grey.shade800,
-          onPressed: controller.toggleScreenShare,
-          tooltip: 'Ekran Paylaşımı',
-        ),
-        _buildControlButton(
-          icon: const Icon(Icons.call_end, color: Colors.white),
-          backgroundColor: Theme.of(context).colorScheme.error,
-          onPressed: () {
-            controller.endCall();
-            Get.back();
-          },
-          tooltip: 'Görüşmeyi Sonlandır',
-        ),
-      ],
+      ),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+        children: [
+          _buildControlButton(
+            icon: Obx(() => Icon(
+                  isAudioEnabled ? Icons.mic : Icons.mic_off,
+                  color: Colors.white,
+                )),
+            backgroundColor: isAudioEnabled
+                ? Colors.grey.shade800
+                : Theme.of(context).colorScheme.error,
+            onPressed: onToggleAudio,
+            tooltip: 'Mikrofon',
+          ),
+          _buildControlButton(
+            icon: Obx(() => Icon(
+                  isVideoEnabled ? Icons.videocam : Icons.videocam_off,
+                  color: Colors.white,
+                )),
+            backgroundColor: isVideoEnabled
+                ? Colors.grey.shade800
+                : Theme.of(context).colorScheme.error,
+            onPressed: onToggleVideo,
+            tooltip: 'Kamera',
+          ),
+          _buildControlButton(
+            icon: const Icon(Icons.switch_camera, color: Colors.white),
+            backgroundColor: Colors.grey.shade800,
+            onPressed: onToggleBackgroundBlur,
+            tooltip: 'Kamera Değiştir',
+          ),
+          _buildControlButton(
+            icon: Obx(() => Icon(
+                  isBackgroundBlurEnabled
+                      ? Icons.screen_share
+                      : Icons.stop_screen_share,
+                  color: Colors.white,
+                )),
+            backgroundColor: isBackgroundBlurEnabled
+                ? Theme.of(context).colorScheme.primary
+                : Colors.grey.shade800,
+            onPressed: onToggleBackgroundBlur,
+            tooltip: 'Ekran Paylaşımı',
+          ),
+          _buildControlButton(
+            icon: Obx(() => Icon(
+                  isRecording ? Icons.stop_circle : Icons.fiber_manual_record,
+                  color: isRecording ? Colors.red : Colors.white,
+                )),
+            backgroundColor: Colors.grey.shade800,
+            onPressed: isRecording ? onStopRecording : onStartRecording,
+            tooltip: 'Kayıt',
+          ),
+          _buildControlButton(
+            icon: const Icon(Icons.call_end, color: Colors.white),
+            backgroundColor: Theme.of(context).colorScheme.error,
+            onPressed: onEndCall,
+            tooltip: 'Görüşmeyi Sonlandır',
+          ),
+        ],
+      ),
     );
   }
 

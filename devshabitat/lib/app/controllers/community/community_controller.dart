@@ -8,6 +8,7 @@ import 'package:devshabitat/app/services/community/community_service.dart';
 import 'package:devshabitat/app/services/community/membership_service.dart';
 import 'package:devshabitat/app/services/community/moderation_service.dart';
 import 'package:devshabitat/app/models/user_model.dart';
+import 'package:devshabitat/app/models/community/moderation_model.dart';
 
 class CommunityController extends GetxController {
   final CommunityService _communityService = Get.find<CommunityService>();
@@ -291,8 +292,8 @@ class CommunityController extends GetxController {
   // Report content
   Future<void> reportContent({
     required String contentId,
-    required String reason,
-    required String contentType,
+    required ModerationReason reason,
+    required ContentType contentType,
   }) async {
     if (community.value == null) return;
 

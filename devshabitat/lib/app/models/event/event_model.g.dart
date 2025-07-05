@@ -50,10 +50,11 @@ Map<String, dynamic> _$EventModelToJson(EventModel instance) =>
     };
 
 const _$EventTypeEnumMap = {
-  EventType.meetup: 'meetup',
   EventType.workshop: 'workshop',
-  EventType.hackathon: 'hackathon',
+  EventType.meetup: 'meetup',
   EventType.conference: 'conference',
+  EventType.hackathon: 'hackathon',
+  EventType.other: 'other',
 };
 
 const _$EventLocationEnumMap = {
