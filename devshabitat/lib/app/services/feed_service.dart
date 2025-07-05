@@ -54,7 +54,7 @@ class FeedService extends GetxService {
             .toList();
       });
     } catch (e) {
-      _errorHandler.handleError(e);
+      _errorHandler.handleError(e, ErrorHandlerService.SERVER_ERROR);
       return Stream.value([]);
     }
   }
@@ -74,7 +74,7 @@ class FeedService extends GetxService {
                   }))
               .toList());
     } catch (e) {
-      _errorHandler.handleError(e);
+      _errorHandler.handleError(e, ErrorHandlerService.SERVER_ERROR);
       return Stream.value([]);
     }
   }
@@ -94,7 +94,7 @@ class FeedService extends GetxService {
                   }))
               .toList());
     } catch (e) {
-      _errorHandler.handleError(e);
+      _errorHandler.handleError(e, ErrorHandlerService.SERVER_ERROR);
       return Stream.value([]);
     }
   }
@@ -115,7 +115,7 @@ class FeedService extends GetxService {
                   }))
               .toList());
     } catch (e) {
-      _errorHandler.handleError(e);
+      _errorHandler.handleError(e, ErrorHandlerService.SERVER_ERROR);
       return Stream.value([]);
     }
   }

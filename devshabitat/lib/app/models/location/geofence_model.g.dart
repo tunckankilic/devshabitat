@@ -9,27 +9,25 @@ part of 'geofence_model.dart';
 GeofenceModel _$GeofenceModelFromJson(Map<String, dynamic> json) =>
     GeofenceModel(
       id: json['id'] as String,
+      name: json['name'] as String,
+      description: json['description'] as String,
       latitude: (json['latitude'] as num).toDouble(),
       longitude: (json['longitude'] as num).toDouble(),
       radius: (json['radius'] as num).toDouble(),
-      name: json['name'] as String,
-      description: json['description'] as String?,
+      notifyUserIds: (json['notifyUserIds'] as List<dynamic>?)
+          ?.map((e) => e as String)
+          .toList(),
       isActive: json['isActive'] as bool? ?? true,
-      createdAt: DateTime.parse(json['createdAt'] as String),
-      expiresAt: json['expiresAt'] == null
-          ? null
-          : DateTime.parse(json['expiresAt'] as String),
     );
 
 Map<String, dynamic> _$GeofenceModelToJson(GeofenceModel instance) =>
     <String, dynamic>{
       'id': instance.id,
+      'name': instance.name,
+      'description': instance.description,
       'latitude': instance.latitude,
       'longitude': instance.longitude,
       'radius': instance.radius,
-      'name': instance.name,
-      'description': instance.description,
+      'notifyUserIds': instance.notifyUserIds,
       'isActive': instance.isActive,
-      'createdAt': instance.createdAt.toIso8601String(),
-      'expiresAt': instance.expiresAt?.toIso8601String(),
     };

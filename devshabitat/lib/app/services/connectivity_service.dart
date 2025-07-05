@@ -30,8 +30,9 @@ class ConnectivityService extends GetxService {
       final result = await _connectivity.checkConnectivity();
       _updateConnectionStatus(result.first);
     } catch (e) {
-      _errorHandler
-          .handleError('Bağlantı durumu kontrol edilirken hata oluştu: $e');
+      _errorHandler.handleError(
+          'Bağlantı durumu kontrol edilirken hata oluştu: $e',
+          ErrorHandlerService.NETWORK_ERROR);
     }
   }
 
@@ -48,8 +49,9 @@ class ConnectivityService extends GetxService {
         _updateConnectionStatus(result.first);
       },
       onError: (error) {
-        _errorHandler
-            .handleError('Bağlantı durumu izlenirken hata oluştu: $error');
+        _errorHandler.handleError(
+            'Bağlantı durumu izlenirken hata oluştu: $error',
+            ErrorHandlerService.NETWORK_ERROR);
       },
     );
   }
@@ -76,7 +78,8 @@ class ConnectivityService extends GetxService {
         _errorHandler.handleSuccess('Offline mod devre dışı bırakıldı');
       }
     } catch (e) {
-      _errorHandler.handleError('Offline mod ayarlanırken hata oluştu: $e');
+      _errorHandler.handleError('Offline mod ayarlanırken hata oluştu: $e',
+          ErrorHandlerService.NETWORK_ERROR);
     }
   }
 

@@ -35,7 +35,8 @@ class AppController extends GetxController {
         .listen((List<ConnectivityResult> results) {
       _isOnline.value = results.first != ConnectivityResult.none;
       if (!_isOnline.value) {
-        _errorHandler.handleError(AppStrings.errorNetwork);
+        _errorHandler.handleError(
+            AppStrings.errorNetwork, ErrorHandlerService.NETWORK_ERROR);
       }
     });
   }
@@ -58,7 +59,7 @@ class AppController extends GetxController {
 
   // Hata yönetimi
   void handleError(dynamic error) {
-    _errorHandler.handleError(error);
+    _errorHandler.handleError(error, ErrorHandlerService.SERVER_ERROR);
   }
 
   // Uygulama durumunu sıfırla

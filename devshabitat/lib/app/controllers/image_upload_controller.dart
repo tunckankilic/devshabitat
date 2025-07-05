@@ -34,7 +34,8 @@ class ImageUploadController extends GetxController {
         await _cropImage(image.path);
       }
     } catch (e) {
-      _errorHandler.handleError('Resim seçilirken bir hata oluştu: $e');
+      _errorHandler.handleError('Resim seçilirken bir hata oluştu: $e',
+          ErrorHandlerService.FILE_ERROR);
       _error.value = 'Resim seçilirken bir hata oluştu: $e';
     }
   }
@@ -51,7 +52,8 @@ class ImageUploadController extends GetxController {
         await _cropImage(image.path);
       }
     } catch (e) {
-      _errorHandler.handleError('Fotoğraf çekilirken bir hata oluştu: $e');
+      _errorHandler.handleError('Fotoğraf çekilirken bir hata oluştu: $e',
+          ErrorHandlerService.FILE_ERROR);
       _error.value = 'Fotoğraf çekilirken bir hata oluştu: $e';
     }
   }
@@ -73,7 +75,8 @@ class ImageUploadController extends GetxController {
         _isCompressing.value = false;
       }
     } catch (e) {
-      _errorHandler.handleError('Resim kırpılırken bir hata oluştu: $e');
+      _errorHandler.handleError('Resim kırpılırken bir hata oluştu: $e',
+          ErrorHandlerService.FILE_ERROR);
       _error.value = 'Resim kırpılırken bir hata oluştu: $e';
       _isCompressing.value = false;
     }
@@ -108,7 +111,8 @@ class ImageUploadController extends GetxController {
         throw Exception('Resim yükleme başarısız');
       }
     } catch (e) {
-      _errorHandler.handleError('Resim yüklenirken bir hata oluştu: $e');
+      _errorHandler.handleError('Resim yüklenirken bir hata oluştu: $e',
+          ErrorHandlerService.FILE_ERROR);
       _error.value = 'Resim yüklenirken bir hata oluştu: $e';
       return null;
     } finally {

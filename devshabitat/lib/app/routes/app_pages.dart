@@ -5,11 +5,13 @@ import '../views/auth/forgot_password/forgot_password_view.dart';
 import '../views/main_wrapper.dart';
 import '../views/notifications/notifications_view.dart';
 import '../views/settings/settings_view.dart';
+import '../views/settings/notification_settings_view.dart';
 import '../views/search/search_view.dart';
 import '../bindings/auth_binding.dart';
 import '../bindings/navigation_binding.dart';
 import '../bindings/home_binding.dart';
 import '../bindings/settings_binding.dart';
+import '../bindings/notification_binding.dart';
 import '../bindings/search_binding.dart';
 import '../middleware/auth_middleware.dart';
 import '../bindings/video_binding.dart';
@@ -187,6 +189,12 @@ class AppPages {
       name: AppRoutes.NEARBY_EVENTS,
       page: () => const NearbyEventsView(),
       binding: NearbyEventsBinding(),
+    ),
+    GetPage(
+      name: AppRoutes.notificationSettings,
+      page: () => const NotificationSettingsView(),
+      binding: NotificationBinding(),
+      middlewares: [AuthMiddleware()],
     ),
   ];
 }

@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:math';
 import 'package:get/get.dart';
 import 'package:location/location.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
@@ -73,8 +74,25 @@ class LocationTrackingService extends GetxService {
 
   // Helper methods
   static double calculateDistance(LatLng point1, LatLng point2) {
-    // TODO: Implement Haversine formula for distance calculation
-    return 0.0;
+    const double earthRadius = 6371; // Dünya'nın yarıçapı (km)
+
+    // Radyana çevirme
+    final lat1 = point1.latitude * (pi / 180);
+    final lon1 = point1.longitude * (pi / 180);
+    final lat2 = point2.latitude * (pi / 180);
+    final lon2 = point2.longitude * (pi / 180);
+
+    // Enlem ve boylam farkları
+    final dLat = lat2 - lat1;
+    final dLon = lon2 - lon1;
+
+    // Haversine formülü
+    final a = sin(dLat / 2) * sin(dLat / 2) +
+        cos(lat1) * cos(lat2) * sin(dLon / 2) * sin(dLon / 2);
+    final c = 2 * atan2(sqrt(a), sqrt(1 - a));
+
+    // Mesafeyi kilometre cinsinden hesaplama
+    return earthRadius * c;
   }
 
   static bool isWithinRadius(LatLng center, LatLng point, double radiusKm) {

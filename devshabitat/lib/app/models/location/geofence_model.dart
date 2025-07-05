@@ -1,30 +1,32 @@
 import 'package:json_annotation/json_annotation.dart';
+import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'dart:math';
+
 part 'geofence_model.g.dart';
 
 @JsonSerializable()
 class GeofenceModel {
   final String id;
+  final String name;
+  final String description;
   final double latitude;
   final double longitude;
   final double radius; // metre cinsinden
-  final String name;
-  final String? description;
+  final List<String>? notifyUserIds;
   final bool isActive;
-  final DateTime createdAt;
-  final DateTime? expiresAt;
 
-  GeofenceModel({
+  const GeofenceModel({
     required this.id,
+    required this.name,
+    required this.description,
     required this.latitude,
     required this.longitude,
     required this.radius,
-    required this.name,
-    this.description,
+    this.notifyUserIds,
     this.isActive = true,
-    required this.createdAt,
-    this.expiresAt,
   });
+
+  LatLng get center => LatLng(latitude, longitude);
 
   bool isPointInside(double lat, double lng) {
     const double earthRadius = 6371000; // metre cinsinden dünya yarıçapı

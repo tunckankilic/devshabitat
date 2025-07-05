@@ -1,84 +1,124 @@
-import 'package:encrypt/encrypt.dart';
+import 'dart:convert';
+import 'dart:math' show Random;
+import 'package:encrypt/encrypt.dart' as encrypt;
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'package:get/get.dart';
+import 'package:logger/logger.dart';
+import 'package:crypto/crypto.dart';
 
-class EncryptionService {
-  static const String _keyStorageKey = 'encryption_key';
+class EncryptionService extends GetxService {
+  static EncryptionService get to => Get.find();
+
   final FlutterSecureStorage _secureStorage = const FlutterSecureStorage();
-  late final Key _key;
-  late final IV _iv;
-  late final Encrypter _encrypter;
+  final Logger _logger = Logger();
+  late encrypt.Encrypter _encrypter;
+  late encrypt.IV _iv;
 
-  // Singleton pattern
-  static final EncryptionService _instance = EncryptionService._internal();
-  factory EncryptionService() => _instance;
-  EncryptionService._internal();
+  // Şifreleme anahtarı için salt
+  static const String _salt = 'devshabitat_secure_salt';
 
-  Future<void> initialize() async {
+  Future<void> init() async {
     try {
-      // Kayıtlı anahtarı al veya yeni oluştur
-      String? storedKey = await _secureStorage.read(key: _keyStorageKey);
-      if (storedKey == null) {
-        final key = Key.fromSecureRandom(32); // 256-bit key
-        await _secureStorage.write(
-          key: _keyStorageKey,
-          value: key.base64,
-        );
-        _key = key;
-      } else {
-        _key = Key.fromBase64(storedKey);
+      // Şifreleme anahtarını al veya oluştur
+      String? encryptionKey = await _secureStorage.read(key: 'encryption_key');
+      if (encryptionKey == null) {
+        encryptionKey = _generateSecureKey();
+        await _secureStorage.write(key: 'encryption_key', value: encryptionKey);
       }
 
-      // Initialization Vector (IV) oluştur
-      _iv = IV.fromSecureRandom(16);
+      // Şifreleme için gerekli nesneleri oluştur
+      final key = encrypt.Key.fromBase64(encryptionKey);
+      _iv = encrypt.IV.fromLength(16);
+      _encrypter = encrypt.Encrypter(encrypt.AES(key));
 
-      // AES encrypter'ı yapılandır
-      _encrypter = Encrypter(AES(_key, mode: AESMode.cbc));
+      _logger.i('Encryption service initialized successfully');
     } catch (e) {
-      throw Exception('Encryption servisi başlatılamadı: $e');
+      _logger.e('Error initializing encryption service: $e');
+      rethrow;
     }
   }
 
-  Future<String> encryptMessage(String content) async {
-    try {
-      if (content.isEmpty) {
-        throw Exception('Şifrelenecek içerik boş olamaz');
-      }
+  String _generateSecureKey() {
+    final timestamp = DateTime.now().millisecondsSinceEpoch.toString();
+    final data = utf8.encode('$_salt$timestamp');
+    final hash = sha256.convert(data);
+    final key = base64.encode(hash.bytes);
+    return key.substring(0, 32); // AES-256 için 32 byte
+  }
 
-      final encrypted = _encrypter.encrypt(content, iv: _iv);
-      // IV'yi encrypted data ile birlikte sakla
-      return '${_iv.base64}:${encrypted.base64}';
+  // API key'leri şifrele
+  Future<void> secureApiKey(String keyName, String value) async {
+    try {
+      final encrypted = _encrypter.encrypt(value, iv: _iv);
+      await _secureStorage.write(
+        key: 'api_key_$keyName',
+        value: encrypted.base64,
+      );
     } catch (e) {
-      throw Exception('Mesaj şifreleme hatası: $e');
+      _logger.e('Error encrypting API key: $e');
+      rethrow;
     }
   }
 
-  Future<String> decryptMessage(String encrypted) async {
+  // API key'leri çöz
+  Future<String?> getApiKey(String keyName) async {
     try {
-      if (encrypted.isEmpty) {
-        throw Exception('Şifresi çözülecek içerik boş olamaz');
-      }
+      final encrypted = await _secureStorage.read(key: 'api_key_$keyName');
+      if (encrypted == null) return null;
 
-      // IV ve encrypted data'yı ayır
-      final parts = encrypted.split(':');
-      if (parts.length != 2) {
-        throw Exception('Geçersiz şifrelenmiş veri formatı');
-      }
-
-      final iv = IV.fromBase64(parts[0]);
-      final encryptedData = Encrypted.fromBase64(parts[1]);
-
-      return _encrypter.decrypt(encryptedData, iv: iv);
+      final decrypted = _encrypter.decrypt64(encrypted, iv: _iv);
+      return decrypted;
     } catch (e) {
-      throw Exception('Mesaj şifre çözme hatası: $e');
+      _logger.e('Error decrypting API key: $e');
+      return null;
     }
   }
 
-  // Güvenli temizleme
-  Future<void> clearEncryptionKey() async {
+  // Hassas verileri şifrele
+  String encryptSensitiveData(String data) {
     try {
-      await _secureStorage.delete(key: _keyStorageKey);
+      return _encrypter.encrypt(data, iv: _iv).base64;
     } catch (e) {
-      throw Exception('Şifreleme anahtarı temizleme hatası: $e');
+      _logger.e('Error encrypting sensitive data: $e');
+      rethrow;
+    }
+  }
+
+  // Şifrelenmiş verileri çöz
+  String? decryptSensitiveData(String encryptedData) {
+    try {
+      return _encrypter.decrypt64(encryptedData, iv: _iv);
+    } catch (e) {
+      _logger.e('Error decrypting sensitive data: $e');
+      return null;
+    }
+  }
+
+  // Güvenli hash oluştur
+  String generateSecureHash(String data) {
+    final bytes = utf8.encode(data + _salt);
+    return sha256.convert(bytes).toString();
+  }
+
+  // Güvenli rastgele string oluştur
+  String generateSecureRandomString(int length) {
+    final random = Random.secure();
+    final values = List<int>.generate(length, (i) => random.nextInt(256));
+    return base64Url.encode(values).substring(0, length);
+  }
+
+  // Tüm API key'leri sil
+  Future<void> clearAllApiKeys() async {
+    try {
+      final allKeys = await _secureStorage.readAll();
+      for (var key in allKeys.keys) {
+        if (key.startsWith('api_key_')) {
+          await _secureStorage.delete(key: key);
+        }
+      }
+    } catch (e) {
+      _logger.e('Error clearing API keys: $e');
+      rethrow;
     }
   }
 }

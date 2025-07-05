@@ -72,12 +72,14 @@ class MessagingController extends GetxController {
           _updateUnreadCount();
         },
         onError: (error) {
-          _errorHandler.handleError('Konuşmalar yüklenirken hata: $error');
+          _errorHandler.handleError('Konuşmalar yüklenirken hata: $error',
+              ErrorHandlerService.SERVER_ERROR);
           errorMessage.value = 'Konuşmalar yüklenirken hata oluştu';
         },
       );
     } catch (e) {
-      _errorHandler.handleError('Beklenmeyen hata: $e');
+      _errorHandler.handleError(
+          'Beklenmeyen hata: $e', ErrorHandlerService.SERVER_ERROR);
       errorMessage.value = 'Konuşmalar yüklenirken beklenmeyen hata';
     } finally {
       isLoading.value = false;
@@ -107,7 +109,8 @@ class MessagingController extends GetxController {
       _updateLastTimestamp(conversationId, messages);
       _hasMoreMessages[conversationId] = messages.length >= pageSize;
     } catch (e) {
-      _errorHandler.handleError('Mesajlar yüklenirken hata: $e');
+      _errorHandler.handleError(
+          'Mesajlar yüklenirken hata: $e', ErrorHandlerService.SERVER_ERROR);
     } finally {
       _isLoadingMore[conversationId] = false;
     }
@@ -177,7 +180,8 @@ class MessagingController extends GetxController {
       messages.insert(0, message);
       conversationMessages[conversationId] = [...messages];
     } catch (e) {
-      _errorHandler.handleError('Mesaj gönderilirken hata: $e');
+      _errorHandler.handleError(
+          'Mesaj gönderilirken hata: $e', ErrorHandlerService.SERVER_ERROR);
     }
   }
 
@@ -186,7 +190,8 @@ class MessagingController extends GetxController {
       await _messagingService.markConversationAsRead(conversationId);
       _updateUnreadCount();
     } catch (e) {
-      _errorHandler.handleError('Okundu işaretlenirken hata: $e');
+      _errorHandler.handleError(
+          'Okundu işaretlenirken hata: $e', ErrorHandlerService.SERVER_ERROR);
     }
   }
 
@@ -199,7 +204,8 @@ class MessagingController extends GetxController {
       messages.removeWhere((message) => message.id == messageId);
       conversationMessages[conversationId] = [...messages];
     } catch (e) {
-      _errorHandler.handleError('Mesaj silinirken hata: $e');
+      _errorHandler.handleError(
+          'Mesaj silinirken hata: $e', ErrorHandlerService.SERVER_ERROR);
     }
   }
 
@@ -211,7 +217,8 @@ class MessagingController extends GetxController {
       conversations.removeWhere((conv) => conv.id == conversationId);
       conversationMessages.remove(conversationId);
     } catch (e) {
-      _errorHandler.handleError('Konuşma silinirken hata: $e');
+      _errorHandler.handleError(
+          'Konuşma silinirken hata: $e', ErrorHandlerService.SERVER_ERROR);
     }
   }
 

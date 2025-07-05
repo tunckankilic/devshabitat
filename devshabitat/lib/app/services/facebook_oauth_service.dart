@@ -21,7 +21,8 @@ class FacebookOAuthService extends GetxService {
 
   Future<Map<String, dynamic>?> signInWithFacebook() async {
     if (!FacebookConfig.isConfigured) {
-      _errorHandler.handleError('Facebook yapılandırması eksik');
+      _errorHandler.handleError(
+          'Facebook yapılandırması eksik', ErrorHandlerService.AUTH_ERROR);
       return null;
     }
 
@@ -43,7 +44,8 @@ class FacebookOAuthService extends GetxService {
         // Access token'ı doğrula
         final isValid = await _validateAccessToken(accessToken.token);
         if (!isValid) {
-          _errorHandler.handleError('Facebook access token doğrulanamadı');
+          _errorHandler.handleError('Facebook access token doğrulanamadı',
+              ErrorHandlerService.AUTH_ERROR);
           return null;
         }
 
@@ -55,13 +57,14 @@ class FacebookOAuthService extends GetxService {
         _errorHandler.handleInfo('Facebook girişi iptal edildi');
         return null;
       } else {
-        _errorHandler.handleError('Facebook girişi başarısız oldu');
+        _errorHandler.handleError(
+            'Facebook girişi başarısız oldu', ErrorHandlerService.AUTH_ERROR);
         return null;
       }
     } catch (e) {
       _logger.e('Facebook ile giriş hatası: $e');
-      _errorHandler
-          .handleError('Facebook ile giriş yapılırken bir hata oluştu');
+      _errorHandler.handleError('Facebook ile giriş yapılırken bir hata oluştu',
+          ErrorHandlerService.AUTH_ERROR);
       return null;
     }
   }
@@ -87,7 +90,8 @@ class FacebookOAuthService extends GetxService {
       await _facebookAuth.logOut();
     } catch (e) {
       _logger.e('Facebook çıkış hatası: $e');
-      _errorHandler.handleError('Facebook çıkış yapılırken bir hata oluştu');
+      _errorHandler.handleError('Facebook çıkış yapılırken bir hata oluştu',
+          ErrorHandlerService.AUTH_ERROR);
     }
   }
 

@@ -11,6 +11,7 @@ abstract class AppRoutes {
   static const profile = '/profile';
   static const settings = '/settings';
   static const notifications = '/notifications';
+  static const notificationSettings = '/notification-settings';
   static const search = '/search';
 
   // Event routes

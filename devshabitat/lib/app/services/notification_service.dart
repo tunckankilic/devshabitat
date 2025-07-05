@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'package:devshabitat/app/repositories/auth_repository.dart';
 import 'package:get/get.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
@@ -6,254 +7,529 @@ import 'package:logger/logger.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import '../models/notification_model.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter/cupertino.dart';
 
 class NotificationService extends GetxService {
-  final FirebaseMessaging _fcm = FirebaseMessaging.instance;
-  final Logger _logger = Logger();
+  static NotificationService get to => Get.find();
+
+  final FirebaseMessaging _firebaseMessaging = FirebaseMessaging.instance;
   final FlutterLocalNotificationsPlugin _localNotifications =
       FlutterLocalNotificationsPlugin();
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
+  final SharedPreferences _prefs;
+  final Logger _logger = Logger();
 
-  // Bildirim izinleri
-  final RxBool hasPermission = false.obs;
-  // Kullanıcının bildirimleri
-  final RxList<NotificationModel> notifications = <NotificationModel>[].obs;
+  // Bildirim izinleri için RxBool değişkenler
+  final RxBool isPushEnabled = true.obs;
+  final RxBool isInAppEnabled = true.obs;
+  final RxString fcmToken = ''.obs;
+  final RxBool isTokenRefreshing = false.obs;
 
-  @override
-  void onInit() {
-    super.onInit();
-    _initializeNotifications();
+  // Bildirim kategorileri için map
+  final Map<String, RxBool> categoryPreferences = {
+    'events': true.obs,
+    'messages': true.obs,
+    'community': true.obs,
+    'connections': true.obs,
+  };
+
+  NotificationService(this._prefs);
+
+  Future<void> init() async {
+    try {
+      // FCM izinlerini iste
+      await _requestPermissions();
+
+      // Local notifications için initialize
+      await _initializeLocalNotifications();
+
+      // FCM token al ve sakla
+      await _initializeFCMToken();
+
+      // Tercihleri yükle
+      await _loadPreferences();
+
+      // Bildirim dinleyicilerini ayarla
+      _setupNotificationListeners();
+
+      // Token yenileme dinleyicisini ayarla
+      _setupTokenRefreshListener();
+    } catch (e) {
+      _logger.e('Notification service initialization error: $e');
+    }
   }
 
-  Future<void> _initializeNotifications() async {
+  Future<void> _requestPermissions() async {
     try {
-      // FCM için izinleri al
-      NotificationSettings settings = await _fcm.requestPermission(
+      NotificationSettings settings =
+          await _firebaseMessaging.requestPermission(
+        alert: true,
+        badge: true,
+        sound: true,
+        provisional: false,
+        announcement: true,
+        carPlay: true,
+        criticalAlert: true,
+      );
+
+      isPushEnabled.value =
+          settings.authorizationStatus == AuthorizationStatus.authorized;
+
+      // iOS için ek izinler
+      await _firebaseMessaging.setForegroundNotificationPresentationOptions(
         alert: true,
         badge: true,
         sound: true,
       );
-      hasPermission.value =
-          settings.authorizationStatus == AuthorizationStatus.authorized;
-
-      // FCM token'ı al ve Firestore'a kaydet
-      String? token = await _fcm.getToken();
-      if (token != null) {
-        await _saveTokenToFirestore(token);
-      }
-
-      // Token yenilendiğinde
-      _fcm.onTokenRefresh.listen(_saveTokenToFirestore);
-
-      // Yerel bildirimler için initialize
-      await _initializeLocalNotifications();
-
-      // Arka planda bildirim geldiğinde
-      FirebaseMessaging.onBackgroundMessage(_handleBackgroundMessage);
-
-      // Uygulama açıkken bildirim geldiğinde
-      FirebaseMessaging.onMessage.listen(_handleForegroundMessage);
-
-      // Bildirime tıklandığında
-      FirebaseMessaging.onMessageOpenedApp.listen(_handleNotificationTap);
     } catch (e) {
-      _logger.e('Bildirim servisi başlatılırken hata: $e');
+      _logger.e('Error requesting notification permissions: $e');
     }
   }
 
   Future<void> _initializeLocalNotifications() async {
-    const initializationSettingsAndroid =
-        AndroidInitializationSettings('@mipmap/ic_launcher');
-    const initializationSettingsIOS = DarwinInitializationSettings(
-      requestAlertPermission: false,
-      requestBadgePermission: false,
-      requestSoundPermission: false,
-    );
-    const initializationSettings = InitializationSettings(
-      android: initializationSettingsAndroid,
-      iOS: initializationSettingsIOS,
-    );
-    await _localNotifications.initialize(
-      initializationSettings,
-      onDidReceiveNotificationResponse: (details) {
-        _handleLocalNotificationTap(details.payload);
-      },
-    );
+    try {
+      const initializationSettingsAndroid =
+          AndroidInitializationSettings('@mipmap/ic_launcher');
+      final initializationSettingsIOS = DarwinInitializationSettings(
+        requestAlertPermission: true,
+        requestBadgePermission: true,
+        requestSoundPermission: true,
+      );
+
+      final initializationSettings = InitializationSettings(
+        android: initializationSettingsAndroid,
+        iOS: initializationSettingsIOS,
+      );
+
+      await _localNotifications.initialize(
+        initializationSettings,
+        onDidReceiveNotificationResponse: _onSelectNotification,
+      );
+
+      // Android için bildirim kanalları oluştur
+      await _createNotificationChannels();
+    } catch (e) {
+      _logger.e('Error initializing local notifications: $e');
+    }
   }
 
-  Future<void> _saveTokenToFirestore(String token) async {
+  Future<void> _createNotificationChannels() async {
+    const channels = [
+      AndroidNotificationChannel(
+        'high_importance_channel',
+        'Önemli Bildirimler',
+        description: 'Acil ve önemli bildirimler için kanal',
+        importance: Importance.high,
+        enableVibration: true,
+        playSound: true,
+      ),
+      AndroidNotificationChannel(
+        'default_channel',
+        'Genel Bildirimler',
+        description: 'Genel bildirimler için varsayılan kanal',
+        importance: Importance.defaultImportance,
+      ),
+      AndroidNotificationChannel(
+        'silent_channel',
+        'Sessiz Bildirimler',
+        description: 'Sessiz bildirimler için kanal',
+        importance: Importance.low,
+        playSound: false,
+        enableVibration: false,
+      ),
+    ];
+
+    for (var channel in channels) {
+      await _localNotifications
+          .resolvePlatformSpecificImplementation<
+              AndroidFlutterLocalNotificationsPlugin>()
+          ?.createNotificationChannel(channel);
+    }
+  }
+
+  Future<void> _initializeFCMToken() async {
+    try {
+      isTokenRefreshing.value = true;
+      String? token = await _firebaseMessaging.getToken();
+      if (token != null) {
+        await _updateFCMToken(token);
+      }
+    } catch (e) {
+      _logger.e('Error initializing FCM token: $e');
+    } finally {
+      isTokenRefreshing.value = false;
+    }
+  }
+
+  Future<void> _updateFCMToken(String token) async {
     try {
       final String? userId = Get.find<AuthRepository>().currentUser?.uid;
       if (userId != null) {
+        // Token'ı Firestore'a kaydet
         await _firestore.collection('users').doc(userId).update({
           'fcmTokens': FieldValue.arrayUnion([token]),
           'lastTokenUpdate': FieldValue.serverTimestamp(),
         });
-        _logger.i('FCM token başarıyla kaydedildi');
+
+        // Token'ı local'e kaydet
+        await _prefs.setString('fcm_token', token);
+        fcmToken.value = token;
+
+        _logger.i('FCM token updated successfully');
       }
     } catch (e) {
-      _logger.e('FCM token kaydedilirken hata: $e');
+      _logger.e('Error updating FCM token: $e');
     }
   }
 
-  Future<void> _handleForegroundMessage(RemoteMessage message) async {
-    _showLocalNotification(
-      title: message.notification?.title ?? 'Yeni Bildirim',
-      body: message.notification?.body ?? '',
-      payload: message.data.toString(),
+  void _setupTokenRefreshListener() {
+    _firebaseMessaging.onTokenRefresh.listen((String token) async {
+      try {
+        await _updateFCMToken(token);
+      } catch (e) {
+        _logger.e('Error in token refresh listener: $e');
+      }
+    });
+  }
+
+  Future<void> _onDidReceiveLocalNotification(
+      int id, String? title, String? body, String? payload) async {
+    // iOS için eski stil bildirimler (iOS 10 ve öncesi)
+    if (title != null && body != null) {
+      await showDialog(
+        context: Get.context!,
+        builder: (BuildContext context) => CupertinoAlertDialog(
+          title: Text(title),
+          content: Text(body),
+          actions: [
+            CupertinoDialogAction(
+              isDefaultAction: true,
+              child: const Text('Tamam'),
+              onPressed: () {
+                Navigator.of(context, rootNavigator: true).pop();
+                if (payload != null) {
+                  handleNotificationNavigation(json.decode(payload));
+                }
+              },
+            )
+          ],
+        ),
+      );
+    }
+  }
+
+  void _onSelectNotification(NotificationResponse response) {
+    if (response.payload != null) {
+      final Map<String, dynamic> payload = json.decode(response.payload!);
+      // Bildirime tıklandığında yönlendirme işlemleri burada yapılacak
+      handleNotificationNavigation(payload);
+    }
+  }
+
+  Future<void> _loadPreferences() async {
+    try {
+      final userId = Get.find<AuthRepository>().currentUser?.uid;
+      if (userId != null) {
+        // Firestore'dan tercihleri yükle
+        final doc = await _firestore
+            .collection('users')
+            .doc(userId)
+            .collection('preferences')
+            .doc('notifications')
+            .get();
+
+        if (doc.exists) {
+          final data = doc.data()!;
+
+          // Genel bildirim ayarları
+          isPushEnabled.value = data['isPushEnabled'] ?? true;
+          isInAppEnabled.value = data['isInAppEnabled'] ?? true;
+
+          // Kategori tercihleri
+          final categories = data['categories'] as Map<String, dynamic>?;
+          if (categories != null) {
+            categories.forEach((key, value) {
+              if (categoryPreferences.containsKey(key)) {
+                categoryPreferences[key]?.value = value as bool;
+              }
+            });
+          }
+
+          // Local'e kaydet
+          await _savePreferencesToLocal(data);
+        } else {
+          // Varsayılan tercihleri oluştur ve kaydet
+          await _savePreferencesToFirestore();
+        }
+
+        // Firestore'daki değişiklikleri dinle
+        _setupPreferencesListener(userId);
+      }
+    } catch (e) {
+      _logger.e('Error loading notification preferences: $e');
+    }
+  }
+
+  Future<void> _savePreferencesToFirestore() async {
+    try {
+      final userId = Get.find<AuthRepository>().currentUser?.uid;
+      if (userId != null) {
+        final preferences = {
+          'isPushEnabled': isPushEnabled.value,
+          'isInAppEnabled': isInAppEnabled.value,
+          'categories': categoryPreferences.map(
+            (key, value) => MapEntry(key, value.value),
+          ),
+          'lastUpdated': FieldValue.serverTimestamp(),
+        };
+
+        await _firestore
+            .collection('users')
+            .doc(userId)
+            .collection('preferences')
+            .doc('notifications')
+            .set(preferences, SetOptions(merge: true));
+
+        await _savePreferencesToLocal(preferences);
+      }
+    } catch (e) {
+      _logger.e('Error saving notification preferences to Firestore: $e');
+    }
+  }
+
+  Future<void> _savePreferencesToLocal(Map<String, dynamic> preferences) async {
+    try {
+      await _prefs.setBool(
+          'push_enabled', preferences['isPushEnabled'] ?? true);
+      await _prefs.setBool(
+          'in_app_enabled', preferences['isInAppEnabled'] ?? true);
+
+      final categories = preferences['categories'] as Map<String, dynamic>?;
+      if (categories != null) {
+        for (var entry in categories.entries) {
+          await _prefs.setBool('category_${entry.key}', entry.value as bool);
+        }
+      }
+    } catch (e) {
+      _logger.e('Error saving notification preferences to local storage: $e');
+    }
+  }
+
+  void _setupPreferencesListener(String userId) {
+    _firestore
+        .collection('users')
+        .doc(userId)
+        .collection('preferences')
+        .doc('notifications')
+        .snapshots()
+        .listen(
+      (doc) {
+        if (doc.exists) {
+          final data = doc.data()!;
+
+          // Genel ayarları güncelle
+          isPushEnabled.value = data['isPushEnabled'] ?? true;
+          isInAppEnabled.value = data['isInAppEnabled'] ?? true;
+
+          // Kategori tercihlerini güncelle
+          final categories = data['categories'] as Map<String, dynamic>?;
+          if (categories != null) {
+            categories.forEach((key, value) {
+              if (categoryPreferences.containsKey(key)) {
+                categoryPreferences[key]?.value = value as bool;
+              }
+            });
+          }
+
+          // Local'e kaydet
+          _savePreferencesToLocal(data);
+        }
+      },
+      onError: (error) {
+        _logger.e('Error in preferences listener: $error');
+      },
     );
   }
 
-  Future<void> _showLocalNotification({
-    required String title,
-    required String body,
-    String? payload,
-  }) async {
-    const androidDetails = AndroidNotificationDetails(
+  void _setupNotificationListeners() {
+    // Uygulama açıkken gelen bildirimler
+    FirebaseMessaging.onMessage.listen(_handleForegroundMessage);
+
+    // Uygulama arka plandayken tıklanan bildirimler
+    FirebaseMessaging.onMessageOpenedApp.listen(_handleBackgroundMessage);
+
+    // Uygulama kapalıyken gelen bildirimler için
+    _firebaseMessaging.getInitialMessage().then((message) {
+      if (message != null) {
+        _handleTerminatedMessage(message);
+      }
+    });
+  }
+
+  Future<void> _handleForegroundMessage(RemoteMessage message) async {
+    if (!isPushEnabled.value) return;
+
+    final category = message.data['category'] as String?;
+    if (category != null && !(categoryPreferences[category]?.value ?? true))
+      return;
+
+    // In-app bildirim göster
+    if (isInAppEnabled.value) {
+      _showInAppNotification(message);
+    }
+
+    // Local notification göster
+    await _showLocalNotification(message);
+  }
+
+  void _handleBackgroundMessage(RemoteMessage message) {
+    handleNotificationNavigation(message.data);
+  }
+
+  void _handleTerminatedMessage(RemoteMessage message) {
+    handleNotificationNavigation(message.data);
+  }
+
+  Future<void> _showLocalNotification(RemoteMessage message) async {
+    final androidDetails = AndroidNotificationDetails(
       'default_channel',
-      'Varsayılan Kanal',
-      channelDescription: 'Genel bildirimler için kanal',
+      'Default Channel',
+      channelDescription: 'Default notification channel',
       importance: Importance.high,
       priority: Priority.high,
     );
-    const iosDetails = DarwinNotificationDetails(
+
+    final iosDetails = DarwinNotificationDetails(
       presentAlert: true,
       presentBadge: true,
       presentSound: true,
     );
-    const details = NotificationDetails(
+
+    final details = NotificationDetails(
       android: androidDetails,
       iOS: iosDetails,
     );
 
     await _localNotifications.show(
-      DateTime.now().millisecond,
-      title,
-      body,
+      message.hashCode,
+      message.notification?.title,
+      message.notification?.body,
       details,
-      payload: payload,
+      payload: json.encode(message.data),
     );
   }
 
-  void _handleLocalNotificationTap(String? payload) {
-    if (payload != null) {
-      try {
-        final data = Map<String, dynamic>.from(
-          Map.from(payload as Map<String, dynamic>),
-        );
-        _handleNotificationData(data);
-      } catch (e) {
-        _logger.e('Bildirim verisi işlenirken hata: $e');
+  void _showInAppNotification(RemoteMessage message) {
+    Get.snackbar(
+      message.notification?.title ?? '',
+      message.notification?.body ?? '',
+      duration: const Duration(seconds: 3),
+      snackPosition: SnackPosition.TOP,
+    );
+  }
+
+  Future<void> handleNotificationNavigation(Map<String, dynamic> data) async {
+    try {
+      final String? route = data['route'];
+      final String? type = data['type'];
+      final String? id = data['id'];
+
+      if (route != null) {
+        switch (type) {
+          case 'message':
+            Get.toNamed('/messages/$id');
+            break;
+          case 'event':
+            Get.toNamed('/events/$id');
+            break;
+          case 'community':
+            Get.toNamed('/communities/$id');
+            break;
+          case 'connection':
+            Get.toNamed('/connections/$id');
+            break;
+          default:
+            Get.toNamed(route);
+        }
       }
+    } catch (e) {
+      _logger.e('Error handling notification navigation: $e');
     }
   }
 
-  void _handleNotificationTap(RemoteMessage message) {
-    _handleNotificationData(message.data);
+  // Tercih güncelleme metodları
+  Future<void> updatePushPreference(bool value) async {
+    isPushEnabled.value = value;
+    await _savePreferencesToFirestore();
   }
 
-  void _handleNotificationData(Map<String, dynamic> data) {
-    // Bildirim tipine göre yönlendirme
-    final String? type = data['type'] as String?;
-    final String? targetId = data['targetId'] as String?;
+  Future<void> updateInAppPreference(bool value) async {
+    isInAppEnabled.value = value;
+    await _savePreferencesToFirestore();
+  }
 
-    switch (type) {
-      case 'message':
-        if (targetId != null) {
-          Get.toNamed('/messages/$targetId');
-        }
-        break;
-      case 'post':
-        if (targetId != null) {
-          Get.toNamed('/posts/$targetId');
-        }
-        break;
-      case 'profile':
-        if (targetId != null) {
-          Get.toNamed('/profile/$targetId');
-        }
-        break;
-      default:
-        Get.toNamed('/notifications');
+  Future<void> updateCategoryPreference(String category, bool value) async {
+    if (categoryPreferences.containsKey(category)) {
+      categoryPreferences[category]?.value = value;
+      await _savePreferencesToFirestore();
     }
   }
 
+  // Test için bildirim gönderme fonksiyonu
+  Future<void> sendTestNotification({
+    required String title,
+    required String body,
+    required String category,
+    String? route,
+    String? id,
+  }) async {
+    final message = RemoteMessage(
+      notification: RemoteNotification(
+        title: title,
+        body: body,
+      ),
+      data: {
+        'category': category,
+        if (route != null) 'route': route,
+        if (id != null) 'id': id,
+      },
+    );
+
+    await _handleForegroundMessage(message);
+  }
+
+  // Bildirimi Firestore'a kaydet
   Future<void> saveNotification(RemoteMessage message) async {
-    try {
-      final String? userId = Get.find<AuthRepository>().currentUser?.uid;
-      if (userId != null) {
-        final notification = NotificationModel(
-          id: DateTime.now().millisecondsSinceEpoch.toString(),
-          title: message.notification?.title ?? '',
-          body: message.notification?.body ?? '',
-          imageUrl: message.notification?.android?.imageUrl,
-          data: message.data,
-          createdAt: DateTime.now(),
-        );
+    final String? userId = Get.find<AuthRepository>().currentUser?.uid;
+    if (userId != null) {
+      final notification = NotificationModel(
+        id: DateTime.now().millisecondsSinceEpoch.toString(),
+        title: message.notification?.title ?? '',
+        body: message.notification?.body ?? '',
+        data: message.data,
+        createdAt: DateTime.now(),
+      );
 
-        await _firestore
-            .collection('users')
-            .doc(userId)
-            .collection('notifications')
-            .doc(notification.id)
-            .set(notification.toMap());
-
-        notifications.insert(0, notification);
-      }
-    } catch (e) {
-      _logger.e('Bildirim kaydedilirken hata: $e');
-    }
-  }
-
-  Future<void> loadNotifications() async {
-    try {
-      final String? userId = Get.find<AuthRepository>().currentUser?.uid;
-      if (userId != null) {
-        final querySnapshot = await _firestore
-            .collection('users')
-            .doc(userId)
-            .collection('notifications')
-            .orderBy('createdAt', descending: true)
-            .limit(50)
-            .get();
-
-        notifications.value = querySnapshot.docs
-            .map((doc) => NotificationModel.fromMap(doc.data()))
-            .toList();
-      }
-    } catch (e) {
-      _logger.e('Bildirimler yüklenirken hata: $e');
+      await FirebaseFirestore.instance
+          .collection('users')
+          .doc(userId)
+          .collection('notifications')
+          .doc(notification.id)
+          .set(notification.toMap());
     }
   }
 
   Future<void> markNotificationAsRead(String notificationId) async {
-    try {
-      final String? userId = Get.find<AuthRepository>().currentUser?.uid;
-      if (userId != null) {
-        await _firestore
-            .collection('users')
-            .doc(userId)
-            .collection('notifications')
-            .doc(notificationId)
-            .update({'isRead': true});
-
-        final index =
-            notifications.indexWhere((element) => element.id == notificationId);
-        if (index != -1) {
-          final updatedNotification = NotificationModel(
-            id: notifications[index].id,
-            title: notifications[index].title,
-            body: notifications[index].body,
-            imageUrl: notifications[index].imageUrl,
-            data: notifications[index].data,
-            createdAt: notifications[index].createdAt,
-            isRead: true,
-          );
-          notifications[index] = updatedNotification;
-        }
-      }
-    } catch (e) {
-      _logger.e('Bildirim okundu olarak işaretlenirken hata: $e');
+    final String? userId = Get.find<AuthRepository>().currentUser?.uid;
+    if (userId != null) {
+      await FirebaseFirestore.instance
+          .collection('users')
+          .doc(userId)
+          .collection('notifications')
+          .doc(notificationId)
+          .update({'isRead': true});
     }
   }
 }
@@ -263,6 +539,7 @@ class NotificationService extends GetxService {
 Future<void> _handleBackgroundMessage(RemoteMessage message) async {
   await Firebase.initializeApp();
 
-  final notificationService = Get.put(NotificationService());
+  final prefs = await SharedPreferences.getInstance();
+  final notificationService = Get.put(NotificationService(prefs));
   await notificationService.saveNotification(message);
 }

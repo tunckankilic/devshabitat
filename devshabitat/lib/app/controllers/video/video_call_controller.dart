@@ -38,6 +38,9 @@ class VideoCallController extends GetxController {
   final _callDuration = const Duration().obs;
   final _participants = <ParticipantModel>[].obs;
   final _callTitle = ''.obs;
+  final _isBackgroundBlurEnabled = false.obs;
+  final _isRecording = false.obs;
+  String? _recordingUrl;
 
   // Getters
   bool get isAudioEnabled => _isAudioEnabled.value;
@@ -48,6 +51,9 @@ class VideoCallController extends GetxController {
   List<ParticipantModel> get participants => _participants;
   String get callTitle => _callTitle.value;
   bool get isGroupCall => participants.length > 2;
+  bool get isBackgroundBlurEnabled => _isBackgroundBlurEnabled.value;
+  bool get isRecording => _isRecording.value;
+  String? get recordingUrl => _recordingUrl;
 
   Timer? _durationTimer;
   StreamSubscription? _signalingSubscription;
@@ -334,6 +340,58 @@ class VideoCallController extends GetxController {
       Get.back();
     } catch (e) {
       print('Reject call error: $e');
+    }
+  }
+
+  Future<void> toggleBackgroundBlur() async {
+    try {
+      await _webRTCService.toggleBackgroundBlur();
+      _isBackgroundBlurEnabled.value = !_isBackgroundBlurEnabled.value;
+    } catch (e) {
+      print('Toggle background blur error: $e');
+    }
+  }
+
+  Future<void> startRecording() async {
+    try {
+      await _webRTCService.startRecording();
+      _isRecording.value = true;
+    } catch (e) {
+      print('Start recording error: $e');
+    }
+  }
+
+  Future<void> stopRecording() async {
+    try {
+      final url = await _webRTCService.stopRecording();
+      _isRecording.value = false;
+      _recordingUrl = url;
+
+      if (url != null) {
+        Get.snackbar(
+          'Kayıt Tamamlandı',
+          'Görüşme kaydı başarıyla kaydedildi.',
+          snackPosition: SnackPosition.BOTTOM,
+        );
+      }
+    } catch (e) {
+      print('Stop recording error: $e');
+    }
+  }
+
+  Future<void> pauseRecording() async {
+    try {
+      await _webRTCService.pauseRecording();
+    } catch (e) {
+      print('Pause recording error: $e');
+    }
+  }
+
+  Future<void> resumeRecording() async {
+    try {
+      await _webRTCService.resumeRecording();
+    } catch (e) {
+      print('Resume recording error: $e');
     }
   }
 }

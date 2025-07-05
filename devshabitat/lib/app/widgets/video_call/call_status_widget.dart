@@ -3,13 +3,19 @@ import 'package:get/get.dart';
 import 'package:devshabitat/app/controllers/video/video_call_controller.dart';
 
 class CallStatusWidget extends GetView<VideoCallController> {
-  const CallStatusWidget({Key? key}) : super(key: key);
+  final Duration duration;
+  final bool isRecording;
+
+  const CallStatusWidget({
+    Key? key,
+    required this.duration,
+    required this.isRecording,
+  }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
     return Obx(() {
       final status = controller.callStatus;
-      final duration = controller.callDuration;
 
       return Row(
         children: [
@@ -22,6 +28,25 @@ class CallStatusWidget extends GetView<VideoCallController> {
               fontSize: 14,
             ),
           ),
+          const Spacer(),
+          if (isRecording) ...[
+            Container(
+              width: 8,
+              height: 8,
+              decoration: const BoxDecoration(
+                color: Colors.red,
+                shape: BoxShape.circle,
+              ),
+            ),
+            const SizedBox(width: 4),
+            const Text(
+              'Kaydediliyor',
+              style: TextStyle(
+                color: Colors.white,
+                fontSize: 14,
+              ),
+            ),
+          ],
         ],
       );
     });

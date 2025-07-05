@@ -2,6 +2,7 @@ import 'dart:async';
 import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:get/get.dart';
 import 'package:devshabitat/app/models/message_model.dart';
+import 'package:devshabitat/app/services/image_upload_service.dart';
 
 class BackgroundSyncService extends GetxService {
   final _syncQueue = <MessageModel>[].obs;
@@ -10,7 +11,8 @@ class BackgroundSyncService extends GetxService {
   final _syncStatus = ''.obs;
   final _batteryOptimized = true.obs;
 
-  late StreamSubscription<List<ConnectivityResult>> _connectivitySubscription;
+  Timer? _cleanupTimer;
+  StreamSubscription<List<ConnectivityResult>>? _connectivitySubscription;
   final _retryAttempts = 3;
   final _retryDelay = const Duration(seconds: 5);
 
@@ -19,6 +21,24 @@ class BackgroundSyncService extends GetxService {
     super.onInit();
     _initConnectivity();
     _startNetworkMonitoring();
+    _startPeriodicCleanup();
+  }
+
+  void _startPeriodicCleanup() {
+    _cleanupTimer = Timer.periodic(const Duration(minutes: 30), (_) {
+      _cleanupResources();
+    });
+  }
+
+  void _cleanupResources() {
+    // Önbellek temizleme
+    _syncQueue.removeWhere((message) {
+      final age = DateTime.now().difference(message.timestamp);
+      return age > const Duration(hours: 24);
+    });
+
+    // Gereksiz kaynakları serbest bırak
+    Get.find<ImageUploadService>().clearCache();
   }
 
   Future<void> _initConnectivity() async {
@@ -33,6 +53,7 @@ class BackgroundSyncService extends GetxService {
   }
 
   void _startNetworkMonitoring() {
+    _connectivitySubscription?.cancel();
     _connectivitySubscription =
         Connectivity().onConnectivityChanged.listen((results) {
       if (results.isNotEmpty) {
@@ -61,7 +82,8 @@ class BackgroundSyncService extends GetxService {
     _updateSyncStatus('Senkronizasyon başlatılıyor...');
 
     try {
-      for (var message in _syncQueue) {
+      final messagesToProcess = List<MessageModel>.from(_syncQueue);
+      for (var message in messagesToProcess) {
         bool synced = false;
         int attempts = 0;
 
@@ -106,7 +128,9 @@ class BackgroundSyncService extends GetxService {
 
   @override
   void onClose() {
-    _connectivitySubscription.cancel();
+    _connectivitySubscription?.cancel();
+    _cleanupTimer?.cancel();
+    _syncQueue.clear();
     super.onClose();
   }
 }

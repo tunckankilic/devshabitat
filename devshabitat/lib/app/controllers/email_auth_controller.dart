@@ -42,7 +42,7 @@ class EmailAuthController extends GetxController {
       _errorHandler.handleSuccess('Giriş başarılı');
     } catch (e) {
       _lastError.value = e.toString();
-      _errorHandler.handleError(e);
+      _errorHandler.handleError(e, ErrorHandlerService.AUTH_ERROR);
     } finally {
       _isLoading.value = false;
     }
@@ -72,7 +72,7 @@ class EmailAuthController extends GetxController {
       _errorHandler.handleSuccess('Hesap oluşturuldu');
     } catch (e) {
       _lastError.value = e.toString();
-      _errorHandler.handleError(e);
+      _errorHandler.handleError(e, ErrorHandlerService.AUTH_ERROR);
     } finally {
       _isLoading.value = false;
     }
@@ -89,7 +89,7 @@ class EmailAuthController extends GetxController {
       _errorHandler.handleSuccess('Şifre sıfırlama bağlantısı gönderildi');
     } catch (e) {
       _lastError.value = e.toString();
-      _errorHandler.handleError(e);
+      _errorHandler.handleError(e, ErrorHandlerService.AUTH_ERROR);
     } finally {
       _isLoading.value = false;
     }
@@ -102,7 +102,7 @@ class EmailAuthController extends GetxController {
       _errorHandler.handleSuccess('Şifre güncellendi');
     } catch (e) {
       _lastError.value = e.toString();
-      _errorHandler.handleError(e);
+      _errorHandler.handleError(e, ErrorHandlerService.AUTH_ERROR);
     } finally {
       _isLoading.value = false;
     }
@@ -115,7 +115,7 @@ class EmailAuthController extends GetxController {
       _errorHandler.handleSuccess('E-posta güncellendi');
     } catch (e) {
       _lastError.value = e.toString();
-      _errorHandler.handleError(e);
+      _errorHandler.handleError(e, ErrorHandlerService.AUTH_ERROR);
     } finally {
       _isLoading.value = false;
     }
@@ -128,7 +128,7 @@ class EmailAuthController extends GetxController {
       _errorHandler.handleSuccess('Kimlik doğrulama başarılı');
     } catch (e) {
       _lastError.value = e.toString();
-      _errorHandler.handleError(e);
+      _errorHandler.handleError(e, ErrorHandlerService.AUTH_ERROR);
     } finally {
       _isLoading.value = false;
     }

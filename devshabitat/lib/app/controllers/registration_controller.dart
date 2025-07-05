@@ -161,7 +161,7 @@ class RegistrationController extends GetxController {
       }
       return false;
     } catch (e) {
-      _errorHandler.handleError(e);
+      _errorHandler.handleError(e, ErrorHandlerService.AUTH_ERROR);
       return false;
     } finally {
       _isLoading.value = false;
@@ -182,7 +182,7 @@ class RegistrationController extends GetxController {
 
       return true;
     } catch (e) {
-      _errorHandler.handleError(e);
+      _errorHandler.handleError(e, ErrorHandlerService.AUTH_ERROR);
       return false;
     } finally {
       _isLoading.value = false;
@@ -204,7 +204,7 @@ class RegistrationController extends GetxController {
 
       return true;
     } catch (e) {
-      _errorHandler.handleError(e);
+      _errorHandler.handleError(e, ErrorHandlerService.AUTH_ERROR);
       return false;
     } finally {
       _isLoading.value = false;
@@ -225,7 +225,7 @@ class RegistrationController extends GetxController {
 
       return true;
     } catch (e) {
-      _errorHandler.handleError(e);
+      _errorHandler.handleError(e, ErrorHandlerService.AUTH_ERROR);
       return false;
     } finally {
       _isLoading.value = false;

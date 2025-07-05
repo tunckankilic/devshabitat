@@ -63,7 +63,7 @@ class AuthController extends GetxController {
         }
       }
     } catch (e) {
-      _errorHandler.handleError(e);
+      _errorHandler.handleError(e, ErrorHandlerService.AUTH_ERROR);
     }
   }
 
@@ -76,7 +76,7 @@ class AuthController extends GetxController {
       _errorHandler.handleSuccess('Google ile giriş başarılı');
     } catch (e) {
       _lastError.value = e.toString();
-      _errorHandler.handleError(e);
+      _errorHandler.handleError(e, ErrorHandlerService.AUTH_ERROR);
     } finally {
       _isLoading.value = false;
     }
@@ -91,7 +91,7 @@ class AuthController extends GetxController {
       _errorHandler.handleSuccess('Apple ile giriş başarılı');
     } catch (e) {
       _lastError.value = e.toString();
-      _errorHandler.handleError(e);
+      _errorHandler.handleError(e, ErrorHandlerService.AUTH_ERROR);
     } finally {
       _isLoading.value = false;
     }
@@ -106,7 +106,7 @@ class AuthController extends GetxController {
       _errorHandler.handleSuccess('Facebook ile giriş başarılı');
     } catch (e) {
       _lastError.value = e.toString();
-      _errorHandler.handleError(e);
+      _errorHandler.handleError(e, ErrorHandlerService.AUTH_ERROR);
     } finally {
       _isLoading.value = false;
     }
@@ -125,7 +125,7 @@ class AuthController extends GetxController {
       return accessToken;
     } catch (e) {
       _lastError.value = e.toString();
-      _errorHandler.handleError(e);
+      _errorHandler.handleError(e, ErrorHandlerService.AUTH_ERROR);
       return null;
     } finally {
       _isLoading.value = false;
@@ -141,7 +141,7 @@ class AuthController extends GetxController {
       }
       return null;
     } catch (e) {
-      _errorHandler.handleError(e);
+      _errorHandler.handleError(e, ErrorHandlerService.AUTH_ERROR);
       return null;
     }
   }
@@ -155,7 +155,7 @@ class AuthController extends GetxController {
       }
       return null;
     } catch (e) {
-      _errorHandler.handleError(e);
+      _errorHandler.handleError(e, ErrorHandlerService.AUTH_ERROR);
       return null;
     }
   }
@@ -176,7 +176,7 @@ class AuthController extends GetxController {
     try {
       await _authRepository.signOut();
     } catch (e) {
-      _errorHandler.handleError(e);
+      _errorHandler.handleError(e, ErrorHandlerService.AUTH_ERROR);
     }
   }
 
@@ -185,7 +185,7 @@ class AuthController extends GetxController {
       await _authRepository.deleteAccount();
       _errorHandler.handleSuccess('Hesabınız başarıyla silindi');
     } catch (e) {
-      _errorHandler.handleError(e);
+      _errorHandler.handleError(e, ErrorHandlerService.AUTH_ERROR);
     }
   }
 
