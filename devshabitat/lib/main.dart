@@ -25,14 +25,24 @@ import 'app/constants/app_strings.dart';
 import 'firebase_options.dart';
 import 'app/bindings/app_binding.dart';
 import 'app/bindings/navigation_binding.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
+import 'app/services/background_message_handler_service.dart';
+import 'app/services/deep_linking_service.dart';
 
-void main() async {
+Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
   // Firebase'i başlat
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
   );
+
+  // Background message handler'ı kaydet
+  FirebaseMessaging.onBackgroundMessage(firebaseMessagingBackgroundHandler);
+
+  // Deep linking servisini başlat
+  final deepLinkingService = Get.put(DeepLinkingService());
+  await deepLinkingService.init();
 
   runApp(const MyApp());
 }
