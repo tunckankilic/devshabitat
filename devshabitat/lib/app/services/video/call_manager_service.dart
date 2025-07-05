@@ -6,6 +6,7 @@ import 'package:devshabitat/app/models/video/participant_model.dart';
 import 'package:devshabitat/app/models/video/call_settings_model.dart';
 import 'package:devshabitat/app/services/video/webrtc_service.dart';
 import 'package:devshabitat/app/services/video/signaling_service.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 
 class CallManagerService extends GetxService {
   final WebRTCService _webRTCService = Get.find();
@@ -13,6 +14,7 @@ class CallManagerService extends GetxService {
   final _currentCall = Rxn<CallModel>();
   final _participants = <String, ParticipantModel>{}.obs;
   final _callSettings = CallSettingsModel().obs;
+  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
 
   CallModel? get currentCall => _currentCall.value;
   Map<String, ParticipantModel> get participants => _participants;
@@ -45,9 +47,11 @@ class CallManagerService extends GetxService {
       ...await Future.wait(participantIds.map((id) async {
         final renderer = RTCVideoRenderer();
         await renderer.initialize();
+        final userDetails = await fetchUserDetails(id);
         return ParticipantModel(
           id: id,
-          name: 'User $id', // TODO: Fetch user details
+          name: userDetails['name'],
+          profileImage: userDetails['avatar'],
           videoRenderer: renderer,
         );
       })),
@@ -187,6 +191,30 @@ class CallManagerService extends GetxService {
     final userId = data['userId'] as String;
     if (_participants.containsKey(userId)) {
       _participants.remove(userId);
+    }
+  }
+
+  Future<Map<String, dynamic>> fetchUserDetails(String userId) async {
+    try {
+      final userDoc = await _firestore.collection('users').doc(userId).get();
+
+      if (!userDoc.exists) {
+        throw Exception('User not found');
+      }
+
+      return {
+        'id': userId,
+        'name': userDoc.data()?['name'] ?? 'Unknown User',
+        'avatar': userDoc.data()?['avatar'],
+        'status': userDoc.data()?['status'] ?? 'offline',
+      };
+    } catch (e) {
+      print('Error fetching user details: $e');
+      return {
+        'id': userId,
+        'name': 'Unknown User',
+        'status': 'offline',
+      };
     }
   }
 

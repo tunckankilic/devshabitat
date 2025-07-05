@@ -57,4 +57,6 @@ const _$RolePermissionEnumMap = {
   RolePermission.pinContent: 'pinContent',
   RolePermission.assignRoles: 'assignRoles',
   RolePermission.viewAnalytics: 'viewAnalytics',
+  RolePermission.manageMembers: 'manageMembers',
+  RolePermission.deleteContent: 'deleteContent',
 };

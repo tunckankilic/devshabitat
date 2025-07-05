@@ -2,8 +2,10 @@ import 'package:get/get.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 import '../models/github_stats_model.dart';
+import '../repositories/auth_repository.dart';
 
 class GithubService extends GetxService {
+  final AuthRepository _authRepository = Get.find();
   static const String _baseUrl = 'https://api.github.com';
   static const String _token =
       'YOUR_GITHUB_TOKEN'; // GitHub Personal Access Token
@@ -215,6 +217,42 @@ class GithubService extends GetxService {
     } catch (e) {
       print('GitHub aktiviteleri alınırken hata: $e');
       return [];
+    }
+  }
+
+  Future<String?> getCurrentUsername() async {
+    final user = _authRepository.currentUser;
+    return user?.providerData
+        .firstWhereOrNull((info) => info.providerId == 'github.com')
+        ?.displayName;
+  }
+
+  Future<List<String>> getUserTechStack(String username) async {
+    final repos = await getUserRepos(username);
+    final Set<String> techStack = {};
+
+    for (final repo in repos) {
+      if (repo['language'] != null) {
+        techStack.add(repo['language'] as String);
+      }
+      if (repo['topics'] != null) {
+        techStack.addAll((repo['topics'] as List).cast<String>());
+      }
+    }
+
+    return techStack.toList();
+  }
+
+  Future<Map<String, int>> getContributionData(String username) async {
+    try {
+      final response =
+          await http.get(Uri.parse('$_baseUrl/users/$username/contributions'));
+      if (response.statusCode == 200) {
+        return Map<String, int>.from(json.decode(response.body));
+      }
+      throw Exception('GitHub katkı verisi alınamadı');
+    } catch (e) {
+      throw Exception('GitHub katkı verisi alınamadı: $e');
     }
   }
 }

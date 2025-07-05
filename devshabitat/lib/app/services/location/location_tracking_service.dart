@@ -1,8 +1,11 @@
 import 'dart:async';
 import 'dart:math';
+import 'package:devshabitat/app/models/location/location_model.dart';
 import 'package:get/get.dart';
 import 'package:location/location.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import '../../models/location/developer_location_model.dart';
 
 class LocationTrackingService extends GetxService {
   final Location _location = Location();
@@ -66,6 +69,31 @@ class LocationTrackingService extends GetxService {
     await _location.enableBackgroundMode(enable: false);
   }
 
+  Future<void> updateUserLocation({
+    required String userId,
+    required GeoPoint location,
+  }) async {
+    try {
+      await FirebaseFirestore.instance
+          .collection('users')
+          .doc(userId)
+          .update({'location': location});
+    } catch (e) {
+      throw Exception('Konum güncellenirken hata oluştu: $e');
+    }
+  }
+
+  Future<void> removeUserLocation({required String userId}) async {
+    try {
+      await FirebaseFirestore.instance
+          .collection('users')
+          .doc(userId)
+          .update({'location': FieldValue.delete()});
+    } catch (e) {
+      throw Exception('Konum silinirken hata oluştu: $e');
+    }
+  }
+
   @override
   void onClose() {
     _locationController?.close();
@@ -98,5 +126,59 @@ class LocationTrackingService extends GetxService {
   static bool isWithinRadius(LatLng center, LatLng point, double radiusKm) {
     final distance = calculateDistance(center, point);
     return distance <= radiusKm;
+  }
+
+  Future<List<DeveloperLocationModel>> getNearbyDevelopers(
+    LocationModel currentLocation,
+    double radiusKm,
+  ) async {
+    try {
+      final snapshot =
+          await FirebaseFirestore.instance.collection('users').get();
+      final developers = snapshot.docs
+          .map((doc) => DeveloperLocationModel.fromFirestore(doc))
+          .where((dev) => isWithinRadius(
+                LatLng(currentLocation.latitude, currentLocation.longitude),
+                LatLng(dev.location.latitude, dev.location.longitude),
+                radiusKm,
+              ))
+          .toList();
+      return developers;
+    } catch (e) {
+      throw Exception('Yakındaki geliştiriciler alınırken hata oluştu: $e');
+    }
+  }
+
+  Future<void> updateLocationNotificationSettings({
+    required String userId,
+    required bool enabled,
+  }) async {
+    try {
+      await FirebaseFirestore.instance
+          .collection('users')
+          .doc(userId)
+          .update({'locationNotificationsEnabled': enabled});
+    } catch (e) {
+      throw Exception('Bildirim ayarları güncellenirken hata oluştu: $e');
+    }
+  }
+
+  Future<void> updateNotificationSettings({
+    required String userId,
+    required bool enabled,
+    required String notificationType,
+  }) async {
+    try {
+      await FirebaseFirestore.instance.collection('users').doc(userId).update({
+        'notifications': {
+          notificationType: {
+            'enabled': enabled,
+            'updatedAt': FieldValue.serverTimestamp(),
+          }
+        }
+      });
+    } catch (e) {
+      throw Exception('Bildirim ayarları güncellenirken hata oluştu: $e');
+    }
   }
 }

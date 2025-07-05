@@ -6,6 +6,12 @@ part of 'event_model.dart';
 // JsonSerializableGenerator
 // **************************************************************************
 
+GeoPointConverter _$GeoPointConverterFromJson(Map<String, dynamic> json) =>
+    GeoPointConverter();
+
+Map<String, dynamic> _$GeoPointConverterToJson(GeoPointConverter instance) =>
+    <String, dynamic>{};
+
 EventModel _$EventModelFromJson(Map<String, dynamic> json) => EventModel(
       id: json['id'] as String,
       title: json['title'] as String,
@@ -13,9 +19,11 @@ EventModel _$EventModelFromJson(Map<String, dynamic> json) => EventModel(
       organizerId: json['organizerId'] as String,
       type: $enumDecode(_$EventTypeEnumMap, json['type']),
       location: $enumDecode(_$EventLocationEnumMap, json['location']),
+      geoPoint: const GeoPointConverter()
+          .fromJson(json['geoPoint'] as Map<String, dynamic>?),
+      coverImageUrl: json['coverImageUrl'] as String?,
       venueAddress: json['venueAddress'] as String?,
       onlineMeetingUrl: json['onlineMeetingUrl'] as String?,
-      coverImageUrl: json['coverImageUrl'] as String?,
       startDate: DateTime.parse(json['startDate'] as String),
       endDate: DateTime.parse(json['endDate'] as String),
       participantLimit: (json['participantLimit'] as num).toInt(),
@@ -36,9 +44,10 @@ Map<String, dynamic> _$EventModelToJson(EventModel instance) =>
       'organizerId': instance.organizerId,
       'type': _$EventTypeEnumMap[instance.type]!,
       'location': _$EventLocationEnumMap[instance.location]!,
+      'geoPoint': const GeoPointConverter().toJson(instance.geoPoint),
+      'coverImageUrl': instance.coverImageUrl,
       'venueAddress': instance.venueAddress,
       'onlineMeetingUrl': instance.onlineMeetingUrl,
-      'coverImageUrl': instance.coverImageUrl,
       'startDate': instance.startDate.toIso8601String(),
       'endDate': instance.endDate.toIso8601String(),
       'participantLimit': instance.participantLimit,

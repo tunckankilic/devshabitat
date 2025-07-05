@@ -271,6 +271,10 @@ class CommunityManageController extends GetxController {
   }
 
   void showMemberProfile(UserModel user) {
-    // TODO: Implement user profile navigation
+    navigateToUserProfile(user.id);
+  }
+
+  void navigateToUserProfile(String userId) {
+    Get.toNamed('/profile/$userId');
   }
 }

@@ -1,3 +1,5 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:devshabitat/app/controllers/auth_controller.dart';
 import 'package:get/get.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:flutter/services.dart' show rootBundle;
@@ -41,6 +43,8 @@ class MapController extends GetxController {
   final locationAccuracy = 'balanced'.obs;
   final nearbyEventNotifications = true.obs;
   final nearbyDeveloperNotifications = true.obs;
+
+  final locationNotificationsEnabled = false.obs;
 
   MapController({
     required LocationTrackingService locationService,
@@ -214,10 +218,22 @@ class MapController extends GetxController {
     });
   }
 
-  void _updateVisibleDevelopers() {
-    // TODO: Implement developer filtering and marker creation logic
-    // Bu metod, mevcut konum, arama yarıçapı ve filtrelere göre
-    // görünür geliştiricileri ve marker'ları güncelleyecek
+  void _updateVisibleDevelopers() async {
+    if (currentLocation.value == null) return;
+
+    await filterAndCreateDeveloperMarkers();
+
+    final nearbyDevelopers = await _locationService.getNearbyDevelopers(
+      currentLocation.value!,
+      searchRadius.value,
+    );
+
+    visibleDevelopers.value = nearbyDevelopers
+        .where((dev) =>
+            !selectedCategories.isNotEmpty ||
+            dev.skills.any((skill) => selectedCategories.contains(skill)))
+        .map((dev) => dev.id)
+        .toList();
   }
 
   // Location permission methods
@@ -251,19 +267,105 @@ class MapController extends GetxController {
   }
 
   // Location sharing methods
-  void toggleLocationSharing(bool value) {
+  void toggleLocationSharing(bool value) async {
     locationSharingEnabled.value = value;
-    // TODO: Implement location sharing logic
+    if (value) {
+      await shareLocation();
+      _startLocationUpdates();
+    } else {
+      final currentUser = Get.find<AuthController>().currentUser;
+      if (currentUser != null) {
+        await _locationService.removeUserLocation(userId: currentUser.uid);
+      }
+    }
   }
 
   // Notification methods
-  void toggleNearbyEventNotifications(bool value) {
+  void toggleNearbyEventNotifications(bool value) async {
     nearbyEventNotifications.value = value;
-    // TODO: Implement notification settings update
+    final currentUser = Get.find<AuthController>().currentUser;
+    if (currentUser != null) {
+      await _locationService.updateNotificationSettings(
+          userId: currentUser.uid, enabled: value, notificationType: 'events');
+    }
   }
 
-  void toggleNearbyDeveloperNotifications(bool value) {
+  void toggleNearbyDeveloperNotifications(bool value) async {
     nearbyDeveloperNotifications.value = value;
-    // TODO: Implement notification settings update
+    final currentUser = Get.find<AuthController>().currentUser;
+    if (currentUser != null) {
+      await _locationService.updateNotificationSettings(
+          userId: currentUser.uid,
+          enabled: value,
+          notificationType: 'developers');
+    }
+  }
+
+  Future<void> filterAndCreateDeveloperMarkers() async {
+    try {
+      final developers = await _locationService.getNearbyDevelopers(
+        currentLocation.value!,
+        searchRadius.value,
+      );
+
+      developerMarkers.clear();
+      for (final dev in developers) {
+        final marker = Marker(
+          markerId: MarkerId(dev.id),
+          position: LatLng(dev.location.latitude, dev.location.longitude),
+          infoWindow: InfoWindow(
+            title: dev.name,
+            snippet: dev.skills.join(', '),
+          ),
+          onTap: () => navigateToProfile(dev.id),
+        );
+        developerMarkers.add(marker);
+      }
+    } catch (e) {
+      print('Error creating developer markers: $e');
+    }
+  }
+
+  Future<void> shareLocation() async {
+    try {
+      final position = await _locationService.getCurrentLocation();
+      final currentUser = Get.find<AuthController>().currentUser;
+      if (position != null && currentUser != null) {
+        await _locationService.updateUserLocation(
+          userId: currentUser.uid,
+          location: GeoPoint(position.latitude!, position.longitude!),
+        );
+        Get.snackbar('Başarılı', 'Konumunuz güncellendi');
+      }
+    } catch (e) {
+      print('Error sharing location: $e');
+      Get.snackbar('Hata', 'Konum paylaşılırken bir hata oluştu');
+    }
+  }
+
+  Future<void> updateNotificationSettings({required bool enabled}) async {
+    try {
+      final currentUser = Get.find<AuthController>().currentUser;
+      if (currentUser != null) {
+        await _locationService.updateLocationNotificationSettings(
+          userId: currentUser.uid,
+          enabled: enabled,
+        );
+        locationNotificationsEnabled.value = enabled;
+        Get.snackbar(
+          'Başarılı',
+          enabled
+              ? 'Konum bildirimleri açıldı'
+              : 'Konum bildirimleri kapatıldı',
+        );
+      }
+    } catch (e) {
+      print('Error updating notification settings: $e');
+      Get.snackbar('Hata', 'Ayarlar güncellenirken bir hata oluştu');
+    }
+  }
+
+  void navigateToProfile(String userId) {
+    Get.toNamed('/profile/$userId');
   }
 }
