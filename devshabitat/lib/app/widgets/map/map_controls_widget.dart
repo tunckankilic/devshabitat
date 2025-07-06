@@ -10,14 +10,14 @@ class MapControlsWidget extends StatelessWidget {
   final MapType currentMapType;
 
   const MapControlsWidget({
-    Key? key,
+    super.key,
     required this.onZoomIn,
     required this.onZoomOut,
     required this.onLocateMe,
     required this.onToggleMapType,
     required this.onToggleFilters,
     this.currentMapType = MapType.normal,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {

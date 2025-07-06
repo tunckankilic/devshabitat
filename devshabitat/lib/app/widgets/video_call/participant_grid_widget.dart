@@ -7,10 +7,10 @@ class ParticipantGridWidget extends StatelessWidget {
   final bool isGroupCall;
 
   const ParticipantGridWidget({
-    Key? key,
+    super.key,
     required this.participants,
     required this.isGroupCall,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {

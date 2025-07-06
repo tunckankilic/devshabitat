@@ -56,10 +56,16 @@ class AuthRepository implements IAuthRepository {
     required GitHubOAuthService githubOAuthService,
   })  : _auth = auth ?? FirebaseAuth.instance,
         _firestore = firestore ?? FirebaseFirestore.instance,
-        _googleSignIn = googleSignIn ?? GoogleSignIn(),
+        _googleSignIn = googleSignIn ?? GoogleSignIn.instance,
         _facebookAuth = facebookAuth ?? FacebookAuth.instance,
         _githubOAuthService = githubOAuthService,
-        _logger = Get.find<Logger>();
+        _logger = Get.find<Logger>() {
+    _initializeGoogleSignIn();
+  }
+
+  Future<void> _initializeGoogleSignIn() async {
+    await _googleSignIn.initialize();
+  }
 
   @override
   Future<UserCredential> signInWithEmailAndPassword(
@@ -105,13 +111,18 @@ class AuthRepository implements IAuthRepository {
   @override
   Future<UserCredential> signInWithGoogle() async {
     try {
-      final GoogleSignInAccount? googleUser = await _googleSignIn.signIn();
+      if (!_googleSignIn.supportsAuthenticate()) {
+        throw Exception(AppStrings.googleLoginNotSupported);
+      }
+
+      final GoogleSignInAccount? googleUser =
+          await _googleSignIn.authenticate();
       if (googleUser == null) throw Exception(AppStrings.googleLoginCancelled);
 
       final GoogleSignInAuthentication googleAuth =
           await googleUser.authentication;
       final credential = GoogleAuthProvider.credential(
-        accessToken: googleAuth.accessToken,
+        accessToken: googleAuth.idToken,
         idToken: googleAuth.idToken,
       );
 

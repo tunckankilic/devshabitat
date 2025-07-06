@@ -7,11 +7,11 @@ class MembershipRequestWidget extends StatelessWidget {
   final Function(UserModel) onReject;
 
   const MembershipRequestWidget({
-    Key? key,
+    super.key,
     required this.pendingMembers,
     required this.onAccept,
     required this.onReject,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {

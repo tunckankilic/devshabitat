@@ -4,7 +4,6 @@ import 'package:flutter_webrtc/flutter_webrtc.dart';
 import 'package:devshabitat/app/models/video/call_settings_model.dart';
 import 'package:devshabitat/app/models/video/video_frame.dart';
 import 'package:tflite_flutter/tflite_flutter.dart';
-import 'package:google_ml_kit/google_ml_kit.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'dart:io';
@@ -78,7 +77,6 @@ class WebRTCService {
   bool _isBackgroundBlurEnabled = false;
   Interpreter? _interpreter;
   bool _isInterpreterInitialized = false;
-  late final FaceDetector _faceDetector;
 
   MediaRecorder? _mediaRecorder;
   bool _isRecording = false;
@@ -303,7 +301,6 @@ class WebRTCService {
     _isInitialized = false;
 
     _interpreter?.close();
-    _faceDetector.close();
     _isInterpreterInitialized = false;
   }
 
@@ -338,6 +335,7 @@ class WebRTCService {
     }
   }
 
+  /*
   Future<void> initializeBackgroundBlur() async {
     if (_isInterpreterInitialized) return;
 
@@ -363,7 +361,7 @@ class WebRTCService {
       await applyBackgroundBlur();
     }
   }
-
+*/
   Future<void> applyBackgroundBlur() async {
     try {
       if (Platform.isIOS) {

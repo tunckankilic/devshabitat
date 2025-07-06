@@ -8,7 +8,7 @@ import 'package:devshabitat/app/widgets/map/map_controls_widget.dart';
 import 'package:devshabitat/app/controllers/event/event_discovery_controller.dart';
 
 class EventMapView extends GetView<EventDiscoveryController> {
-  const EventMapView({Key? key}) : super(key: key);
+  const EventMapView({super.key});
 
   @override
   Widget build(BuildContext context) {

@@ -1,6 +1,5 @@
 import 'package:get/get.dart';
 import 'package:logger/logger.dart';
-import '../controllers/message/message_base_controller.dart';
 import '../controllers/message/message_chat_controller.dart';
 import '../controllers/message/message_list_controller.dart';
 import '../controllers/message/message_search_controller.dart';

@@ -343,6 +343,7 @@ class VideoCallController extends GetxController {
     }
   }
 
+/*
   Future<void> toggleBackgroundBlur() async {
     try {
       await _webRTCService.toggleBackgroundBlur();
@@ -351,7 +352,7 @@ class VideoCallController extends GetxController {
       print('Toggle background blur error: $e');
     }
   }
-
+*/
   Future<void> startRecording() async {
     try {
       await _webRTCService.startRecording();

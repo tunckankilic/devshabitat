@@ -7,10 +7,10 @@ class CallStatusWidget extends GetView<VideoCallController> {
   final bool isRecording;
 
   const CallStatusWidget({
-    Key? key,
+    super.key,
     required this.duration,
     required this.isRecording,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {

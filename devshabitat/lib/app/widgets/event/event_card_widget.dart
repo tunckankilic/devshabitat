@@ -8,10 +8,10 @@ class EventCard extends StatelessWidget {
   final bool showDetailedInfo;
 
   const EventCard({
-    Key? key,
+    super.key,
     required this.event,
     this.showDetailedInfo = false,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {

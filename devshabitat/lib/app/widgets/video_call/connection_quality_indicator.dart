@@ -6,9 +6,9 @@ class ConnectionQualityIndicator extends StatelessWidget {
   final ConnectionQuality quality;
 
   const ConnectionQualityIndicator({
-    Key? key,
+    super.key,
     required this.quality,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -90,9 +90,9 @@ class ConnectionQualityStream extends StatelessWidget {
   final WebRTCService webRTCService;
 
   const ConnectionQualityStream({
-    Key? key,
+    super.key,
     required this.webRTCService,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -115,9 +115,9 @@ class ConnectionDetailsDialog extends StatelessWidget {
   final ConnectionStats stats;
 
   const ConnectionDetailsDialog({
-    Key? key,
+    super.key,
     required this.stats,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {

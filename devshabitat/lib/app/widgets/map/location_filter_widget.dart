@@ -9,14 +9,14 @@ class LocationFilterWidget extends StatelessWidget {
   final Function(bool) onOnlineStatusChanged;
 
   const LocationFilterWidget({
-    Key? key,
+    super.key,
     required this.radius,
     required this.onRadiusChanged,
     required this.selectedCategories,
     required this.onCategoriesChanged,
     required this.showOnlineOnly,
     required this.onOnlineStatusChanged,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
