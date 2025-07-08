@@ -28,7 +28,10 @@ class AppConfig extends GetxService {
   @override
   void onInit() {
     super.onInit();
-    _initializeEncryption();
+  }
+
+  Future<void> initialize() async {
+    await _initializeEncryption();
   }
 
   Future<void> _initializeEncryption() async {
