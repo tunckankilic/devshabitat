@@ -1,7 +1,9 @@
+import 'package:devshabitat/app/core/config/env.dart';
+
 class FacebookConfig {
-  static const String appId = 'YOUR_FACEBOOK_APP_ID';
-  static const String appSecret = 'YOUR_FACEBOOK_APP_SECRET';
-  static const String scope = 'email,public_profile';
+  static String get appId => Env.facebookAppId;
+  static String get appSecret => Env.facebookAppSecret;
+  static String get scope => Env.facebookScope;
 
   static bool get isConfigured => appId.isNotEmpty && appSecret.isNotEmpty;
 }

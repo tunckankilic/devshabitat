@@ -1,6 +1,7 @@
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:get/get.dart';
 import 'package:encrypt/encrypt.dart' as encrypt;
+import 'package:devshabitat/app/core/config/env.dart';
 
 class AppConfig extends GetxService {
   static AppConfig get to => Get.find();
@@ -10,15 +11,19 @@ class AppConfig extends GetxService {
   late final encrypt.IV _iv;
 
   // Güvenlik ayarları
-  static const int maxFileSize = 10 * 1024 * 1024; // 10MB
-  static const List<String> allowedFileTypes = ['jpg', 'jpeg', 'png', 'pdf'];
-  static const int maxPasswordLength = 128;
-  static const int minPasswordLength = 8;
-  static const Duration tokenExpiration = Duration(hours: 24);
-  static const int maxLoginAttempts = 5;
-  static const Duration lockoutDuration = Duration(minutes: 30);
+  static int get maxFileSize => Env.maxFileSizeMb * 1024 * 1024; // MB to bytes
+  static List<String> get allowedImageTypes => Env.allowedImageTypes.split(',');
+  static List<String> get allowedDocumentTypes =>
+      Env.allowedDocumentTypes.split(',');
+  static int get maxFileNameLength => Env.maxFileNameLength;
+  static int get maxPasswordLength => 128;
+  static int get minPasswordLength => 8;
+  static Duration get tokenExpiration => const Duration(hours: 24);
+  static int get maxLoginAttempts => Env.maxLoginAttempts;
+  static Duration get lockoutDuration =>
+      Duration(minutes: Env.loginLockoutMinutes);
 
-  static const String googleMapsApiKey = 'YOUR_GOOGLE_MAPS_API_KEY';
+  static String get googleMapsApiKey => Env.googleMapsApiKey;
 
   @override
   void onInit() {
@@ -97,7 +102,8 @@ class AppConfig extends GetxService {
   // Dosya Güvenliği
   bool isValidFileType(String fileName) {
     final extension = fileName.split('.').last.toLowerCase();
-    return allowedFileTypes.contains(extension);
+    return allowedImageTypes.contains(extension) ||
+        allowedDocumentTypes.contains(extension);
   }
 
   bool isValidFileSize(int fileSize) {

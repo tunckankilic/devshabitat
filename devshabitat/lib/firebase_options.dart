@@ -3,6 +3,7 @@
 import 'package:firebase_core/firebase_core.dart' show FirebaseOptions;
 import 'package:flutter/foundation.dart'
     show defaultTargetPlatform, kIsWeb, TargetPlatform;
+import 'package:devshabitat/app/core/config/env.dart';
 
 /// Default [FirebaseOptions] for use with your Firebase apps.
 ///
@@ -49,24 +50,20 @@ class DefaultFirebaseOptions {
     }
   }
 
-  static const FirebaseOptions android = FirebaseOptions(
-    apiKey: 'AIzaSyAhZcXbJa76nAt_nuWtP3YKZtu_tElGv9k',
-    appId: '1:663354311647:android:746b1a9c15d9158640ba6a',
-    messagingSenderId: '663354311647',
-    projectId: 'devshabitat',
-    storageBucket: 'devshabitat.firebasestorage.app',
+  static final FirebaseOptions android = FirebaseOptions(
+    apiKey: Env.firebaseAndroidApiKey,
+    appId: Env.firebaseAndroidAppId,
+    messagingSenderId: Env.firebaseAndroidMessagingSenderId,
+    projectId: Env.firebaseAndroidProjectId,
+    storageBucket: Env.firebaseAndroidStorageBucket,
   );
 
-  static const FirebaseOptions ios = FirebaseOptions(
-    apiKey: 'AIzaSyBVbwjUoiKllxHDea7mJuBw4RAJylLi0UI',
-    appId: '1:663354311647:ios:bc7984af4ca4590c40ba6a',
-    messagingSenderId: '663354311647',
-    projectId: 'devshabitat',
-    storageBucket: 'devshabitat.firebasestorage.app',
-    androidClientId:
-        '663354311647-ca64iiag11lipn1na55m9abhnbvehrk1.apps.googleusercontent.com',
-    iosClientId:
-        '663354311647-b08kjil14ms6a2bqlul9o0r54ocb90jh.apps.googleusercontent.com',
-    iosBundleId: 'site.tunckankilic.devshabitat',
+  static final FirebaseOptions ios = FirebaseOptions(
+    apiKey: Env.firebaseIosApiKey,
+    appId: Env.firebaseIosAppId,
+    messagingSenderId: Env.firebaseIosMessagingSenderId,
+    projectId: Env.firebaseIosProjectId,
+    storageBucket: Env.firebaseIosStorageBucket,
+    iosBundleId: Env.firebaseIosBundleId,
   );
 }

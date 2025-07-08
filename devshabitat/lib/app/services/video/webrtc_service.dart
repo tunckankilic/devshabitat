@@ -1,10 +1,6 @@
 import 'dart:async';
-import 'dart:ui' as ui;
 import 'package:flutter_webrtc/flutter_webrtc.dart';
 import 'package:devshabitat/app/models/video/call_settings_model.dart';
-import 'package:devshabitat/app/models/video/video_frame.dart';
-import 'package:tflite_flutter/tflite_flutter.dart';
-import 'package:flutter/material.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'dart:io';
 import 'package:path_provider/path_provider.dart';
@@ -74,9 +70,11 @@ class WebRTCService {
   Function(RTCPeerConnectionState)? onConnectionStateChange;
   Function(RTCDataChannelMessage)? onDataChannelMessage;
 
+/*
   bool _isBackgroundBlurEnabled = false;
   Interpreter? _interpreter;
   bool _isInterpreterInitialized = false;
+*/
 
   MediaRecorder? _mediaRecorder;
   bool _isRecording = false;
@@ -105,9 +103,9 @@ class WebRTCService {
       'iceServers': [
         {'urls': 'stun:stun.l.google.com:19302'},
         {
-          'urls': 'turn:your-turn-server.com:3478',
-          'username': 'username',
-          'credential': 'password',
+          'urls': 'turn:YOUR_VM_IP:3478',
+          'username': 'your_username',
+          'credential': 'your_password',
         },
       ],
       'sdpSemantics': 'unified-plan',
@@ -138,6 +136,7 @@ class WebRTCService {
     };
 
     _isInitialized = true;
+    await _startConnectionMonitoring();
   }
 
   Future<MediaStream> createLocalStream({
@@ -300,8 +299,8 @@ class WebRTCService {
     _dataChannel = null;
     _isInitialized = false;
 
-    _interpreter?.close();
-    _isInterpreterInitialized = false;
+    //_interpreter?.close();
+    //_isInterpreterInitialized = false;
   }
 
   Future<void> joinRoom(String roomId) async {
@@ -555,7 +554,6 @@ class WebRTCService {
   Future<void> _adjustMediaQuality(ConnectionStats stats) async {
     if (_localStream == null) return;
 
-    final videoTrack = _localStream!.getVideoTracks().first;
     final sender = (await _peerConnection!.getSenders())
         .firstWhere((s) => s.track?.kind == 'video');
 
