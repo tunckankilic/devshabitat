@@ -4,6 +4,7 @@ import 'package:devshabitat/app/models/video/call_settings_model.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'dart:io';
 import 'package:path_provider/path_provider.dart';
+import 'package:devshabitat/app/core/config/webrtc_config.dart';
 
 // RTCStatsReport sınıfı tanımı
 class RTCStatsReport {
@@ -99,17 +100,11 @@ class WebRTCService {
     this.onConnectionStateChange = onConnectionStateChange;
     this.onDataChannelMessage = onDataChannelMessage;
 
-    final configuration = {
-      'iceServers': [
-        {'urls': 'stun:stun.l.google.com:19302'},
-        {
-          'urls': 'turn:YOUR_VM_IP:3478',
-          'username': 'your_username',
-          'credential': 'your_password',
-        },
-      ],
-      'sdpSemantics': 'unified-plan',
-    };
+    if (!WebRTCConfig.isConfigured) {
+      throw Exception('WebRTC TURN/STUN sunucusu yapılandırması eksik!');
+    }
+
+    final configuration = WebRTCConfig.iceServers;
 
     final constraints = <String, dynamic>{
       'mandatory': {

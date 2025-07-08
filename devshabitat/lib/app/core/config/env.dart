@@ -111,4 +111,20 @@ abstract class Env {
 
   @EnviedField(varName: 'FORCE_HTTPS')
   static final bool forceHttps = _Env.forceHttps;
+
+  // WebRTC TURN/STUN Configuration
+  @EnviedField(varName: 'TURN_SERVER_IP', obfuscate: true)
+  static final String turnServerIp = _Env.turnServerIp;
+
+  @EnviedField(varName: 'TURN_SERVER_PORT', obfuscate: true)
+  static final String turnServerPort = _Env.turnServerPort;
+
+  @EnviedField(varName: 'TURNS_SERVER_PORT', obfuscate: true)
+  static final String turnsServerPort = _Env.turnsServerPort;
+
+  @EnviedField(varName: 'TURN_SERVER_USERNAME', obfuscate: true)
+  static final String turnServerUsername = _Env.turnServerUsername;
+
+  @EnviedField(varName: 'TURN_SERVER_PASSWORD', obfuscate: true)
+  static final String turnServerPassword = _Env.turnServerPassword;
 }
