@@ -22,6 +22,9 @@ abstract class Env {
   static final String firebaseAndroidStorageBucket =
       _Env.firebaseAndroidStorageBucket;
 
+  @EnviedField(varName: 'FIREBASE_ANDROID_CLIENT_ID', obfuscate: true)
+  static final String firebaseAndroidClientId = _Env.firebaseAndroidClientId;
+
   // Firebase iOS Configuration
   @EnviedField(varName: 'FIREBASE_IOS_API_KEY', obfuscate: true)
   static final String firebaseIosApiKey = _Env.firebaseIosApiKey;
@@ -41,6 +44,9 @@ abstract class Env {
 
   @EnviedField(varName: 'FIREBASE_IOS_BUNDLE_ID', obfuscate: true)
   static final String firebaseIosBundleId = _Env.firebaseIosBundleId;
+
+  @EnviedField(varName: 'FIREBASE_IOS_CLIENT_ID', obfuscate: true)
+  static final String firebaseIosClientId = _Env.firebaseIosClientId;
 
   // GitHub Configuration
   @EnviedField(varName: 'GITHUB_CLIENT_ID', obfuscate: true)

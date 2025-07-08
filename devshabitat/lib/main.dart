@@ -1,10 +1,10 @@
+import 'package:devshabitat/app/firebase/firebase_options.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'app/routes/app_pages.dart';
 import 'app/core/theme/dev_habitat_theme.dart';
-import 'firebase_options.dart';
 import 'app/bindings/app_binding.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'app/services/background_message_handler_service.dart';
