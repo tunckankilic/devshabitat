@@ -46,8 +46,6 @@ class MyApp extends StatelessWidget {
           getPages: AppPages.routes,
           initialBinding: AppBinding(),
           defaultTransition: Transition.fade,
-          locale: const Locale('tr', 'TR'),
-          fallbackLocale: const Locale('en', 'US'),
           debugShowCheckedModeBanner: false,
         );
       },

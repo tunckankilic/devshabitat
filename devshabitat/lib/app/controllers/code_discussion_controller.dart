@@ -8,6 +8,7 @@ class CodeDiscussionController extends GetxController {
   final ErrorHandlerService _errorHandler = Get.find();
 
   final RxList<CodeSnippetModel> codeSnippets = <CodeSnippetModel>[].obs;
+  final Rx<CodeSnippetModel?> currentDiscussion = Rx<CodeSnippetModel?>(null);
   final RxBool isLoading = false.obs;
   final RxString error = ''.obs;
 
@@ -98,7 +99,7 @@ class CodeDiscussionController extends GetxController {
       error.value = '';
 
       final discussion = await _discussionService.getDiscussion(snippetId);
-      // Tartışma verilerini güncelle
+      currentDiscussion.value = discussion;
     } catch (e) {
       error.value = 'Tartışma yüklenirken bir hata oluştu: $e';
       _errorHandler.handleError(e, ErrorHandlerService.DISCUSSION_ERROR);

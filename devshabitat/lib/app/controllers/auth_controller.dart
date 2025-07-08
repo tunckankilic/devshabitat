@@ -3,10 +3,8 @@ import 'package:get/get.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import '../repositories/auth_repository.dart';
 import '../core/services/error_handler_service.dart';
-import '../routes/app_pages.dart';
 import 'email_auth_controller.dart';
 import 'auth_state_controller.dart';
-import '../core/config/github_config.dart';
 import '../services/storage_service.dart';
 
 class AuthController extends GetxController {

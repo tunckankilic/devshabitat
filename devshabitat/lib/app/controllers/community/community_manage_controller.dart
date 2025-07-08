@@ -1,7 +1,7 @@
+import 'package:devshabitat/app/models/user_profile_model.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../../models/community/community_model.dart';
-import '../../models/user_model.dart';
 import '../../services/community/community_service.dart';
 import '../../services/community/membership_service.dart';
 import '../../services/storage_service.dart';
@@ -22,8 +22,8 @@ class CommunityManageController extends GetxController {
   final isLoading = false.obs;
   final error = ''.obs;
 
-  final members = <UserModel>[].obs;
-  final pendingMembers = <UserModel>[].obs;
+  final members = <UserProfile>[].obs;
+  final pendingMembers = <UserProfile>[].obs;
 
   String? _selectedImagePath;
   late String communityId;
@@ -177,7 +177,7 @@ class CommunityManageController extends GetxController {
     }
   }
 
-  Future<void> acceptMember(UserModel user) async {
+  Future<void> acceptMember(UserProfile user) async {
     try {
       await _membershipService.acceptMembership(
         communityId: communityId,
@@ -201,7 +201,7 @@ class CommunityManageController extends GetxController {
     }
   }
 
-  Future<void> rejectMember(UserModel user) async {
+  Future<void> rejectMember(UserProfile user) async {
     try {
       await _membershipService.rejectMembership(
         communityId: communityId,
@@ -224,7 +224,7 @@ class CommunityManageController extends GetxController {
     }
   }
 
-  Future<void> removeMember(UserModel user) async {
+  Future<void> removeMember(UserProfile user) async {
     try {
       await _membershipService.removeMember(
         communityId: communityId,
@@ -247,7 +247,7 @@ class CommunityManageController extends GetxController {
     }
   }
 
-  Future<void> promoteToModerator(UserModel user) async {
+  Future<void> promoteToModerator(UserProfile user) async {
     try {
       await _membershipService.promoteToModerator(
         communityId: communityId,
@@ -270,7 +270,7 @@ class CommunityManageController extends GetxController {
     }
   }
 
-  void showMemberProfile(UserModel user) {
+  void showMemberProfile(UserProfile user) {
     navigateToUserProfile(user.id);
   }
 

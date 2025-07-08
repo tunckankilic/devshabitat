@@ -1,17 +1,17 @@
+import 'package:devshabitat/app/models/user_profile_model.dart';
 import 'package:flutter/material.dart';
-import '../../models/user_model.dart';
 
 class MembershipRequestWidget extends StatelessWidget {
-  final List<UserModel> pendingMembers;
-  final Function(UserModel) onAccept;
-  final Function(UserModel) onReject;
+  final List<UserProfile> pendingMembers;
+  final Function(UserProfile) onAccept;
+  final Function(UserProfile) onReject;
 
   const MembershipRequestWidget({
-    Key? key,
+    super.key,
     required this.pendingMembers,
     required this.onAccept,
     required this.onReject,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -48,15 +48,12 @@ class MembershipRequestWidget extends StatelessWidget {
                   backgroundImage: member.photoUrl != null
                       ? NetworkImage(member.photoUrl!)
                       : null,
-                  child: member.photoUrl == null && member.displayName != null
-                      ? Text(member.displayName!.characters.first.toUpperCase())
+                  child: member.photoUrl == null && member.fullName != ""
+                      ? Text(member.fullName.characters.first.toUpperCase())
                       : null,
                 ),
-                title:
-                    Text(member.displayName ?? member.email ?? 'İsimsiz Üye'),
-                subtitle: member.metadata?['title'] != null
-                    ? Text(member.metadata!['title'] as String)
-                    : null,
+                title: Text(member.fullName),
+                subtitle: Text(member.title.toString()),
                 trailing: Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [

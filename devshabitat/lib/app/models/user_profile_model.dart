@@ -50,12 +50,12 @@ class UserProfile {
   final bool isInternship;
   final DateTime? lastActive;
   final bool isOnline;
-  final Map<String, dynamic> socialLinks;
+  final Map<String, String> socialLinks;
   final List<String> portfolioUrls;
-  final List<WorkExperience> workExperience;
-  final List<Education> education;
-  final List<Project> projects;
-  final List<Certificate> certificates;
+  final List<Map<String, dynamic>> workExperience;
+  final List<Map<String, dynamic>> education;
+  final List<Map<String, dynamic>> projects;
+  final List<Map<String, dynamic>> certificates;
 
   UserProfile({
     required this.id,
@@ -113,25 +113,19 @@ class UserProfile {
           ? (data['lastActive'] as Timestamp).toDate()
           : null,
       isOnline: data['isOnline'] ?? false,
-      socialLinks: Map<String, dynamic>.from(data['socialLinks'] ?? {}),
+      socialLinks: Map<String, String>.from(data['socialLinks'] ?? {}),
       portfolioUrls: List<String>.from(data['portfolioUrls'] ?? []),
-      workExperience: (data['workExperience'] as List<dynamic>? ?? [])
-          .map((e) => WorkExperience.fromMap(e as Map<String, dynamic>))
-          .toList(),
-      education: (data['education'] as List<dynamic>? ?? [])
-          .map((e) => Education.fromMap(e as Map<String, dynamic>))
-          .toList(),
-      projects: (data['projects'] as List<dynamic>? ?? [])
-          .map((e) => Project.fromMap(e as Map<String, dynamic>))
-          .toList(),
-      certificates: (data['certificates'] as List<dynamic>? ?? [])
-          .map((e) => Certificate.fromMap(e as Map<String, dynamic>))
-          .toList(),
+      workExperience:
+          List<Map<String, dynamic>>.from(data['workExperience'] ?? []),
+      education: List<Map<String, dynamic>>.from(data['education'] ?? []),
+      projects: List<Map<String, dynamic>>.from(data['projects'] ?? []),
+      certificates: List<Map<String, dynamic>>.from(data['certificates'] ?? []),
     );
   }
 
-  Map<String, dynamic> toMap() {
+  Map<String, dynamic> toJson() {
     return {
+      'id': id,
       'email': email,
       'fullName': fullName,
       'photoUrl': photoUrl,
@@ -154,10 +148,10 @@ class UserProfile {
       'isOnline': isOnline,
       'socialLinks': socialLinks,
       'portfolioUrls': portfolioUrls,
-      'workExperience': workExperience.map((e) => e.toMap()).toList(),
-      'education': education.map((e) => e.toMap()).toList(),
-      'projects': projects.map((e) => e.toMap()).toList(),
-      'certificates': certificates.map((e) => e.toMap()).toList(),
+      'workExperience': workExperience,
+      'education': education,
+      'projects': projects,
+      'certificates': certificates,
     };
   }
 
@@ -183,12 +177,12 @@ class UserProfile {
     bool? isInternship,
     DateTime? lastActive,
     bool? isOnline,
-    Map<String, dynamic>? socialLinks,
+    Map<String, String>? socialLinks,
     List<String>? portfolioUrls,
-    List<WorkExperience>? workExperience,
-    List<Education>? education,
-    List<Project>? projects,
-    List<Certificate>? certificates,
+    List<Map<String, dynamic>>? workExperience,
+    List<Map<String, dynamic>>? education,
+    List<Map<String, dynamic>>? projects,
+    List<Map<String, dynamic>>? certificates,
   }) {
     return UserProfile(
       id: id ?? this.id,
@@ -232,22 +226,25 @@ class UserProfile {
 
   double _calculateSkillMatch(List<String> otherSkills) {
     if (skills.isEmpty || otherSkills.isEmpty) return 0.0;
-    var intersection = skills.toSet().intersection(otherSkills.toSet());
-    var union = skills.toSet().union(otherSkills.toSet());
-    return intersection.length / union.length;
+    int matchCount =
+        skills.where((skill) => otherSkills.contains(skill)).length;
+    return matchCount / skills.length;
   }
 
   double _calculateExperienceMatch(int otherExperience) {
-    final maxExperience = 40; // Maksimum deneyim yılı
-    return 1.0 - ((yearsOfExperience - otherExperience).abs() / maxExperience);
+    if (yearsOfExperience == 0 || otherExperience == 0) return 0.0;
+    int diff = (yearsOfExperience - otherExperience).abs();
+    return 1.0 - (diff / max(yearsOfExperience, otherExperience));
   }
 
   double _calculateInterestMatch(List<String> otherInterests) {
     if (interests.isEmpty || otherInterests.isEmpty) return 0.0;
-    var intersection = interests.toSet().intersection(otherInterests.toSet());
-    var union = interests.toSet().union(otherInterests.toSet());
-    return intersection.length / union.length;
+    int matchCount =
+        interests.where((interest) => otherInterests.contains(interest)).length;
+    return matchCount / interests.length;
   }
+
+  int max(int a, int b) => a > b ? a : b;
 }
 
 class WorkExperience {

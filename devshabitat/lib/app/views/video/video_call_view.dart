@@ -9,7 +9,7 @@ import 'package:devshabitat/app/widgets/video_call/participant_grid_widget.dart'
 import 'package:devshabitat/app/widgets/video_call/call_status_widget.dart';
 
 class VideoCallView extends GetView<VideoCallController> {
-  const VideoCallView({Key? key}) : super(key: key);
+  const VideoCallView({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -78,7 +78,7 @@ class VideoCallView extends GetView<VideoCallController> {
                 isRecording: controller.isRecording,
                 onToggleAudio: controller.toggleAudio,
                 onToggleVideo: controller.toggleVideo,
-                onToggleBackgroundBlur: controller.toggleBackgroundBlur,
+                onToggleBackgroundBlur: () {},
                 onStartRecording: controller.startRecording,
                 onStopRecording: controller.stopRecording,
                 onEndCall: controller.endCall,

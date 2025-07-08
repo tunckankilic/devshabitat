@@ -1,3 +1,5 @@
+// ignore_for_file: deprecated_member_use
+
 import 'package:flutter/material.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import '../models/attachment_model.dart';
@@ -19,7 +21,10 @@ class MessageAttachmentWidget extends StatelessWidget {
   Widget build(BuildContext context) {
     return Card(
       elevation: 0,
-      color: Theme.of(context).colorScheme.surfaceContainerHighest.withOpacity(0.5),
+      color: Theme.of(context)
+          .colorScheme
+          .surfaceContainerHighest
+          .withOpacity(0.5),
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(12),
       ),

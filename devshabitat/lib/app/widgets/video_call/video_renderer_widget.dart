@@ -10,14 +10,14 @@ class VideoRendererWidget extends StatelessWidget {
   final bool isLocalVideo;
 
   const VideoRendererWidget({
-    Key? key,
+    super.key,
     required this.renderer,
     required this.isMuted,
     required this.isVideoEnabled,
     required this.participantName,
     this.isScreenShare = false,
     this.isLocalVideo = false,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {

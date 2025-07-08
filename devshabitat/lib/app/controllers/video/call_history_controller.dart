@@ -40,7 +40,7 @@ class CallHistoryController extends GetxController {
         _isLoading.value = false;
         _calls.value = snapshot.docs
             .map((doc) => CallModel.fromJson({
-                  ...doc.data() as Map<String, dynamic>,
+                  ...doc.data(),
                   'id': doc.id,
                 }))
             .where((call) =>

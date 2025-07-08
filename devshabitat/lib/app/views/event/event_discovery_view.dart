@@ -5,7 +5,7 @@ import 'package:devshabitat/app/models/event/event_model.dart';
 import 'package:devshabitat/app/routes/app_pages.dart';
 
 class EventDiscoveryView extends GetView<EventDiscoveryController> {
-  const EventDiscoveryView({Key? key}) : super(key: key);
+  const EventDiscoveryView({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -155,7 +155,7 @@ class EventDiscoveryView extends GetView<EventDiscoveryController> {
 class EventCard extends StatelessWidget {
   final EventModel event;
 
-  const EventCard({Key? key, required this.event}) : super(key: key);
+  const EventCard({super.key, required this.event});
 
   @override
   Widget build(BuildContext context) {

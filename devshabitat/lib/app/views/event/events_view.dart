@@ -5,7 +5,7 @@ import 'package:devshabitat/app/models/event/event_model.dart';
 import 'package:devshabitat/app/routes/app_pages.dart';
 
 class EventsView extends GetView<EventController> {
-  const EventsView({Key? key}) : super(key: key);
+  const EventsView({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -57,7 +57,7 @@ class EventsView extends GetView<EventController> {
 class EventCard extends StatelessWidget {
   final EventModel event;
 
-  const EventCard({Key? key, required this.event}) : super(key: key);
+  const EventCard({super.key, required this.event});
 
   @override
   Widget build(BuildContext context) {

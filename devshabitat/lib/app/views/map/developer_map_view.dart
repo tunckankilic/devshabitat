@@ -8,7 +8,7 @@ import 'package:devshabitat/app/widgets/map/map_controls_widget.dart';
 import 'package:devshabitat/app/controllers/location/map_controller.dart';
 
 class DeveloperMapView extends GetView<MapController> {
-  const DeveloperMapView({Key? key}) : super(key: key);
+  const DeveloperMapView({super.key});
 
   @override
   Widget build(BuildContext context) {

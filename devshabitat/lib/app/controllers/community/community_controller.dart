@@ -1,3 +1,4 @@
+import 'package:devshabitat/app/models/user_profile_model.dart';
 import 'package:devshabitat/app/repositories/auth_repository.dart';
 import 'package:get/get.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -7,7 +8,6 @@ import 'package:devshabitat/app/models/community/membership_model.dart';
 import 'package:devshabitat/app/services/community/community_service.dart';
 import 'package:devshabitat/app/services/community/membership_service.dart';
 import 'package:devshabitat/app/services/community/moderation_service.dart';
-import 'package:devshabitat/app/models/user_model.dart';
 import 'package:devshabitat/app/models/community/moderation_model.dart';
 
 class CommunityController extends GetxController {
@@ -23,8 +23,8 @@ class CommunityController extends GetxController {
   final error = ''.obs;
   final isUserModerator = false.obs;
   final isMember = false.obs;
-  final members = <UserModel>[].obs;
-  final pendingMembers = <UserModel>[].obs;
+  final members = <UserProfile>[].obs;
+  final pendingMembers = <UserProfile>[].obs;
 
   @override
   void onInit() {
@@ -164,7 +164,7 @@ class CommunityController extends GetxController {
     }
   }
 
-  Future<void> acceptMember(UserModel user) async {
+  Future<void> acceptMember(UserProfile user) async {
     try {
       if (community.value == null) return;
 
@@ -191,7 +191,7 @@ class CommunityController extends GetxController {
     }
   }
 
-  Future<void> rejectMember(UserModel user) async {
+  Future<void> rejectMember(UserProfile user) async {
     try {
       if (community.value == null) return;
 
@@ -217,7 +217,7 @@ class CommunityController extends GetxController {
     }
   }
 
-  Future<void> removeMember(UserModel user) async {
+  Future<void> removeMember(UserProfile user) async {
     try {
       if (community.value == null) return;
 
@@ -243,7 +243,7 @@ class CommunityController extends GetxController {
     }
   }
 
-  Future<void> promoteToModerator(UserModel user) async {
+  Future<void> promoteToModerator(UserProfile user) async {
     try {
       if (community.value == null) return;
 
@@ -269,7 +269,7 @@ class CommunityController extends GetxController {
     }
   }
 
-  void showMemberProfile(UserModel user) {
+  void showMemberProfile(UserProfile user) {
     navigateToUserProfile(user.id);
   }
 
@@ -337,7 +337,7 @@ class CommunityController extends GetxController {
   }
 
   // Get community members
-  Future<List<UserModel>> getMembers({
+  Future<List<UserProfile>> getMembers({
     MembershipRole? role,
     MembershipStatus? status,
     int limit = 20,

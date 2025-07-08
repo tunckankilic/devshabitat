@@ -68,6 +68,8 @@ class AppStrings {
 
   // Social Auth
   static const String googleLoginCancelled = 'Google login cancelled';
+  static const String googleLoginNotSupported =
+      'Google login is not supported on this platform';
   static const String githubLoginFailed =
       'GitHub login failed. Please try again.';
   static const String githubUserInfoFailed = 'Could not get GitHub user info';

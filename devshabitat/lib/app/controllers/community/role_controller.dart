@@ -1,6 +1,6 @@
+import 'package:devshabitat/app/models/user_profile_model.dart';
 import 'package:get/get.dart';
 import '../../models/community/role_model.dart';
-import '../../models/user_model.dart';
 import '../../services/community/role_service.dart';
 import '../../services/community/membership_service.dart';
 
@@ -9,7 +9,7 @@ class RoleController extends GetxController {
   final MembershipService _membershipService = Get.find<MembershipService>();
 
   final roles = <RoleModel>[].obs;
-  final members = <UserModel>[].obs;
+  final members = <UserProfile>[].obs;
   final selectedRole = Rxn<RoleModel>();
   final isLoading = false.obs;
   final error = ''.obs;

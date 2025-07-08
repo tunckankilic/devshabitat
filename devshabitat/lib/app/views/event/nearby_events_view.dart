@@ -5,7 +5,7 @@ import '../../models/event/event_model.dart';
 import '../../widgets/event/event_card.dart';
 
 class NearbyEventsView extends GetView<EventDiscoveryController> {
-  const NearbyEventsView({Key? key}) : super(key: key);
+  const NearbyEventsView({super.key});
 
   @override
   Widget build(BuildContext context) {
