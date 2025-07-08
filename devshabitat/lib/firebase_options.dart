@@ -56,6 +56,7 @@ class DefaultFirebaseOptions {
     messagingSenderId: Env.firebaseAndroidMessagingSenderId,
     projectId: Env.firebaseAndroidProjectId,
     storageBucket: Env.firebaseAndroidStorageBucket,
+    androidClientId: Env.firebaseAndroidClientId,
   );
 
   static final FirebaseOptions ios = FirebaseOptions(
@@ -64,6 +65,7 @@ class DefaultFirebaseOptions {
     messagingSenderId: Env.firebaseIosMessagingSenderId,
     projectId: Env.firebaseIosProjectId,
     storageBucket: Env.firebaseIosStorageBucket,
+    iosClientId: Env.firebaseIosClientId,
     iosBundleId: Env.firebaseIosBundleId,
   );
 }
