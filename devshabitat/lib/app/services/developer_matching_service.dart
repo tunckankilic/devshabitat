@@ -1,12 +1,12 @@
 import 'package:get/get.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import '../models/user_model.dart';
+import '../models/user_profile_model.dart';
 
 class DeveloperMatchingService extends GetxService {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
 
   // Benzer teknoloji stack'ine sahip geliştiricileri bul
-  Future<List<UserModel>> findDevelopersByTechStack({
+  Future<List<UserProfile>> findDevelopersByTechStack({
     required List<String> techStack,
     required String excludeUsername,
   }) async {
@@ -18,7 +18,7 @@ class DeveloperMatchingService extends GetxService {
           .get();
 
       return querySnapshot.docs
-          .map((doc) => UserModel.fromJson(doc.data()))
+          .map((doc) => UserProfile.fromFirestore(doc))
           .toList();
     } catch (e) {
       throw Exception('Geliştiriciler bulunurken bir hata oluştu: $e');
@@ -43,7 +43,7 @@ class DeveloperMatchingService extends GetxService {
   }
 
   // Potansiyel mentorları bul
-  Future<List<UserModel>> findPotentialMentors({
+  Future<List<UserProfile>> findPotentialMentors({
     required String username,
   }) async {
     try {
@@ -54,7 +54,7 @@ class DeveloperMatchingService extends GetxService {
           .get();
 
       return querySnapshot.docs
-          .map((doc) => UserModel.fromJson(doc.data()))
+          .map((doc) => UserProfile.fromFirestore(doc))
           .toList();
     } catch (e) {
       throw Exception('Mentor önerileri alınırken bir hata oluştu: $e');
@@ -62,7 +62,7 @@ class DeveloperMatchingService extends GetxService {
   }
 
   // Eşleşme skoru hesapla
-  double calculateMatchScore(UserModel developer) {
+  double calculateMatchScore(UserProfile developer) {
     try {
       // Burada daha karmaşık bir algoritma kullanılabilir
       return 0.8; // Örnek skor

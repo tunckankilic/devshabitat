@@ -1,8 +1,9 @@
 import 'package:devshabitat/app/repositories/auth_repository.dart';
 import 'package:get/get.dart';
 import 'package:flutter/material.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import '../core/services/error_handler_service.dart';
-import '../models/user_model.dart';
+import '../models/user_profile_model.dart';
 
 enum RegistrationStep {
   basicInfo, // Email, şifre ve isim (zorunlu)
@@ -37,16 +38,36 @@ class RegistrationController extends GetxController {
   final bioController = TextEditingController();
   final locationController = TextEditingController();
   final photoUrlController = TextEditingController();
+  final locationNameController = TextEditingController();
 
   // Professional Info Controllers (Opsiyonel)
   final titleController = TextEditingController();
   final companyController = TextEditingController();
   final yearsOfExperienceController = TextEditingController();
 
+  // Work Preferences
+  final isAvailableForWork = true.obs;
+  final isRemote = false.obs;
+  final isFullTime = false.obs;
+  final isPartTime = false.obs;
+  final isFreelance = false.obs;
+  final isInternship = false.obs;
+
   // Skills Info Controllers (Opsiyonel)
   final RxList<String> selectedSkills = <String>[].obs;
   final RxList<String> selectedLanguages = <String>[].obs;
-  final RxList<String> selectedFrameworks = <String>[].obs;
+  final RxList<String> selectedInterests = <String>[].obs;
+  final RxMap<String, String> socialLinks = <String, String>{}.obs;
+  final RxList<String> portfolioUrls = <String>[].obs;
+  final RxList<Map<String, dynamic>> workExperience =
+      <Map<String, dynamic>>[].obs;
+  final RxList<Map<String, dynamic>> education = <Map<String, dynamic>>[].obs;
+  final RxList<Map<String, dynamic>> projects = <Map<String, dynamic>>[].obs;
+  final RxList<Map<String, dynamic>> certificates =
+      <Map<String, dynamic>>[].obs;
+
+  // Location data
+  final Rxn<GeoPoint> location = Rxn<GeoPoint>();
 
   // Getters
   bool get isLoading => _isLoading.value;
@@ -137,8 +158,7 @@ class RegistrationController extends GetxController {
       case RegistrationStep.skillsInfo:
         if (await _updateSkillsInfo()) {
           _currentStep.value = RegistrationStep.completed;
-          Get.offAllNamed(
-              '/home'); // Kayıt tamamlandığında ana sayfaya yönlendir
+          Get.offAllNamed('/home');
         }
         break;
       case RegistrationStep.completed:
@@ -157,6 +177,14 @@ class RegistrationController extends GetxController {
       );
 
       if (userCredential.user != null) {
+        // Temel kullanıcı profilini oluştur
+        final userProfile = UserProfile(
+          id: userCredential.user!.uid,
+          email: emailController.text,
+          fullName: displayNameController.text,
+        );
+
+        await _authRepository.updateUserProfile(userProfile.toJson());
         return true;
       }
       return false;
@@ -171,15 +199,14 @@ class RegistrationController extends GetxController {
   Future<bool> _updatePersonalInfo() async {
     try {
       _isLoading.value = true;
-      final user = _authRepository.currentUser;
-      if (user == null) return false;
-
-      await _authRepository.updateUserProfile({
+      final updates = {
         'bio': bioController.text,
-        'location': locationController.text,
-        'photoURL': photoUrlController.text,
-      });
+        'location': location.value,
+        'locationName': locationNameController.text,
+        'photoUrl': photoUrlController.text,
+      };
 
+      await _authRepository.updateUserProfile(updates);
       return true;
     } catch (e) {
       _errorHandler.handleError(e, ErrorHandlerService.AUTH_ERROR);
@@ -192,16 +219,24 @@ class RegistrationController extends GetxController {
   Future<bool> _updateProfessionalInfo() async {
     try {
       _isLoading.value = true;
-      final user = _authRepository.currentUser;
-      if (user == null) return false;
-
-      await _authRepository.updateUserProfile({
+      final updates = {
         'title': titleController.text,
         'company': companyController.text,
         'yearsOfExperience':
             int.tryParse(yearsOfExperienceController.text) ?? 0,
-      });
+        'isAvailableForWork': isAvailableForWork.value,
+        'isRemote': isRemote.value,
+        'isFullTime': isFullTime.value,
+        'isPartTime': isPartTime.value,
+        'isFreelance': isFreelance.value,
+        'isInternship': isInternship.value,
+        'workExperience': workExperience,
+        'education': education,
+        'projects': projects,
+        'certificates': certificates,
+      };
 
+      await _authRepository.updateUserProfile(updates);
       return true;
     } catch (e) {
       _errorHandler.handleError(e, ErrorHandlerService.AUTH_ERROR);
@@ -214,15 +249,15 @@ class RegistrationController extends GetxController {
   Future<bool> _updateSkillsInfo() async {
     try {
       _isLoading.value = true;
-      final user = _authRepository.currentUser;
-      if (user == null) return false;
-
-      await _authRepository.updateUserProfile({
+      final updates = {
         'skills': selectedSkills,
         'languages': selectedLanguages,
-        'frameworks': selectedFrameworks,
-      });
+        'interests': selectedInterests,
+        'socialLinks': socialLinks,
+        'portfolioUrls': portfolioUrls,
+      };
 
+      await _authRepository.updateUserProfile(updates);
       return true;
     } catch (e) {
       _errorHandler.handleError(e, ErrorHandlerService.AUTH_ERROR);
@@ -233,35 +268,19 @@ class RegistrationController extends GetxController {
   }
 
   void goBack() {
-    switch (_currentStep.value) {
-      case RegistrationStep.personalInfo:
-        _currentStep.value = RegistrationStep.basicInfo;
-        break;
-      case RegistrationStep.professionalInfo:
-        _currentStep.value = RegistrationStep.personalInfo;
-        break;
-      case RegistrationStep.skillsInfo:
-        _currentStep.value = RegistrationStep.professionalInfo;
-        break;
-      default:
-        break;
+    if (_currentStep.value == RegistrationStep.basicInfo) {
+      Get.back();
+    } else {
+      _currentStep.value =
+          RegistrationStep.values[_currentStep.value.index - 1];
     }
   }
 
   void skipCurrentStep() {
-    switch (_currentStep.value) {
-      case RegistrationStep.personalInfo:
-        _currentStep.value = RegistrationStep.professionalInfo;
-        break;
-      case RegistrationStep.professionalInfo:
-        _currentStep.value = RegistrationStep.skillsInfo;
-        break;
-      case RegistrationStep.skillsInfo:
-        _currentStep.value = RegistrationStep.completed;
-        Get.offAllNamed('/home');
-        break;
-      default:
-        break;
+    if (_currentStep.value != RegistrationStep.basicInfo &&
+        _currentStep.value != RegistrationStep.completed) {
+      _currentStep.value =
+          RegistrationStep.values[_currentStep.value.index + 1];
     }
   }
 
@@ -271,22 +290,18 @@ class RegistrationController extends GetxController {
 
   @override
   void onClose() {
-    // Basic Info Controllers
+    // Controllers'ı temizle
     emailController.dispose();
     passwordController.dispose();
     confirmPasswordController.dispose();
     displayNameController.dispose();
-
-    // Personal Info Controllers
     bioController.dispose();
     locationController.dispose();
     photoUrlController.dispose();
-
-    // Professional Info Controllers
+    locationNameController.dispose();
     titleController.dispose();
     companyController.dispose();
     yearsOfExperienceController.dispose();
-
     super.onClose();
   }
 }

@@ -1,12 +1,12 @@
+import 'package:devshabitat/app/models/user_profile_model.dart';
 import 'package:flutter/material.dart';
-import '../../models/user_model.dart';
 
 class MemberListWidget extends StatelessWidget {
-  final List<UserModel> members;
+  final List<UserProfile> members;
   final bool isAdmin;
-  final Function(UserModel)? onMemberTap;
-  final Function(UserModel)? onRemoveMember;
-  final Function(UserModel)? onPromoteToModerator;
+  final Function(UserProfile)? onMemberTap;
+  final Function(UserProfile)? onRemoveMember;
+  final Function(UserProfile)? onPromoteToModerator;
 
   const MemberListWidget({
     Key? key,
@@ -29,14 +29,12 @@ class MemberListWidget extends StatelessWidget {
           leading: CircleAvatar(
             backgroundImage:
                 member.photoUrl != null ? NetworkImage(member.photoUrl!) : null,
-            child: member.photoUrl == null && member.displayName != null
-                ? Text(member.displayName!.characters.first.toUpperCase())
+            child: member.photoUrl == null && member.fullName != ""
+                ? Text(member.fullName.characters.first.toUpperCase())
                 : null,
           ),
-          title: Text(member.displayName ?? member.email ?? 'İsimsiz Üye'),
-          subtitle: member.metadata?['title'] != null
-              ? Text(member.metadata!['title'] as String)
-              : null,
+          title: Text(member.fullName),
+          subtitle: member.title != null ? Text(member.title!) : null,
           onTap: onMemberTap != null ? () => onMemberTap!(member) : null,
           trailing: isAdmin
               ? PopupMenuButton<String>(

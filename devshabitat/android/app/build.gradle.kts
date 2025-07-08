@@ -11,8 +11,8 @@ plugins {
 
 android {
     namespace = "site.tunckankilic.devshabitat"
-    compileSdk = 34
-    ndkVersion = "25.1.8937393"
+    compileSdk = 35
+    ndkVersion = "27.0.12077973"
 
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_11
@@ -29,7 +29,7 @@ android {
         // You can update the following values to match your application needs.
         // For more information, see: https://flutter.dev/to/review-gradle-config.
         minSdk = 24
-        targetSdk = 34
+        targetSdk = 35
         versionCode = 1
         versionName = "1.0.0"
         
@@ -86,18 +86,6 @@ android {
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
             )
-        }
-        
-        create("profile") {
-            initWith(getByName("release"))
-            isDebuggable = false
-            isMinifyEnabled = true
-            isShrinkResources = true
-            applicationIdSuffix = ".profile"
-            versionNameSuffix = "-profile"
-            
-            buildConfigField("boolean", "DEBUG_MODE", "false")
-            buildConfigField("String", "API_BASE_URL", "\"https://staging-api.devshabitat.com\"")
         }
     }
     

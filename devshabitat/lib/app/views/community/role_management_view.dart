@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../../controllers/community/role_controller.dart';
 import '../../models/community/role_model.dart';
-import '../../models/user_model.dart';
+import '../../models/user_profile_model.dart';
 
 class RoleManagementView extends GetView<RoleController> {
   const RoleManagementView({Key? key}) : super(key: key);
@@ -95,10 +95,10 @@ class RoleManagementView extends GetView<RoleController> {
                             ? NetworkImage(member.photoUrl!)
                             : null,
                         child: member.photoUrl == null
-                            ? Text(member.displayName ?? "")
+                            ? Text(member.fullName ?? "")
                             : null,
                       ),
-                      title: Text(member.displayName ?? ""),
+                      title: Text(member.fullName ?? ""),
                       subtitle: Wrap(
                         spacing: 4,
                         children: roles
@@ -436,7 +436,7 @@ class RoleManagementView extends GetView<RoleController> {
     );
   }
 
-  void _showManageUserRolesDialog(BuildContext context, UserModel user) {
+  void _showManageUserRolesDialog(BuildContext context, UserProfile user) {
     final selectedRoles = <String>{}.obs;
 
     Get.dialog(
@@ -447,7 +447,7 @@ class RoleManagementView extends GetView<RoleController> {
             mainAxisSize: MainAxisSize.min,
             children: [
               Text(
-                '${user.displayName ?? ""} - Roller',
+                '${user.fullName} - Roller',
                 style: const TextStyle(
                   fontSize: 20,
                   fontWeight: FontWeight.bold,

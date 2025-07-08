@@ -1,7 +1,7 @@
+import 'package:devshabitat/app/models/user_profile_model.dart';
 import 'package:get/get.dart';
 import '../services/github_service.dart';
 import '../services/developer_matching_service.dart';
-import '../models/user_model.dart';
 import '../core/services/error_handler_service.dart';
 
 class DeveloperMatchingController extends GetxController {
@@ -9,10 +9,10 @@ class DeveloperMatchingController extends GetxController {
   final DeveloperMatchingService _matchingService = Get.find();
   final ErrorHandlerService _errorHandler = Get.find();
 
-  final RxList<UserModel> similarDevelopers = <UserModel>[].obs;
+  final RxList<UserProfile> similarDevelopers = <UserProfile>[].obs;
   final RxList<Map<String, dynamic>> projectSuggestions =
       <Map<String, dynamic>>[].obs;
-  final RxList<UserModel> potentialMentors = <UserModel>[].obs;
+  final RxList<UserProfile> potentialMentors = <UserProfile>[].obs;
   final RxBool isLoading = false.obs;
   final RxString error = ''.obs;
 
@@ -96,7 +96,7 @@ class DeveloperMatchingController extends GetxController {
   }
 
   // Eşleşme skoru hesaplama
-  double calculateMatchScore(UserModel developer) {
+  double calculateMatchScore(UserProfile developer) {
     try {
       return _matchingService.calculateMatchScore(developer);
     } catch (e) {

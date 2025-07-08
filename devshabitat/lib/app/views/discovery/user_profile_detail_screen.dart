@@ -91,14 +91,14 @@ class UserProfileDetailScreen extends GetView<UserProfileController> {
             const Icon(Icons.location_on_outlined, size: 16),
             const SizedBox(width: 4),
             Text(
-              user.location.toString(),
+              user.locationName ?? "Konum belirtilmemiş",
               style: Get.textTheme.bodyMedium,
             ),
             const SizedBox(width: 16),
             const Icon(Icons.business_outlined, size: 16),
             const SizedBox(width: 4),
             Text(
-              user.company ?? "No Company",
+              user.company ?? "Şirket belirtilmemiş",
               style: Get.textTheme.bodyMedium,
             ),
           ],
@@ -117,7 +117,7 @@ class UserProfileDetailScreen extends GetView<UserProfileController> {
         ),
         const SizedBox(height: 8),
         Text(
-          user.bio ?? "No Bio",
+          user.bio ?? "Henüz bir biyografi eklenmemiş",
           style: Get.textTheme.bodyMedium,
         ),
       ],
@@ -162,7 +162,8 @@ class UserProfileDetailScreen extends GetView<UserProfileController> {
           physics: const NeverScrollableScrollPhysics(),
           itemCount: user.workExperience.length,
           itemBuilder: (context, index) {
-            final experience = user.workExperience[index];
+            final experienceMap = user.workExperience[index];
+            final experience = WorkExperience.fromMap(experienceMap);
             return ListTile(
               contentPadding: EdgeInsets.zero,
               leading: const Icon(Icons.work_outline),
@@ -183,14 +184,14 @@ class UserProfileDetailScreen extends GetView<UserProfileController> {
       children: [
         if (user.socialLinks['github'] != null)
           ElevatedButton.icon(
-            onPressed: () => controller.openGitHub(user.socialLinks['github']),
+            onPressed: () => controller.openGitHub(user.socialLinks['github']!),
             icon: const Icon(Icons.code),
             label: const Text('GitHub'),
           ),
         if (user.socialLinks['linkedin'] != null)
           ElevatedButton.icon(
             onPressed: () =>
-                controller.openLinkedIn(user.socialLinks['linkedin']),
+                controller.openLinkedIn(user.socialLinks['linkedin']!),
             icon: const Icon(Icons.business_center),
             label: const Text('LinkedIn'),
           ),

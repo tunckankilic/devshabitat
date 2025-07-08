@@ -1,7 +1,7 @@
+import 'package:devshabitat/app/models/user_profile_model.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../controllers/developer_matching_controller.dart';
-import '../models/user_model.dart';
 import '../models/privacy_settings_model.dart';
 
 class DeveloperMatchingWidget extends StatelessWidget {
@@ -55,9 +55,6 @@ class SkillMatchCard extends GetView<DeveloperMatchingController> {
                 itemCount: controller.similarDevelopers.length,
                 itemBuilder: (context, index) {
                   final developer = controller.similarDevelopers[index];
-                  if (!developer.privacySettings.isProfilePublic) {
-                    return const SizedBox.shrink();
-                  }
                   return DeveloperCard(
                     developer: developer,
                     matchScore: controller.calculateMatchScore(developer),
@@ -156,9 +153,6 @@ class MentorshipCard extends GetView<DeveloperMatchingController> {
                 itemCount: controller.potentialMentors.length,
                 itemBuilder: (context, index) {
                   final mentor = controller.potentialMentors[index];
-                  if (!mentor.privacySettings.allowMentorshipRequests) {
-                    return const SizedBox.shrink();
-                  }
                   return MentorCard(
                     mentor: mentor,
                     onRequest: () => controller.sendMentorshipRequest(
@@ -176,7 +170,7 @@ class MentorshipCard extends GetView<DeveloperMatchingController> {
 }
 
 class DeveloperCard extends StatelessWidget {
-  final UserModel developer;
+  final UserProfile developer;
   final double matchScore;
   final VoidCallback onConnect;
 
@@ -195,23 +189,22 @@ class DeveloperCard extends StatelessWidget {
         leading: CircleAvatar(
           backgroundImage: NetworkImage(developer.photoUrl ?? ''),
         ),
-        title: Text(developer.displayName ?? ''),
+        title: Text(developer.fullName),
         subtitle: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            if (developer.privacySettings.showBio) Text(developer.bio ?? ''),
+            if (developer.bio != null) Text(developer.bio!),
             const SizedBox(height: 4),
-            if (developer.privacySettings.showTechnologies)
-              Wrap(
-                spacing: 4,
-                children: developer.technologies
-                    .map((tech) => Chip(
-                          label: Text(tech),
-                          backgroundColor:
-                              Theme.of(context).primaryColor.withOpacity(0.1),
-                        ))
-                    .toList(),
-              ),
+            Wrap(
+              spacing: 4,
+              children: developer.skills
+                  .map((tech) => Chip(
+                        label: Text(tech),
+                        backgroundColor:
+                            Theme.of(context).primaryColor.withOpacity(0.1),
+                      ))
+                  .toList(),
+            ),
           ],
         ),
         trailing: Column(
@@ -221,11 +214,10 @@ class DeveloperCard extends StatelessWidget {
               '${(matchScore * 100).toInt()}% Eşleşme',
               style: Theme.of(context).textTheme.bodySmall,
             ),
-            if (developer.privacySettings.allowConnectionRequests)
-              ElevatedButton(
-                onPressed: onConnect,
-                child: const Text('Bağlantı Kur'),
-              ),
+            ElevatedButton(
+              onPressed: onConnect,
+              child: const Text('Bağlantı Kur'),
+            ),
           ],
         ),
       ),
@@ -275,7 +267,7 @@ class ProjectSuggestionCard extends StatelessWidget {
 }
 
 class MentorCard extends StatelessWidget {
-  final UserModel mentor;
+  final UserProfile mentor;
   final VoidCallback onRequest;
 
   const MentorCard({
@@ -292,23 +284,22 @@ class MentorCard extends StatelessWidget {
         leading: CircleAvatar(
           backgroundImage: NetworkImage(mentor.photoUrl ?? ''),
         ),
-        title: Text(mentor.displayName ?? ''),
+        title: Text(mentor.fullName),
         subtitle: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            if (mentor.privacySettings.showBio) Text(mentor.bio ?? ''),
+            if (mentor.bio != null) Text(mentor.bio!),
             const SizedBox(height: 4),
-            if (mentor.privacySettings.showTechnologies)
-              Wrap(
-                spacing: 4,
-                children: mentor.technologies
-                    .map((tech) => Chip(
-                          label: Text(tech),
-                          backgroundColor:
-                              Theme.of(context).primaryColor.withOpacity(0.1),
-                        ))
-                    .toList(),
-              ),
+            Wrap(
+              spacing: 4,
+              children: mentor.skills
+                  .map((tech) => Chip(
+                        label: Text(tech),
+                        backgroundColor:
+                            Theme.of(context).primaryColor.withOpacity(0.1),
+                      ))
+                  .toList(),
+            ),
           ],
         ),
         trailing: ElevatedButton(

@@ -1,6 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:devshabitat/app/models/community/membership_model.dart';
-import '../../models/user_model.dart';
+import 'package:devshabitat/app/models/user_profile_model.dart';
 
 class MembershipService {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
@@ -370,7 +370,7 @@ class MembershipService {
   }
 
   // Topluluk üyelerini detaylı getirme
-  Future<List<UserModel>> getCommunityMembersDetailed(
+  Future<List<UserProfile>> getCommunityMembersDetailed(
       String communityId) async {
     try {
       final communityDoc =
@@ -389,14 +389,16 @@ class MembershipService {
           .where(FieldPath.documentId, whereIn: memberIds)
           .get();
 
-      return userDocs.docs.map((doc) => UserModel.fromFirestore(doc)).toList();
+      return userDocs.docs
+          .map((doc) => UserProfile.fromFirestore(doc))
+          .toList();
     } catch (e) {
       throw Exception('Üyeler getirilemedi: $e');
     }
   }
 
   // Bekleyen üyeleri getirme
-  Future<List<UserModel>> getPendingMembers(String communityId) async {
+  Future<List<UserProfile>> getPendingMembers(String communityId) async {
     try {
       final communityDoc =
           await _firestore.collection('communities').doc(communityId).get();
@@ -414,7 +416,9 @@ class MembershipService {
           .where(FieldPath.documentId, whereIn: pendingMemberIds)
           .get();
 
-      return userDocs.docs.map((doc) => UserModel.fromFirestore(doc)).toList();
+      return userDocs.docs
+          .map((doc) => UserProfile.fromFirestore(doc))
+          .toList();
     } catch (e) {
       throw Exception('Bekleyen üyeler getirilemedi: $e');
     }
