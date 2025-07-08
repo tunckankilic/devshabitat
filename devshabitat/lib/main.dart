@@ -9,9 +9,14 @@ import 'app/bindings/app_binding.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'app/services/background_message_handler_service.dart';
 import 'app/services/deep_linking_service.dart';
+import 'app/core/config/app_config.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
+
+  // AppConfig servisini başlat
+  final config = Get.put(AppConfig());
+  await config.initialize();
 
   // Firebase'i başlat
   await Firebase.initializeApp(
