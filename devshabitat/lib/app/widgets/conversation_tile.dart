@@ -45,8 +45,7 @@ class ConversationTile extends StatelessWidget {
             ),
           ),
           Text(
-            timeago.format(conversation.lastMessageTime ?? DateTime.now(),
-                locale: 'tr'),
+            timeago.format(conversation.lastMessageTime, locale: 'tr'),
             style: theme.textTheme.bodySmall?.copyWith(
               color: theme.colorScheme.onSurfaceVariant,
             ),

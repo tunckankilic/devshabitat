@@ -146,8 +146,6 @@ class EventDiscoveryView extends GetView<EventDiscoveryController> {
         return 'Konferans';
       case EventType.other:
         return 'Diğer';
-      default:
-        return 'Diğer';
     }
   }
 }

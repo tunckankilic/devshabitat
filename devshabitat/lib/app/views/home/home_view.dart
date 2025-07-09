@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import '../../controllers/home_controller.dart';
-import '../../controllers/responsive_controller.dart';
 import '../base/base_view.dart';
 import 'widgets/profile_summary_card.dart';
 import 'widgets/connections_overview_card.dart';
@@ -16,8 +15,6 @@ class HomeView extends BaseView<HomeController> {
 
   @override
   Widget buildView(BuildContext context) {
-    final ResponsiveController responsive = Get.find<ResponsiveController>();
-
     return Scaffold(
       appBar: AppBar(
         title: Text(

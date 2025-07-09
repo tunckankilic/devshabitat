@@ -67,7 +67,7 @@ class ProfileSummaryCard extends GetView<AuthController> {
             Obx(() {
               final profile = controller.userProfile;
               return Text(
-                profile?['bio'] ?? 'Henüz bir biyografi eklenmemiş.',
+                profile['bio'] ?? 'Henüz bir biyografi eklenmemiş.',
                 style: TextStyle(fontSize: 14.sp),
               );
             }),

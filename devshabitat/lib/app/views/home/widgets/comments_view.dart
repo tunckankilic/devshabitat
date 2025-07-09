@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../../../controllers/comments_controller.dart';
 import '../../../models/comment_model.dart';
-import '../../../models/feed_item.dart';
 
 class CommentsView extends GetView<CommentsController> {
   const CommentsView({super.key});

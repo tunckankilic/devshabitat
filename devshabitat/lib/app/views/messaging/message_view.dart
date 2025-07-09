@@ -74,12 +74,12 @@ class MessageView extends BaseView<MessageChatController> {
       leading: CircleAvatar(
         radius: 24.r,
         child: Text(
-          (conversation.participantName ?? 'A')[0].toUpperCase(),
+          (conversation.participantName)[0].toUpperCase(),
           style: TextStyle(fontSize: 16.sp),
         ),
       ),
       title: Text(
-        conversation.participantName ?? 'Anonim',
+        conversation.participantName,
         style: TextStyle(fontSize: 16.sp),
       ),
       subtitle: Text(
