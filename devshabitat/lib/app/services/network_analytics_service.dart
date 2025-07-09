@@ -76,18 +76,76 @@ class NetworkAnalyticsService extends GetxService {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
   final Logger _logger = Get.find<Logger>();
 
+  // Memory management
+  final Map<String, NetworkStats> _statsCache = {};
+  final Map<String, DateTime> _cacheTimestamps = {};
+  static const Duration _cacheExpiry = Duration(minutes: 30);
+  static const int _maxCacheSize = 50;
+  static const int _batchSize = 100; // Firestore batch size
+
+  @override
+  void onClose() {
+    _clearCache();
+    super.onClose();
+  }
+
+  void _clearCache() {
+    _statsCache.clear();
+    _cacheTimestamps.clear();
+  }
+
+  void _cleanupExpiredCache() {
+    final now = DateTime.now();
+    _cacheTimestamps.removeWhere((key, timestamp) {
+      if (now.difference(timestamp) > _cacheExpiry) {
+        _statsCache.remove(key);
+        return true;
+      }
+      return false;
+    });
+
+    // Cache boyutunu kontrol et
+    if (_statsCache.length > _maxCacheSize) {
+      final sortedEntries = _cacheTimestamps.entries.toList()
+        ..sort((a, b) => a.value.compareTo(b.value));
+
+      final toRemove = _statsCache.length - _maxCacheSize;
+      for (int i = 0; i < toRemove; i++) {
+        final key = sortedEntries[i].key;
+        _statsCache.remove(key);
+        _cacheTimestamps.remove(key);
+      }
+    }
+  }
+
   // Basit network istatistikleri hesapla
   Future<NetworkStats> calculateNetworkStats(String userId) async {
     try {
-      // Kullanıcının bağlantılarını getir
+      // Cache kontrolü
+      final cacheKey = 'network_stats_$userId';
+      final cachedStats = _statsCache[cacheKey];
+      final cacheTimestamp = _cacheTimestamps[cacheKey];
+
+      if (cachedStats != null && cacheTimestamp != null) {
+        if (DateTime.now().difference(cacheTimestamp) < _cacheExpiry) {
+          return cachedStats;
+        }
+      }
+
+      // Cache temizliği
+      _cleanupExpiredCache();
+
+      // Kullanıcının bağlantılarını getir (batch processing)
       final connectionsQuery = await _firestore
           .collection('connections')
           .where('fromUserId', isEqualTo: userId)
+          .limit(_batchSize)
           .get();
 
       final incomingConnectionsQuery = await _firestore
           .collection('connections')
           .where('toUserId', isEqualTo: userId)
+          .limit(_batchSize)
           .get();
 
       // Temel sayıları hesapla
@@ -123,22 +181,24 @@ class NetworkAnalyticsService extends GetxService {
       final connectionSuccessRate =
           totalConnections > 0 ? (acceptedCount / totalConnections) * 100 : 0.0;
 
-      // Network reach hesapla (ikinci derece bağlantılar)
-      final networkReach = await _calculateNetworkReach(userId);
+      // Network reach hesapla (ikinci derece bağlantılar) - optimize edilmiş
+      final networkReach = await _calculateNetworkReachOptimized(userId);
 
-      // Top skills hesapla
-      final topSkills = await _getTopSkillsForUser(userId);
+      // Top skills hesapla - optimize edilmiş
+      final topSkills = await _getTopSkillsForUserOptimized(userId);
 
-      // Skill dağılımını hesapla
-      final skillDistribution = await _calculateSkillDistribution(userId);
+      // Skill dağılımını hesapla - optimize edilmiş
+      final skillDistribution =
+          await _calculateSkillDistributionOptimized(userId);
 
-      // Ortak ilgileri bul
-      final commonInterests = await _getCommonInterests(userId);
+      // Ortak ilgileri bul - optimize edilmiş
+      final commonInterests = await _getCommonInterestsOptimized(userId);
 
-      // Growth rate hesapla
-      final networkGrowthRate = await _calculateNetworkGrowthRate(userId);
+      // Growth rate hesapla - optimize edilmiş
+      final networkGrowthRate =
+          await _calculateNetworkGrowthRateOptimized(userId);
 
-      return NetworkStats(
+      final stats = NetworkStats(
         totalConnections: totalConnections,
         pendingConnections: pendingCount,
         acceptedConnections: acceptedCount,
@@ -150,6 +210,12 @@ class NetworkAnalyticsService extends GetxService {
         commonInterests: commonInterests,
         networkGrowthRate: networkGrowthRate,
       );
+
+      // Cache'e kaydet
+      _statsCache[cacheKey] = stats;
+      _cacheTimestamps[cacheKey] = DateTime.now();
+
+      return stats;
     } catch (e) {
       _logger.e('Network istatistikleri hesaplanırken hata: $e');
       throw Exception('Network istatistikleri hesaplanamadı');
@@ -357,64 +423,85 @@ class NetworkAnalyticsService extends GetxService {
     }
   }
 
-  // Yardımcı metodlar
-  Future<int> _calculateNetworkReach(String userId) async {
+  // Optimize edilmiş network reach hesaplama
+  Future<int> _calculateNetworkReachOptimized(String userId) async {
     try {
-      // Direkt bağlantıları al
+      // Sadece kabul edilmiş bağlantıları al
       final directConnections = await _firestore
           .collection('connections')
           .where('fromUserId', isEqualTo: userId)
           .where('status', isEqualTo: 'accepted')
+          .limit(_batchSize)
           .get();
 
-      final Set<String> secondDegreeConnections = {};
+      final Set<String> secondDegreeUsers = {};
 
-      // Her direkt bağlantının bağlantılarını al
+      // İkinci derece bağlantıları bul
       for (final doc in directConnections.docs) {
         final connection = ConnectionModel.fromFirestore(doc);
-        final friendConnections = await _firestore
+
+        // Bu bağlantının bağlantılarını al
+        final secondConnections = await _firestore
             .collection('connections')
             .where('fromUserId', isEqualTo: connection.toUserId)
             .where('status', isEqualTo: 'accepted')
+            .limit(_batchSize)
             .get();
 
-        for (final friendDoc in friendConnections.docs) {
-          final friendConnection = ConnectionModel.fromFirestore(friendDoc);
-          if (friendConnection.toUserId != userId) {
-            secondDegreeConnections.add(friendConnection.toUserId);
+        for (final secondDoc in secondConnections.docs) {
+          final secondConnection = ConnectionModel.fromFirestore(secondDoc);
+          if (secondConnection.toUserId != userId) {
+            secondDegreeUsers.add(secondConnection.toUserId);
           }
         }
       }
 
-      return directConnections.docs.length + secondDegreeConnections.length;
+      return secondDegreeUsers.length;
     } catch (e) {
       _logger.e('Network reach hesaplanırken hata: $e');
       return 0;
     }
   }
 
-  Future<List<String>> _getTopSkillsForUser(String userId) async {
+  // Optimize edilmiş top skills hesaplama
+  Future<List<String>> _getTopSkillsForUserOptimized(String userId) async {
     try {
-      // Kullanıcının bağlantılarının en çok kullandığı skill'leri bul
       final connections = await _firestore
           .collection('connections')
           .where('fromUserId', isEqualTo: userId)
           .where('status', isEqualTo: 'accepted')
+          .limit(_batchSize)
           .get();
 
       final Map<String, int> skillCounts = {};
 
-      for (final doc in connections.docs) {
-        final connection = ConnectionModel.fromFirestore(doc);
-        final userDoc =
-            await _firestore.collection('users').doc(connection.toUserId).get();
+      // Batch processing ile user bilgilerini al
+      final userIds = connections.docs
+          .map((doc) => ConnectionModel.fromFirestore(doc).toUserId)
+          .toSet()
+          .toList();
 
-        if (userDoc.exists) {
-          final userData = userDoc.data()!;
-          final skills = List<String>.from(userData['skills'] ?? []);
+      for (int i = 0; i < userIds.length; i += _batchSize) {
+        final batch = userIds.skip(i).take(_batchSize);
 
-          for (final skill in skills) {
-            skillCounts[skill] = (skillCounts[skill] ?? 0) + 1;
+        for (final connectionUserId in batch) {
+          try {
+            final userDoc = await _firestore
+                .collection('users')
+                .doc(connectionUserId)
+                .get();
+
+            if (userDoc.exists) {
+              final userData = userDoc.data()!;
+              final skills = List<String>.from(userData['skills'] ?? []);
+
+              for (final skill in skills) {
+                skillCounts[skill] = (skillCounts[skill] ?? 0) + 1;
+              }
+            }
+          } catch (e) {
+            _logger.w('Error getting user data for $connectionUserId: $e');
+            continue;
           }
         }
       }
@@ -430,7 +517,9 @@ class NetworkAnalyticsService extends GetxService {
     }
   }
 
-  Future<Map<String, int>> _calculateSkillDistribution(String userId) async {
+  // Optimize edilmiş skill dağılımı hesaplama
+  Future<Map<String, int>> _calculateSkillDistributionOptimized(
+      String userId) async {
     try {
       final userDoc = await _firestore.collection('users').doc(userId).get();
       if (!userDoc.exists) return {};
@@ -453,7 +542,8 @@ class NetworkAnalyticsService extends GetxService {
     }
   }
 
-  Future<List<String>> _getCommonInterests(String userId) async {
+  // Optimize edilmiş ortak ilgiler hesaplama
+  Future<List<String>> _getCommonInterestsOptimized(String userId) async {
     try {
       final userDoc = await _firestore.collection('users').doc(userId).get();
       if (!userDoc.exists) return [];
@@ -463,31 +553,47 @@ class NetworkAnalyticsService extends GetxService {
 
       if (userInterests.isEmpty) return [];
 
-      // Kullanıcının bağlantılarının ilgilerini al
+      // Kullanıcının bağlantılarının ilgilerini al - optimize edilmiş
       final connections = await _firestore
           .collection('connections')
           .where('fromUserId', isEqualTo: userId)
           .where('status', isEqualTo: 'accepted')
-          .limit(20) // Performans için sınırla
+          .limit(_batchSize)
           .get();
 
       final Map<String, int> interestCounts = {};
 
-      for (final doc in connections.docs) {
-        final connection = ConnectionModel.fromFirestore(doc);
-        final connectionUserDoc =
-            await _firestore.collection('users').doc(connection.toUserId).get();
+      // Batch processing
+      final connectionUserIds = connections.docs
+          .map((doc) => ConnectionModel.fromFirestore(doc).toUserId)
+          .toList();
 
-        if (connectionUserDoc.exists) {
-          final connectionUserData = connectionUserDoc.data()!;
-          final connectionInterests =
-              List<String>.from(connectionUserData['interests'] ?? []);
+      for (int i = 0; i < connectionUserIds.length; i += _batchSize) {
+        final batch = connectionUserIds.skip(i).take(_batchSize);
 
-          // Ortak ilgileri say
-          for (final interest in connectionInterests) {
-            if (userInterests.contains(interest)) {
-              interestCounts[interest] = (interestCounts[interest] ?? 0) + 1;
+        for (final connectionUserId in batch) {
+          try {
+            final connectionUserDoc = await _firestore
+                .collection('users')
+                .doc(connectionUserId)
+                .get();
+
+            if (connectionUserDoc.exists) {
+              final connectionUserData = connectionUserDoc.data()!;
+              final connectionInterests =
+                  List<String>.from(connectionUserData['interests'] ?? []);
+
+              // Ortak ilgileri say
+              for (final interest in connectionInterests) {
+                if (userInterests.contains(interest)) {
+                  interestCounts[interest] =
+                      (interestCounts[interest] ?? 0) + 1;
+                }
+              }
             }
+          } catch (e) {
+            _logger.w('Error getting connection user data: $e');
+            continue;
           }
         }
       }
@@ -503,7 +609,8 @@ class NetworkAnalyticsService extends GetxService {
     }
   }
 
-  Future<double> _calculateNetworkGrowthRate(String userId) async {
+  // Optimize edilmiş network growth rate hesaplama
+  Future<double> _calculateNetworkGrowthRateOptimized(String userId) async {
     try {
       final now = DateTime.now();
       final thirtyDaysAgo = now.subtract(const Duration(days: 30));
@@ -516,6 +623,7 @@ class NetworkAnalyticsService extends GetxService {
           .where('status', isEqualTo: 'accepted')
           .where('createdAt',
               isGreaterThanOrEqualTo: Timestamp.fromDate(thirtyDaysAgo))
+          .limit(_batchSize)
           .get();
 
       // Önceki 30 günün bağlantıları
@@ -526,6 +634,7 @@ class NetworkAnalyticsService extends GetxService {
           .where('createdAt',
               isGreaterThanOrEqualTo: Timestamp.fromDate(sixtyDaysAgo))
           .where('createdAt', isLessThan: Timestamp.fromDate(thirtyDaysAgo))
+          .limit(_batchSize)
           .get();
 
       final recentCount = recentConnections.docs.length;

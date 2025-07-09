@@ -152,14 +152,48 @@ class NotificationService extends GetxService {
   Future<void> _initializeFCMToken() async {
     try {
       isTokenRefreshing.value = true;
+
+      // Önceki token'ı temizle
+      final oldToken = await _firebaseMessaging.getToken();
+      if (oldToken != null) {
+        await _removeOldToken(oldToken);
+      }
+
+      // Yeni token al
       String? token = await _firebaseMessaging.getToken();
       if (token != null) {
         await _updateFCMToken(token);
+      } else {
+        _logger.w('FCM token alınamadı');
+        // Retry mechanism
+        await Future.delayed(const Duration(seconds: 2));
+        token = await _firebaseMessaging.getToken();
+        if (token != null) {
+          await _updateFCMToken(token);
+        }
       }
     } catch (e) {
       _logger.e('Error initializing FCM token: $e');
+      // Fallback: Local token'ı kullan
+      final localToken = _prefs.getString('fcm_token');
+      if (localToken != null) {
+        fcmToken.value = localToken;
+      }
     } finally {
       isTokenRefreshing.value = false;
+    }
+  }
+
+  Future<void> _removeOldToken(String oldToken) async {
+    try {
+      final String? userId = Get.find<AuthRepository>().currentUser?.uid;
+      if (userId != null) {
+        await _firestore.collection('users').doc(userId).update({
+          'fcmTokens': FieldValue.arrayRemove([oldToken]),
+        });
+      }
+    } catch (e) {
+      _logger.e('Error removing old FCM token: $e');
     }
   }
 
@@ -171,6 +205,11 @@ class NotificationService extends GetxService {
         await _firestore.collection('users').doc(userId).update({
           'fcmTokens': FieldValue.arrayUnion([token]),
           'lastTokenUpdate': FieldValue.serverTimestamp(),
+          'deviceInfo': {
+            'platform': GetPlatform.isIOS ? 'iOS' : 'Android',
+            'appVersion': '1.0.0', // TODO: Get from app info
+            'lastSeen': FieldValue.serverTimestamp(),
+          },
         });
 
         // Token'ı local'e kaydet
@@ -178,19 +217,41 @@ class NotificationService extends GetxService {
         fcmToken.value = token;
 
         _logger.i('FCM token updated successfully');
+      } else {
+        _logger.w('User not authenticated, token not saved to Firestore');
+        // Local'e kaydet
+        await _prefs.setString('fcm_token', token);
+        fcmToken.value = token;
       }
     } catch (e) {
       _logger.e('Error updating FCM token: $e');
+      // Local'e kaydetmeyi dene
+      try {
+        await _prefs.setString('fcm_token', token);
+        fcmToken.value = token;
+      } catch (localError) {
+        _logger.e('Error saving token to local storage: $localError');
+      }
     }
   }
 
   void _setupTokenRefreshListener() {
     _firebaseMessaging.onTokenRefresh.listen((String token) async {
       try {
+        _logger.i('FCM token refreshed');
         await _updateFCMToken(token);
       } catch (e) {
         _logger.e('Error in token refresh listener: $e');
+        // Retry mechanism
+        await Future.delayed(const Duration(seconds: 5));
+        try {
+          await _updateFCMToken(token);
+        } catch (retryError) {
+          _logger.e('Error in token refresh retry: $retryError');
+        }
       }
+    }, onError: (error) {
+      _logger.e('Token refresh stream error: $error');
     });
   }
 

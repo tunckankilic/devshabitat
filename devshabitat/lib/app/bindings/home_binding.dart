@@ -6,8 +6,6 @@ class HomeBinding extends Bindings {
   @override
   void dependencies() {
     Get.put(FeedRepository());
-    Get.put(HomeController(
-      feedRepository: Get.find(),
-    ));
+    Get.put(HomeController());
   }
 }

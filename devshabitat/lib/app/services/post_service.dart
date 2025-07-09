@@ -6,12 +6,14 @@ import '../models/post.dart';
 import 'image_upload_service.dart';
 import '../core/services/error_handler_service.dart';
 import 'package:rxdart/rxdart.dart';
+import 'package:logger/logger.dart';
 
 class PostService extends GetxService {
   final FirebaseFirestore _firestore;
   final FirebaseAuth _auth;
   final ImageUploadService _imageUploadService;
   final ErrorHandlerService _errorHandler;
+  final Logger _logger;
 
   // Önbellekleme için değişkenler
   final Map<String, Post> _postCache = {};
@@ -21,24 +23,30 @@ class PostService extends GetxService {
   final BehaviorSubject<List<Post>> _postsController =
       BehaviorSubject<List<Post>>();
 
+  // Timer for cache cleanup
+  Timer? _cleanupTimer;
+
   PostService({
     FirebaseFirestore? firestore,
     FirebaseAuth? auth,
     ImageUploadService? imageUploadService,
     ErrorHandlerService? errorHandler,
+    Logger? logger,
   })  : _firestore = firestore ?? FirebaseFirestore.instance,
         _auth = auth ?? FirebaseAuth.instance,
         _imageUploadService = imageUploadService ?? Get.find(),
-        _errorHandler = errorHandler ?? Get.find();
+        _errorHandler = errorHandler ?? Get.find(),
+        _logger = logger ?? Get.find();
 
   @override
   void onInit() {
     super.onInit();
-    _startPeriodicCacheCleanup();
+    _startCleanupTimer();
   }
 
-  void _startPeriodicCacheCleanup() {
-    Timer.periodic(const Duration(minutes: 30), (_) {
+  void _startCleanupTimer() {
+    _cleanupTimer?.cancel();
+    _cleanupTimer = Timer.periodic(const Duration(minutes: 30), (_) {
       _cleanupCache();
     });
   }
@@ -349,6 +357,7 @@ class PostService extends GetxService {
 
   @override
   void onClose() {
+    _cleanupTimer?.cancel();
     _postsController.close();
     _postCache.clear();
     _userPostsCache.clear();

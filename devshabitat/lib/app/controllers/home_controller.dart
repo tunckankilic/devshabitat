@@ -1,9 +1,8 @@
 import 'package:get/get.dart';
 import '../services/github_service.dart';
 import '../repositories/auth_repository.dart';
-import '../core/services/snackbar_service.dart';
 import '../models/feed_item.dart';
-import '../repositories/feed_repository.dart';
+
 import 'package:flutter/foundation.dart';
 import '../models/notification_model.dart';
 import '../services/notification_service.dart';
@@ -15,7 +14,6 @@ class HomeController extends GetxController {
   final _authRepository = Get.find<AuthRepository>();
   final _githubService = Get.find<GithubService>();
   final _notificationService = Get.find<NotificationService>();
-  final FeedRepository _feedRepository;
   final FeedService _feedService = Get.find();
   final ConnectionService _connectionService = Get.find();
   final AuthController _authController = Get.find();
@@ -30,9 +28,9 @@ class HomeController extends GetxController {
   final Rx<FeedItem?> selectedFeedItem = Rx<FeedItem?>(null);
   final RxList<NotificationModel> notifications = <NotificationModel>[].obs;
 
-  HomeController({
-    required FeedRepository feedRepository,
-  }) : _feedRepository = feedRepository;
+  HomeController() {
+    // Empty constructor
+  }
 
   @override
   void onInit() {
