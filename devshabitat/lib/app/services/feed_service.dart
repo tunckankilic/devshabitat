@@ -202,13 +202,21 @@ class FeedService extends GetxService {
       final userId = _authController.currentUser?.uid;
       if (userId == null) throw 'Kullanıcı oturumu bulunamadı';
 
+      final user = _authController.currentUser;
+      final userName = user?.displayName ?? 'Kullanıcı';
+      final userPhotoUrl = user?.photoURL;
+
       final feedRef = _firestore.collection('feed').doc(feedItemId);
       final commentsRef = feedRef.collection('comments');
 
       await commentsRef.add({
         'userId': userId,
+        'userName': userName,
+        'userPhotoUrl': userPhotoUrl,
         'comment': comment,
         'createdAt': FieldValue.serverTimestamp(),
+        'likesCount': 0,
+        'isLiked': false,
       });
 
       await feedRef.update({
@@ -225,6 +233,7 @@ class FeedService extends GetxService {
     int limit = 10,
   }) async {
     try {
+      final userId = _authController.currentUser?.uid;
       final commentsRef = _firestore
           .collection('feed')
           .doc(feedItemId)
@@ -233,10 +242,101 @@ class FeedService extends GetxService {
           .limit(limit);
 
       final snapshot = await commentsRef.get();
-      return snapshot.docs.map((doc) => doc.data()).toList();
+      final comments = <Map<String, dynamic>>[];
+
+      for (final doc in snapshot.docs) {
+        final commentData = doc.data();
+        final commentId = doc.id;
+
+        // Kullanıcının bu yorumu beğenip beğenmediğini kontrol et
+        bool isLiked = false;
+        if (userId != null) {
+          final likeDoc = await _firestore
+              .collection('feed')
+              .doc(feedItemId)
+              .collection('comments')
+              .doc(commentId)
+              .collection('likes')
+              .doc(userId)
+              .get();
+          isLiked = likeDoc.exists;
+        }
+
+        comments.add({
+          ...commentData,
+          'id': commentId,
+          'isLiked': isLiked,
+        });
+      }
+
+      return comments;
     } catch (e) {
       print('Yorumlar alınırken hata: $e');
       return [];
+    }
+  }
+
+  Future<void> deleteComment(String feedItemId, String commentId) async {
+    try {
+      final userId = _authController.currentUser?.uid;
+      if (userId == null) throw 'Kullanıcı oturumu bulunamadı';
+
+      final feedRef = _firestore.collection('feed').doc(feedItemId);
+      final commentRef = feedRef.collection('comments').doc(commentId);
+
+      // Yorumun kullanıcıya ait olup olmadığını kontrol et
+      final commentDoc = await commentRef.get();
+      if (!commentDoc.exists) {
+        throw 'Yorum bulunamadı';
+      }
+
+      final commentData = commentDoc.data();
+      if (commentData?['userId'] != userId) {
+        throw 'Bu yorumu silme yetkiniz yok';
+      }
+
+      // Yorumu sil
+      await commentRef.delete();
+
+      // Feed öğesinin yorum sayısını güncelle
+      await feedRef.update({
+        'commentsCount': FieldValue.increment(-1),
+      });
+    } catch (e) {
+      print('Yorum silinirken hata: $e');
+      rethrow;
+    }
+  }
+
+  Future<void> likeComment(String feedItemId, String commentId) async {
+    try {
+      final userId = _authController.currentUser?.uid;
+      if (userId == null) throw 'Kullanıcı oturumu bulunamadı';
+
+      final feedRef = _firestore.collection('feed').doc(feedItemId);
+      final commentRef = feedRef.collection('comments').doc(commentId);
+      final likesRef = commentRef.collection('likes');
+
+      final likeDoc = await likesRef.doc(userId).get();
+      if (likeDoc.exists) {
+        // Beğeniyi kaldır
+        await likeDoc.reference.delete();
+        await commentRef.update({
+          'likesCount': FieldValue.increment(-1),
+        });
+      } else {
+        // Beğeni ekle
+        await likesRef.doc(userId).set({
+          'userId': userId,
+          'createdAt': FieldValue.serverTimestamp(),
+        });
+        await commentRef.update({
+          'likesCount': FieldValue.increment(1),
+        });
+      }
+    } catch (e) {
+      print('Yorum beğenilirken hata: $e');
+      rethrow;
     }
   }
 }

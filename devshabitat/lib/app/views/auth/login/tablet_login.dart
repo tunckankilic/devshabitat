@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import '../../../controllers/auth_controller.dart';
-import '../../../controllers/responsive_controller.dart';
 import '../../base/base_view.dart';
 import '../widgets/responsive_form_field.dart';
 import '../widgets/social_login_button.dart';

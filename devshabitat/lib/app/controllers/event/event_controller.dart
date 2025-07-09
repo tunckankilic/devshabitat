@@ -62,7 +62,7 @@ class EventController extends GetxController {
       if (userId == null) {
         throw Exception('Kullanıcı oturum açmamış');
       }
-      final registration = await _registrationService.registerForEvent(
+      await _registrationService.registerForEvent(
         eventId,
         userId,
       );

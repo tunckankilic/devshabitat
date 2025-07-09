@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:devshabitat/app/controllers/video/video_call_controller.dart';
 
 class CallControlsWidget extends StatelessWidget {
   final bool isAudioEnabled;

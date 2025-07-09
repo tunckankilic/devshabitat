@@ -280,7 +280,7 @@ class EventDiscoveryController extends GetxController {
         }
 
         // Konum filtresi
-        if (currentPosition.value != null && event.geoPoint != null) {
+        if (event.geoPoint != null) {
           final distance = calculateDistance(
             currentPosition.value.latitude,
             currentPosition.value.longitude,

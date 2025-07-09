@@ -1,6 +1,5 @@
 import 'dart:io';
 import 'dart:math';
-import 'package:flutter/foundation.dart';
 import 'package:get/get.dart';
 import 'package:path/path.dart' as path;
 import 'package:mime/mime.dart';
@@ -9,7 +8,6 @@ import 'package:uuid/uuid.dart';
 import 'package:flutter_image_compress/flutter_image_compress.dart';
 import 'package:logger/logger.dart';
 import '../core/services/error_handler_service.dart';
-import '../core/config/app_config.dart';
 import '../core/config/security_config.dart';
 import '../core/error/error_handler.dart';
 
@@ -17,7 +15,6 @@ class FileUploadService extends GetxService {
   static FileUploadService get to => Get.find();
 
   final ErrorHandlerService _errorHandler = Get.find();
-  final AppConfig _config = Get.find();
   final FirebaseStorage _storage = FirebaseStorage.instance;
   final _uuid = const Uuid();
   final Logger _logger = Logger();
@@ -221,7 +218,7 @@ class FileUploadService extends GetxService {
     }
 
     // Zararlı dosya kontrolü
-    if (_isPotentiallyDangerousFile(fileExtension, mimeType!)) {
+    if (_isPotentiallyDangerousFile(fileExtension, mimeType)) {
       ErrorHandler.throwError(
         'Güvenlik nedeniyle bu dosya tipi kabul edilmemektedir',
         code: 'DANGEROUS_FILE_TYPE',

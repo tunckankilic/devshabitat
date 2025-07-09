@@ -1,6 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:get/get.dart';
-import '../core/mixins/pagination_mixin.dart';
 
 class LazyLoadingList<T> extends StatefulWidget {
   final List<T> items;

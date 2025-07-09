@@ -17,7 +17,7 @@ class IntegrationController extends GetxController {
       if (event.isStarting) {
         await _videoEventService.startEventVideoCall(event);
       } else if (event.isEnding) {
-        await _videoEventService.endEventVideoCall(event.id!);
+        await _videoEventService.endEventVideoCall(event.id);
       }
     } catch (e) {
       print('Error in event-video integration: $e');
@@ -29,8 +29,7 @@ class IntegrationController extends GetxController {
   Future<void> handleCommunityEventIntegration(
       EventModel event, CommunityModel community) async {
     try {
-      await _communityEventService.linkEventToCommunity(
-          event.id!, community.id!);
+      await _communityEventService.linkEventToCommunity(event.id, community.id);
     } catch (e) {
       print('Error in community-event integration: $e');
       rethrow;

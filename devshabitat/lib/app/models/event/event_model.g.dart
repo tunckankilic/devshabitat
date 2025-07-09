@@ -6,12 +6,6 @@ part of 'event_model.dart';
 // JsonSerializableGenerator
 // **************************************************************************
 
-GeoPointConverter _$GeoPointConverterFromJson(Map<String, dynamic> json) =>
-    GeoPointConverter();
-
-Map<String, dynamic> _$GeoPointConverterToJson(GeoPointConverter instance) =>
-    <String, dynamic>{};
-
 EventModel _$EventModelFromJson(Map<String, dynamic> json) => EventModel(
       id: json['id'] as String,
       title: json['title'] as String,

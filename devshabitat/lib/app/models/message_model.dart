@@ -1,5 +1,4 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:encrypt/encrypt.dart' as encrypt;
 
 /// Mesaj türlerini tanımlayan enum
 enum MessageType { text, image, document, link, audio, video }
@@ -45,26 +44,6 @@ class MessageModel {
   bool get hasMedia => mediaUrl != null;
   bool get hasDocument => documentUrl != null;
   bool get hasLinks => links.isNotEmpty;
-
-  /// Mesajı şifrelemek için kullanılan yardımcı metod
-  static String _encryptContent(String content, String key) {
-    final encrypter =
-        encrypt.Encrypter(encrypt.AES(encrypt.Key.fromUtf8(key.padRight(32))));
-    final iv = encrypt.IV.fromLength(16);
-    return encrypter.encrypt(content, iv: iv).base64;
-  }
-
-  /// Mesajı çözmek için kullanılan yardımcı metod
-  static String _decryptContent(String encryptedContent, String key) {
-    try {
-      final encrypter = encrypt.Encrypter(
-          encrypt.AES(encrypt.Key.fromUtf8(key.padRight(32))));
-      final iv = encrypt.IV.fromLength(16);
-      return encrypter.decrypt64(encryptedContent, iv: iv);
-    } catch (e) {
-      return encryptedContent; // Çözülemezse orijinal içeriği döndür
-    }
-  }
 
   factory MessageModel.fromMap(Map<String, dynamic> map) {
     return MessageModel(

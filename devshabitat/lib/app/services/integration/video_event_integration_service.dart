@@ -4,7 +4,6 @@ import '../video/call_manager_service.dart';
 import '../event/event_service.dart';
 import '../../models/event/event_model.dart';
 import '../../models/video/call_model.dart';
-import '../../models/video/participant_model.dart';
 
 class VideoEventIntegrationService extends GetxService {
   final CallManagerService _callManagerService = Get.find();
@@ -13,21 +12,6 @@ class VideoEventIntegrationService extends GetxService {
 
   Future<void> startEventVideoCall(EventModel event) async {
     try {
-      final String callId = DateTime.now().millisecondsSinceEpoch.toString();
-      final CallModel call = CallModel(
-        id: callId,
-        roomId: 'room_$callId',
-        callType: CallType.video,
-        status: CallStatus.completed,
-        startTime: DateTime.now(),
-        duration: const Duration(seconds: 0),
-        participants: [], // Boş liste ile başlat
-        metadata: {
-          'eventId': event.id,
-          'title': 'Event: ${event.title}',
-        },
-      );
-
       final organizerName = await getOrganizerName(event.id);
       await _callManagerService.initiateCall(
         participantIds: [], // Boş liste ile başlat
@@ -37,7 +21,7 @@ class VideoEventIntegrationService extends GetxService {
       );
 
       // Event servisine call status metodunu ekleyelim
-      await _eventService.updateEventCallStatus(event.id!, true);
+      await _eventService.updateEventCallStatus(event.id, true);
     } catch (e) {
       print('Error starting event video call: $e');
       rethrow;

@@ -10,6 +10,7 @@ import '../models/notification_model.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
+import 'package:package_info_plus/package_info_plus.dart';
 
 class NotificationService extends GetxService {
   static NotificationService get to => Get.find();
@@ -201,13 +202,18 @@ class NotificationService extends GetxService {
     try {
       final String? userId = Get.find<AuthRepository>().currentUser?.uid;
       if (userId != null) {
+        // Uygulama versiyonunu al
+        final PackageInfo packageInfo = await PackageInfo.fromPlatform();
+        final String appVersion =
+            '${packageInfo.version}+${packageInfo.buildNumber}';
+
         // Token'ı Firestore'a kaydet
         await _firestore.collection('users').doc(userId).update({
           'fcmTokens': FieldValue.arrayUnion([token]),
           'lastTokenUpdate': FieldValue.serverTimestamp(),
           'deviceInfo': {
             'platform': GetPlatform.isIOS ? 'iOS' : 'Android',
-            'appVersion': '1.0.0', // TODO: Get from app info
+            'appVersion': appVersion,
             'lastSeen': FieldValue.serverTimestamp(),
           },
         });

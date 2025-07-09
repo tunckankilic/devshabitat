@@ -8,7 +8,6 @@ import 'package:flutter/services.dart' show rootBundle;
 import '../../models/location/location_model.dart';
 import '../../models/location/map_marker_model.dart';
 import '../../services/location/maps_service.dart';
-import 'package:location/location.dart';
 import 'package:devshabitat/app/services/location/location_tracking_service.dart';
 import 'package:permission_handler/permission_handler.dart';
 
@@ -69,7 +68,7 @@ class MapController extends GetxController {
   }
 
   Future<void> _initializeMap() async {
-    markers.value = _mapsService.markers;
+    markers.assignAll(_mapsService.markers);
     // Harita stilini yükle
     await _loadMapStyle();
   }
@@ -110,17 +109,17 @@ class MapController extends GetxController {
 
   Future<void> addMarker(MapMarkerModel marker) async {
     _mapsService.addMarker(marker);
-    markers.value = _mapsService.markers;
+    markers.assignAll(_mapsService.markers);
   }
 
   void removeMarker(String markerId) {
     _mapsService.removeMarker(markerId);
-    markers.value = _mapsService.markers;
+    markers.assignAll(_mapsService.markers);
   }
 
   void clearMarkers() {
     _mapsService.clearMarkers();
-    markers.value = _mapsService.markers;
+    markers.assignAll(_mapsService.markers);
   }
 
   Future<void> toggleMapStyle() async {

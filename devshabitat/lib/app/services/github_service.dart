@@ -160,9 +160,6 @@ class GithubService extends GetxService {
 
   Future<int> _getContributionsCount(String username) async {
     try {
-      final now = DateTime.now();
-      final oneYearAgo = DateTime(now.year - 1, now.month, now.day);
-
       final events = await getUserRepos(username);
 
       return events.length;
