@@ -3,7 +3,6 @@ import 'package:json_annotation/json_annotation.dart';
 
 part 'event_model.g.dart';
 
-@JsonSerializable()
 class GeoPointConverter
     implements JsonConverter<GeoPoint?, Map<String, dynamic>?> {
   const GeoPointConverter();

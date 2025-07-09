@@ -237,8 +237,6 @@ class ModerationService extends GetxService {
         return communityRef.collection('resources').doc(moderation.contentId);
       case ContentType.profile:
         return _firestore.collection('users').doc(moderation.contentId);
-      default:
-        return null;
     }
   }
 
@@ -335,7 +333,7 @@ class ModerationService extends GetxService {
   bool _hasUnsafeLinks(String content) {
     final urlPattern = RegExp(
         r'(http|https)://[\w-]+(\.[\w-]+)+([\w.,@?^=%&amp;:/~+#-]*[\w@?^=%&amp;/~+#-])?');
-    final urls = urlPattern.allMatches(content);
+    urlPattern.allMatches(content);
 
     // URL güvenlik kontrolü yapılabilir
     return false; // Şimdilik tüm linklere izin ver

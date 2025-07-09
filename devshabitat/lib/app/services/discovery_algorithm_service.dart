@@ -167,7 +167,11 @@ class DiscoveryAlgorithmService extends GetxService {
             .where('location.latitude',
                 isGreaterThanOrEqualTo: userLocation.latitude - latRange)
             .where('location.latitude',
-                isLessThanOrEqualTo: userLocation.latitude + latRange);
+                isLessThanOrEqualTo: userLocation.latitude + latRange)
+            .where('location.longitude',
+                isGreaterThanOrEqualTo: userLocation.longitude - lonRange)
+            .where('location.longitude',
+                isLessThanOrEqualTo: userLocation.longitude + lonRange);
       }
 
       // Deneyim filtresi

@@ -183,7 +183,7 @@ class MembershipService {
     try {
       final communityRef =
           _firestore.collection('communities').doc(communityId);
-      final userRef = _firestore.collection('users').doc(userId);
+      _firestore.collection('users').doc(userId);
 
       await _firestore.runTransaction((transaction) async {
         final communityDoc = await transaction.get(communityRef);
@@ -223,7 +223,7 @@ class MembershipService {
     try {
       final communityRef =
           _firestore.collection('communities').doc(communityId);
-      final userRef = _firestore.collection('users').doc(userId);
+      _firestore.collection('users').doc(userId);
 
       await _firestore.runTransaction((transaction) async {
         final communityDoc = await transaction.get(communityRef);

@@ -1,8 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:devshabitat/app/widgets/map/custom_map_widget.dart';
-import 'package:devshabitat/app/widgets/map/event_marker_widget.dart';
 import 'package:devshabitat/app/widgets/map/location_filter_widget.dart';
 import 'package:devshabitat/app/widgets/map/map_controls_widget.dart';
 import 'package:devshabitat/app/controllers/event/event_discovery_controller.dart';

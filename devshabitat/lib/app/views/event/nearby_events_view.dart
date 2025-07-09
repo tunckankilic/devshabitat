@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../../controllers/event/event_discovery_controller.dart';
-import '../../models/event/event_model.dart';
 import '../../widgets/event/event_card.dart';
 
 class NearbyEventsView extends GetView<EventDiscoveryController> {

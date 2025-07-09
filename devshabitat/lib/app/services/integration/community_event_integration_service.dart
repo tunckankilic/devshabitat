@@ -20,7 +20,7 @@ class CommunityEventIntegrationService extends GetxService {
         data: {
           'type': 'community_event',
           'eventId': event.id,
-          'communityId': community.id!,
+          'communityId': community.id,
           'route': '/event/detail/${event.id}',
           'title': 'Yeni Topluluk Etkinliği',
           'body':
@@ -50,10 +50,7 @@ class CommunityEventIntegrationService extends GetxService {
       await _eventService.updateEvent(updatedEvent);
 
       final community = await _communityService.getCommunity(communityId);
-
-      if (community != null) {
-        await sendCommunityEventNotification(updatedEvent, community);
-      }
+      await sendCommunityEventNotification(updatedEvent, community);
     } catch (e) {
       print('Error linking event to community: $e');
       rethrow;

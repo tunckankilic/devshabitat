@@ -72,7 +72,7 @@ class ApiOptimizationService extends GetxService {
     }
 
     // Dakikalık çağrı sayısını kontrol et
-    final oneMinuteAgo = now.subtract(const Duration(minutes: 1));
+    now.subtract(const Duration(minutes: 1));
     _callCounts[key] = (_callCounts[key] ?? 0) + 1;
 
     // Eski çağrıları temizle

@@ -1,7 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:get/get.dart';
 import '../../models/community/role_model.dart';
-import '../../models/community/membership_model.dart';
 
 class RoleService extends GetxService {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;

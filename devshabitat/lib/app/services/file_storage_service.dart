@@ -76,14 +76,6 @@ class FileStorageService extends GetxService {
     return file.lengthSync() <= maxFileSizeBytes;
   }
 
-  // Dosya uzantısı kontrolü
-  bool _validateFileExtension(String extension, bool isImage) {
-    if (isImage) {
-      return allowedImageExtensions.contains(extension.toLowerCase());
-    }
-    return allowedFileExtensions.contains(extension.toLowerCase());
-  }
-
   // Resim sıkıştırma
   Future<File> _compressImage(File imageFile) async {
     final img.Image? image = img.decodeImage(await imageFile.readAsBytes());

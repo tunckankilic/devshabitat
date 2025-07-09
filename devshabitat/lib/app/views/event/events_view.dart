@@ -151,8 +151,6 @@ class EventCard extends StatelessWidget {
         return Icons.business;
       case EventType.other:
         return Icons.event;
-      default:
-        return Icons.event;
     }
   }
 
@@ -167,8 +165,6 @@ class EventCard extends StatelessWidget {
       case EventType.conference:
         return 'Konferans';
       case EventType.other:
-        return 'Diğer';
-      default:
         return 'Diğer';
     }
   }

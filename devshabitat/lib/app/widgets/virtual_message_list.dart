@@ -118,7 +118,7 @@ class _VirtualMessageListState extends State<VirtualMessageList> {
   Widget build(BuildContext context) {
     return LayoutBuilder(
       builder: (context, constraints) {
-        final totalHeight = widget.messages.fold<double>(
+        widget.messages.fold<double>(
           0,
           (sum, _) => sum + _estimatedItemHeight,
         );

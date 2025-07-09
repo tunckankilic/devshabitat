@@ -45,4 +45,7 @@ abstract class AppRoutes {
   // Chat routes
   static const CHAT = '/chat';
   static const NEW_CHAT = '/new-chat';
+
+  // Comments routes
+  static const comments = '/comments';
 }

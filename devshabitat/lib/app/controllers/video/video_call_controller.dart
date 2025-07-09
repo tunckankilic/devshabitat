@@ -2,7 +2,6 @@ import 'dart:async';
 import 'package:flutter_webrtc/flutter_webrtc.dart';
 import 'package:get/get.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:devshabitat/app/models/video/call_model.dart';
 import 'package:devshabitat/app/models/video/participant_model.dart';
 import 'package:devshabitat/app/models/video/call_settings_model.dart';
 import 'package:devshabitat/app/services/video/webrtc_service.dart';

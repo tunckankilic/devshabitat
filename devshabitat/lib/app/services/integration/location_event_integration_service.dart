@@ -1,5 +1,4 @@
 import 'package:get/get.dart';
-import '../location/location_tracking_service.dart';
 import '../event/event_service.dart';
 import '../../models/event/event_model.dart';
 import '../../models/location/location_model.dart';
@@ -8,9 +7,7 @@ import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'dart:math';
 
 class LocationEventIntegrationService extends GetxService {
-  final LocationTrackingService _locationService = Get.find();
   final EventService _eventService = Get.find();
-  final FirebaseMessaging _firebaseMessaging = FirebaseMessaging.instance;
 
   static const double NEARBY_THRESHOLD_KM = 5.0; // 5 km yarıçap
 

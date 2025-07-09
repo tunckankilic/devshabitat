@@ -50,20 +50,6 @@ class EventNotificationService {
     required String body,
     Map<String, dynamic>? data,
   }) async {
-    final topic = 'event_$eventId';
-
-    final message = {
-      'notification': {
-        'title': title,
-        'body': body,
-      },
-      'data': {
-        'eventId': eventId,
-        ...?data,
-      },
-      'topic': topic,
-    };
-
     // Store notification in Firestore
     await _firestore.collection('event_notifications').add({
       'eventId': eventId,

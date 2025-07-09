@@ -1,7 +1,6 @@
 import 'package:get/get.dart';
 import '../models/thread_model.dart';
 import '../services/thread_service.dart';
-import '../services/messaging_service.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:logger/logger.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -9,7 +8,6 @@ import '../models/attachment_model.dart';
 
 class ThreadController extends GetxController {
   final ThreadService _threadService = Get.find<ThreadService>();
-  final MessagingService _messagingService = Get.find<MessagingService>();
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
   final FirebaseAuth _auth = FirebaseAuth.instance;
   final Logger _logger = Logger();
