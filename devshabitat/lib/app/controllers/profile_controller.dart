@@ -1,10 +1,12 @@
-import 'package:devshabitat/app/repositories/auth_repository.dart';
-import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter/material.dart';
 import '../models/enhanced_user_model.dart';
 import '../services/storage_service.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
 import '../services/github_service.dart';
+import '../core/services/api_optimization_service.dart';
+import '../repositories/auth_repository.dart';
 
 class ProfileController extends GetxController {
   final AuthRepository _authService = Get.find<AuthRepository>();
@@ -190,22 +192,30 @@ class ProfileController extends GetxController {
 
   Future<Map<String, dynamic>> fetchGithubRepoData(String username) async {
     try {
-      final repos = await Get.find<GithubService>().getUserRepos(username);
-      if (repos.isEmpty) {
-        throw Exception('Kullanıcının repository\'si bulunamadı');
-      }
-      // En çok yıldızlı repo'yu döndür
-      final repo = repos.reduce((curr, next) =>
-          (curr['stargazers_count'] ?? 0) > (next['stargazers_count'] ?? 0)
-              ? curr
-              : next);
-      return {
-        'name': repo['name'],
-        'description': repo['description'],
-        'language': repo['language'],
-        'stars': repo['stargazers_count'] ?? 0,
-        'forks': repo['forks_count'] ?? 0,
-      };
+      final apiOptimizer = Get.find<ApiOptimizationService>();
+
+      return await apiOptimizer.optimizeApiCall(
+        apiCall: () async {
+          final repos = await Get.find<GithubService>().getUserRepos(username);
+          if (repos.isEmpty) {
+            throw Exception('Kullanıcının repository\'si bulunamadı');
+          }
+          // En çok yıldızlı repo'yu döndür
+          final repo = repos.reduce((curr, next) =>
+              (curr['stargazers_count'] ?? 0) > (next['stargazers_count'] ?? 0)
+                  ? curr
+                  : next);
+          return {
+            'name': repo['name'],
+            'description': repo['description'],
+            'language': repo['language'],
+            'stars': repo['stargazers_count'] ?? 0,
+            'forks': repo['forks_count'] ?? 0,
+          };
+        },
+        cacheKey: 'github_repo_data_$username',
+        cacheDuration: const Duration(minutes: 30),
+      );
     } catch (e) {
       throw Exception('GitHub verisi alınamadı: $e');
     }

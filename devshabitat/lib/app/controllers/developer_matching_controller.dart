@@ -28,7 +28,7 @@ class DeveloperMatchingController extends GetxController {
       }
 
       // Kullanıcının teknoloji stack'ini al
-      final userTechStack = await _githubService.getUserTechStack(username);
+      final userTechStack = await _githubService.getTechStack(username);
 
       // Benzer teknolojileri kullanan geliştiricileri bul
       final developers = await _matchingService.findDevelopersByTechStack(

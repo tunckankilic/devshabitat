@@ -6,6 +6,7 @@ import 'package:devshabitat/app/models/video/participant_model.dart';
 import 'package:devshabitat/app/models/video/call_settings_model.dart';
 import 'package:devshabitat/app/services/video/webrtc_service.dart';
 import 'package:devshabitat/app/services/video/signaling_service.dart';
+import 'package:devshabitat/app/core/services/memory_manager_service.dart';
 
 enum CallConnectionStatus {
   connecting,
@@ -14,7 +15,7 @@ enum CallConnectionStatus {
   disconnected,
 }
 
-class VideoCallController extends GetxController {
+class VideoCallController extends GetxController with MemoryManagementMixin {
   final WebRTCService _webRTCService;
   final SignalingService _signalingService;
   final String roomId;
@@ -66,9 +67,7 @@ class VideoCallController extends GetxController {
 
   @override
   void onClose() {
-    _durationTimer?.cancel();
-    _signalingSubscription?.cancel();
-    _participantSubscription?.cancel();
+    // MemoryManagementMixin otomatik olarak kaynakları temizleyecek
     _webRTCService.dispose();
     super.onClose();
   }
@@ -89,20 +88,22 @@ class VideoCallController extends GetxController {
         isInitiator: isInitiator,
       );
 
-      // Signaling mesajları dinleniyor
+      // Signaling mesajları dinleniyor - Otomatik yönetim
       _signalingSubscription = _signalingService.onSignalingMessage.listen(
         _handleSignalingMessage,
       );
+      registerSubscription(_signalingSubscription!);
 
-      // Katılımcı değişiklikleri dinleniyor
+      // Katılımcı değişiklikleri dinleniyor - Otomatik yönetim
       _participantSubscription = FirebaseFirestore.instance
           .collection('calls')
           .doc(roomId)
           .collection('participants')
           .snapshots()
           .listen(_handleParticipantChanges);
+      registerSubscription(_participantSubscription!);
 
-      // Süre sayacı başlatılıyor
+      // Süre sayacı başlatılıyor - Otomatik yönetim
       _startDurationTimer();
 
       // Yerel medya akışları başlatılıyor
@@ -245,6 +246,7 @@ class VideoCallController extends GetxController {
     _durationTimer = Timer.periodic(const Duration(seconds: 1), (timer) {
       _callDuration.value = Duration(seconds: timer.tick);
     });
+    registerTimer(_durationTimer!); // Otomatik yönetim
   }
 
   // Kontrol Metodları
@@ -311,7 +313,7 @@ class VideoCallController extends GetxController {
   Future<void> endCall() async {
     try {
       _callStatus.value = CallConnectionStatus.disconnected;
-      _durationTimer?.cancel();
+      // Timer otomatik olarak iptal edilecek
 
       await _signalingService.leaveRoom(
         roomId: roomId,

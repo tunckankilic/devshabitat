@@ -5,12 +5,15 @@ import 'package:firebase_auth/firebase_auth.dart';
 import '../models/network_stats_model.dart';
 import '../models/user_profile_model.dart';
 import '../services/network_analytics_service.dart';
+import '../core/services/api_optimization_service.dart';
 
 class NetworkingController extends GetxController {
   // Servisler
   final NetworkAnalyticsService _analyticsService =
       Get.find<NetworkAnalyticsService>();
   final AuthRepository _authRepository = Get.find<AuthRepository>();
+  final ApiOptimizationService _apiOptimizer =
+      Get.find<ApiOptimizationService>();
   final Logger _logger = Get.find<Logger>();
 
   // Observable State
@@ -49,11 +52,22 @@ class NetworkingController extends GetxController {
         throw Exception('Kullanıcı oturum açmamış');
       }
 
-      // Paralel veri yükleme
-      await Future.wait([
-        _loadConnections(),
-        _loadNetworkStats(currentUser.uid),
-      ]);
+      // Batch API çağrıları ile optimize edilmiş veri yükleme
+      final results = await _apiOptimizer.batchApiCalls(
+        calls: {
+          'connections': () => _loadConnections(),
+          'networkStats': () => _loadNetworkStats(currentUser.uid),
+        },
+        cacheDuration: const Duration(minutes: 5),
+      );
+
+      // Sonuçları işle
+      if (results.containsKey('connections')) {
+        connections.value = results['connections'] as List<UserProfile>;
+      }
+      if (results.containsKey('networkStats')) {
+        networkStats.value = results['networkStats'] as NetworkStatsModel;
+      }
     } catch (e) {
       hasError.value = true;
       errorMessage.value = 'Veriler yüklenirken hata oluştu: $e';

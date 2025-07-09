@@ -8,10 +8,13 @@ import '../models/connection_model.dart';
 import 'package:geolocator/geolocator.dart';
 import '../models/user_profile_model.dart';
 import 'discovery_algorithm_service.dart';
+import '../core/services/api_optimization_service.dart';
 
 class DiscoveryService {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
   final GetStorage _cache = GetStorage();
+  final ApiOptimizationService _apiOptimizer =
+      Get.find<ApiOptimizationService>();
   final StreamController<Map<String, bool>> _onlineStatusController =
       StreamController<Map<String, bool>>.broadcast();
   final DiscoveryAlgorithmService _algorithmService =
@@ -122,88 +125,65 @@ class DiscoveryService {
 
   // Get recommended users
   Future<List<UserProfile>> getRecommendedUsers(String userId) async {
-    try {
-      // Check cache first
-      final cachedData = _cache.read(_recommendedUsersCacheKey + userId);
-      if (cachedData != null) {
-        final cacheTimestamp =
-            DateTime.fromMillisecondsSinceEpoch(cachedData['timestamp']);
-        if (DateTime.now().difference(cacheTimestamp) < _cacheDuration) {
-          return (cachedData['users'] as List).map((userData) {
-            final doc = _usersCollection.doc().withConverter(
-                  fromFirestore: (snapshot, _) =>
-                      UserProfile.fromFirestore(snapshot),
-                  toFirestore: (user, _) => userData as Map<String, dynamic>,
-                );
-            return UserProfile.fromFirestore(
-                doc as DocumentSnapshot<Map<String, dynamic>>);
-          }).toList();
-        }
-      }
+    return await _apiOptimizer.optimizeApiCall(
+      apiCall: () async {
+        // Get user's profile for matching
+        final userDoc = await _usersCollection.doc(userId).get();
+        final userData = userDoc.data() as Map<String, dynamic>;
 
-      // Get user's profile for matching
-      final userDoc = await _usersCollection.doc(userId).get();
-      final userData = userDoc.data() as Map<String, dynamic>;
+        // Get users with similar interests and skills
+        final query = _usersCollection
+            .where('skills', arrayContainsAny: userData['skills'] ?? [])
+            .where('id', isNotEqualTo: userId)
+            .limit(20);
 
-      // Get users with similar interests and skills
-      final query = _usersCollection
-          .where('skills', arrayContainsAny: userData['skills'] ?? [])
-          .where('id', isNotEqualTo: userId)
-          .limit(20);
+        final recommendedUsers = await query.get();
+        final results = recommendedUsers.docs
+            .map((doc) => UserProfile.fromFirestore(doc))
+            .toList();
 
-      final recommendedUsers = await query.get();
-      final results = recommendedUsers.docs
-          .map((doc) => UserProfile.fromFirestore(doc))
-          .toList();
-
-      // Cache results
-      await _cache.write(_recommendedUsersCacheKey + userId, {
-        'timestamp': DateTime.now().millisecondsSinceEpoch,
-        'users': results.map((user) => (user as dynamic).data()).toList(),
-      });
-
-      return results;
-    } catch (e) {
-      print('Error getting recommended users: $e');
-      return [];
-    }
+        return results;
+      },
+      cacheKey: 'recommended_users_$userId',
+      cacheDuration: const Duration(minutes: 30),
+    );
   }
 
   // Send connection request
   Future<bool> sendConnectionRequest(String recipientId, String message) async {
-    try {
-      final String senderId = Get.find<AuthRepository>().currentUser!.uid;
+    return await _apiOptimizer.retryApiCall(
+      apiCall: () async {
+        final String senderId = Get.find<AuthRepository>().currentUser!.uid;
 
-      // Check if connection already exists
-      final existingConnection = await _connectionsCollection
-          .where('senderId', isEqualTo: senderId)
-          .where('recipientId', isEqualTo: recipientId)
-          .get();
+        // Check if connection already exists
+        final existingConnection = await _connectionsCollection
+            .where('senderId', isEqualTo: senderId)
+            .where('recipientId', isEqualTo: recipientId)
+            .get();
 
-      if (existingConnection.docs.isNotEmpty) {
-        return false;
-      }
+        if (existingConnection.docs.isNotEmpty) {
+          return false;
+        }
 
-      // Create new connection request
-      final connection = ConnectionModel(
-        id: '',
-        fromUserId: senderId,
-        toUserId: recipientId,
-        status: ConnectionStatus.pending,
-        createdAt: DateTime.now(),
-        updatedAt: DateTime.now(),
-      );
+        // Create new connection request
+        final connection = ConnectionModel(
+          id: '',
+          fromUserId: senderId,
+          toUserId: recipientId,
+          status: ConnectionStatus.pending,
+          createdAt: DateTime.now(),
+          updatedAt: DateTime.now(),
+        );
 
-      await _connectionsCollection.add(connection.toMap());
+        await _connectionsCollection.add(connection.toMap());
 
-      // Update analytics
-      await _updateConnectionAnalytics(senderId);
+        // Update analytics
+        await _updateConnectionAnalytics(senderId);
 
-      return true;
-    } catch (e) {
-      print('Error sending connection request: $e');
-      return false;
-    }
+        return true;
+      },
+      maxAttempts: 3,
+    );
   }
 
   // Respond to connection request

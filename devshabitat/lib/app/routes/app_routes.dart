@@ -48,4 +48,7 @@ abstract class AppRoutes {
 
   // Comments routes
   static const comments = '/comments';
+
+  // Debug routes
+  static const memoryDebug = '/memory-debug';
 }

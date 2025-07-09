@@ -101,6 +101,58 @@ class MemoryManagerService extends GetxService {
     _logger.i('Active resources: ${_resources.length}');
   }
 
+  // Debug için detaylı bilgi
+  void printDetailedMemoryInfo() {
+    _logger.i('=== MEMORY MANAGER DETAILED INFO ===');
+    _logger.i('Active subscriptions: ${_subscriptions.length}');
+    _subscriptions.forEach((id, subscription) {
+      _logger.i('  - Subscription: $id');
+    });
+
+    _logger.i('Active timers: ${_timers.length}');
+    _timers.forEach((id, timer) {
+      _logger.i('  - Timer: $id');
+    });
+
+    _logger.i('Active resources: ${_resources.length}');
+    _resources.forEach((id, resource) {
+      _logger.i('  - Resource: $id (${resource.runtimeType})');
+    });
+    _logger.i('=====================================');
+  }
+
+  // Belirli bir controller'ın kaynaklarını temizle
+  void disposeControllerResources(String controllerId) {
+    final pattern = RegExp('^${controllerId}_');
+
+    _subscriptions.removeWhere((key, value) {
+      if (pattern.hasMatch(key)) {
+        value.cancel();
+        _logger.i('Disposed subscription: $key');
+        return true;
+      }
+      return false;
+    });
+
+    _timers.removeWhere((key, value) {
+      if (pattern.hasMatch(key)) {
+        value.cancel();
+        _logger.i('Disposed timer: $key');
+        return true;
+      }
+      return false;
+    });
+
+    _resources.removeWhere((key, value) {
+      if (pattern.hasMatch(key)) {
+        disposeResource(key);
+        _logger.i('Disposed resource: $key');
+        return true;
+      }
+      return false;
+    });
+  }
+
   @override
   void onClose() {
     disposeAll();
