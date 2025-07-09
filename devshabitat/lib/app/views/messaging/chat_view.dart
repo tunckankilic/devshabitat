@@ -1,4 +1,3 @@
-import 'package:devshabitat/app/repositories/auth_repository.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -6,8 +5,11 @@ import '../../controllers/message/message_chat_controller.dart';
 import '../../controllers/message/message_interaction_controller.dart';
 import '../../models/message_model.dart';
 import '../base/base_view.dart';
+import '../../utils/performance_optimizer.dart';
+import '../../repositories/auth_repository.dart';
 
-class ChatView extends BaseView<MessageChatController> {
+class ChatView extends BaseView<MessageChatController>
+    with PerformanceOptimizer {
   final MessageInteractionController interactionController = Get.find();
   final String conversationId = Get.parameters['id']!;
 
@@ -16,113 +18,115 @@ class ChatView extends BaseView<MessageChatController> {
   @override
   Widget buildView(BuildContext context) {
     controller.loadMessages(conversationId);
-    return Scaffold(
-      appBar: AppBar(
-        title: Obx(() {
-          final conversation = controller.currentConversation.value;
-          if (conversation == null) {
-            return Text('Yükleniyor...', style: TextStyle(fontSize: 18.sp));
-          }
-          return Text(
-            conversation.participantName,
-            style: TextStyle(fontSize: 18.sp),
-          );
-        }),
-        actions: [
-          IconButton(
-            icon: Icon(Icons.more_vert, size: 24.sp),
-            onPressed: () {
-              _showChatOptions();
-            },
-          ),
-        ],
-      ),
-      body: Column(
-        children: [
-          // Mesaj listesi
-          Expanded(
-            child: Obx(() {
-              if (controller.isLoading) {
-                return const Center(child: CircularProgressIndicator());
-              }
-
-              if (controller.messages.isEmpty) {
-                return Center(
-                  child: Text(
-                    'Henüz mesaj yok',
-                    style: TextStyle(fontSize: 16.sp),
-                  ),
-                );
-              }
-
-              return ListView.builder(
-                controller: controller.scrollController,
-                reverse: true,
-                itemCount: controller.messages.length,
-                itemBuilder: (context, index) {
-                  final message = controller.messages[index];
-                  return _buildMessageTile(message);
-                },
-              );
-            }),
-          ),
-
-          // Mesaj yazma alanı
-          Container(
-            padding: EdgeInsets.all(8.r),
-            decoration: BoxDecoration(
-              color: Theme.of(context).scaffoldBackgroundColor,
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.black12,
-                  blurRadius: 4.r,
-                  offset: Offset(0, -2.h),
-                ),
-              ],
+    return optimizeWidgetTree(
+      Scaffold(
+        appBar: AppBar(
+          title: Obx(() {
+            final conversation = controller.currentConversation.value;
+            if (conversation == null) {
+              return Text('Yükleniyor...', style: TextStyle(fontSize: 18.sp));
+            }
+            return Text(
+              conversation.participantName,
+              style: TextStyle(fontSize: 18.sp),
+            );
+          }),
+          actions: [
+            IconButton(
+              icon: Icon(Icons.more_vert, size: 24.sp),
+              onPressed: () {
+                _showChatOptions();
+              },
             ),
-            child: SafeArea(
-              child: Row(
-                children: [
-                  IconButton(
-                    icon: Icon(Icons.attach_file, size: 24.sp),
-                    onPressed: () {
-                      // Dosya ekleme
-                    },
-                  ),
-                  Expanded(
-                    child: TextField(
-                      controller: controller.messageController,
+          ],
+        ),
+        body: Column(
+          children: [
+            // Mesaj listesi
+            Expanded(
+              child: Obx(() {
+                if (controller.isLoading) {
+                  return const Center(child: CircularProgressIndicator());
+                }
+
+                if (controller.messages.isEmpty) {
+                  return Center(
+                    child: Text(
+                      'Henüz mesaj yok',
                       style: TextStyle(fontSize: 16.sp),
-                      maxLines: null,
-                      decoration: InputDecoration(
-                        hintText: 'Mesaj yazın...',
-                        hintStyle: TextStyle(fontSize: 16.sp),
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(24.r),
-                          borderSide: BorderSide.none,
-                        ),
-                        filled: true,
-                        contentPadding: EdgeInsets.symmetric(
-                          horizontal: 16.w,
-                          vertical: 8.h,
-                        ),
-                      ),
-                      onChanged: (value) {
-                        controller.updateTypingStatus(value.isNotEmpty);
-                      },
                     ),
-                  ),
-                  IconButton(
-                    icon: Icon(Icons.send, size: 24.sp),
-                    onPressed: () {
-                      controller.sendMessage();
-                    },
+                  );
+                }
+
+                return ListView.builder(
+                  controller: controller.scrollController,
+                  reverse: true,
+                  itemCount: controller.messages.length,
+                  itemBuilder: (context, index) {
+                    final message = controller.messages[index];
+                    return _buildMessageTile(message);
+                  },
+                );
+              }),
+            ),
+
+            // Mesaj yazma alanı
+            Container(
+              padding: EdgeInsets.all(8.r),
+              decoration: BoxDecoration(
+                color: Theme.of(context).scaffoldBackgroundColor,
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black12,
+                    blurRadius: 4.r,
+                    offset: Offset(0, -2.h),
                   ),
                 ],
               ),
+              child: SafeArea(
+                child: Row(
+                  children: [
+                    IconButton(
+                      icon: Icon(Icons.attach_file, size: 24.sp),
+                      onPressed: () {
+                        // Dosya ekleme
+                      },
+                    ),
+                    Expanded(
+                      child: TextField(
+                        controller: controller.messageController,
+                        style: TextStyle(fontSize: 16.sp),
+                        maxLines: null,
+                        decoration: InputDecoration(
+                          hintText: 'Mesaj yazın...',
+                          hintStyle: TextStyle(fontSize: 16.sp),
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(24.r),
+                            borderSide: BorderSide.none,
+                          ),
+                          filled: true,
+                          contentPadding: EdgeInsets.symmetric(
+                            horizontal: 16.w,
+                            vertical: 8.h,
+                          ),
+                        ),
+                        onChanged: (value) {
+                          controller.updateTypingStatus(value.isNotEmpty);
+                        },
+                      ),
+                    ),
+                    IconButton(
+                      icon: Icon(Icons.send, size: 24.sp),
+                      onPressed: () {
+                        controller.sendMessage();
+                      },
+                    ),
+                  ],
+                ),
+              ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
@@ -131,116 +135,118 @@ class ChatView extends BaseView<MessageChatController> {
     final authService = Get.find<AuthRepository>();
     final isMe = message.senderId == authService.currentUser?.uid;
 
-    return Padding(
-      padding: EdgeInsets.symmetric(
-        horizontal: 8.w,
-        vertical: 4.h,
-      ),
-      child: Row(
-        mainAxisAlignment:
-            isMe ? MainAxisAlignment.end : MainAxisAlignment.start,
-        children: [
-          if (!isMe)
-            CircleAvatar(
-              radius: 16.r,
-              child: Text(
-                message.senderId[0].toUpperCase(),
-                style: TextStyle(fontSize: 12.sp),
+    return wrapWithRepaintBoundary(
+      Padding(
+        padding: EdgeInsets.symmetric(
+          horizontal: 8.w,
+          vertical: 4.h,
+        ),
+        child: Row(
+          mainAxisAlignment:
+              isMe ? MainAxisAlignment.end : MainAxisAlignment.start,
+          children: [
+            if (!isMe)
+              CircleAvatar(
+                radius: 16.r,
+                child: Text(
+                  message.senderId[0].toUpperCase(),
+                  style: TextStyle(fontSize: 12.sp),
+                ),
               ),
-            ),
-          SizedBox(width: 8.w),
-          Flexible(
-            child: GestureDetector(
-              onLongPress: () {
-                _showMessageOptions(message);
-              },
-              child: Container(
-                padding: EdgeInsets.symmetric(
-                  horizontal: 12.w,
-                  vertical: 8.h,
-                ),
-                decoration: BoxDecoration(
-                  color: isMe
-                      ? Theme.of(Get.context!).primaryColor
-                      : Colors.grey[300],
-                  borderRadius: BorderRadius.only(
-                    topLeft: Radius.circular(16.r),
-                    topRight: Radius.circular(16.r),
-                    bottomLeft: Radius.circular(isMe ? 16.r : 0),
-                    bottomRight: Radius.circular(isMe ? 0 : 16.r),
+            SizedBox(width: 8.w),
+            Flexible(
+              child: GestureDetector(
+                onLongPress: () {
+                  _showMessageOptions(message);
+                },
+                child: Container(
+                  padding: EdgeInsets.symmetric(
+                    horizontal: 12.w,
+                    vertical: 8.h,
                   ),
-                ),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    if (message.replyToId != null)
-                      Container(
-                        padding: EdgeInsets.all(8.r),
-                        margin: EdgeInsets.only(bottom: 8.h),
-                        decoration: BoxDecoration(
-                          color: Colors.black12,
-                          borderRadius: BorderRadius.circular(8.r),
-                        ),
-                        child: Text(
-                          'Yanıtlanan mesaj',
-                          style: TextStyle(
-                            fontSize: 12.sp,
-                            fontStyle: FontStyle.italic,
-                          ),
-                        ),
-                      ),
-                    Text(
-                      message.content,
-                      style: TextStyle(
-                        fontSize: 16.sp,
-                        color: isMe ? Colors.white : Colors.black,
-                      ),
+                  decoration: BoxDecoration(
+                    color: isMe
+                        ? Theme.of(Get.context!).primaryColor
+                        : Colors.grey[300],
+                    borderRadius: BorderRadius.only(
+                      topLeft: Radius.circular(16.r),
+                      topRight: Radius.circular(16.r),
+                      bottomLeft: Radius.circular(isMe ? 16.r : 0),
+                      bottomRight: Radius.circular(isMe ? 0 : 16.r),
                     ),
-                    SizedBox(height: 4.h),
-                    Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Text(
-                          _formatTime(message.timestamp),
-                          style: TextStyle(
-                            fontSize: 12.sp,
-                            color: isMe ? Colors.white70 : Colors.black54,
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      if (message.replyToId != null)
+                        Container(
+                          padding: EdgeInsets.all(8.r),
+                          margin: EdgeInsets.only(bottom: 8.h),
+                          decoration: BoxDecoration(
+                            color: Colors.black12,
+                            borderRadius: BorderRadius.circular(8.r),
                           ),
-                        ),
-                        if (message.isEdited)
-                          Text(
-                            ' • düzenlendi',
+                          child: Text(
+                            'Yanıtlanan mesaj',
                             style: TextStyle(
                               fontSize: 12.sp,
-                              color: isMe ? Colors.white70 : Colors.black54,
                               fontStyle: FontStyle.italic,
                             ),
                           ),
-                        if (isMe)
-                          Icon(
-                            message.isRead ? Icons.done_all : Icons.done,
-                            size: 16.sp,
-                            color: Colors.white70,
+                        ),
+                      Text(
+                        message.content,
+                        style: TextStyle(
+                          fontSize: 16.sp,
+                          color: isMe ? Colors.white : Colors.black,
+                        ),
+                      ),
+                      SizedBox(height: 4.h),
+                      Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Text(
+                            _formatTime(message.timestamp),
+                            style: TextStyle(
+                              fontSize: 12.sp,
+                              color: isMe ? Colors.white70 : Colors.black54,
+                            ),
                           ),
-                      ],
-                    ),
-                  ],
+                          if (message.isEdited)
+                            Text(
+                              ' • düzenlendi',
+                              style: TextStyle(
+                                fontSize: 12.sp,
+                                color: isMe ? Colors.white70 : Colors.black54,
+                                fontStyle: FontStyle.italic,
+                              ),
+                            ),
+                          if (isMe)
+                            Icon(
+                              message.isRead ? Icons.done_all : Icons.done,
+                              size: 16.sp,
+                              color: Colors.white70,
+                            ),
+                        ],
+                      ),
+                    ],
+                  ),
                 ),
               ),
             ),
-          ),
-          SizedBox(width: 8.w),
-          if (isMe)
-            CircleAvatar(
-              radius: 16.r,
-              child: Text(
-                message.senderId[0].toUpperCase(),
-                style: TextStyle(fontSize: 12.sp),
+            SizedBox(width: 8.w),
+            if (isMe)
+              CircleAvatar(
+                radius: 16.r,
+                child: Text(
+                  message.senderId[0].toUpperCase(),
+                  style: TextStyle(fontSize: 12.sp),
+                ),
               ),
-            ),
-        ],
+          ],
+        ),
       ),
-    );
+    ).onlyWhenVisible();
   }
 
   void _showMessageOptions(MessageModel message) {
