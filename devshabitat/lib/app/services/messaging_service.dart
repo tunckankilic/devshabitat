@@ -165,30 +165,40 @@ class MessagingService extends GetxService {
   /// Mesaj gönderir
   Future<void> sendMessage(MessageModel message) async {
     try {
+      if (currentUserId.isEmpty) {
+        throw Exception('Kullanıcı kimliği bulunamadı');
+      }
+
       final messageRef = _firestore.collection('messages').doc();
       final conversationRef =
           _firestore.collection('conversations').doc(message.conversationId);
 
       await _firestore.runTransaction((transaction) async {
-        // Mesajı ekle
-        transaction.set(messageRef, {
-          ...message.toMap(),
-          'id': messageRef.id,
-          'timestamp': FieldValue.serverTimestamp(),
-        });
+        try {
+          // Mesajı ekle
+          transaction.set(messageRef, {
+            ...message.toMap(),
+            'id': messageRef.id,
+            'timestamp': FieldValue.serverTimestamp(),
+          });
 
-        // Konuşmayı güncelle
-        transaction.update(conversationRef, {
-          'lastMessage': message.content,
-          'lastMessageSenderId': message.senderId,
-          'lastMessageTime': FieldValue.serverTimestamp(),
-          'isRead': false,
-          'unreadCount': FieldValue.increment(1),
-        });
+          // Konuşmayı güncelle
+          transaction.update(conversationRef, {
+            'lastMessage': message.content,
+            'lastMessageSenderId': message.senderId,
+            'lastMessageTime': FieldValue.serverTimestamp(),
+            'isRead': false,
+            'unreadCount': FieldValue.increment(1),
+          });
+        } catch (transactionError) {
+          _logger.e('Transaction içinde hata: $transactionError');
+          throw transactionError;
+        }
       });
     } catch (e) {
       _logger.e('Mesaj gönderilirken hata: $e');
-      _handleError('Mesaj gönderilirken hata: $e');
+      _errorHandler.handleError(
+          'Mesaj gönderilirken hata: $e', ErrorHandlerService.SERVER_ERROR);
       rethrow;
     }
   }
@@ -196,23 +206,30 @@ class MessagingService extends GetxService {
   /// Konuşmaları gerçek zamanlı dinler
   Stream<List<ConversationModel>> getConversations() {
     try {
+      if (currentUserId.isEmpty) {
+        throw Exception('Kullanıcı kimliği bulunamadı');
+      }
+
       return _firestore
           .collection('conversations')
-          .where('participants', arrayContains: currentUserId)
+          .where('participantId', isEqualTo: currentUserId)
           .orderBy('lastMessageTime', descending: true)
           .snapshots()
-          .map((snapshot) {
-        return snapshot.docs
-            .map((doc) => ConversationModel.fromMap({
-                  ...doc.data(),
-                  'id': doc.id,
-                }))
-            .toList();
+          .map((snapshot) => snapshot.docs
+              .map((doc) => ConversationModel.fromMap({
+                    ...doc.data(),
+                    'id': doc.id,
+                  }))
+              .toList())
+          .handleError((error) {
+        _logger.e('Konuşmalar alınırken hata: $error');
+        _errorHandler.handleError(error, ErrorHandlerService.SERVER_ERROR);
+        return <ConversationModel>[];
       });
     } catch (e) {
-      _logger.e('Konuşmalar alınırken hata: $e');
-      _handleError('Konuşmalar alınırken hata: $e');
-      return Stream.value([]);
+      _logger.e('Konuşmalar stream oluşturulurken hata: $e');
+      _errorHandler.handleError(e, ErrorHandlerService.SERVER_ERROR);
+      return Stream.value(<ConversationModel>[]);
     }
   }
 

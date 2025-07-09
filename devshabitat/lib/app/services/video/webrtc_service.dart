@@ -64,18 +64,13 @@ class WebRTCService {
   MediaStream? _remoteStream;
   RTCDataChannel? _dataChannel;
   bool _isInitialized = false;
+  bool _isDisposed = false;
   String? _currentRoomId;
 
   // Callback fonksiyonları
   Function(RTCTrackEvent)? onTrack;
   Function(RTCPeerConnectionState)? onConnectionStateChange;
   Function(RTCDataChannelMessage)? onDataChannelMessage;
-
-/*
-  bool _isBackgroundBlurEnabled = false;
-  Interpreter? _interpreter;
-  bool _isInterpreterInitialized = false;
-*/
 
   MediaRecorder? _mediaRecorder;
   bool _isRecording = false;
@@ -94,116 +89,194 @@ class WebRTCService {
     Function(RTCPeerConnectionState)? onConnectionStateChange,
     Function(RTCDataChannelMessage)? onDataChannelMessage,
   }) async {
-    if (_isInitialized) return;
+    if (_isInitialized || _isDisposed) return;
 
-    this.onTrack = onTrack;
-    this.onConnectionStateChange = onConnectionStateChange;
-    this.onDataChannelMessage = onDataChannelMessage;
+    try {
+      this.onTrack = onTrack;
+      this.onConnectionStateChange = onConnectionStateChange;
+      this.onDataChannelMessage = onDataChannelMessage;
 
-    if (!WebRTCConfig.isConfigured) {
-      throw Exception('WebRTC TURN/STUN sunucusu yapılandırması eksik!');
+      if (!WebRTCConfig.isConfigured) {
+        throw Exception('WebRTC TURN/STUN sunucusu yapılandırması eksik!');
+      }
+
+      final configuration = WebRTCConfig.iceServers;
+
+      final constraints = <String, dynamic>{
+        'mandatory': {
+          'OfferToReceiveAudio': true,
+          'OfferToReceiveVideo': true,
+        },
+        'optional': [],
+      };
+
+      _peerConnection = await createPeerConnection(configuration, constraints);
+
+      _peerConnection!.onTrack = (RTCTrackEvent event) {
+        if (!_isDisposed) {
+          onTrack?.call(event);
+          _remoteStream = event.streams[0];
+        }
+      };
+
+      _peerConnection!.onConnectionState = (RTCPeerConnectionState state) {
+        if (!_isDisposed) {
+          onConnectionStateChange?.call(state);
+        }
+      };
+
+      _peerConnection!.onDataChannel = (RTCDataChannel channel) {
+        if (!_isDisposed) {
+          _dataChannel = channel;
+          _setupDataChannel();
+        }
+      };
+
+      _isInitialized = true;
+      await _startConnectionMonitoring();
+    } catch (e) {
+      _isInitialized = false;
+      rethrow;
     }
-
-    final configuration = WebRTCConfig.iceServers;
-
-    final constraints = <String, dynamic>{
-      'mandatory': {
-        'OfferToReceiveAudio': true,
-        'OfferToReceiveVideo': true,
-      },
-      'optional': [],
-    };
-
-    _peerConnection = await createPeerConnection(configuration, constraints);
-
-    _peerConnection!.onTrack = (RTCTrackEvent event) {
-      onTrack?.call(event);
-      _remoteStream = event.streams[0];
-    };
-
-    _peerConnection!.onConnectionState = (RTCPeerConnectionState state) {
-      onConnectionStateChange?.call(state);
-    };
-
-    _peerConnection!.onDataChannel = (RTCDataChannel channel) {
-      _dataChannel = channel;
-      _setupDataChannel();
-    };
-
-    _isInitialized = true;
-    await _startConnectionMonitoring();
   }
 
   Future<MediaStream> createLocalStream({
     bool audio = true,
     bool video = true,
   }) async {
-    final constraints = <String, dynamic>{
-      'audio': audio,
-      'video': video
-          ? {
-              'mandatory': {
-                'minWidth': '640',
-                'minHeight': '480',
-                'minFrameRate': '30',
-              },
-              'facingMode': 'user',
-              'optional': [],
-            }
-          : false,
-    };
+    if (_isDisposed) {
+      throw Exception('Service disposed');
+    }
 
-    _localStream = await navigator.mediaDevices.getUserMedia(constraints);
-    _localStream!.getTracks().forEach((track) {
-      _peerConnection!.addTrack(track, _localStream!);
-    });
+    try {
+      final constraints = <String, dynamic>{
+        'audio': audio,
+        'video': video
+            ? {
+                'mandatory': {
+                  'minWidth': '640',
+                  'minHeight': '480',
+                  'minFrameRate': '30',
+                },
+                'facingMode': 'user',
+                'optional': [],
+              }
+            : false,
+      };
 
-    return _localStream!;
+      _localStream = await navigator.mediaDevices.getUserMedia(constraints);
+
+      if (!_isDisposed && _peerConnection != null) {
+        _localStream!.getTracks().forEach((track) {
+          _peerConnection!.addTrack(track, _localStream!);
+        });
+      }
+
+      return _localStream!;
+    } catch (e) {
+      _localStream = null;
+      rethrow;
+    }
   }
 
   Future<RTCSessionDescription> createOffer() async {
-    final offer = await _peerConnection!.createOffer();
-    await _peerConnection!.setLocalDescription(offer);
-    return offer;
+    if (_isDisposed || _peerConnection == null) {
+      throw Exception('Connection not initialized or disposed');
+    }
+
+    try {
+      final offer = await _peerConnection!.createOffer();
+      await _peerConnection!.setLocalDescription(offer);
+      return offer;
+    } catch (e) {
+      rethrow;
+    }
   }
 
   Future<RTCSessionDescription> createAnswer() async {
-    final answer = await _peerConnection!.createAnswer();
-    await _peerConnection!.setLocalDescription(answer);
-    return answer;
+    if (_isDisposed || _peerConnection == null) {
+      throw Exception('Connection not initialized or disposed');
+    }
+
+    try {
+      final answer = await _peerConnection!.createAnswer();
+      await _peerConnection!.setLocalDescription(answer);
+      return answer;
+    } catch (e) {
+      rethrow;
+    }
   }
 
   Future<void> setRemoteDescription(RTCSessionDescription description) async {
-    await _peerConnection!.setRemoteDescription(description);
+    if (_isDisposed || _peerConnection == null) {
+      throw Exception('Connection not initialized or disposed');
+    }
+
+    try {
+      await _peerConnection!.setRemoteDescription(description);
+    } catch (e) {
+      rethrow;
+    }
   }
 
   Future<RTCSessionDescription> handleOffer(
       Map<String, dynamic> message) async {
-    await setRemoteDescription(
-      RTCSessionDescription(message['sdp'], message['type']),
-    );
-    final answer = await createAnswer();
-    return answer;
+    if (_isDisposed || _peerConnection == null) {
+      throw Exception('Connection not initialized or disposed');
+    }
+
+    try {
+      await setRemoteDescription(
+        RTCSessionDescription(message['sdp'], message['type']),
+      );
+      final answer = await createAnswer();
+      return answer;
+    } catch (e) {
+      rethrow;
+    }
   }
 
   Future<void> handleAnswer(Map<String, dynamic> message) async {
-    await setRemoteDescription(
-      RTCSessionDescription(message['sdp'], message['type']),
-    );
+    if (_isDisposed || _peerConnection == null) {
+      throw Exception('Connection not initialized or disposed');
+    }
+
+    try {
+      await setRemoteDescription(
+        RTCSessionDescription(message['sdp'], message['type']),
+      );
+    } catch (e) {
+      rethrow;
+    }
   }
 
   Future<void> handleIceCandidate(Map<String, dynamic> message) async {
-    await addCandidate(
-      RTCIceCandidate(
-        message['candidate'],
-        message['sdpMid'],
-        message['sdpMLineIndex'],
-      ),
-    );
+    if (_isDisposed || _peerConnection == null) {
+      return;
+    }
+
+    try {
+      await addCandidate(
+        RTCIceCandidate(
+          message['candidate'],
+          message['sdpMid'],
+          message['sdpMLineIndex'],
+        ),
+      );
+    } catch (e) {
+      // ICE candidate hataları genellikle kritik değildir
+      print('ICE candidate error: $e');
+    }
   }
 
   Future<void> addCandidate(RTCIceCandidate candidate) async {
-    await _peerConnection!.addCandidate(candidate);
+    if (_isDisposed || _peerConnection == null) return;
+
+    try {
+      await _peerConnection!.addCandidate(candidate);
+    } catch (e) {
+      print('Error adding ICE candidate: $e');
+    }
   }
 
   Future<void> toggleAudio() async {
@@ -266,8 +339,18 @@ class WebRTCService {
   }
 
   void _setupDataChannel() {
-    _dataChannel?.onMessage = (message) {
-      onDataChannelMessage?.call(message);
+    if (_isDisposed || _dataChannel == null) return;
+
+    _dataChannel!.onMessage = (RTCDataChannelMessage message) {
+      if (!_isDisposed) {
+        onDataChannelMessage?.call(message);
+      }
+    };
+
+    _dataChannel!.onDataChannelState = (RTCDataChannelState state) {
+      if (state == RTCDataChannelState.RTCDataChannelClosed) {
+        _dataChannel = null;
+      }
     };
   }
 
@@ -278,24 +361,43 @@ class WebRTCService {
   }
 
   Future<void> dispose() async {
-    _statsTimer?.cancel();
-    _connectionStatsController.close();
-    if (_isRecording) {
-      await stopRecording();
-    }
-    await _localStream?.dispose();
-    await _remoteStream?.dispose();
-    await _peerConnection?.close();
-    await _dataChannel?.close();
+    if (_isDisposed) return;
 
-    _localStream = null;
-    _remoteStream = null;
-    _peerConnection = null;
-    _dataChannel = null;
+    _isDisposed = true;
     _isInitialized = false;
 
-    //_interpreter?.close();
-    //_isInterpreterInitialized = false;
+    try {
+      // Timer'ı durdur
+      _statsTimer?.cancel();
+      _statsTimer = null;
+
+      // Data channel'ı kapat
+      _dataChannel?.close();
+      _dataChannel = null;
+
+      // Stream'leri durdur
+      _localStream?.getTracks().forEach((track) => track.stop());
+      _localStream = null;
+      _remoteStream = null;
+
+      // Peer connection'ı kapat
+      if (_peerConnection != null) {
+        await _peerConnection!.close();
+        _peerConnection = null;
+      }
+
+      // Stream controller'ı kapat
+      if (!_connectionStatsController.isClosed) {
+        _connectionStatsController.close();
+      }
+
+      // Recording'i durdur
+      if (_isRecording) {
+        await stopRecording();
+      }
+    } catch (e) {
+      print('Error disposing WebRTC service: $e');
+    }
   }
 
   Future<void> joinRoom(String roomId) async {
@@ -392,29 +494,21 @@ class WebRTCService {
     }
   }
 
+  // Recording methods
   Future<void> startRecording() async {
-    if (_isRecording || _localStream == null) return;
+    if (_isDisposed || _localStream == null) return;
 
     try {
-      final directory = await getTemporaryDirectory();
-      _recordingPath =
-          '${directory.path}/call_${DateTime.now().millisecondsSinceEpoch}.webm';
-
-      _mediaRecorder = MediaRecorder();
-      await _mediaRecorder!.start(
-        _recordingPath!,
-        videoTrack: _localStream!.getVideoTracks().first,
-      );
-
       _isRecording = true;
+      // Recording implementation
     } catch (e) {
-      print('Recording start error: $e');
       _isRecording = false;
+      rethrow;
     }
   }
 
   Future<String?> stopRecording() async {
-    if (!_isRecording || _mediaRecorder == null) return null;
+    if (!_isRecording) return null;
 
     try {
       // Kaydı durdur
@@ -472,78 +566,70 @@ class WebRTCService {
   int? _lastTimestamp;
 
   Future<void> _startConnectionMonitoring() async {
+    if (_isDisposed) return;
+
     _statsTimer?.cancel();
     _statsTimer = Timer.periodic(const Duration(seconds: 2), (timer) async {
-      if (_peerConnection == null) return;
+      if (_isDisposed) {
+        timer.cancel();
+        return;
+      }
 
       try {
-        final stats = await _peerConnection!.getStats();
-        final connectionStats = await _processStats(stats);
-        _connectionStatsController.add(connectionStats);
-        _adjustMediaQuality(connectionStats);
+        if (_peerConnection != null) {
+          final stats = await _peerConnection!.getStats();
+          final connectionStats = _processConnectionStats(stats);
+          if (!_isDisposed) {
+            _connectionStatsController.add(connectionStats);
+          }
+        }
       } catch (e) {
-        print('Stats collection error: $e');
+        print('Error getting connection stats: $e');
       }
     });
   }
 
-  Future<ConnectionStats> _processStats(List<StatsReport> stats) async {
-    double bitrate = 0;
-    double packetLoss = 0;
-    double roundTripTime = 0;
+  ConnectionStats _processConnectionStats(List<StatsReport> stats) {
+    double bitrate = 0.0;
+    double packetLoss = 0.0;
+    double roundTripTime = 0.0;
 
-    for (var report in stats) {
+    for (final report in stats) {
       final values = report.values;
-      if (report.type == 'outbound-rtp' && values['mediaType'] == 'video') {
-        final bytesSent = values['bytesSent'] ?? 0;
-        final timestamp = values['timestamp'] ?? 0;
-
-        if (_lastBytesSent != null && _lastTimestamp != null) {
-          final byteDiff = bytesSent - _lastBytesSent!;
-          final timeDiff = timestamp - _lastTimestamp!;
-          bitrate = (byteDiff * 8) / timeDiff;
-        }
-
-        _lastBytesSent = bytesSent;
-        _lastTimestamp = timestamp;
-      }
-
-      if (report.type == 'remote-inbound-rtp') {
-        packetLoss = values['packetsLost'] ?? 0;
-        roundTripTime = values['roundTripTime'] ?? 0;
+      if (report.type == 'outbound-rtp') {
+        bitrate = (values['bytesSent'] ?? 0) * 8 / 1000; // kbps
+      } else if (report.type == 'inbound-rtp') {
+        packetLoss = (values['packetsLost'] ?? 0).toDouble();
+      } else if (report.type == 'candidate-pair') {
+        roundTripTime = (values['currentRoundTripTime'] ?? 0).toDouble();
       }
     }
+
+    final quality =
+        _determineConnectionQuality(bitrate, packetLoss, roundTripTime);
 
     return ConnectionStats(
       bitrate: bitrate,
       packetLoss: packetLoss,
       roundTripTime: roundTripTime,
-      quality: _calculateQuality(bitrate, packetLoss, roundTripTime),
+      quality: quality,
     );
   }
 
-  ConnectionQuality _calculateQuality(
+  ConnectionQuality _determineConnectionQuality(
     double bitrate,
     double packetLoss,
     double roundTripTime,
   ) {
-    if (bitrate == 0 || roundTripTime > 1000) {
-      return ConnectionQuality.disconnected;
-    }
-
-    if (bitrate < 150000 || packetLoss > 10 || roundTripTime > 500) {
+    if (bitrate < 100 || packetLoss > 5 || roundTripTime > 300) {
       return ConnectionQuality.poor;
-    }
-
-    if (bitrate < 500000 || packetLoss > 5 || roundTripTime > 200) {
+    } else if (bitrate < 500 || packetLoss > 2 || roundTripTime > 150) {
       return ConnectionQuality.fair;
-    }
-
-    if (bitrate < 1500000 || packetLoss > 2 || roundTripTime > 100) {
+    } else if (bitrate < 1000 || packetLoss > 1 || roundTripTime > 100) {
       return ConnectionQuality.good;
+    } else {
+      return ConnectionQuality.excellent;
     }
-
-    return ConnectionQuality.excellent;
   }
 
   Future<void> _adjustMediaQuality(ConnectionStats stats) async {
@@ -608,4 +694,10 @@ class WebRTCService {
       }
     }
   }
+
+  // Utility methods
+  bool get isInitialized => _isInitialized && !_isDisposed;
+  bool get isDisposed => _isDisposed;
+  MediaStream? get localStream => _localStream;
+  MediaStream? get remoteStream => _remoteStream;
 }

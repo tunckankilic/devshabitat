@@ -28,6 +28,13 @@ class DiscoveryService {
   CollectionReference get _userAnalyticsCollection =>
       _firestore.collection('user_analytics');
 
+  // Dispose method to prevent memory leaks
+  void dispose() {
+    if (!_onlineStatusController.isClosed) {
+      _onlineStatusController.close();
+    }
+  }
+
   // Konum hesaplama yardımcı fonksiyonları
   double _calculateDistance(GeoPoint point1, GeoPoint point2) {
     return Geolocator.distanceBetween(

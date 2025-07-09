@@ -5,14 +5,12 @@ import '../repositories/auth_repository.dart';
 import '../core/services/error_handler_service.dart';
 import 'email_auth_controller.dart';
 import 'auth_state_controller.dart';
-import '../services/storage_service.dart';
 
 class AuthController extends GetxController {
   final EmailAuthController _emailAuth;
   final AuthStateController _authState;
   final AuthRepository _authRepository;
   final ErrorHandlerService _errorHandler;
-  final StorageService _storageService = Get.find();
 
   final Rx<User?> _firebaseUser = Rx<User?>(null);
   final RxMap<String, dynamic> _userProfile = RxMap<String, dynamic>();
@@ -53,10 +51,10 @@ class AuthController extends GetxController {
 
   Future<void> _loadUserProfile() async {
     try {
-      if (_firebaseUser.value != null) {
-        final profile =
-            await _authRepository.getUserProfile(_firebaseUser.value!.uid);
-        if (profile != null) {
+      final currentUser = _firebaseUser.value;
+      if (currentUser != null && currentUser.uid.isNotEmpty) {
+        final profile = await _authRepository.getUserProfile(currentUser.uid);
+        if (profile != null && profile.isNotEmpty) {
           _userProfile.assignAll(profile);
         }
       }
@@ -70,7 +68,7 @@ class AuthController extends GetxController {
       _isLoading.value = true;
       _lastError.value = '';
 
-      final credential = await _authRepository.signInWithGoogle();
+      await _authRepository.signInWithGoogle();
       _errorHandler.handleSuccess('Google ile giriş başarılı');
     } catch (e) {
       _lastError.value = e.toString();
@@ -85,7 +83,7 @@ class AuthController extends GetxController {
       _isLoading.value = true;
       _lastError.value = '';
 
-      final credential = await _authRepository.signInWithApple();
+      await _authRepository.signInWithApple();
       _errorHandler.handleSuccess('Apple ile giriş başarılı');
     } catch (e) {
       _lastError.value = e.toString();
@@ -100,7 +98,7 @@ class AuthController extends GetxController {
       _isLoading.value = true;
       _lastError.value = '';
 
-      final credential = await _authRepository.signInWithFacebook();
+      await _authRepository.signInWithFacebook();
       _errorHandler.handleSuccess('Facebook ile giriş başarılı');
     } catch (e) {
       _lastError.value = e.toString();

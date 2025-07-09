@@ -6,67 +6,127 @@ import 'package:location/location.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import '../../models/location/developer_location_model.dart';
+import 'package:logger/logger.dart';
 
 class LocationTrackingService extends GetxService {
   final Location _location = Location();
   StreamController<LocationData>? _locationController;
+  StreamSubscription<LocationData>? _locationSubscription;
+  final Logger _logger = Get.find<Logger>();
+  bool _isDisposed = false;
 
   Future<LocationTrackingService> init() async {
-    await _location.requestPermission();
-    await _location.changeSettings(
-      accuracy: LocationAccuracy.high,
-      interval: 15000, // 15 seconds
-    );
-    return this;
+    try {
+      await _location.requestPermission();
+      await _location.changeSettings(
+        accuracy: LocationAccuracy.high,
+        interval: 15000, // 15 seconds
+      );
+      return this;
+    } catch (e) {
+      _logger.e('Location tracking service initialization error: $e');
+      rethrow;
+    }
   }
 
   Future<LocationData?> getCurrentLocation() async {
     try {
+      if (_isDisposed) {
+        throw Exception('Service disposed');
+      }
       return await _location.getLocation();
     } catch (e) {
+      _logger.e('Error getting current location: $e');
       Get.snackbar('Hata', 'Konum alınamadı');
       return null;
     }
   }
 
   Stream<LocationData?> getLocationStream() {
-    _locationController?.close();
-    _locationController = StreamController<LocationData>.broadcast();
+    try {
+      // Önceki stream'i temizle
+      _disposeLocationStream();
 
-    _location.onLocationChanged.listen(
-      (locationData) {
-        if (!_locationController!.isClosed) {
-          _locationController!.add(locationData);
-        }
-      },
-      onError: (error) {
-        Get.snackbar('Hata', 'Konum güncellemesi alınamadı');
-      },
-    );
+      if (_isDisposed) {
+        return Stream.value(null);
+      }
 
-    return _locationController!.stream;
+      _locationController = StreamController<LocationData>.broadcast();
+
+      _locationSubscription = _location.onLocationChanged.listen(
+        (locationData) {
+          if (!_isDisposed &&
+              _locationController != null &&
+              !_locationController!.isClosed) {
+            _locationController!.add(locationData);
+          }
+        },
+        onError: (error) {
+          _logger.e('Location stream error: $error');
+          Get.snackbar('Hata', 'Konum güncellemesi alınamadı');
+        },
+        cancelOnError: false,
+      );
+
+      return _locationController!.stream;
+    } catch (e) {
+      _logger.e('Error creating location stream: $e');
+      return Stream.value(null);
+    }
+  }
+
+  void _disposeLocationStream() {
+    _locationSubscription?.cancel();
+    _locationSubscription = null;
+
+    if (_locationController != null && !_locationController!.isClosed) {
+      _locationController!.close();
+    }
+    _locationController = null;
   }
 
   Future<void> updateLocationSettings({
     required LocationAccuracy accuracy,
     required int interval,
   }) async {
-    await _location.changeSettings(
-      accuracy: accuracy,
-      interval: interval,
-    );
+    try {
+      if (_isDisposed) return;
+      await _location.changeSettings(
+        accuracy: accuracy,
+        interval: interval,
+      );
+    } catch (e) {
+      _logger.e('Error updating location settings: $e');
+    }
   }
 
   Future<bool> checkBackgroundMode() async {
-    return await _location.isBackgroundModeEnabled();
+    try {
+      if (_isDisposed) return false;
+      return await _location.isBackgroundModeEnabled();
+    } catch (e) {
+      _logger.e('Error checking background mode: $e');
+      return false;
+    }
   }
 
   Future<bool> enableBackgroundMode() async {
-    return await _location.enableBackgroundMode();
+    try {
+      if (_isDisposed) return false;
+      return await _location.enableBackgroundMode();
+    } catch (e) {
+      _logger.e('Error enabling background mode: $e');
+      return false;
+    }
   }
 
   Future<void> disableBackgroundMode() async {
-    await _location.enableBackgroundMode(enable: false);
+    try {
+      if (_isDisposed) return;
+      await _location.enableBackgroundMode(enable: false);
+    } catch (e) {
+      _logger.e('Error disabling background mode: $e');
+    }
   }
 
   Future<void> updateUserLocation({
@@ -74,29 +134,34 @@ class LocationTrackingService extends GetxService {
     required GeoPoint location,
   }) async {
     try {
+      if (_isDisposed) return;
       await FirebaseFirestore.instance
           .collection('users')
           .doc(userId)
           .update({'location': location});
     } catch (e) {
+      _logger.e('Error updating user location: $e');
       throw Exception('Konum güncellenirken hata oluştu: $e');
     }
   }
 
   Future<void> removeUserLocation({required String userId}) async {
     try {
+      if (_isDisposed) return;
       await FirebaseFirestore.instance
           .collection('users')
           .doc(userId)
           .update({'location': FieldValue.delete()});
     } catch (e) {
+      _logger.e('Error removing user location: $e');
       throw Exception('Konum silinirken hata oluştu: $e');
     }
   }
 
   @override
   void onClose() {
-    _locationController?.close();
+    _isDisposed = true;
+    _disposeLocationStream();
     super.onClose();
   }
 
@@ -133,6 +198,8 @@ class LocationTrackingService extends GetxService {
     double radiusKm,
   ) async {
     try {
+      if (_isDisposed) return [];
+
       final snapshot =
           await FirebaseFirestore.instance.collection('users').get();
       final developers = snapshot.docs
@@ -145,6 +212,7 @@ class LocationTrackingService extends GetxService {
           .toList();
       return developers;
     } catch (e) {
+      _logger.e('Error getting nearby developers: $e');
       throw Exception('Yakındaki geliştiriciler alınırken hata oluştu: $e');
     }
   }
@@ -154,11 +222,13 @@ class LocationTrackingService extends GetxService {
     required bool enabled,
   }) async {
     try {
+      if (_isDisposed) return;
       await FirebaseFirestore.instance
           .collection('users')
           .doc(userId)
           .update({'locationNotificationsEnabled': enabled});
     } catch (e) {
+      _logger.e('Error updating location notification settings: $e');
       throw Exception('Bildirim ayarları güncellenirken hata oluştu: $e');
     }
   }
@@ -169,6 +239,7 @@ class LocationTrackingService extends GetxService {
     required String notificationType,
   }) async {
     try {
+      if (_isDisposed) return;
       await FirebaseFirestore.instance.collection('users').doc(userId).update({
         'notifications': {
           notificationType: {
@@ -178,6 +249,7 @@ class LocationTrackingService extends GetxService {
         }
       });
     } catch (e) {
+      _logger.e('Error updating notification settings: $e');
       throw Exception('Bildirim ayarları güncellenirken hata oluştu: $e');
     }
   }
