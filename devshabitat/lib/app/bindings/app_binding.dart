@@ -7,6 +7,8 @@ import '../core/services/error_handler_service.dart';
 import '../core/services/memory_manager_service.dart';
 import '../core/services/api_optimization_service.dart';
 import '../services/github_oauth_service.dart';
+import '../services/github_service.dart';
+import '../services/developer_matching_service.dart';
 import '../services/post_service.dart';
 import '../services/lazy_loading_service.dart';
 import '../services/asset_optimization_service.dart';
@@ -44,6 +46,12 @@ class AppBinding extends Bindings {
     final authRepository = Get.put(AuthRepository(
       githubOAuthService: githubOAuthService,
     ));
+
+    // GitHub Services
+    Get.put(GithubService());
+
+    // Developer Matching Service
+    Get.put(DeveloperMatchingService());
 
     // Auth Related Controllers
     final authStateController = Get.put(AuthStateController(

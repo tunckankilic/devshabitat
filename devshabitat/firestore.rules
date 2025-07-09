@@ -1,0 +1,21 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Kullanıcılar kendi verilerini okuyabilir ve yazabilir
+    match /users/{userId} {
+      allow read, write: if request.auth != null && request.auth.uid == userId;
+      allow read: if request.auth != null; // Diğer kullanıcılar okuyabilir
+    }
+    
+    // Projeler - herkes okuyabilir, sahibi yazabilir
+    match /projects/{projectId} {
+      allow read: if true;
+      allow write: if request.auth != null && request.auth.uid == resource.data.ownerId;
+    }
+    
+    // Diğer koleksiyonlar için genel okuma izni
+    match /{document=**} {
+      allow read: if request.auth != null;
+    }
+  }
+} 

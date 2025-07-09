@@ -1,6 +1,7 @@
 import 'package:get/get.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
+import 'dart:async';
 import '../models/github_stats_model.dart';
 import '../repositories/auth_repository.dart';
 import '../core/services/api_optimization_service.dart';
@@ -13,10 +14,44 @@ class GithubService extends GetxService {
   static const String _token =
       'YOUR_GITHUB_TOKEN'; // GitHub Personal Access Token
 
+  // Rate limiting için retry mekanizması
+  Future<T> _retryWithBackoff<T>(
+    Future<T> Function() apiCall, {
+    int maxRetries = 3,
+    Duration initialDelay = const Duration(seconds: 1),
+  }) async {
+    int retryCount = 0;
+    Duration delay = initialDelay;
+
+    while (retryCount < maxRetries) {
+      try {
+        return await apiCall();
+      } catch (e) {
+        retryCount++;
+
+        if (e.toString().contains('rate limit') ||
+            e.toString().contains('429')) {
+          if (retryCount >= maxRetries) {
+            throw Exception(
+                'GitHub API rate limit aşıldı. Lütfen daha sonra tekrar deneyin.');
+          }
+
+          print('Rate limit aşıldı, ${delay.inSeconds} saniye bekleniyor...');
+          await Future.delayed(delay);
+          delay = Duration(seconds: delay.inSeconds * 2); // Exponential backoff
+        } else {
+          rethrow;
+        }
+      }
+    }
+
+    throw Exception('Maksimum deneme sayısı aşıldı');
+  }
+
   // GitHub kullanıcı bilgilerini getir
   Future<Map<String, dynamic>> getUserInfo(String username) async {
     return await _apiOptimizer.optimizeApiCall(
-      apiCall: () async {
+      apiCall: () => _retryWithBackoff(() async {
         final response = await http.get(
           Uri.parse('$_baseUrl/users/$username'),
           headers: {
@@ -27,10 +62,15 @@ class GithubService extends GetxService {
 
         if (response.statusCode == 200) {
           return json.decode(response.body);
+        } else if (response.statusCode == 404) {
+          throw Exception('GitHub kullanıcısı bulunamadı: $username');
+        } else if (response.statusCode == 403) {
+          throw Exception(
+              'GitHub API erişimi reddedildi. Rate limit kontrol edin.');
         } else {
-          throw 'GitHub API error: ${response.statusCode}';
+          throw Exception('GitHub API hatası: ${response.statusCode}');
         }
-      },
+      }),
       cacheKey: 'github_user_info_$username',
       cacheDuration: const Duration(minutes: 10),
     );
@@ -39,7 +79,7 @@ class GithubService extends GetxService {
   // Kullanıcının repolarını getir
   Future<List<Map<String, dynamic>>> getUserRepos(String username) async {
     return await _apiOptimizer.optimizeApiCall(
-      apiCall: () async {
+      apiCall: () => _retryWithBackoff(() async {
         final response = await http.get(
           Uri.parse('$_baseUrl/users/$username/repos'),
           headers: {
@@ -51,10 +91,15 @@ class GithubService extends GetxService {
         if (response.statusCode == 200) {
           final List<dynamic> repos = json.decode(response.body);
           return repos.cast<Map<String, dynamic>>();
+        } else if (response.statusCode == 404) {
+          throw Exception('GitHub kullanıcısı bulunamadı: $username');
+        } else if (response.statusCode == 403) {
+          throw Exception(
+              'GitHub API erişimi reddedildi. Rate limit kontrol edin.');
         } else {
-          throw 'GitHub API error: ${response.statusCode}';
+          throw Exception('GitHub API hatası: ${response.statusCode}');
         }
-      },
+      }),
       cacheKey: 'github_user_repos_$username',
       cacheDuration: const Duration(minutes: 15),
     );
@@ -231,32 +276,46 @@ class GithubService extends GetxService {
   }
 
   Future<String?> getCurrentUsername() async {
-    final user = _authRepository.currentUser;
-    return user?.providerData
-        .firstWhereOrNull((info) => info.providerId == 'github.com')
-        ?.displayName;
+    try {
+      final user = _authRepository.currentUser;
+      if (user == null) {
+        return null;
+      }
+
+      return user.providerData
+          .firstWhereOrNull((info) => info.providerId == 'github.com')
+          ?.displayName;
+    } catch (e) {
+      print('GitHub username alınırken hata: $e');
+      return null;
+    }
   }
 
   Future<List<String>> getTechStack(String username) async {
-    return await _apiOptimizer.optimizeApiCall(
-      apiCall: () async {
-        final repos = await getUserRepos(username);
-        final Set<String> techStack = {};
+    try {
+      return await _apiOptimizer.optimizeApiCall(
+        apiCall: () async {
+          final repos = await getUserRepos(username);
+          final Set<String> techStack = {};
 
-        for (final repo in repos) {
-          if (repo['language'] != null) {
-            techStack.add(repo['language'] as String);
+          for (final repo in repos) {
+            if (repo['language'] != null) {
+              techStack.add(repo['language'] as String);
+            }
+            if (repo['topics'] != null) {
+              techStack.addAll((repo['topics'] as List).cast<String>());
+            }
           }
-          if (repo['topics'] != null) {
-            techStack.addAll((repo['topics'] as List).cast<String>());
-          }
-        }
 
-        return techStack.toList();
-      },
-      cacheKey: 'github_tech_stack_$username',
-      cacheDuration: const Duration(minutes: 30),
-    );
+          return techStack.toList();
+        },
+        cacheKey: 'github_tech_stack_$username',
+        cacheDuration: const Duration(minutes: 30),
+      );
+    } catch (e) {
+      print('Tech stack alınırken hata: $e');
+      return [];
+    }
   }
 
   Future<Map<String, int>> getContributionData(String username) async {
