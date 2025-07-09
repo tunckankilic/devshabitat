@@ -95,10 +95,10 @@ class RoleManagementView extends GetView<RoleController> {
                             ? NetworkImage(member.photoUrl!)
                             : null,
                         child: member.photoUrl == null
-                            ? Text(member.fullName ?? "")
+                            ? Text(member.fullName)
                             : null,
                       ),
-                      title: Text(member.fullName ?? ""),
+                      title: Text(member.fullName),
                       subtitle: Wrap(
                         spacing: 4,
                         children: roles
@@ -463,8 +463,7 @@ class RoleManagementView extends GetView<RoleController> {
                     }
 
                     final userRoles = snapshot.data ?? [];
-                    selectedRoles.value =
-                        userRoles.map((role) => role.id).toSet();
+                    selectedRoles.assignAll(userRoles.map((role) => role.id));
 
                     return Obx(
                       () => ListView.builder(

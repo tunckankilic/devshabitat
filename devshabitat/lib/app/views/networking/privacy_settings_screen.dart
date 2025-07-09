@@ -75,6 +75,30 @@ class PrivacySettingsScreen extends GetView<PrivacyController> {
                       ),
                     ),
                   ),
+                  SizedBox(height: 16.h),
+                  Card(
+                    child: Padding(
+                      padding: EdgeInsets.all(16.r),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            'Engelleme Yönetimi',
+                            style: TextStyle(
+                              fontSize: 18.sp,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                          SizedBox(height: 16.h),
+                          _buildPrivacyOption(
+                            'Engellenen Kullanıcılar',
+                            'Engellediğiniz kullanıcıları yönetin',
+                            Icons.block,
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
                 ],
               ),
       ),
@@ -88,7 +112,11 @@ class PrivacySettingsScreen extends GetView<PrivacyController> {
       subtitle: Text(subtitle, style: TextStyle(fontSize: 14.sp)),
       trailing: Icon(Icons.chevron_right, size: 24.sp),
       onTap: () {
-        _showVisibilityOptions();
+        if (title == 'Engellenen Kullanıcılar') {
+          _showBlockedUsers();
+        } else {
+          _showVisibilityOptions();
+        }
       },
     );
   }

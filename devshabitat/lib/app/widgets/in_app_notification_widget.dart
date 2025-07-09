@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:get/get.dart';
 import '../models/notification_model.dart';
 
 class InAppNotificationWidget extends StatelessWidget {

@@ -8,8 +8,6 @@ import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import '../models/notification_model.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:flutter/material.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 
 class NotificationService extends GetxService {
@@ -125,12 +123,17 @@ class NotificationService extends GetxService {
         importance: Importance.high,
         enableVibration: true,
         playSound: true,
+        showBadge: true,
+        enableLights: true,
       ),
       AndroidNotificationChannel(
         'default_channel',
         'Genel Bildirimler',
         description: 'Genel bildirimler için varsayılan kanal',
         importance: Importance.defaultImportance,
+        enableVibration: true,
+        playSound: true,
+        showBadge: true,
       ),
       AndroidNotificationChannel(
         'silent_channel',
@@ -139,6 +142,25 @@ class NotificationService extends GetxService {
         importance: Importance.low,
         playSound: false,
         enableVibration: false,
+        showBadge: false,
+      ),
+      AndroidNotificationChannel(
+        'messages_channel',
+        'Mesaj Bildirimleri',
+        description: 'Mesaj bildirimleri için özel kanal',
+        importance: Importance.high,
+        enableVibration: true,
+        playSound: true,
+        showBadge: true,
+      ),
+      AndroidNotificationChannel(
+        'events_channel',
+        'Etkinlik Bildirimleri',
+        description: 'Etkinlik bildirimleri için özel kanal',
+        importance: Importance.defaultImportance,
+        enableVibration: true,
+        playSound: true,
+        showBadge: true,
       ),
     ];
 
@@ -259,32 +281,6 @@ class NotificationService extends GetxService {
     }, onError: (error) {
       _logger.e('Token refresh stream error: $error');
     });
-  }
-
-  Future<void> _onDidReceiveLocalNotification(
-      int id, String? title, String? body, String? payload) async {
-    // iOS için eski stil bildirimler (iOS 10 ve öncesi)
-    if (title != null && body != null) {
-      await showDialog(
-        context: Get.context!,
-        builder: (BuildContext context) => CupertinoAlertDialog(
-          title: Text(title),
-          content: Text(body),
-          actions: [
-            CupertinoDialogAction(
-              isDefaultAction: true,
-              child: const Text('Tamam'),
-              onPressed: () {
-                Navigator.of(context, rootNavigator: true).pop();
-                if (payload != null) {
-                  handleNotificationNavigation(json.decode(payload));
-                }
-              },
-            )
-          ],
-        ),
-      );
-    }
   }
 
   void _onSelectNotification(NotificationResponse response) {

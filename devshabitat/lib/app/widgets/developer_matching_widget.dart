@@ -2,7 +2,6 @@ import 'package:devshabitat/app/models/user_profile_model.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../controllers/developer_matching_controller.dart';
-import '../models/privacy_settings_model.dart';
 
 class DeveloperMatchingWidget extends StatelessWidget {
   const DeveloperMatchingWidget({super.key});

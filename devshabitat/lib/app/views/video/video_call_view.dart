@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:flutter_webrtc/flutter_webrtc.dart';
 import 'package:devshabitat/app/controllers/video/video_call_controller.dart';
 import 'package:devshabitat/app/widgets/video_call/connection_quality_indicator.dart';
 import 'package:devshabitat/app/services/video/webrtc_service.dart';
