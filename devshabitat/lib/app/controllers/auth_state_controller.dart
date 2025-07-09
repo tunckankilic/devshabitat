@@ -43,7 +43,12 @@ class AuthStateController extends GetxController {
         _authState.value = AuthState.authenticated;
         // Kullanıcı profilini yükle
         _userProfile.value = await _authRepository.getUserProfile(user.uid);
-        Get.offAllNamed(AppRoutes.home);
+
+        // Sadece login sayfasındaysa anasayfaya yönlendir
+        if (Get.currentRoute == AppRoutes.login) {
+          Get.offAllNamed(AppRoutes.home);
+        }
+
         await _firestore.collection('users').doc(user.uid).set({
           'id': user.uid,
           'email': user.email,
@@ -56,7 +61,13 @@ class AuthStateController extends GetxController {
       } else {
         _authState.value = AuthState.unauthenticated;
         _userProfile.value = null;
-        Get.offAllNamed(AppRoutes.login);
+
+        // Sadece korumalı sayfalardaysa login sayfasına yönlendir
+        if (Get.currentRoute != AppRoutes.login &&
+            Get.currentRoute != AppRoutes.register &&
+            Get.currentRoute != AppRoutes.forgotPassword) {
+          Get.offAllNamed(AppRoutes.login);
+        }
       }
     });
   }

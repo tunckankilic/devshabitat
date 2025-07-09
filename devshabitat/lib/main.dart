@@ -10,6 +10,7 @@ import 'package:firebase_messaging/firebase_messaging.dart';
 import 'app/services/background_message_handler_service.dart';
 import 'app/services/deep_linking_service.dart';
 import 'app/core/config/app_config.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -47,7 +48,7 @@ class MyApp extends StatelessWidget {
           title: 'DevsHabitat',
           theme: DevHabitatTheme.lightTheme,
           darkTheme: DevHabitatTheme.darkTheme,
-          initialRoute: AppPages.INITIAL,
+          initialRoute: _getInitialRoute(),
           getPages: AppPages.routes,
           initialBinding: AppBinding(),
           defaultTransition: Transition.fade,
@@ -55,5 +56,17 @@ class MyApp extends StatelessWidget {
         );
       },
     );
+  }
+
+  String _getInitialRoute() {
+    // Firebase Auth'tan mevcut kullanıcıyı kontrol et
+    final currentUser = FirebaseAuth.instance.currentUser;
+
+    // Eğer kullanıcı giriş yapmışsa anasayfaya, yapmamışsa login sayfasına yönlendir
+    if (currentUser != null) {
+      return AppRoutes.home;
+    } else {
+      return AppRoutes.login;
+    }
   }
 }

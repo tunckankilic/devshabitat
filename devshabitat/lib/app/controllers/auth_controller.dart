@@ -42,10 +42,18 @@ class AuthController extends GetxController {
 
   void _setInitialScreen(User? user) {
     if (user == null) {
-      Get.offAllNamed('/login');
+      // Sadece korumalı sayfalardaysa login sayfasına yönlendir
+      if (Get.currentRoute != '/login' &&
+          Get.currentRoute != '/register' &&
+          Get.currentRoute != '/forgot-password') {
+        Get.offAllNamed('/login');
+      }
     } else {
       _loadUserProfile();
-      Get.offAllNamed('/home');
+      // Sadece login sayfasındaysa anasayfaya yönlendir
+      if (Get.currentRoute == '/login') {
+        Get.offAllNamed('/home');
+      }
     }
   }
 

@@ -47,7 +47,8 @@ import '../bindings/event/nearby_events_binding.dart';
 part 'app_routes.dart';
 
 class AppPages {
-  static const INITIAL = AppRoutes.login;
+  static const INITIAL =
+      AppRoutes.login; // Bu artık dinamik olarak belirleniyor
 
   static final routes = [
     GetPage(
