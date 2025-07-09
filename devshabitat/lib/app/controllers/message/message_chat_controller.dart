@@ -1,18 +1,22 @@
 import 'package:get/get.dart';
 import 'package:flutter/material.dart';
+import 'dart:async';
 import '../../models/message_model.dart';
 import '../../models/conversation_model.dart';
 import '../../services/messaging_service.dart';
 import '../../core/services/error_handler_service.dart';
+import '../../core/services/memory_manager_service.dart';
 import 'message_base_controller.dart';
 
-class MessageChatController extends MessageBaseController {
+class MessageChatController extends MessageBaseController
+    with MemoryManagementMixin {
   final TextEditingController messageController = TextEditingController();
   final ScrollController scrollController = ScrollController();
   final RxList<MessageModel> messages = <MessageModel>[].obs;
   final Rx<ConversationModel?> currentConversation =
       Rx<ConversationModel?>(null);
   final RxBool isTyping = false.obs;
+  StreamSubscription? _messageStreamSubscription;
 
   MessageChatController({
     required MessagingService messagingService,
@@ -30,9 +34,10 @@ class MessageChatController extends MessageBaseController {
       currentConversation.value = conversation;
 
       final messageStream = messagingService.listenToMessages(conversationId);
-      messageStream.listen((messageList) {
+      _messageStreamSubscription = messageStream.listen((messageList) {
         messages.assignAll(messageList);
       });
+      registerSubscription(_messageStreamSubscription!); // Otomatik yönetim
 
       // Okunmamış mesajları okundu olarak işaretle
       await messagingService.markAsRead(conversationId);
@@ -124,6 +129,7 @@ class MessageChatController extends MessageBaseController {
   void onClose() {
     messageController.dispose();
     scrollController.dispose();
+    // MemoryManagementMixin otomatik olarak subscription'ı temizleyecek
     super.onClose();
   }
 }

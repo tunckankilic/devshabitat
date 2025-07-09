@@ -43,6 +43,7 @@ import '../views/event/nearby_events_view.dart';
 import '../bindings/event/event_detail_binding.dart';
 import '../bindings/community/community_event_binding.dart';
 import '../bindings/event/nearby_events_binding.dart';
+import '../views/debug/memory_debug_view.dart';
 
 part 'app_routes.dart';
 
@@ -196,6 +197,13 @@ class AppPages {
       page: () => const NotificationSettingsView(),
       binding: NotificationBinding(),
       middlewares: [AuthMiddleware()],
+    ),
+    GetPage(
+      name: AppRoutes.memoryDebug,
+      page: () => const MemoryDebugView(),
+      binding: BindingsBuilder(() {
+        Get.lazyPut(() => MemoryDebugController());
+      }),
     ),
   ];
 }

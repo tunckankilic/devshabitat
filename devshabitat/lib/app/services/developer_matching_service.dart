@@ -1,6 +1,7 @@
 import 'package:get/get.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import '../models/user_profile_model.dart';
+import '../controllers/auth_controller.dart';
 
 class DeveloperMatchingService extends GetxService {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
@@ -11,17 +12,43 @@ class DeveloperMatchingService extends GetxService {
     required String excludeUsername,
   }) async {
     try {
+      // Önce sadece skills ile filtrele, sonra client-side'da username kontrolü yap
       final querySnapshot = await _firestore
           .collection('users')
-          .where('technologies', arrayContainsAny: techStack)
-          .where('username', isNotEqualTo: excludeUsername)
+          .where('skills', arrayContainsAny: techStack)
+          .limit(50) // Limit ekle
           .get();
 
-      return querySnapshot.docs
+      // Client-side'da username filtrelemesi yap
+      final filteredDevelopers = querySnapshot.docs
+          .where((doc) {
+            final data = doc.data();
+            return data['githubUsername'] != excludeUsername;
+          })
           .map((doc) => UserProfile.fromFirestore(doc))
           .toList();
+
+      return filteredDevelopers;
     } catch (e) {
-      throw Exception('Geliştiriciler bulunurken bir hata oluştu: $e');
+      print('Firestore query hatası: $e');
+      // Fallback: Tüm kullanıcıları getir ve client-side'da filtrele
+      try {
+        final allUsers = await _firestore.collection('users').limit(100).get();
+        return allUsers.docs
+            .where((doc) {
+              final data = doc.data();
+              final skills = List<String>.from(data['skills'] ?? []);
+              final username = data['githubUsername'];
+
+              return username != excludeUsername &&
+                  techStack.any((tech) => skills.contains(tech));
+            })
+            .map((doc) => UserProfile.fromFirestore(doc))
+            .toList();
+      } catch (fallbackError) {
+        throw Exception(
+            'Geliştiriciler bulunurken bir hata oluştu: $fallbackError');
+      }
     }
   }
 
@@ -33,12 +60,22 @@ class DeveloperMatchingService extends GetxService {
       final querySnapshot = await _firestore
           .collection('projects')
           .where('isOpen', isEqualTo: true)
-          .where('collaborators', arrayContains: username)
+          .limit(20) // Limit ekle
           .get();
 
-      return querySnapshot.docs.map((doc) => doc.data()).toList();
+      // Client-side'da collaborator kontrolü yap
+      return querySnapshot.docs
+          .where((doc) {
+            final data = doc.data();
+            final collaborators =
+                List<String>.from(data['collaborators'] ?? []);
+            return collaborators.contains(username);
+          })
+          .map((doc) => doc.data())
+          .toList();
     } catch (e) {
-      throw Exception('Proje önerileri alınırken bir hata oluştu: $e');
+      print('Proje önerileri hatası: $e');
+      return [];
     }
   }
 
@@ -50,14 +87,20 @@ class DeveloperMatchingService extends GetxService {
       final querySnapshot = await _firestore
           .collection('users')
           .where('isMentor', isEqualTo: true)
-          .where('username', isNotEqualTo: username)
+          .limit(50) // Limit ekle
           .get();
 
+      // Client-side'da username filtrelemesi yap
       return querySnapshot.docs
+          .where((doc) {
+            final data = doc.data();
+            return data['githubUsername'] != username;
+          })
           .map((doc) => UserProfile.fromFirestore(doc))
           .toList();
     } catch (e) {
-      throw Exception('Mentor önerileri alınırken bir hata oluştu: $e');
+      print('Mentor bulma hatası: $e');
+      return [];
     }
   }
 
@@ -76,7 +119,12 @@ class DeveloperMatchingService extends GetxService {
     required String targetUserId,
   }) async {
     try {
-      final currentUserId = Get.find<String>();
+      final authController = Get.find<AuthController>();
+      final currentUserId = authController.currentUser?.uid;
+
+      if (currentUserId == null) {
+        throw Exception('Kullanıcı oturumu bulunamadı');
+      }
 
       await _firestore.collection('collaboration_requests').add({
         'fromUserId': currentUserId,
@@ -94,7 +142,12 @@ class DeveloperMatchingService extends GetxService {
     required String mentorId,
   }) async {
     try {
-      final currentUserId = Get.find<String>();
+      final authController = Get.find<AuthController>();
+      final currentUserId = authController.currentUser?.uid;
+
+      if (currentUserId == null) {
+        throw Exception('Kullanıcı oturumu bulunamadı');
+      }
 
       await _firestore.collection('mentorship_requests').add({
         'fromUserId': currentUserId,

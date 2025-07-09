@@ -38,6 +38,7 @@ class UserProfile {
   final String? company;
   final GeoPoint? location;
   final String? locationName;
+  final String? githubUsername;
   final List<String> skills;
   final List<String> interests;
   final List<String> languages;
@@ -67,6 +68,7 @@ class UserProfile {
     this.company,
     this.location,
     this.locationName,
+    this.githubUsername,
     this.skills = const [],
     this.interests = const [],
     this.languages = const [],
@@ -99,6 +101,7 @@ class UserProfile {
       company: data['company'],
       location: data['location'] as GeoPoint?,
       locationName: data['locationName'],
+      githubUsername: data['githubUsername'],
       skills: List<String>.from(data['skills'] ?? []),
       interests: List<String>.from(data['interests'] ?? []),
       languages: List<String>.from(data['languages'] ?? []),
@@ -134,6 +137,7 @@ class UserProfile {
       'company': company,
       'location': location,
       'locationName': locationName,
+      'githubUsername': githubUsername,
       'skills': skills,
       'interests': interests,
       'languages': languages,
@@ -165,6 +169,7 @@ class UserProfile {
     String? company,
     GeoPoint? location,
     String? locationName,
+    String? githubUsername,
     List<String>? skills,
     List<String>? interests,
     List<String>? languages,
@@ -194,6 +199,7 @@ class UserProfile {
       company: company ?? this.company,
       location: location ?? this.location,
       locationName: locationName ?? this.locationName,
+      githubUsername: githubUsername ?? this.githubUsername,
       skills: skills ?? this.skills,
       interests: interests ?? this.interests,
       languages: languages ?? this.languages,

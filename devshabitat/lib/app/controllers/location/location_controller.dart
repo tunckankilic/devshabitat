@@ -4,8 +4,9 @@ import 'package:location/location.dart';
 import '../../models/location/location_model.dart';
 import '../../services/location/location_tracking_service.dart';
 import '../../services/location/maps_service.dart';
+import '../../core/services/memory_manager_service.dart';
 
-class LocationController extends GetxController {
+class LocationController extends GetxController with MemoryManagementMixin {
   final LocationTrackingService _trackingService =
       Get.find<LocationTrackingService>();
   final MapsService _mapsService = Get.find<MapsService>();
@@ -93,6 +94,7 @@ class LocationController extends GetxController {
           print('Konum takip hatası: $error');
         },
       );
+      registerSubscription(_locationSubscription!); // Otomatik yönetim
       isTrackingEnabled.value = true;
     }
   }
@@ -131,7 +133,7 @@ class LocationController extends GetxController {
   @override
   void onClose() {
     stopLocationTracking();
-    _locationSubscription?.cancel();
+    // MemoryManagementMixin otomatik olarak subscription'ı temizleyecek
     super.onClose();
   }
 }

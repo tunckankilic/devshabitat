@@ -24,11 +24,18 @@ class DeveloperMatchingController extends GetxController {
 
       final username = await _githubService.getCurrentUsername();
       if (username == null) {
-        throw Exception('GitHub kullanıcı adı bulunamadı');
+        error.value =
+            'GitHub hesabınızla giriş yapmanız gerekiyor. Lütfen önce GitHub ile giriş yapın.';
+        return;
       }
 
       // Kullanıcının teknoloji stack'ini al
-      final userTechStack = await _githubService.getUserTechStack(username);
+      final userTechStack = await _githubService.getTechStack(username);
+      if (userTechStack.isEmpty) {
+        error.value =
+            'GitHub profilinizde teknoloji bilgisi bulunamadı. Lütfen GitHub profilinizi güncelleyin.';
+        return;
+      }
 
       // Benzer teknolojileri kullanan geliştiricileri bul
       final developers = await _matchingService.findDevelopersByTechStack(
@@ -53,7 +60,9 @@ class DeveloperMatchingController extends GetxController {
 
       final username = await _githubService.getCurrentUsername();
       if (username == null) {
-        throw Exception('GitHub kullanıcı adı bulunamadı');
+        error.value =
+            'GitHub hesabınızla giriş yapmanız gerekiyor. Lütfen önce GitHub ile giriş yapın.';
+        return;
       }
 
       // Kullanıcının ilgi alanlarına göre proje önerileri
@@ -78,7 +87,9 @@ class DeveloperMatchingController extends GetxController {
 
       final username = await _githubService.getCurrentUsername();
       if (username == null) {
-        throw Exception('GitHub kullanıcı adı bulunamadı');
+        error.value =
+            'GitHub hesabınızla giriş yapmanız gerekiyor. Lütfen önce GitHub ile giriş yapın.';
+        return;
       }
 
       // Kullanıcının öğrenmek istediği teknolojilere göre mentor önerileri

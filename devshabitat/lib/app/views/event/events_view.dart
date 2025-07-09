@@ -3,53 +3,62 @@ import 'package:get/get.dart';
 import 'package:devshabitat/app/controllers/event/event_controller.dart';
 import 'package:devshabitat/app/models/event/event_model.dart';
 import 'package:devshabitat/app/routes/app_pages.dart';
+import 'package:devshabitat/app/utils/performance_optimizer.dart';
 
-class EventsView extends GetView<EventController> {
+class EventsView extends GetView<EventController> with PerformanceOptimizer {
   const EventsView({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('Etkinlikler'),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.search),
-            onPressed: () => Get.toNamed(AppRoutes.eventDiscovery),
-          ),
-          IconButton(
-            icon: const Icon(Icons.add),
-            onPressed: () => Get.toNamed(AppRoutes.eventCreate),
-          ),
-        ],
-      ),
-      body: Obx(
-        () => controller.isLoading.value
-            ? const Center(child: CircularProgressIndicator())
-            : RefreshIndicator(
-                onRefresh: () => controller.loadEvents(refresh: true),
-                child: ListView.builder(
-                  itemCount: controller.events.length + 1,
-                  itemBuilder: (context, index) {
-                    if (index == controller.events.length) {
-                      if (controller.hasMore.value) {
-                        controller.loadEvents();
-                        return const Center(
-                          child: Padding(
-                            padding: EdgeInsets.all(8.0),
-                            child: CircularProgressIndicator(),
-                          ),
-                        );
+    return optimizeWidgetTree(
+      Scaffold(
+        appBar: AppBar(
+          title: const Text('Etkinlikler'),
+          actions: [
+            IconButton(
+              icon: const Icon(Icons.search),
+              onPressed: () => Get.toNamed(AppRoutes.eventDiscovery),
+            ),
+            IconButton(
+              icon: const Icon(Icons.add),
+              onPressed: () => Get.toNamed(AppRoutes.eventCreate),
+            ),
+          ],
+        ),
+        body: Obx(
+          () => controller.isLoading.value
+              ? const Center(child: CircularProgressIndicator())
+              : RefreshIndicator(
+                  onRefresh: () => controller.loadEvents(refresh: true),
+                  child: ListView.builder(
+                    itemCount: controller.events.length + 1,
+                    itemBuilder: (context, index) {
+                      if (index == controller.events.length) {
+                        if (controller.hasMore.value) {
+                          controller.loadEvents();
+                          return const Center(
+                            child: Padding(
+                              padding: EdgeInsets.all(8.0),
+                              child: CircularProgressIndicator(),
+                            ),
+                          );
+                        }
+                        return const SizedBox();
                       }
-                      return const SizedBox();
-                    }
 
-                    final event = controller.events[index];
-                    return EventCard(event: event);
-                  },
+                      final event = controller.events[index];
+                      return _buildEventCard(event);
+                    },
+                  ),
                 ),
-              ),
+        ),
       ),
+    );
+  }
+
+  Widget _buildEventCard(EventModel event) {
+    return wrapWithRepaintBoundary(
+      EventCard(event: event).onlyWhenVisible(),
     );
   }
 }

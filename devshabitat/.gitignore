@@ -50,3 +50,7 @@ app.*.map.json
 
 # Generated files
 *.g.dart
+
+# Firebase configuration files (contain sensitive project information)
+android/app/google-services.json
+ios/Runner/GoogleService-Info.plist
