@@ -1,3 +1,5 @@
+import 'dart:developer';
+
 import 'package:devshabitat/app/repositories/auth_repository.dart';
 import 'package:get/get.dart';
 import 'package:flutter/material.dart';
@@ -84,7 +86,7 @@ class CommunityDiscoveryController extends GetxController {
       final results = await _communityService.getTrendingCommunities();
       trendingCommunities.value = results;
     } catch (e) {
-      print('Error loading trending communities: $e');
+      log('Error loading trending communities: $e');
     }
   }
 
@@ -104,7 +106,7 @@ class CommunityDiscoveryController extends GetxController {
 
       userCommunities.value = communities.whereType<CommunityModel>().toList();
     } catch (e) {
-      print('Error loading user communities: $e');
+      log('Error loading user communities: $e');
     }
   }
 

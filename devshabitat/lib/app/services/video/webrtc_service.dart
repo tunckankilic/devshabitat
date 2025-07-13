@@ -3,7 +3,6 @@ import 'package:flutter_webrtc/flutter_webrtc.dart';
 import 'package:devshabitat/app/models/video/call_settings_model.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'dart:io';
-import 'package:path_provider/path_provider.dart';
 import 'package:devshabitat/app/core/config/webrtc_config.dart';
 import 'package:logger/logger.dart';
 
@@ -482,8 +481,7 @@ class WebRTCService {
       }
 
       // Stream controller'ı kapat
-      if (_connectionStatsController != null &&
-          !_connectionStatsController.isClosed) {
+      if (!_connectionStatsController.isClosed) {
         _logger.i('Closing connection stats controller');
         _connectionStatsController.close();
       }
@@ -548,33 +546,6 @@ class WebRTCService {
     }
   }
 
-  /*
-  Future<void> initializeBackgroundBlur() async {
-    if (_isInterpreterInitialized) return;
-
-    try {
-      // TensorFlow Lite modelini yükle
-      _interpreter = await Interpreter.fromAsset(
-          'assets/models/selfie_segmentation.tflite');
-      _faceDetector = GoogleMlKit.vision.faceDetector();
-      _isInterpreterInitialized = true;
-    } catch (e) {
-      print('Background blur initialization error: $e');
-      _isInterpreterInitialized = false;
-    }
-  }
-
-  Future<void> toggleBackgroundBlur() async {
-    if (!_isInterpreterInitialized) {
-      await initializeBackgroundBlur();
-    }
-
-    _isBackgroundBlurEnabled = !_isBackgroundBlurEnabled;
-    if (_localStream != null) {
-      await applyBackgroundBlur();
-    }
-  }
-*/
   Future<void> applyBackgroundBlur() async {
     try {
       if (Platform.isIOS) {
@@ -679,9 +650,6 @@ class WebRTCService {
 
   bool get isRecording => _isRecording;
 
-  int? _lastBytesSent;
-  int? _lastTimestamp;
-
   Future<void> _startConnectionMonitoring() async {
     if (_isDisposed) return;
 
@@ -749,6 +717,7 @@ class WebRTCService {
     }
   }
 
+/*
   Future<void> _adjustMediaQuality(ConnectionStats stats) async {
     if (_localStream == null) return;
 
@@ -799,7 +768,7 @@ class WebRTCService {
       await sender.setParameters(parameters);
     }
   }
-
+*/
   Future<void> _attemptReconnection() async {
     if (_peerConnection?.connectionState ==
         RTCPeerConnectionState.RTCPeerConnectionStateFailed) {

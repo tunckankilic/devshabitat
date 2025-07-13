@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:flutter/services.dart' show rootBundle;
+import '../constants/app_assets.dart';
 
 class MapTheme {
   static const double markerSize = 40.0;
@@ -37,7 +39,28 @@ class MapTheme {
     );
   }
 
-  static String getDarkMapStyle() {
+  /// Koyu tema harita stilini asset dosyasından yükler
+  static Future<String> getDarkMapStyle() async {
+    try {
+      return await rootBundle.loadString(AppAssets.darkMapStyle);
+    } catch (e) {
+      print('Dark map style yükleme hatası: $e');
+      return _getDefaultDarkMapStyle();
+    }
+  }
+
+  /// Açık tema harita stilini asset dosyasından yükler
+  static Future<String> getLightMapStyle() async {
+    try {
+      return await rootBundle.loadString(AppAssets.lightMapStyle);
+    } catch (e) {
+      print('Light map style yükleme hatası: $e');
+      return _getDefaultLightMapStyle();
+    }
+  }
+
+  /// Fallback koyu tema stili
+  static String _getDefaultDarkMapStyle() {
     return '''
       [
         {
@@ -95,7 +118,8 @@ class MapTheme {
     ''';
   }
 
-  static String getLightMapStyle() {
+  /// Fallback açık tema stili
+  static String _getDefaultLightMapStyle() {
     return '''
       [
         {

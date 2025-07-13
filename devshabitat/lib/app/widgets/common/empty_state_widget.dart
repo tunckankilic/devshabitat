@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:lottie/lottie.dart';
+import '../../constants/app_assets.dart';
 
 class EmptyStateWidget extends StatelessWidget {
   final String message;
@@ -14,7 +15,7 @@ class EmptyStateWidget extends StatelessWidget {
     required this.message,
     this.actionLabel,
     this.onAction,
-    this.lottieAsset = 'assets/animations/empty.json',
+    this.lottieAsset = AppAssets.emptyAnimation,
     this.width,
     this.height,
   });
@@ -77,7 +78,7 @@ class NoEventsWidget extends StatelessWidget {
       message: 'Henüz hiç etkinlik yok.',
       actionLabel: 'Etkinlik Oluştur',
       onAction: onCreateEvent,
-      lottieAsset: 'assets/animations/no_events.json',
+      lottieAsset: AppAssets.noEventsAnimation,
     );
   }
 }
@@ -96,7 +97,7 @@ class NoCommunityWidget extends StatelessWidget {
       message: 'Henüz hiç topluluk yok.',
       actionLabel: 'Topluluk Oluştur',
       onAction: onCreateCommunity,
-      lottieAsset: 'assets/animations/no_community.json',
+      lottieAsset: AppAssets.noCommunityAnimation,
     );
   }
 }

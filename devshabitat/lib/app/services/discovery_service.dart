@@ -2,7 +2,6 @@ import 'dart:async';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:devshabitat/app/repositories/auth_repository.dart';
 import 'package:get/get.dart';
-import 'package:get_storage/get_storage.dart';
 import '../models/search_filter_model.dart';
 import '../models/connection_model.dart';
 import 'package:geolocator/geolocator.dart';
@@ -12,7 +11,6 @@ import '../core/services/api_optimization_service.dart';
 
 class DiscoveryService {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
-  final GetStorage _cache = GetStorage();
   final ApiOptimizationService _apiOptimizer =
       Get.find<ApiOptimizationService>();
   final StreamController<Map<String, bool>> _onlineStatusController =
@@ -21,8 +19,6 @@ class DiscoveryService {
       DiscoveryAlgorithmService();
 
   // Cache constants
-  static const String _recommendedUsersCacheKey = 'recommended_users';
-  static const Duration _cacheDuration = Duration(minutes: 30);
 
   // Collections
   CollectionReference get _usersCollection => _firestore.collection('users');

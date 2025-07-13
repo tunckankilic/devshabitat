@@ -172,9 +172,6 @@ class _CommunityEventViewState extends State<CommunityEventView>
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final isDarkMode = theme.brightness == Brightness.dark;
-
     return Scaffold(
       appBar: AppBar(
         title: Text(
@@ -352,7 +349,6 @@ class _CommunityEventViewState extends State<CommunityEventView>
 
   Widget _buildEventCard(EventModel event) {
     final theme = Theme.of(context);
-    final isDarkMode = theme.brightness == Brightness.dark;
 
     return Card(
       margin: const EdgeInsets.only(bottom: 16),

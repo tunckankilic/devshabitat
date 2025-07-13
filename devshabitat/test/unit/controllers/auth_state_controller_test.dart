@@ -1,5 +1,4 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:get/get.dart';
 import 'package:devshabitat/app/controllers/auth_state_controller.dart';
 import 'package:devshabitat/app/repositories/auth_repository.dart';
 import 'package:mockito/mockito.dart';

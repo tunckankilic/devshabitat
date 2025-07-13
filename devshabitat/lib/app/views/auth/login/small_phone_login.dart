@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import '../../../controllers/auth_controller.dart';
+import '../../../constants/app_assets.dart';
 import '../../base/base_view.dart';
 import '../widgets/responsive_form_field.dart';
 import '../widgets/social_login_button.dart';
@@ -25,7 +26,7 @@ class SmallPhoneLogin extends BaseView<AuthController> {
               children: [
                 SizedBox(height: 32.h),
                 Image.asset(
-                  'assets/images/logo.png',
+                  AppAssets.logo,
                   height: 80.h,
                 ),
                 SizedBox(height: 32.h),

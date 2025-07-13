@@ -10,6 +10,7 @@ import '../../models/location/map_marker_model.dart';
 import '../../services/location/maps_service.dart';
 import 'package:devshabitat/app/services/location/location_tracking_service.dart';
 import 'package:permission_handler/permission_handler.dart';
+import '../../constants/app_assets.dart';
 
 class MapController extends GetxController {
   final MapsService _mapsService = Get.find<MapsService>();
@@ -74,9 +75,8 @@ class MapController extends GetxController {
   }
 
   Future<void> _loadMapStyle() async {
-    final style = isDarkMode.value
-        ? 'assets/map_styles/dark_style.json'
-        : 'assets/map_styles/light_style.json';
+    final style =
+        isDarkMode.value ? AppAssets.darkMapStyle : AppAssets.lightMapStyle;
 
     try {
       mapStyle.value = await rootBundle.loadString(style);
