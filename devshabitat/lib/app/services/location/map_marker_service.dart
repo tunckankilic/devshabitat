@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import '../../models/location/map_marker_model.dart';
+import '../../constants/app_assets.dart';
 
 class MapMarkerService extends GetxService {
   final RxMap<String, Marker> markers = <String, Marker>{}.obs;
@@ -54,13 +55,13 @@ class MapMarkerService extends GetxService {
     // Kategori bazlı varsayılan ikonları döndür
     switch (category) {
       case MarkerCategory.user:
-        return await getMarkerIcon('assets/icons/user_marker.png');
+        return await getMarkerIcon(AppAssets.userMarker);
       case MarkerCategory.event:
-        return await getMarkerIcon('assets/icons/event_marker.png');
+        return await getMarkerIcon(AppAssets.eventMarker);
       case MarkerCategory.community:
-        return await getMarkerIcon('assets/icons/community_marker.png');
+        return await getMarkerIcon(AppAssets.communityMarker);
       case MarkerCategory.place:
-        return await getMarkerIcon('assets/icons/place_marker.png');
+        return await getMarkerIcon(AppAssets.placeMarker);
       default:
         return BitmapDescriptor.defaultMarker;
     }

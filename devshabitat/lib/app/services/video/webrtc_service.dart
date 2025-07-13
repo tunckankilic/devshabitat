@@ -6,6 +6,7 @@ import 'dart:io';
 import 'package:path_provider/path_provider.dart';
 import 'package:devshabitat/app/core/config/webrtc_config.dart';
 import 'package:logger/logger.dart';
+import '../../constants/app_assets.dart';
 
 // RTCStatsReport sınıfı tanımı
 class RTCStatsReport {
@@ -548,33 +549,6 @@ class WebRTCService {
     }
   }
 
-  /*
-  Future<void> initializeBackgroundBlur() async {
-    if (_isInterpreterInitialized) return;
-
-    try {
-      // TensorFlow Lite modelini yükle
-      _interpreter = await Interpreter.fromAsset(
-          'assets/models/selfie_segmentation.tflite');
-      _faceDetector = GoogleMlKit.vision.faceDetector();
-      _isInterpreterInitialized = true;
-    } catch (e) {
-      print('Background blur initialization error: $e');
-      _isInterpreterInitialized = false;
-    }
-  }
-
-  Future<void> toggleBackgroundBlur() async {
-    if (!_isInterpreterInitialized) {
-      await initializeBackgroundBlur();
-    }
-
-    _isBackgroundBlurEnabled = !_isBackgroundBlurEnabled;
-    if (_localStream != null) {
-      await applyBackgroundBlur();
-    }
-  }
-*/
   Future<void> applyBackgroundBlur() async {
     try {
       if (Platform.isIOS) {

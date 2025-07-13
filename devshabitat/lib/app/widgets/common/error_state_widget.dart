@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:lottie/lottie.dart';
+import '../../constants/app_assets.dart';
 
 class ErrorStateWidget extends StatelessWidget {
   final String message;
@@ -12,7 +13,7 @@ class ErrorStateWidget extends StatelessWidget {
     super.key,
     required this.message,
     this.onRetry,
-    this.lottieAsset = 'assets/animations/error.json',
+    this.lottieAsset = AppAssets.errorAnimation,
     this.width,
     this.height,
   });
@@ -74,7 +75,7 @@ class NetworkErrorWidget extends StatelessWidget {
     return ErrorStateWidget(
       message: 'İnternet bağlantısı hatası. Lütfen bağlantınızı kontrol edin.',
       onRetry: onRetry,
-      lottieAsset: 'assets/animations/no_connection.json',
+      lottieAsset: AppAssets.noConnectionAnimation,
     );
   }
 }
@@ -92,7 +93,7 @@ class ServerErrorWidget extends StatelessWidget {
     return ErrorStateWidget(
       message: 'Sunucu hatası. Lütfen daha sonra tekrar deneyin.',
       onRetry: onRetry,
-      lottieAsset: 'assets/animations/server_error.json',
+      lottieAsset: AppAssets.serverErrorAnimation,
     );
   }
 }

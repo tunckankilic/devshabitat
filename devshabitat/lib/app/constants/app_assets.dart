@@ -2,36 +2,58 @@ class AppAssets {
   // Görsel varlıklar
   static const String _imagesPath = 'assets/images';
   static const String _iconsPath = 'assets/icons';
+  static const String _animationsPath = 'assets/animations';
+  static const String _mapStylesPath = 'assets/map_styles';
 
   // Logo ve marka
   static const String logo = '$_imagesPath/logo.png';
-  static const String logoDark = '$_imagesPath/logo_dark.png';
-  static const String logoLight = '$_imagesPath/logo_light.png';
+  static const String logoSvg = '$_imagesPath/logo.svg';
 
-  // Onboarding görselleri
-  static const String onboarding1 = '$_imagesPath/onboarding_1.png';
-  static const String onboarding2 = '$_imagesPath/onboarding_2.png';
-  static const String onboarding3 = '$_imagesPath/onboarding_3.png';
+  // Sosyal medya logoları (giriş butonları için)
+  static const String googleLogo = '$_imagesPath/google_logo.png';
+  static const String githubLogo = '$_imagesPath/github_logo.png';
+  static const String facebookLogo = '$_imagesPath/facebook_logo.png';
+  static const String appleLogo = '$_imagesPath/apple_logo.png';
 
-  // Profil görselleri
-  static const String defaultAvatar = '$_imagesPath/default_avatar.png';
-  static const String profileBackground = '$_imagesPath/profile_background.png';
+  // Sosyal medya ikonları (küçük boyutlu)
+  static const String googleIcon = '$_iconsPath/google.png';
+  static const String githubIcon = '$_iconsPath/github.png';
+  static const String facebookIcon = '$_iconsPath/facebook.png';
+  static const String appleIcon = '$_iconsPath/apple.png';
 
-  // İkonlar
-  static const String homeIcon = '$_iconsPath/home.svg';
-  static const String profileIcon = '$_iconsPath/profile.svg';
-  static const String settingsIcon = '$_iconsPath/settings.svg';
-  static const String notificationIcon = '$_iconsPath/notification.svg';
-  static const String searchIcon = '$_iconsPath/search.svg';
-  static const String messageIcon = '$_iconsPath/message.svg';
+  // Harita marker ikonları
+  static const String userMarker = '$_iconsPath/user_marker.png';
+  static const String eventMarker = '$_iconsPath/event_marker.png';
+  static const String communityMarker = '$_iconsPath/community_marker.png';
+  static const String placeMarker = '$_iconsPath/place_marker.png';
 
-  // Sosyal medya ikonları
-  static const String githubIcon = '$_iconsPath/github.svg';
-  static const String linkedinIcon = '$_iconsPath/linkedin.svg';
-  static const String twitterIcon = '$_iconsPath/twitter.svg';
+  // Lottie animasyonları - Boş durum
+  static const String emptyAnimation = '$_animationsPath/empty.json';
+  static const String noEventsAnimation = '$_animationsPath/no_events.json';
+  static const String noCommunityAnimation =
+      '$_animationsPath/no_community.json';
 
-  // UI elementleri
-  static const String loadingAnimation = '$_imagesPath/loading.gif';
-  static const String errorImage = '$_imagesPath/error.png';
-  static const String successImage = '$_imagesPath/success.png';
+  // Lottie animasyonları - Hata durumu
+  static const String errorAnimation = '$_animationsPath/error.json';
+  static const String noConnectionAnimation =
+      '$_animationsPath/no_connection.json';
+  static const String serverErrorAnimation =
+      '$_animationsPath/server_error.json';
+
+  // Lottie animasyonları - Başarı durumu
+  static const String successAnimation = '$_animationsPath/success.json';
+  static const String saveSuccessAnimation =
+      '$_animationsPath/save_success.json';
+  static const String updateSuccessAnimation =
+      '$_animationsPath/update_success.json';
+
+  // Harita stilleri
+  static const String darkMapStyle = '$_mapStylesPath/dark_style.json';
+  static const String lightMapStyle = '$_mapStylesPath/light_style.json';
+
+  // Splash ve launcher ikonları
+  static const String splashImage = '$_imagesPath/splash.png';
+  static const String splashAndroid12 = '$_imagesPath/splash_android12.png';
+  static const String appIcon = '$_iconsPath/app_icon.png';
+  static const String appIconAdaptive = '$_iconsPath/app_icon_adaptive.png';
 }

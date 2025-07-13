@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:lottie/lottie.dart';
 import 'package:flutter_animate/flutter_animate.dart';
+import '../../constants/app_assets.dart';
 
 class SuccessAnimationWidget extends StatelessWidget {
   final String message;
@@ -15,7 +16,7 @@ class SuccessAnimationWidget extends StatelessWidget {
     super.key,
     required this.message,
     this.onAnimationEnd,
-    this.lottieAsset = 'assets/animations/success.json',
+    this.lottieAsset = AppAssets.successAnimation,
     this.width,
     this.height,
     this.displayDuration = const Duration(seconds: 2),
@@ -97,7 +98,7 @@ class SaveSuccessAnimation extends StatelessWidget {
     return SuccessAnimationWidget(
       message: 'Başarıyla Kaydedildi',
       onAnimationEnd: onAnimationEnd,
-      lottieAsset: 'assets/animations/save_success.json',
+      lottieAsset: AppAssets.saveSuccessAnimation,
     );
   }
 }
@@ -115,7 +116,7 @@ class UpdateSuccessAnimation extends StatelessWidget {
     return SuccessAnimationWidget(
       message: 'Başarıyla Güncellendi',
       onAnimationEnd: onAnimationEnd,
-      lottieAsset: 'assets/animations/update_success.json',
+      lottieAsset: AppAssets.updateSuccessAnimation,
     );
   }
 }

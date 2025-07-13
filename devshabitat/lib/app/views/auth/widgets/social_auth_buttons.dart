@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../constants/app_assets.dart';
 
 class SocialAuthButtons extends StatelessWidget {
   final VoidCallback onGoogleSignIn;
@@ -20,25 +21,25 @@ class SocialAuthButtons extends StatelessWidget {
       children: [
         _buildSocialButton(
           onPressed: onGoogleSignIn,
-          icon: 'assets/images/google_logo.png',
+          icon: AppAssets.googleLogo,
           label: 'Google ile Giriş Yap',
         ),
         const SizedBox(height: 16),
         _buildSocialButton(
           onPressed: onGithubSignIn,
-          icon: 'assets/images/github_logo.png',
+          icon: AppAssets.githubLogo,
           label: 'GitHub ile Giriş Yap',
         ),
         const SizedBox(height: 16),
         _buildSocialButton(
           onPressed: onFacebookSignIn,
-          icon: 'assets/images/facebook_logo.png',
+          icon: AppAssets.facebookLogo,
           label: 'Facebook ile Giriş Yap',
         ),
         const SizedBox(height: 16),
         _buildSocialButton(
           onPressed: onAppleSignIn,
-          icon: 'assets/images/apple_logo.png',
+          icon: AppAssets.appleLogo,
           label: 'Apple ile Giriş Yap',
         ),
       ],
