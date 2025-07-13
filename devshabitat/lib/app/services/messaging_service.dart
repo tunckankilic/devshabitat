@@ -81,18 +81,41 @@ class MessagingService extends GetxService {
 
   Future<void> removeConversation(String conversationId) async {
     try {
-      await _firestore.collection('conversations').doc(conversationId).delete();
+      await _firestore.runTransaction((transaction) async {
+        // Önce konuşmanın var olduğunu kontrol et
+        final conversationDoc = await transaction
+            .get(_firestore.collection('conversations').doc(conversationId));
 
-      final messages = await _firestore
-          .collection('messages')
-          .where('conversationId', isEqualTo: conversationId)
-          .get();
+        if (!conversationDoc.exists) {
+          throw _handleError('Konuşma bulunamadı');
+        }
 
-      final batch = _firestore.batch();
-      for (var doc in messages.docs) {
-        batch.delete(doc.reference);
-      }
-      await batch.commit();
+        // Konuşmaya ait mesajları al
+        final messages = await _firestore
+            .collection('messages')
+            .where('conversationId', isEqualTo: conversationId)
+            .get();
+
+        // Konuşmayı ve tüm mesajları tek bir transaction içinde sil
+        transaction.delete(conversationDoc.reference);
+
+        for (var message in messages.docs) {
+          transaction.delete(message.reference);
+        }
+
+        // Konuşmaya ait diğer ilişkili verileri de temizle
+        final attachments = await _firestore
+            .collection('attachments')
+            .where('conversationId', isEqualTo: conversationId)
+            .get();
+
+        for (var attachment in attachments.docs) {
+          transaction.delete(attachment.reference);
+        }
+
+        _logger.i(
+            'Konuşma ve ilişkili veriler başarıyla silindi: $conversationId');
+      });
     } catch (e) {
       _logger.e('Konuşma silinemedi: $e');
       throw _handleError('Konuşma silinemedi: $e');
@@ -110,43 +133,84 @@ class MessagingService extends GetxService {
       final currentUser = authService.currentUser?.uid;
       if (currentUser == null) throw _handleError('Kullanıcı bulunamadı');
 
-      final messageDoc = await _firestore.collection('messages').add({
-        'conversationId': conversationId,
-        'senderId': currentUser,
-        'content': content,
-        'timestamp': FieldValue.serverTimestamp(),
-        'isRead': false,
-        'isEdited': false,
-        'replyToId': replyToId,
-        'attachments': attachments,
+      String messageId = '';
+      late MessageModel createdMessage;
+
+      await _firestore.runTransaction((transaction) async {
+        // Konuşmanın var olduğunu kontrol et
+        final conversationDoc = await transaction.get(
+          _firestore.collection('conversations').doc(conversationId),
+        );
+
+        if (!conversationDoc.exists) {
+          throw _handleError('Konuşma bulunamadı');
+        }
+
+        // Yanıtlanan mesajın var olduğunu kontrol et
+        if (replyToId != null) {
+          final replyDoc = await transaction.get(
+            _firestore.collection('messages').doc(replyToId),
+          );
+
+          if (!replyDoc.exists) {
+            throw _handleError('Yanıtlanan mesaj bulunamadı');
+          }
+        }
+
+        // Yeni mesaj oluştur
+        final messageRef = _firestore.collection('messages').doc();
+        messageId = messageRef.id;
+
+        final messageData = {
+          'id': messageId,
+          'conversationId': conversationId,
+          'senderId': currentUser,
+          'senderName': '',
+          'content': content,
+          'timestamp': FieldValue.serverTimestamp(),
+          'isRead': false,
+          'isEdited': false,
+          'replyToId': replyToId,
+          'attachments': attachments,
+          'type': MessageType.text.toString(),
+        };
+
+        transaction.set(messageRef, messageData);
+
+        // Konuşmayı güncelle
+        transaction.update(
+          _firestore.collection('conversations').doc(conversationId),
+          {
+            'lastMessage': content,
+            'lastMessageSenderId': currentUser,
+            'lastMessageTime': FieldValue.serverTimestamp(),
+            'unreadCount': FieldValue.increment(1),
+          },
+        );
+
+        createdMessage = MessageModel(
+          id: messageId,
+          conversationId: conversationId,
+          senderId: currentUser,
+          senderName: '',
+          content: content,
+          timestamp: DateTime.now(),
+          isRead: false,
+          isEdited: false,
+          replyToId: replyToId,
+          type: MessageType.text,
+          attachments: attachments
+              .map((url) => MessageAttachment(
+                    url: url,
+                    name: url.split('/').last,
+                    type: MessageType.image,
+                    size: '',
+                  ))
+              .toList(),
+        );
       });
 
-      await _firestore.collection('conversations').doc(conversationId).update({
-        'lastMessage': content,
-        'lastMessageSenderId': currentUser,
-        'lastMessageTime': FieldValue.serverTimestamp(),
-        'isRead': false,
-        'unreadCount': FieldValue.increment(1),
-      });
-
-      return MessageModel(
-        id: messageDoc.id,
-        conversationId: conversationId,
-        senderId: currentUser,
-        senderName: '',
-        content: content,
-        timestamp: DateTime.now(),
-        isRead: false,
-        type: MessageType.text,
-        attachments: attachments
-            .map((url) => MessageAttachment(
-                  url: url,
-                  name: url.split('/').last,
-                  size: '',
-                  type: MessageType.image,
-                ))
-            .toList(),
-      );
+      return createdMessage;
     } catch (e) {
       _logger.e('Mesaj gönderilemedi: $e');
       throw _handleError('Mesaj gönderilemedi: $e');

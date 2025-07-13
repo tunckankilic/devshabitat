@@ -1,8 +1,10 @@
 import 'dart:async';
+import 'dart:math' as math;
 import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:get/get.dart';
 import 'package:devshabitat/app/models/message_model.dart';
 import 'package:devshabitat/app/services/image_upload_service.dart';
+import 'package:logger/logger.dart';
 
 class BackgroundSyncService extends GetxService {
   final _syncQueue = <MessageModel>[].obs;
@@ -10,11 +12,13 @@ class BackgroundSyncService extends GetxService {
   final _networkStatus = Rx<ConnectivityResult>(ConnectivityResult.none);
   final _syncStatus = ''.obs;
   final _batteryOptimized = true.obs;
+  final _logger = Logger();
 
   Timer? _cleanupTimer;
   StreamSubscription<List<ConnectivityResult>>? _connectivitySubscription;
   final _retryAttempts = 3;
-  final _retryDelay = const Duration(seconds: 5);
+  final _baseRetryDelay = const Duration(seconds: 2);
+  final _maxRetryDelay = const Duration(minutes: 5);
 
   @override
   void onInit() {
@@ -84,27 +88,60 @@ class BackgroundSyncService extends GetxService {
     try {
       final messagesToProcess = List<MessageModel>.from(_syncQueue);
       for (var message in messagesToProcess) {
-        bool synced = false;
-        int attempts = 0;
-
-        while (!synced && attempts < _retryAttempts) {
-          try {
-            await _syncMessage(message);
-            synced = true;
-            _syncQueue.remove(message);
-          } catch (e) {
-            attempts++;
-            if (attempts < _retryAttempts) {
-              _updateSyncStatus('Yeniden deneme $attempts/$_retryAttempts');
-              await Future.delayed(_retryDelay);
-            }
-          }
+        if (await _syncWithRetry(message)) {
+          _syncQueue.remove(message);
         }
       }
     } finally {
       _isSyncing.value = false;
       _updateSyncStatus('Senkronizasyon tamamlandı');
     }
+  }
+
+  Future<bool> _syncWithRetry(MessageModel message) async {
+    int attempts = 0;
+    DateTime? lastAttempt;
+
+    while (attempts < _retryAttempts) {
+      try {
+        // Eğer bu ilk deneme değilse, exponential backoff uygula
+        if (lastAttempt != null) {
+          final backoffDuration = _calculateBackoffDuration(attempts);
+          _updateSyncStatus('Bekleniyor: ${backoffDuration.inSeconds} saniye');
+          await Future.delayed(backoffDuration);
+        }
+
+        await _syncMessage(message);
+        return true;
+      } catch (e) {
+        attempts++;
+        lastAttempt = DateTime.now();
+
+        if (attempts >= _retryAttempts) {
+          _logger.e('Maksimum deneme sayısına ulaşıldı: $e');
+          _updateSyncStatus('Senkronizasyon başarısız: ${e.toString()}');
+          return false;
+        }
+
+        _updateSyncStatus('Yeniden deneme $attempts/$_retryAttempts');
+        _logger.w('Sync retry attempt $attempts: ${e.toString()}');
+      }
+    }
+    return false;
+  }
+
+  Duration _calculateBackoffDuration(int attempt) {
+    // 2^n formülü ile exponential backoff hesapla (2, 4, 8, 16, 32 saniye...)
+    final backoffSeconds = math.min(
+      math.pow(2, attempt) * _baseRetryDelay.inSeconds,
+      _maxRetryDelay.inSeconds,
+    );
+
+    // Rastgele jitter ekle (±%25)
+    final jitter = math.Random().nextDouble() * 0.5 - 0.25; // -0.25 to +0.25
+    final finalSeconds = backoffSeconds * (1 + jitter);
+
+    return Duration(seconds: finalSeconds.round());
   }
 
   Future<void> _syncMessage(MessageModel message) async {

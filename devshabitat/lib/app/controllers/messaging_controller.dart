@@ -59,7 +59,18 @@ class MessagingController extends GetxController {
 
   @override
   void onClose() {
+    // Tüm subscription'ları temizle
     _conversationsSubscription?.cancel();
+
+    // Mesaj listelerini temizle
+    conversationMessages.clear();
+    conversations.clear();
+
+    // Timestamp ve loading state'leri temizle
+    _lastMessageTimestamp.clear();
+    _isLoadingMore.clear();
+    _hasMoreMessages.clear();
+
     super.onClose();
   }
 

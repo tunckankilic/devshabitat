@@ -5,6 +5,7 @@ import 'package:firebase_storage/firebase_storage.dart';
 import 'dart:io';
 import 'package:path_provider/path_provider.dart';
 import 'package:devshabitat/app/core/config/webrtc_config.dart';
+import 'package:logger/logger.dart';
 
 // RTCStatsReport sınıfı tanımı
 class RTCStatsReport {
@@ -66,6 +67,7 @@ class WebRTCService {
   bool _isInitialized = false;
   bool _isDisposed = false;
   String? _currentRoomId;
+  final _logger = Logger();
 
   // Callback fonksiyonları
   Function(RTCTrackEvent)? onTrack;
@@ -222,60 +224,136 @@ class WebRTCService {
   Future<RTCSessionDescription> handleOffer(
       Map<String, dynamic> message) async {
     if (_isDisposed || _peerConnection == null) {
+      _logger.e('Connection not initialized or disposed');
       throw Exception('Connection not initialized or disposed');
     }
 
     try {
+      if (!message.containsKey('sdp') || !message.containsKey('type')) {
+        _logger.e('Invalid SDP offer format');
+        throw Exception('Invalid SDP offer format');
+      }
+
+      final sdp = message['sdp'] as String?;
+      final type = message['type'] as String?;
+
+      if (sdp == null || sdp.isEmpty || type == null || type.isEmpty) {
+        _logger.e('Empty SDP or type in offer');
+        throw Exception('Empty SDP or type in offer');
+      }
+
+      _logger.i('Setting remote description from offer');
       await setRemoteDescription(
-        RTCSessionDescription(message['sdp'], message['type']),
+        RTCSessionDescription(sdp, type),
       );
+
+      _logger.i('Creating answer');
       final answer = await createAnswer();
+      _logger.i('Answer created successfully');
       return answer;
     } catch (e) {
+      _logger.e('Error handling offer: $e');
       rethrow;
     }
   }
 
   Future<void> handleAnswer(Map<String, dynamic> message) async {
     if (_isDisposed || _peerConnection == null) {
+      _logger.e('Connection not initialized or disposed');
       throw Exception('Connection not initialized or disposed');
     }
 
     try {
+      if (!message.containsKey('sdp') || !message.containsKey('type')) {
+        _logger.e('Invalid SDP answer format');
+        throw Exception('Invalid SDP answer format');
+      }
+
+      final sdp = message['sdp'] as String?;
+      final type = message['type'] as String?;
+
+      if (sdp == null || sdp.isEmpty || type == null || type.isEmpty) {
+        _logger.e('Empty SDP or type in answer');
+        throw Exception('Empty SDP or type in answer');
+      }
+
+      _logger.i('Setting remote description from answer');
       await setRemoteDescription(
-        RTCSessionDescription(message['sdp'], message['type']),
+        RTCSessionDescription(sdp, type),
       );
+      _logger.i('Remote description set successfully');
     } catch (e) {
+      _logger.e('Error handling answer: $e');
       rethrow;
     }
   }
 
   Future<void> handleIceCandidate(Map<String, dynamic> message) async {
     if (_isDisposed || _peerConnection == null) {
+      _logger.w('Peer connection disposed or not initialized');
       return;
     }
 
     try {
-      await addCandidate(
-        RTCIceCandidate(
-          message['candidate'],
-          message['sdpMid'],
-          message['sdpMLineIndex'],
-        ),
+      if (!message.containsKey('candidate') ||
+          !message.containsKey('sdpMid') ||
+          !message.containsKey('sdpMLineIndex')) {
+        throw Exception('Invalid ICE candidate format');
+      }
+
+      final candidate = RTCIceCandidate(
+        message['candidate'],
+        message['sdpMid'],
+        message['sdpMLineIndex'],
       );
+
+      if (candidate.candidate == null || candidate.candidate!.isEmpty) {
+        _logger.w('Empty ICE candidate received, skipping...');
+        return;
+      }
+
+      await addCandidate(candidate);
+      _logger.i('ICE candidate added successfully');
     } catch (e) {
-      // ICE candidate hataları genellikle kritik değildir
-      print('ICE candidate error: $e');
+      _logger.e('Error handling ICE candidate: $e');
+      if (e is Exception &&
+          e.toString().contains('Invalid ICE candidate format')) {
+        rethrow; // Format hatalarını yukarı ilet
+      }
+      // Diğer ICE candidate hataları genellikle kritik değildir
     }
   }
 
   Future<void> addCandidate(RTCIceCandidate candidate) async {
-    if (_isDisposed || _peerConnection == null) return;
+    if (_isDisposed || _peerConnection == null) {
+      _logger.w(
+          'Cannot add ICE candidate: connection disposed or not initialized');
+      return;
+    }
 
     try {
+      if (candidate.candidate == null || candidate.candidate!.isEmpty) {
+        _logger.w('Empty ICE candidate, skipping...');
+        return;
+      }
+
+      if (_peerConnection!.connectionState ==
+              RTCPeerConnectionState.RTCPeerConnectionStateFailed ||
+          _peerConnection!.connectionState ==
+              RTCPeerConnectionState.RTCPeerConnectionStateClosed) {
+        _logger.w(
+            'Cannot add ICE candidate: connection in ${_peerConnection!.connectionState} state');
+        return;
+      }
+
       await _peerConnection!.addCandidate(candidate);
+      _logger.i('ICE candidate added successfully');
     } catch (e) {
-      print('Error adding ICE candidate: $e');
+      _logger.e('Error adding ICE candidate: $e');
+      if (e.toString().contains('InvalidStateError')) {
+        _logger.w('Connection state error, attempting reconnection...');
+        _attemptReconnection();
+      }
     }
   }
 
@@ -361,42 +439,81 @@ class WebRTCService {
   }
 
   Future<void> dispose() async {
-    if (_isDisposed) return;
+    if (_isDisposed) {
+      _logger.w('WebRTC service already disposed');
+      return;
+    }
 
+    _logger.i('Disposing WebRTC service...');
     _isDisposed = true;
     _isInitialized = false;
 
     try {
       // Timer'ı durdur
-      _statsTimer?.cancel();
-      _statsTimer = null;
+      if (_statsTimer != null) {
+        _logger.i('Canceling stats timer');
+        _statsTimer?.cancel();
+        _statsTimer = null;
+      }
 
       // Data channel'ı kapat
-      _dataChannel?.close();
-      _dataChannel = null;
+      if (_dataChannel != null) {
+        _logger.i('Closing data channel');
+        _dataChannel?.close();
+        _dataChannel = null;
+      }
 
       // Stream'leri durdur
-      _localStream?.getTracks().forEach((track) => track.stop());
-      _localStream = null;
+      if (_localStream != null) {
+        _logger.i('Stopping local stream tracks');
+        _localStream?.getTracks().forEach((track) {
+          track.stop();
+          _logger.i('Stopped track: ${track.kind}');
+        });
+        _localStream = null;
+      }
       _remoteStream = null;
 
       // Peer connection'ı kapat
       if (_peerConnection != null) {
+        _logger.i('Closing peer connection');
         await _peerConnection!.close();
         _peerConnection = null;
       }
 
       // Stream controller'ı kapat
-      if (!_connectionStatsController.isClosed) {
+      if (_connectionStatsController != null &&
+          !_connectionStatsController.isClosed) {
+        _logger.i('Closing connection stats controller');
         _connectionStatsController.close();
       }
 
       // Recording'i durdur
       if (_isRecording) {
+        _logger.i('Stopping active recording');
         await stopRecording();
       }
+
+      _logger.i('WebRTC service disposed successfully');
     } catch (e) {
-      print('Error disposing WebRTC service: $e');
+      _logger.e('Error disposing WebRTC service: $e');
+      // Hata durumunda bile kaynakları temizlemeye çalış
+      _cleanupResources();
+    }
+  }
+
+  void _cleanupResources() {
+    _logger.i('Cleaning up remaining resources');
+    try {
+      _statsTimer?.cancel();
+      _dataChannel?.close();
+      _localStream?.getTracks().forEach((track) => track.stop());
+      _peerConnection?.close();
+      if (!_connectionStatsController.isClosed) {
+        _connectionStatsController.close();
+      }
+    } catch (e) {
+      _logger.e('Error during cleanup: $e');
     }
   }
 

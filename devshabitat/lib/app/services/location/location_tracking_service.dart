@@ -8,6 +8,16 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import '../../models/location/developer_location_model.dart';
 import 'package:logger/logger.dart';
 
+class BatteryOptimizedSettings {
+  final LocationAccuracy accuracy;
+  final int interval;
+
+  BatteryOptimizedSettings({
+    required this.accuracy,
+    required this.interval,
+  });
+}
+
 class LocationTrackingService extends GetxService {
   final Location _location = Location();
   StreamController<LocationData>? _locationController;
@@ -15,17 +25,73 @@ class LocationTrackingService extends GetxService {
   final Logger _logger = Get.find<Logger>();
   bool _isDisposed = false;
 
+  // Battery optimization settings
+  LocationAccuracy _currentAccuracy = LocationAccuracy.balanced;
+  int _currentInterval = 30000; // Start with 30 seconds
+  Timer? _batteryOptimizationTimer;
+
   Future<LocationTrackingService> init() async {
     try {
       await _location.requestPermission();
-      await _location.changeSettings(
-        accuracy: LocationAccuracy.high,
-        interval: 15000, // 15 seconds
-      );
+      await _initializeOptimalSettings();
+      _startBatteryOptimization();
       return this;
     } catch (e) {
       _logger.e('Location tracking service initialization error: $e');
       rethrow;
+    }
+  }
+
+  Future<void> _initializeOptimalSettings() async {
+    // Get battery level and adjust settings accordingly
+    final batteryLevel = await _getBatteryOptimizedSettings();
+    await _location.changeSettings(
+      accuracy: batteryLevel.accuracy,
+      interval: batteryLevel.interval,
+    );
+    _currentAccuracy = batteryLevel.accuracy;
+    _currentInterval = batteryLevel.interval;
+  }
+
+  Future<BatteryOptimizedSettings> _getBatteryOptimizedSettings() async {
+    // Mock battery level - in real app use battery_plus package
+    final isLowPowerMode = false; // await Battery().isInBatterySaveMode();
+
+    if (isLowPowerMode) {
+      return BatteryOptimizedSettings(
+        accuracy: LocationAccuracy.low,
+        interval: 60000, // 1 minute
+      );
+    } else {
+      return BatteryOptimizedSettings(
+        accuracy: LocationAccuracy.balanced,
+        interval: 30000, // 30 seconds
+      );
+    }
+  }
+
+  void _startBatteryOptimization() {
+    _batteryOptimizationTimer?.cancel();
+    _batteryOptimizationTimer = Timer.periodic(
+      const Duration(minutes: 5),
+      (_) => _adjustSettingsBasedOnUsage(),
+    );
+  }
+
+  Future<void> _adjustSettingsBasedOnUsage() async {
+    if (_isDisposed) return;
+
+    try {
+      final settings = await _getBatteryOptimizedSettings();
+      if (settings.accuracy != _currentAccuracy ||
+          settings.interval != _currentInterval) {
+        await updateLocationSettings(
+          accuracy: settings.accuracy,
+          interval: settings.interval,
+        );
+      }
+    } catch (e) {
+      _logger.e('Error adjusting location settings: $e');
     }
   }
 
@@ -95,6 +161,10 @@ class LocationTrackingService extends GetxService {
         accuracy: accuracy,
         interval: interval,
       );
+      _currentAccuracy = accuracy;
+      _currentInterval = interval;
+      _logger.i(
+          'Location settings updated: accuracy=$accuracy, interval=${interval}ms');
     } catch (e) {
       _logger.e('Error updating location settings: $e');
     }
@@ -161,6 +231,7 @@ class LocationTrackingService extends GetxService {
   @override
   void onClose() {
     _isDisposed = true;
+    _batteryOptimizationTimer?.cancel();
     _disposeLocationStream();
     super.onClose();
   }
