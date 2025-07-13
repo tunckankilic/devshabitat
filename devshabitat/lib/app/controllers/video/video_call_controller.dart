@@ -67,8 +67,20 @@ class VideoCallController extends GetxController with MemoryManagementMixin {
 
   @override
   void onClose() {
-    // MemoryManagementMixin otomatik olarak kaynakları temizleyecek
+    // Tüm stream'leri temizle
+    _signalingSubscription?.cancel();
+    _participantSubscription?.cancel();
+    _durationTimer?.cancel();
+
+    // WebRTC kaynaklarını temizle
     _webRTCService.dispose();
+
+    // Tüm video renderer'ları temizle
+    for (var participant in _participants) {
+      participant.videoRenderer.dispose();
+    }
+    _participants.clear();
+
     super.onClose();
   }
 

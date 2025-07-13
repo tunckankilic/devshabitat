@@ -132,8 +132,15 @@ class LocationController extends GetxController with MemoryManagementMixin {
 
   @override
   void onClose() {
+    // Location tracking'i durdur
     stopLocationTracking();
-    // MemoryManagementMixin otomatik olarak subscription'ı temizleyecek
+
+    // Location subscription'ı temizle
+    _locationSubscription?.cancel();
+
+    // Tracking service'i durdur
+    _trackingService.onClose();
+
     super.onClose();
   }
 }

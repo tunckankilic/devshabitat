@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -40,21 +41,57 @@ class AuthController extends GetxController {
     ever(_firebaseUser, _setInitialScreen);
   }
 
+  Timer? _navigationTimer;
+  bool _isNavigating = false;
+
   void _setInitialScreen(User? user) {
-    if (user == null) {
-      // Sadece korumalı sayfalardaysa login sayfasına yönlendir
-      if (Get.currentRoute != '/login' &&
-          Get.currentRoute != '/register' &&
-          Get.currentRoute != '/forgot-password') {
-        Get.offAllNamed('/login');
+    // Navigation döngüsünü önlemek için debounce uygula
+    _navigationTimer?.cancel();
+    _navigationTimer = Timer(const Duration(milliseconds: 500), () {
+      if (_isNavigating) return;
+
+      if (user == null) {
+        _handleUnauthenticatedUser();
+      } else {
+        _handleAuthenticatedUser();
       }
-    } else {
-      _loadUserProfile();
-      // Sadece login sayfasındaysa anasayfaya yönlendir
-      if (Get.currentRoute == '/login') {
-        Get.offAllNamed('/home');
-      }
+    });
+  }
+
+  void _handleUnauthenticatedUser() {
+    final currentRoute = Get.currentRoute;
+    final protectedRoutes = [
+      '/home',
+      '/profile',
+      '/settings',
+      '/notifications'
+    ];
+
+    // Sadece korumalı sayfalardaysa login sayfasına yönlendir
+    if (protectedRoutes.contains(currentRoute)) {
+      _navigateToRoute('/login');
     }
+  }
+
+  void _handleAuthenticatedUser() {
+    _loadUserProfile();
+    final currentRoute = Get.currentRoute;
+    final authRoutes = ['/login', '/register', '/forgot-password'];
+
+    // Sadece auth sayfalarındaysa anasayfaya yönlendir
+    if (authRoutes.contains(currentRoute)) {
+      _navigateToRoute('/home');
+    }
+  }
+
+  void _navigateToRoute(String route) {
+    if (_isNavigating) return;
+
+    _isNavigating = true;
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      Get.offAllNamed(route);
+      _isNavigating = false;
+    });
   }
 
   Future<void> _loadUserProfile() async {
@@ -207,6 +244,7 @@ class AuthController extends GetxController {
 
   @override
   void onClose() {
+    _navigationTimer?.cancel();
     _emailAuth.dispose();
     githubUsernameController.dispose();
     super.onClose();
