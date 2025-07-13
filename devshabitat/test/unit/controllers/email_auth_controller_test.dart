@@ -1,5 +1,4 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:get/get.dart';
 import 'package:devshabitat/app/controllers/email_auth_controller.dart';
 import 'package:devshabitat/app/repositories/auth_repository.dart';
 import 'package:devshabitat/app/core/services/error_handler_service.dart';

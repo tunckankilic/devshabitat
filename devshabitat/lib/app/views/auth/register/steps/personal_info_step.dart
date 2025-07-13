@@ -65,18 +65,72 @@ class PersonalInfoStep extends GetView<RegistrationController> {
     }
   }
 
-  void _updateLocation(String value) {
+  bool _isValidLocationFormat(String value) {
+    if (value.isEmpty) return true; // Empty is valid
+
     try {
       final parts = value.split(',').map((e) => e.trim()).toList();
       if (parts.length == 2) {
         final lat = double.parse(parts[0]);
         final lng = double.parse(parts[1]);
+        return lat >= -90 && lat <= 90 && lng >= -180 && lng <= 180;
+      }
+      return false;
+    } catch (e) {
+      return false;
+    }
+  }
+
+  void _updateLocation(String value) {
+    if (value.isEmpty) {
+      controller.location.value = null;
+      return;
+    }
+
+    try {
+      final parts = value.split(',').map((e) => e.trim()).toList();
+      if (parts.length == 2) {
+        final lat = double.parse(parts[0]);
+        final lng = double.parse(parts[1]);
+
         if (lat >= -90 && lat <= 90 && lng >= -180 && lng <= 180) {
           controller.location.value = GeoPoint(lat, lng);
+
+          // Başarılı koordinat girişi feedback'i
+          if (value.contains(',') && parts.length == 2) {
+            Get.snackbar(
+              'Başarılı',
+              'Konum koordinatları güncellendi',
+              snackPosition: SnackPosition.BOTTOM,
+              backgroundColor: Colors.green.withOpacity(0.8),
+              colorText: Colors.white,
+              duration: const Duration(seconds: 2),
+            );
+          }
+        } else {
+          // Geçersiz koordinat aralığı
+          Get.snackbar(
+            'Geçersiz Koordinat',
+            'Enlem: -90 ile 90, Boylam: -180 ile 180 arasında olmalı',
+            snackPosition: SnackPosition.BOTTOM,
+            backgroundColor: Colors.orange.withOpacity(0.8),
+            colorText: Colors.white,
+            duration: const Duration(seconds: 3),
+          );
         }
       }
     } catch (e) {
-      // Geçersiz format - işlem yapma
+      // Geçersiz format - sadece virgül içeriyorsa uyarı ver
+      if (value.contains(',')) {
+        Get.snackbar(
+          'Geçersiz Format',
+          'Lütfen koordinatları "enlem, boylam" formatında girin',
+          snackPosition: SnackPosition.BOTTOM,
+          backgroundColor: Colors.red.withOpacity(0.8),
+          colorText: Colors.white,
+          duration: const Duration(seconds: 3),
+        );
+      }
     }
   }
 
@@ -166,23 +220,59 @@ class PersonalInfoStep extends GetView<RegistrationController> {
           SizedBox(height: 16.h),
 
           // Konum
-          TextFormField(
-            controller: controller.locationController,
-            onChanged: _updateLocation,
-            decoration: InputDecoration(
-              labelText: 'Konum Koordinatları',
-              hintText: 'Örn: 41.0082, 28.9784',
-              prefixIcon: Icon(Icons.location_on, size: 24.sp),
-              border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(8.r),
+          Obx(() {
+            final locationText = controller.locationController.text;
+            final isValidLocation = _isValidLocationFormat(locationText);
+
+            return TextFormField(
+              controller: controller.locationController,
+              onChanged: _updateLocation,
+              decoration: InputDecoration(
+                labelText: 'Konum Koordinatları',
+                hintText: 'Örn: 41.0082, 28.9784',
+                prefixIcon: Icon(Icons.location_on, size: 24.sp),
+                suffixIcon: locationText.isNotEmpty
+                    ? Icon(
+                        isValidLocation ? Icons.check_circle : Icons.error,
+                        color: isValidLocation ? Colors.green : Colors.red,
+                        size: 20.sp,
+                      )
+                    : null,
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(8.r),
+                  borderSide: BorderSide(
+                    color: locationText.isEmpty
+                        ? Colors.grey
+                        : isValidLocation
+                            ? Colors.green
+                            : Colors.red,
+                  ),
+                ),
+                focusedBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(8.r),
+                  borderSide: BorderSide(
+                    color: locationText.isEmpty
+                        ? Theme.of(context).primaryColor
+                        : isValidLocation
+                            ? Colors.green
+                            : Colors.red,
+                  ),
+                ),
+                contentPadding: EdgeInsets.symmetric(
+                  horizontal: 16.w,
+                  vertical: 16.h,
+                ),
+                helperText: locationText.isNotEmpty && !isValidLocation
+                    ? 'Geçerli koordinat formatı: enlem, boylam'
+                    : null,
+                helperStyle: TextStyle(
+                  color: Colors.red,
+                  fontSize: 12.sp,
+                ),
               ),
-              contentPadding: EdgeInsets.symmetric(
-                horizontal: 16.w,
-                vertical: 16.h,
-              ),
-            ),
-            style: TextStyle(fontSize: 16.sp),
-          ),
+              style: TextStyle(fontSize: 16.sp),
+            );
+          }),
           SizedBox(height: 16.h),
 
           // Konum Adı

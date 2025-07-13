@@ -3,10 +3,8 @@ import 'package:flutter_webrtc/flutter_webrtc.dart';
 import 'package:devshabitat/app/models/video/call_settings_model.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'dart:io';
-import 'package:path_provider/path_provider.dart';
 import 'package:devshabitat/app/core/config/webrtc_config.dart';
 import 'package:logger/logger.dart';
-import '../../constants/app_assets.dart';
 
 // RTCStatsReport sınıfı tanımı
 class RTCStatsReport {
@@ -483,8 +481,7 @@ class WebRTCService {
       }
 
       // Stream controller'ı kapat
-      if (_connectionStatsController != null &&
-          !_connectionStatsController.isClosed) {
+      if (!_connectionStatsController.isClosed) {
         _logger.i('Closing connection stats controller');
         _connectionStatsController.close();
       }
@@ -653,9 +650,6 @@ class WebRTCService {
 
   bool get isRecording => _isRecording;
 
-  int? _lastBytesSent;
-  int? _lastTimestamp;
-
   Future<void> _startConnectionMonitoring() async {
     if (_isDisposed) return;
 
@@ -723,6 +717,7 @@ class WebRTCService {
     }
   }
 
+/*
   Future<void> _adjustMediaQuality(ConnectionStats stats) async {
     if (_localStream == null) return;
 
@@ -773,7 +768,7 @@ class WebRTCService {
       await sender.setParameters(parameters);
     }
   }
-
+*/
   Future<void> _attemptReconnection() async {
     if (_peerConnection?.connectionState ==
         RTCPeerConnectionState.RTCPeerConnectionStateFailed) {

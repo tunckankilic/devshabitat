@@ -1,5 +1,4 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:get/get.dart';
 import 'package:devshabitat/app/controllers/app_controller.dart';
 import 'package:devshabitat/app/core/services/error_handler_service.dart';
 import 'package:mockito/mockito.dart';

@@ -55,19 +55,11 @@ class LocationTrackingService extends GetxService {
 
   Future<BatteryOptimizedSettings> _getBatteryOptimizedSettings() async {
     // Mock battery level - in real app use battery_plus package
-    final isLowPowerMode = false; // await Battery().isInBatterySaveMode();
-
-    if (isLowPowerMode) {
-      return BatteryOptimizedSettings(
-        accuracy: LocationAccuracy.low,
-        interval: 60000, // 1 minute
-      );
-    } else {
-      return BatteryOptimizedSettings(
-        accuracy: LocationAccuracy.balanced,
-        interval: 30000, // 30 seconds
-      );
-    }
+    // For now, return balanced settings. Add battery_plus package for real implementation
+    return BatteryOptimizedSettings(
+      accuracy: LocationAccuracy.balanced,
+      interval: 30000, // 30 seconds
+    );
   }
 
   void _startBatteryOptimization() {
