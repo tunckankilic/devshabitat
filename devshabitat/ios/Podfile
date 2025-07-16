@@ -33,6 +33,8 @@ target 'Runner' do
 
   flutter_install_all_ios_pods File.dirname(File.realpath(__FILE__))
   pod 'AgoraRtcEngine_iOS', '~> 4.5.2'
+  pod 'FBSDKCoreKit'  # Facebook Core SDK
+  pod 'FBSDKLoginKit' # Facebook Login SDK
   
   target 'RunnerTests' do
     inherit! :search_paths

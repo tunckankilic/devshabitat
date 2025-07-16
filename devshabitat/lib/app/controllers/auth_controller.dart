@@ -2,6 +2,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'dart:io' show Platform;
 import '../repositories/auth_repository.dart';
 import '../core/services/error_handler_service.dart';
 import 'email_auth_controller.dart';
@@ -19,6 +20,10 @@ class AuthController extends GetxController {
   final RxString _lastError = ''.obs;
   final githubUsernameController = TextEditingController();
 
+  // Platform bazlı kontroller
+  final RxBool _isAppleSignInAvailable = false.obs;
+  final RxBool _isGoogleSignInAvailable = false.obs;
+
   AuthController({
     required EmailAuthController emailAuth,
     required AuthStateController authState,
@@ -33,12 +38,15 @@ class AuthController extends GetxController {
   Map<String, dynamic> get userProfile => _userProfile;
   bool get isLoading => _isLoading.value;
   String get lastError => _lastError.value;
+  bool get isAppleSignInAvailable => _isAppleSignInAvailable.value;
+  bool get isGoogleSignInAvailable => _isGoogleSignInAvailable.value;
 
   @override
   void onInit() {
     super.onInit();
     _firebaseUser.bindStream(_authRepository.authStateChanges);
     ever(_firebaseUser, _setInitialScreen);
+    _checkAvailableSignInMethods();
   }
 
   Timer? _navigationTimer;
@@ -108,7 +116,26 @@ class AuthController extends GetxController {
     }
   }
 
+  Future<void> _checkAvailableSignInMethods() async {
+    // iOS'ta Apple Sign In zorunlu
+    if (Platform.isIOS) {
+      _isAppleSignInAvailable.value = true;
+      _isGoogleSignInAvailable.value = false; // iOS'ta Google Sign In gizli
+    } else {
+      _isAppleSignInAvailable.value = false;
+      _isGoogleSignInAvailable.value = true;
+    }
+  }
+
   Future<void> signInWithGoogle() async {
+    if (!_isGoogleSignInAvailable.value) {
+      _errorHandler.handleError(
+        'Google ile giriş bu platformda kullanılamaz',
+        ErrorHandlerService.AUTH_ERROR,
+      );
+      return;
+    }
+
     try {
       _isLoading.value = true;
       _lastError.value = '';
@@ -124,6 +151,14 @@ class AuthController extends GetxController {
   }
 
   Future<void> signInWithApple() async {
+    if (!_isAppleSignInAvailable.value && !Platform.isIOS) {
+      _errorHandler.handleError(
+        'Apple ile giriş bu platformda kullanılamaz',
+        ErrorHandlerService.AUTH_ERROR,
+      );
+      return;
+    }
+
     try {
       _isLoading.value = true;
       _lastError.value = '';

@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">Devshabitat</string>
-    <string name="facebook_app_id">test_app_id</string>
-    <string name="facebook_client_token">test_client_token</string>
-    <string name="fb_login_protocol_scheme">fbtest_app_id</string>
+    <string name="facebook_app_id">{FACEBOOK_APP_ID}</string>
+    <string name="facebook_client_token">{FACEBOOK_CLIENT_TOKEN}</string>
+    <string name="fb_login_protocol_scheme">fb{FACEBOOK_APP_ID}</string>
 </resources> 
