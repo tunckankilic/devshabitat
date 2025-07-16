@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../../constants/app_assets.dart';
+import 'dart:io' show Platform;
+import 'social_login_button.dart';
 
 class SocialAuthButtons extends StatelessWidget {
   final VoidCallback onGoogleSignIn;
@@ -18,53 +20,65 @@ class SocialAuthButtons extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Column(
-      children: [
-        _buildSocialButton(
-          onPressed: onGoogleSignIn,
-          icon: AppAssets.googleLogo,
-          label: 'Google ile Giriş Yap',
-        ),
-        const SizedBox(height: 16),
-        _buildSocialButton(
-          onPressed: onGithubSignIn,
-          icon: AppAssets.githubLogo,
-          label: 'GitHub ile Giriş Yap',
-        ),
-        const SizedBox(height: 16),
-        _buildSocialButton(
-          onPressed: onFacebookSignIn,
-          icon: AppAssets.facebookLogo,
-          label: 'Facebook ile Giriş Yap',
-        ),
-        const SizedBox(height: 16),
-        _buildSocialButton(
-          onPressed: onAppleSignIn,
-          icon: AppAssets.appleLogo,
-          label: 'Apple ile Giriş Yap',
-        ),
-      ],
+      children: Platform.isIOS ? _buildIOSButtons() : _buildAndroidButtons(),
     );
   }
 
-  Widget _buildSocialButton({
-    required VoidCallback onPressed,
-    required String icon,
-    required String label,
-  }) {
-    return OutlinedButton.icon(
-      onPressed: onPressed,
-      icon: Image.asset(
-        icon,
-        height: 24,
+  List<Widget> _buildIOSButtons() {
+    return [
+      // iOS'ta Apple Sign In en üstte
+      SocialLoginButton(
+        text: 'Apple ile Giriş Yap',
+        iconPath: AppAssets.appleLogo,
+        onPressed: onAppleSignIn,
+        backgroundColor: Colors.black,
+        textColor: Colors.white,
       ),
-      label: Text(label),
-      style: OutlinedButton.styleFrom(
-        padding: const EdgeInsets.symmetric(
-          horizontal: 24,
-          vertical: 12,
-        ),
-        minimumSize: const Size(double.infinity, 48),
+      const SizedBox(height: 16),
+      SocialLoginButton(
+        text: 'GitHub ile Giriş Yap',
+        iconPath: AppAssets.githubLogo,
+        onPressed: onGithubSignIn,
+        backgroundColor: Colors.black87,
+        textColor: Colors.white,
       ),
-    );
+      const SizedBox(height: 16),
+      SocialLoginButton(
+        text: 'Facebook ile Giriş Yap',
+        iconPath: AppAssets.facebookLogo,
+        onPressed: onFacebookSignIn,
+        backgroundColor: const Color(0xFF1877F2),
+        textColor: Colors.white,
+      ),
+    ];
+  }
+
+  List<Widget> _buildAndroidButtons() {
+    return [
+      // Android'de Google Sign In en üstte
+      SocialLoginButton(
+        text: 'Google ile Giriş Yap',
+        iconPath: AppAssets.googleLogo,
+        onPressed: onGoogleSignIn,
+        backgroundColor: Colors.white,
+        textColor: Colors.black87,
+      ),
+      const SizedBox(height: 16),
+      SocialLoginButton(
+        text: 'GitHub ile Giriş Yap',
+        iconPath: AppAssets.githubLogo,
+        onPressed: onGithubSignIn,
+        backgroundColor: Colors.black87,
+        textColor: Colors.white,
+      ),
+      const SizedBox(height: 16),
+      SocialLoginButton(
+        text: 'Facebook ile Giriş Yap',
+        iconPath: AppAssets.facebookLogo,
+        onPressed: onFacebookSignIn,
+        backgroundColor: const Color(0xFF1877F2),
+        textColor: Colors.white,
+      ),
+    ];
   }
 }
