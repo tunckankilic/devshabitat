@@ -1,3 +1,5 @@
+// ignore_for_file: avoid_print
+
 import 'package:get/get.dart';
 import '../../services/integration/video_event_integration_service.dart';
 import '../../services/integration/community_event_integration_service.dart';

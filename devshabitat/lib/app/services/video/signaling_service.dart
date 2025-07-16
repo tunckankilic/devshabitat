@@ -236,7 +236,11 @@ class SignalingService extends GetxService {
     });
   }
 
-  void dispose() {
-    _messageController.close();
+  @override
+  void onClose() {
+    if (!_messageController.isClosed) {
+      _messageController.close();
+    }
+    super.onClose();
   }
 }

@@ -1,3 +1,5 @@
+// ignore_for_file: avoid_print
+
 import 'package:devshabitat/app/core/services/error_handler_service.dart';
 import 'package:get/get.dart';
 import '../models/feed_item.dart';

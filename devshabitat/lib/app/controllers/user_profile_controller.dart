@@ -1,3 +1,5 @@
+// ignore_for_file: avoid_print
+
 import 'package:devshabitat/app/controllers/auth_controller.dart';
 import 'package:get/get.dart';
 import 'package:url_launcher/url_launcher.dart';

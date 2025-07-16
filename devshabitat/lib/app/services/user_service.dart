@@ -1,4 +1,3 @@
-import 'package:devshabitat/app/models/user_profile_model.dart';
 import 'package:get/get.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -87,10 +86,14 @@ class UserService extends GetxService {
   }
 
   Future<PrivacySettings> getPrivacySettings() async {
-    final userId = Get.find<UserProfile>().id;
+    final user = _auth.currentUser;
+    if (user == null) {
+      throw Exception('Kullanıcı oturum açmamış');
+    }
+
     final doc = await _firestore
         .collection('users')
-        .doc(userId)
+        .doc(user.uid)
         .collection('settings')
         .doc('privacy')
         .get();
@@ -102,10 +105,14 @@ class UserService extends GetxService {
   }
 
   Future<void> updatePrivacySettings(PrivacySettings settings) async {
-    final userId = Get.find<UserProfile>().id;
+    final user = _auth.currentUser;
+    if (user == null) {
+      throw Exception('Kullanıcı oturum açmamış');
+    }
+
     await _firestore
         .collection('users')
-        .doc(userId)
+        .doc(user.uid)
         .collection('settings')
         .doc('privacy')
         .set(settings.toJson());

@@ -23,7 +23,9 @@ class ImageUploadService extends GetxService {
   static const int _defaultQuality = 85; // Default compression quality
 
   final Map<String, String> _imageCache = {};
+  final Map<String, DateTime> _cacheTimestamps = {};
   final int _maxCacheSize = 100; // Maximum number of cached URLs
+  final Duration _cacheExpiry = const Duration(hours: 24);
 
   ImageUploadService({
     FirebaseStorage? storage,
@@ -48,8 +50,15 @@ class ImageUploadService extends GetxService {
 
       // Cache kontrolü
       final cacheKey = await _generateCacheKey(file);
-      if (_imageCache.containsKey(cacheKey)) {
-        return _imageCache[cacheKey];
+      if (_imageCache.containsKey(cacheKey) &&
+          _cacheTimestamps.containsKey(cacheKey)) {
+        final cacheTime = _cacheTimestamps[cacheKey]!;
+        if (DateTime.now().difference(cacheTime) < _cacheExpiry) {
+          return _imageCache[cacheKey];
+        } else {
+          _imageCache.remove(cacheKey);
+          _cacheTimestamps.remove(cacheKey);
+        }
       }
 
       var fileToUpload = file;
@@ -180,14 +189,32 @@ class ImageUploadService extends GetxService {
   }
 
   void _addToCache(String key, String url) {
+    _cleanExpiredCache();
     if (_imageCache.length >= _maxCacheSize) {
-      _imageCache.remove(_imageCache.keys.first);
+      final oldestKey = _imageCache.keys.first;
+      _imageCache.remove(oldestKey);
+      _cacheTimestamps.remove(oldestKey);
     }
     _imageCache[key] = url;
+    _cacheTimestamps[key] = DateTime.now();
+  }
+
+  void _cleanExpiredCache() {
+    final now = DateTime.now();
+    final expiredKeys = _cacheTimestamps.entries
+        .where((entry) => now.difference(entry.value) > _cacheExpiry)
+        .map((entry) => entry.key)
+        .toList();
+
+    for (final key in expiredKeys) {
+      _imageCache.remove(key);
+      _cacheTimestamps.remove(key);
+    }
   }
 
   void clearCache() {
     _imageCache.clear();
+    _cacheTimestamps.clear();
   }
 
   Future<void> _uploadInChunks(

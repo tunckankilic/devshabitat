@@ -2,9 +2,11 @@ import 'package:get/get.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import '../models/connection_model.dart';
 import '../controllers/auth_controller.dart';
+import 'package:logger/logger.dart';
 
 class ConnectionService extends GetxService {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
+  final Logger _logger = Logger();
 
   Future<int> getConnectionCount() async {
     try {
@@ -19,7 +21,7 @@ class ConnectionService extends GetxService {
 
       return snapshot.size;
     } catch (e) {
-      print('Bağlantı sayısı alınırken hata: $e');
+      _logger.e('Bağlantı sayısı alınırken hata: $e');
       return 0;
     }
   }
@@ -41,8 +43,9 @@ class ConnectionService extends GetxService {
           .map((doc) => ConnectionModel.fromMap(doc.data()))
           .toList();
     } catch (e) {
-      print('Bağlantılar alınırken hata: $e');
-      return [];
+      _logger.e('Bağlantılar alınırken hata: $e');
+      throw Exception(
+          'Bağlantılar alınırken bir hata oluştu. Lütfen tekrar deneyin.');
     }
   }
 
@@ -58,8 +61,9 @@ class ConnectionService extends GetxService {
         'createdAt': FieldValue.serverTimestamp(),
       });
     } catch (e) {
-      print('Bağlantı isteği gönderilirken hata: $e');
-      rethrow;
+      _logger.e('Bağlantı isteği gönderilirken hata: $e');
+      throw Exception(
+          'Bağlantı isteği gönderilemedi. Lütfen internet bağlantınızı kontrol edin.');
     }
   }
 

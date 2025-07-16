@@ -1,8 +1,9 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:devshabitat/app/models/community/membership_model.dart';
 import 'package:devshabitat/app/models/user_profile_model.dart';
+import 'package:get/get.dart';
 
-class MembershipService {
+class MembershipService extends GetxService {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
   final String _collection = 'communities';
 
