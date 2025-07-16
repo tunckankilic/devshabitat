@@ -1,6 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:get/get.dart';
 import '../models/code_snippet_model.dart';
+import '../repositories/auth_repository.dart';
 import 'package:uuid/uuid.dart';
 
 class CodeDiscussionService extends GetxService {
@@ -28,7 +29,12 @@ class CodeDiscussionService extends GetxService {
     String? description,
   }) async {
     final String snippetId = _uuid.v4();
-    final String userId = Get.find<String>(); // Kullanıcı ID'sini al
+    final authRepo = Get.find<AuthRepository>();
+    final userId = authRepo.currentUser?.uid;
+
+    if (userId == null) {
+      throw Exception('Kullanıcı oturum açmamış');
+    }
 
     final snippet = CodeSnippetModel(
       id: snippetId,
@@ -51,7 +57,12 @@ class CodeDiscussionService extends GetxService {
     String? lineNumber,
   }) async {
     final String commentId = _uuid.v4();
-    final String userId = Get.find<String>();
+    final authRepo = Get.find<AuthRepository>();
+    final userId = authRepo.currentUser?.uid;
+
+    if (userId == null) {
+      throw Exception('Kullanıcı oturum açmamış');
+    }
 
     final codeComment = CodeComment(
       id: commentId,

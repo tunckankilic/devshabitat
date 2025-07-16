@@ -20,8 +20,11 @@ class FeedService extends GetxService {
         _auth = auth ?? FirebaseAuth.instance,
         _errorHandler = errorHandler ?? Get.find();
 
-  // For You feed stream'i (kendi ve bağlantıların postları)
-  Stream<List<Post>> getForYouFeedStream() {
+  // For You feed stream'i with pagination support
+  Stream<List<Post>> getForYouFeedStream({
+    int limit = 20,
+    DocumentSnapshot? startAfter,
+  }) {
     try {
       final user = _auth.currentUser;
       if (user == null) return Stream.value([]);
@@ -38,20 +41,62 @@ class FeedService extends GetxService {
             List<String>.from(userDoc.data()?['connections'] ?? []);
         connections.add(user.uid); // Kendi postlarını da ekle
 
-        // Son 50 postu getir
-        final querySnapshot = await _firestore
-            .collection('posts')
-            .where('userId', whereIn: connections)
-            .orderBy('createdAt', descending: true)
-            .limit(50)
-            .get();
+        // Firestore whereIn limit is 10, handle large connection lists
+        if (connections.length > 10) {
+          // Multiple queries for large connection lists
+          List<Post> allPosts = [];
 
-        return querySnapshot.docs
-            .map((doc) => Post.fromJson({
-                  ...doc.data(),
-                  'id': doc.id,
-                }))
-            .toList();
+          for (int i = 0; i < connections.length; i += 10) {
+            final batch = connections.skip(i).take(10).toList();
+
+            Query query = _firestore
+                .collection('posts')
+                .where('userId', whereIn: batch)
+                .orderBy('createdAt', descending: true);
+
+            if (startAfter != null && i == 0) {
+              query = query.startAfterDocument(startAfter);
+            }
+
+            final batchSnapshot = await query
+                .limit(limit ~/ (connections.length / 10).ceil())
+                .get();
+
+            final batchPosts = batchSnapshot.docs.map((doc) {
+              final data = doc.data() as Map<String, dynamic>? ?? {};
+              return Post.fromJson({
+                ...data,
+                'id': doc.id,
+              });
+            }).toList();
+
+            allPosts.addAll(batchPosts);
+          }
+
+          // Sort and limit combined results
+          allPosts.sort((a, b) => b.createdAt.compareTo(a.createdAt));
+          return allPosts.take(limit).toList();
+        } else {
+          // Single query for small connection lists
+          Query query = _firestore
+              .collection('posts')
+              .where('userId', whereIn: connections)
+              .orderBy('createdAt', descending: true);
+
+          if (startAfter != null) {
+            query = query.startAfterDocument(startAfter);
+          }
+
+          final querySnapshot = await query.limit(limit).get();
+
+          return querySnapshot.docs.map((doc) {
+            final data = doc.data() as Map<String, dynamic>? ?? {};
+            return Post.fromJson({
+              ...data,
+              'id': doc.id,
+            });
+          }).toList();
+        }
       });
     } catch (e) {
       _errorHandler.handleError(e, ErrorHandlerService.SERVER_ERROR);

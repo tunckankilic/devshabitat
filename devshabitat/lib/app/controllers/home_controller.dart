@@ -1,3 +1,5 @@
+// ignore_for_file: avoid_print
+
 import 'package:get/get.dart';
 import '../services/github_service.dart';
 import '../repositories/auth_repository.dart';

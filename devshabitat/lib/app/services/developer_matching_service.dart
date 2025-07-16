@@ -2,9 +2,11 @@ import 'package:get/get.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import '../models/user_profile_model.dart';
 import '../controllers/auth_controller.dart';
+import 'package:logger/logger.dart';
 
 class DeveloperMatchingService extends GetxService {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
+  final Logger _logger = Logger();
 
   // Benzer teknoloji stack'ine sahip geliştiricileri bul
   Future<List<UserProfile>> findDevelopersByTechStack({
@@ -30,21 +32,48 @@ class DeveloperMatchingService extends GetxService {
 
       return filteredDevelopers;
     } catch (e) {
-      print('Firestore query hatası: $e');
-      // Fallback: Tüm kullanıcıları getir ve client-side'da filtrele
+      _logger.e('Teknoloji stack query hatası: $e');
+      // Optimize edilmiş fallback: Batch queries ile performans iyileştirmesi
       try {
-        final allUsers = await _firestore.collection('users').limit(100).get();
-        return allUsers.docs
-            .where((doc) {
-              final data = doc.data();
-              final skills = List<String>.from(data['skills'] ?? []);
-              final username = data['githubUsername'];
+        const int batchSize = 30; // Küçük batch size
+        const int maxResults = 50; // Maksimum sonuç
 
-              return username != excludeUsername &&
-                  techStack.any((tech) => skills.contains(tech));
-            })
-            .map((doc) => UserProfile.fromFirestore(doc))
-            .toList();
+        List<UserProfile> allResults = [];
+
+        // Teknoloji stack'ini küçük gruplara böl
+        for (int i = 0;
+            i < techStack.length && allResults.length < maxResults;
+            i += 5) {
+          final techBatch = techStack.skip(i).take(5).toList();
+
+          final batchQuery = await _firestore
+              .collection('users')
+              .where('skills', arrayContainsAny: techBatch)
+              .limit(batchSize)
+              .get();
+
+          final batchResults = batchQuery.docs
+              .where((doc) {
+                final data = doc.data();
+                final username = data['githubUsername'];
+                return username != excludeUsername;
+              })
+              .map((doc) => UserProfile.fromFirestore(doc))
+              .toList();
+
+          allResults.addAll(batchResults);
+
+          // Yeterli sonuç bulunduğunda dur
+          if (allResults.length >= maxResults) break;
+        }
+
+        // Tekrar edenleri kaldır ve limit uygula
+        final uniqueResults = <String, UserProfile>{};
+        for (final user in allResults) {
+          uniqueResults[user.id] = user;
+        }
+
+        return uniqueResults.values.take(maxResults).toList();
       } catch (fallbackError) {
         throw Exception(
             'Geliştiriciler bulunurken bir hata oluştu: $fallbackError');

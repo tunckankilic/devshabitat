@@ -28,7 +28,7 @@ android {
         applicationId = "site.tunckankilic.devshabitat"
         // You can update the following values to match your application needs.
         // For more information, see: https://flutter.dev/to/review-gradle-config.
-        minSdk = 24
+        minSdk = 33
         targetSdk = 35
         versionCode = 1
         versionName = "0.9.0"
@@ -60,7 +60,7 @@ android {
             isDebuggable = true
             isMinifyEnabled = false
             isShrinkResources = false
-            applicationIdSuffix = ".debug"
+            // applicationIdSuffix = ".debug"  // Firebase config uyumsuzluğu nedeniyle devre dışı
             versionNameSuffix = "-debug"
             
             // Debug-specific configurations
@@ -158,7 +158,7 @@ flutter {
 
 dependencies {
     // Core library desugaring for API level compatibility
-    coreLibraryDesugaring("com.android.tools:desugar_jdk_libs:2.0.4")
+    coreLibraryDesugaring("com.android.tools:desugar_jdk_libs:2.1.4")
     
     // MultiDex support
     implementation("androidx.multidex:multidex:2.0.1")

@@ -1,3 +1,5 @@
+// ignore_for_file: avoid_print
+
 import 'package:get/get.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import '../../routes/app_pages.dart';

@@ -1,7 +1,7 @@
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import 'package:url_launcher/url_launcher.dart';
-import 'package:uni_links/uni_links.dart';
+import 'package:app_links/app_links.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 import '../core/config/github_config.dart';
@@ -97,8 +97,7 @@ class GitHubOAuthService extends GetxService {
 
   Future<String?> _handleRedirect() async {
     try {
-      final Uri? uri = await uriLinkStream.first;
-      if (uri == null) return null;
+      final Uri uri = await AppLinks().uriLinkStream.first;
 
       final code = uri.queryParameters['code'];
       if (code == null) {

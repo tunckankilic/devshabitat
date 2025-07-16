@@ -36,10 +36,16 @@ class MessageSearchService extends GetxService {
     DocumentSnapshot? lastDocument,
   }) async {
     try {
+      // Input validation and sanitization
+      final sanitizedTerm = _sanitizeSearchTerm(searchTerm);
+      if (sanitizedTerm.isEmpty || sanitizedTerm.length > 100) {
+        throw Exception('Geçersiz arama terimi');
+      }
+
       Query query = _firestore
           .collection('messages')
-          .where('content', isGreaterThanOrEqualTo: searchTerm)
-          .where('content', isLessThan: '${searchTerm}z')
+          .where('content', isGreaterThanOrEqualTo: sanitizedTerm)
+          .where('content', isLessThan: '${sanitizedTerm}z')
           .limit(pageSize);
 
       // Filtreleri uygula
@@ -78,9 +84,15 @@ class MessageSearchService extends GetxService {
 
   Future<void> addRecentSearch(String query) async {
     try {
+      // Input validation
+      final sanitizedQuery = _sanitizeSearchTerm(query);
+      if (sanitizedQuery.isEmpty || sanitizedQuery.length > 100) {
+        return; // Don't save invalid searches
+      }
+
       final List<String> searches = await getRecentSearches();
-      searches.remove(query); // Varsa mevcut aramayı kaldır
-      searches.insert(0, query); // En başa ekle
+      searches.remove(sanitizedQuery); // Varsa mevcut aramayı kaldır
+      searches.insert(0, sanitizedQuery); // En başa ekle
 
       // Maksimum sayıyı aşmayacak şekilde kaydet
       if (searches.length > _maxRecentSearches) {
@@ -91,6 +103,19 @@ class MessageSearchService extends GetxService {
     } catch (e) {
       print('Son arama eklenirken hata: $e');
     }
+  }
+
+  String _sanitizeSearchTerm(String term) {
+    return term
+        .replaceAll(RegExp(r'[<>"();]'), '')
+        .replaceAll("'", '')
+        .replaceAll('[', '')
+        .replaceAll(']', '')
+        .replaceAll('{', '')
+        .replaceAll('}', '')
+        .replaceAll('(', '')
+        .replaceAll(')', '')
+        .trim();
   }
 
   Future<void> removeRecentSearch(String query) async {

@@ -1,26 +1,25 @@
 import 'package:get/get.dart';
-import 'package:uni_links/uni_links.dart';
+import 'package:app_links/app_links.dart';
 import 'package:flutter/services.dart';
 import 'package:logger/logger.dart';
 
 class DeepLinkingService extends GetxService {
   static DeepLinkingService get to => Get.find();
   final Logger _logger = Logger();
+  final AppLinks _appLinks = AppLinks();
 
   // Deep link yapısı: devshabitat://route/id?params
   Future<void> init() async {
     try {
       // Initial link'i kontrol et
-      final initialLink = await getInitialLink();
+      final initialLink = await _appLinks.getInitialLink();
       if (initialLink != null) {
-        _handleDeepLink(initialLink);
+        _handleDeepLink(initialLink.toString());
       }
 
       // Yeni gelen linkleri dinle
-      uriLinkStream.listen((Uri? uri) {
-        if (uri != null) {
-          _handleDeepLink(uri.toString());
-        }
+      _appLinks.uriLinkStream.listen((Uri uri) {
+        _handleDeepLink(uri.toString());
       }, onError: (err) {
         _logger.e('Deep link error: $err');
       });
@@ -43,15 +42,39 @@ class DeepLinkingService extends GetxService {
   static final _validParamPattern = RegExp(r'^[a-zA-Z0-9_\-\.@]+$');
 
   bool _isValidId(String id) {
-    return id.length <= _maxIdLength && _validIdPattern.hasMatch(id);
+    // Sanitize input first
+    final sanitizedId = _sanitizeInput(id);
+    return sanitizedId.length <= _maxIdLength &&
+        sanitizedId.isNotEmpty &&
+        _validIdPattern.hasMatch(sanitizedId);
   }
 
   bool _isValidParams(Map<String, String> params) {
-    return params.entries.every((entry) =>
-        entry.key.length <= 50 &&
-        entry.value.length <= 255 &&
-        _validParamPattern.hasMatch(entry.key) &&
-        _validParamPattern.hasMatch(entry.value));
+    return params.entries.every((entry) {
+      final sanitizedKey = _sanitizeInput(entry.key);
+      final sanitizedValue = _sanitizeInput(entry.value);
+
+      return sanitizedKey.length <= 50 &&
+          sanitizedValue.length <= 255 &&
+          sanitizedKey.isNotEmpty &&
+          sanitizedValue.isNotEmpty &&
+          _validParamPattern.hasMatch(sanitizedKey) &&
+          _validParamPattern.hasMatch(sanitizedValue);
+    });
+  }
+
+  String _sanitizeInput(String input) {
+    // Remove potentially dangerous characters
+    return input
+        .replaceAll(RegExp(r'[<>"();]'), '')
+        .replaceAll("'", '')
+        .replaceAll('[', '')
+        .replaceAll(']', '')
+        .replaceAll('{', '')
+        .replaceAll('}', '')
+        .replaceAll('(', '')
+        .replaceAll(')', '')
+        .trim();
   }
 
   void _handleDeepLink(String link) {

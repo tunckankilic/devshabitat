@@ -1,3 +1,5 @@
+// ignore_for_file: avoid_print
+
 import 'package:get/get.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
@@ -5,14 +7,24 @@ import 'dart:async';
 import '../models/github_stats_model.dart';
 import '../repositories/auth_repository.dart';
 import '../core/services/api_optimization_service.dart';
+import 'package:logger/logger.dart';
 
 class GithubService extends GetxService {
   final AuthRepository _authRepository = Get.find();
   final ApiOptimizationService _apiOptimizer =
       Get.find<ApiOptimizationService>();
   static const String _baseUrl = 'https://api.github.com';
-  static const String _token =
-      'YOUR_GITHUB_TOKEN'; // GitHub Personal Access Token
+
+  // GitHub token'ı güvenli şekilde al
+  String? get _token {
+    try {
+      // GitHubConfig'den token'ı al veya environment'dan
+      return const String.fromEnvironment('GITHUB_TOKEN', defaultValue: '');
+    } catch (e) {
+      Get.find<Logger>().e('GitHub token alınırken hata: $e');
+      return null;
+    }
+  }
 
   // Rate limiting için retry mekanizması
   Future<T> _retryWithBackoff<T>(
@@ -36,7 +48,8 @@ class GithubService extends GetxService {
                 'GitHub API rate limit aşıldı. Lütfen daha sonra tekrar deneyin.');
           }
 
-          print('Rate limit aşıldı, ${delay.inSeconds} saniye bekleniyor...');
+          Get.find<Logger>().w(
+              'GitHub Rate limit aşıldı, ${delay.inSeconds} saniye bekleniyor...');
           await Future.delayed(delay);
           delay = Duration(seconds: delay.inSeconds * 2); // Exponential backoff
         } else {
@@ -52,12 +65,19 @@ class GithubService extends GetxService {
   Future<Map<String, dynamic>> getUserInfo(String username) async {
     return await _apiOptimizer.optimizeApiCall(
       apiCall: () => _retryWithBackoff(() async {
+        final token = _token;
+        final headers = <String, String>{
+          'Accept': 'application/vnd.github.v3+json',
+        };
+
+        // Token varsa authorization header'ı ekle
+        if (token != null && token.isNotEmpty) {
+          headers['Authorization'] = 'Bearer $token';
+        }
+
         final response = await http.get(
           Uri.parse('$_baseUrl/users/$username'),
-          headers: {
-            'Authorization': 'Bearer $_token',
-            'Accept': 'application/vnd.github.v3+json',
-          },
+          headers: headers,
         );
 
         if (response.statusCode == 200) {

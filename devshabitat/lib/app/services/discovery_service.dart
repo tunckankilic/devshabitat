@@ -9,7 +9,7 @@ import '../models/user_profile_model.dart';
 import 'discovery_algorithm_service.dart';
 import '../core/services/api_optimization_service.dart';
 
-class DiscoveryService {
+class DiscoveryService extends GetxService {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
   final ApiOptimizationService _apiOptimizer =
       Get.find<ApiOptimizationService>();
@@ -27,11 +27,12 @@ class DiscoveryService {
   CollectionReference get _userAnalyticsCollection =>
       _firestore.collection('user_analytics');
 
-  // Dispose method to prevent memory leaks
-  void dispose() {
+  @override
+  void onClose() {
     if (!_onlineStatusController.isClosed) {
       _onlineStatusController.close();
     }
+    super.onClose();
   }
 
   // Konum hesaplama yardımcı fonksiyonları
@@ -50,8 +51,12 @@ class DiscoveryService {
   }
 
   // Search users with filters
-  Stream<List<UserProfile>> searchUsersWithFilters(SearchFilterModel filters) {
-    Query query = _usersCollection.limit(20);
+  Stream<List<UserProfile>> searchUsersWithFilters(
+    SearchFilterModel filters, {
+    int limit = 20,
+    DocumentSnapshot? startAfter,
+  }) {
+    Query query = _usersCollection;
 
     // Apply text search filter
     if (filters.name.isNotEmpty) {
@@ -59,9 +64,16 @@ class DiscoveryService {
           arrayContains: filters.name.toLowerCase());
     }
 
-    // Apply skills filter with fuzzy matching
+    // Apply skills filter with limit check for whereIn operations
     if (filters.skills.isNotEmpty) {
-      query = query.where('skills', arrayContainsAny: filters.skills);
+      // Firestore whereIn limit is 10, split if needed
+      if (filters.skills.length <= 10) {
+        query = query.where('skills', arrayContainsAny: filters.skills);
+      } else {
+        // Use first 10 skills to avoid Firestore limit
+        final limitedSkills = filters.skills.take(10).toList();
+        query = query.where('skills', arrayContainsAny: limitedSkills);
+      }
     }
 
     // Apply location filter
@@ -115,23 +127,60 @@ class DiscoveryService {
       query = query.where('isInternship', isEqualTo: true);
     }
 
+    // Apply ordering and pagination
+    query = query.orderBy('lastSeen', descending: true);
+
+    if (startAfter != null) {
+      query = query.startAfterDocument(startAfter);
+    }
+
+    query = query.limit(limit);
+
     return query.snapshots().map((snapshot) =>
         snapshot.docs.map((doc) => UserProfile.fromFirestore(doc)).toList());
   }
 
-  // Get recommended users
-  Future<List<UserProfile>> getRecommendedUsers(String userId) async {
+  // Get recommended users with optimization
+  Future<List<UserProfile>> getRecommendedUsers(
+    String userId, {
+    int limit = 20,
+  }) async {
     return await _apiOptimizer.optimizeApiCall(
       apiCall: () async {
         // Get user's profile for matching
         final userDoc = await _usersCollection.doc(userId).get();
+        if (!userDoc.exists) {
+          throw Exception('Kullanıcı profili bulunamadı');
+        }
+
         final userData = userDoc.data() as Map<String, dynamic>;
+        final userSkills = List<String>.from(userData['skills'] ?? []);
+
+        if (userSkills.isEmpty) {
+          // No skills to match, return recent active users
+          final query = _usersCollection
+              .where(FieldPath.documentId, isNotEqualTo: userId)
+              .orderBy(FieldPath.documentId)
+              .orderBy('lastSeen', descending: true)
+              .limit(limit);
+
+          final snapshot = await query.get();
+          return snapshot.docs
+              .map((doc) => UserProfile.fromFirestore(doc))
+              .toList();
+        }
+
+        // Limit skills for whereIn constraint (max 10)
+        final limitedSkills =
+            userSkills.length > 10 ? userSkills.take(10).toList() : userSkills;
 
         // Get users with similar interests and skills
         final query = _usersCollection
-            .where('skills', arrayContainsAny: userData['skills'] ?? [])
-            .where('id', isNotEqualTo: userId)
-            .limit(20);
+            .where('skills', arrayContainsAny: limitedSkills)
+            .where(FieldPath.documentId, isNotEqualTo: userId)
+            .orderBy(FieldPath.documentId)
+            .orderBy('lastSeen', descending: true)
+            .limit(limit);
 
         final recommendedUsers = await query.get();
         final results = recommendedUsers.docs
@@ -449,10 +498,6 @@ class DiscoveryService {
 
   void updateOnlineStatus(String userId, bool isOnline) {
     _onlineStatusController.add({userId: isOnline});
-  }
-
-  void onClose() {
-    _onlineStatusController.close();
   }
 
   // Kullanıcı arama
