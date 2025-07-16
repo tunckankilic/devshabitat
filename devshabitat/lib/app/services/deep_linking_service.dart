@@ -1,26 +1,25 @@
 import 'package:get/get.dart';
-import 'package:uni_links/uni_links.dart';
+import 'package:app_links/app_links.dart';
 import 'package:flutter/services.dart';
 import 'package:logger/logger.dart';
 
 class DeepLinkingService extends GetxService {
   static DeepLinkingService get to => Get.find();
   final Logger _logger = Logger();
+  final AppLinks _appLinks = AppLinks();
 
   // Deep link yapısı: devshabitat://route/id?params
   Future<void> init() async {
     try {
       // Initial link'i kontrol et
-      final initialLink = await getInitialLink();
+      final initialLink = await _appLinks.getInitialLink();
       if (initialLink != null) {
-        _handleDeepLink(initialLink);
+        _handleDeepLink(initialLink.toString());
       }
 
       // Yeni gelen linkleri dinle
-      uriLinkStream.listen((Uri? uri) {
-        if (uri != null) {
-          _handleDeepLink(uri.toString());
-        }
+      _appLinks.uriLinkStream.listen((Uri uri) {
+        _handleDeepLink(uri.toString());
       }, onError: (err) {
         _logger.e('Deep link error: $err');
       });
