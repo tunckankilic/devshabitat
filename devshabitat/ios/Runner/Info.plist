@@ -56,13 +56,13 @@
 				<string>devshabitat</string>
 			</array>
 			<key>CFBundleURLName</key>
-			<string>com.example.devshabitat</string>
+			<string>site.tunckankilic.devshabitat</string>
 		</dict>
-		<!-- Facebook Login - APP_ID değerini Facebook Developer Console'dan alın -->
+		<!-- Facebook Login -->
 		<dict>
 			<key>CFBundleURLSchemes</key>
 			<array>
-				<string>fbAPP_ID</string>
+				<string>fb{FACEBOOK_APP_ID}</string>
 			</array>
 		</dict>
 	</array>
@@ -106,12 +106,14 @@
 		<true/>
 	</dict>
 	
-	<!-- Facebook Configuration - APP_ID değerini değiştirin -->
+	<!-- Facebook Configuration -->
 	<key>FacebookAppID</key>
-	<string>APP_ID</string>
+	<string>{FACEBOOK_APP_ID}</string>
+	<key>FacebookClientToken</key>
+	<string>{FACEBOOK_CLIENT_TOKEN}</string>
 	<key>FacebookDisplayName</key>
 	<string>Devshabitat</string>
-	
+
 	<!-- Query Schemes for Social Media -->
 	<key>LSApplicationQueriesSchemes</key>
 	<array>
@@ -119,8 +121,6 @@
 		<string>fb-messenger-share-api</string>
 		<string>fbauth2</string>
 		<string>fbshareextension</string>
-		<string>googlegmail</string>
-		<string>googlemail</string>
 	</array>
 	
 	<!-- Encryption Declaration -->
