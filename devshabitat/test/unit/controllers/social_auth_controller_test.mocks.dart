@@ -12,8 +12,8 @@ import 'package:devshabitat/app/core/services/error_handler_service.dart'
     as _i9;
 import 'package:devshabitat/app/repositories/auth_repository.dart' as _i8;
 import 'package:firebase_auth/firebase_auth.dart' as _i2;
-import 'package:flutter/material.dart' as _i7;
-import 'package:flutter_facebook_auth/flutter_facebook_auth.dart' as _i4;
+import 'package:flutter/material.dart' as _i6;
+//import 'package:flutter_facebook_auth/flutter_facebook_auth.dart' as _i4;
 import 'package:get/get.dart' as _i5;
 import 'package:get/get_state_manager/src/simple/list_notifier.dart' as _i13;
 import 'package:google_sign_in/google_sign_in.dart' as _i3;
@@ -54,7 +54,7 @@ class _FakeGoogleSignIn_1 extends _i1.SmartFake implements _i3.GoogleSignIn {
         );
 }
 
-class _FakeFacebookAuth_2 extends _i1.SmartFake implements _i4.FacebookAuth {
+/*class _FakeFacebookAuth_2 extends _i1.SmartFake implements _i4.FacebookAuth {
   _FakeFacebookAuth_2(
     Object parent,
     Invocation parentInvocation,
@@ -63,7 +63,7 @@ class _FakeFacebookAuth_2 extends _i1.SmartFake implements _i4.FacebookAuth {
           parentInvocation,
         );
 }
-
+*/
 class _FakeUserCredential_3 extends _i1.SmartFake
     implements _i2.UserCredential {
   _FakeUserCredential_3(
@@ -97,7 +97,7 @@ class _FakeFuture_5<T1> extends _i1.SmartFake implements _i6.Future<T1> {
 }
 
 class _FakeTextEditingController_6 extends _i1.SmartFake
-    implements _i7.TextEditingController {
+    implements _i6.TextEditingController {
   _FakeTextEditingController_6(
     Object parent,
     Invocation parentInvocation,
@@ -187,7 +187,7 @@ class MockAuthRepository extends _i1.Mock implements _i8.AuthRepository {
           Invocation.getter(#googleSignIn),
         ),
       ) as _i3.GoogleSignIn);
-
+/*
   @override
   _i4.FacebookAuth get facebookAuth => (super.noSuchMethod(
         Invocation.getter(#facebookAuth),
@@ -200,7 +200,7 @@ class MockAuthRepository extends _i1.Mock implements _i8.AuthRepository {
           Invocation.getter(#facebookAuth),
         ),
       ) as _i4.FacebookAuth);
-
+*/
   @override
   _i6.Stream<_i2.User?> get authStateChanges => (super.noSuchMethod(
         Invocation.getter(#authStateChanges),
@@ -526,10 +526,13 @@ class MockAuthRepository extends _i1.Mock implements _i8.AuthRepository {
       ) as _i6.Future<void>);
 
   @override
-  _i6.Future<void> handleSocialSignIn(_i2.User? user) => (super.noSuchMethod(
+  _i6.Future<void> handleSocialSignIn(_i2.User user,
+          {Map<String, dynamic>? additionalData}) =>
+      (super.noSuchMethod(
         Invocation.method(
           #handleSocialSignIn,
           [user],
+          {#additionalData: additionalData},
         ),
         returnValue: _i6.Future<void>.value(),
         returnValueForMissingStub: _i6.Future<void>.value(),
@@ -892,7 +895,7 @@ class MockErrorHandlerService extends _i1.Mock
 class MockEmailAuthController extends _i1.Mock
     implements _i12.EmailAuthController {
   @override
-  _i7.TextEditingController get emailController => (super.noSuchMethod(
+  _i6.TextEditingController get emailController => (super.noSuchMethod(
         Invocation.getter(#emailController),
         returnValue: _FakeTextEditingController_6(
           this,
@@ -902,10 +905,10 @@ class MockEmailAuthController extends _i1.Mock
           this,
           Invocation.getter(#emailController),
         ),
-      ) as _i7.TextEditingController);
+      ) as _i6.TextEditingController);
 
   @override
-  _i7.TextEditingController get passwordController => (super.noSuchMethod(
+  _i6.TextEditingController get passwordController => (super.noSuchMethod(
         Invocation.getter(#passwordController),
         returnValue: _FakeTextEditingController_6(
           this,
@@ -915,10 +918,10 @@ class MockEmailAuthController extends _i1.Mock
           this,
           Invocation.getter(#passwordController),
         ),
-      ) as _i7.TextEditingController);
+      ) as _i6.TextEditingController);
 
   @override
-  _i7.TextEditingController get confirmPasswordController =>
+  _i6.TextEditingController get confirmPasswordController =>
       (super.noSuchMethod(
         Invocation.getter(#confirmPasswordController),
         returnValue: _FakeTextEditingController_6(
@@ -929,10 +932,10 @@ class MockEmailAuthController extends _i1.Mock
           this,
           Invocation.getter(#confirmPasswordController),
         ),
-      ) as _i7.TextEditingController);
+      ) as _i6.TextEditingController);
 
   @override
-  _i7.TextEditingController get usernameController => (super.noSuchMethod(
+  _i6.TextEditingController get usernameController => (super.noSuchMethod(
         Invocation.getter(#usernameController),
         returnValue: _FakeTextEditingController_6(
           this,
@@ -942,7 +945,7 @@ class MockEmailAuthController extends _i1.Mock
           this,
           Invocation.getter(#usernameController),
         ),
-      ) as _i7.TextEditingController);
+      ) as _i6.TextEditingController);
 
   @override
   bool get isLoading => (super.noSuchMethod(

@@ -173,6 +173,7 @@ class AuthController extends GetxController {
     }
   }
 
+/*
   Future<void> signInWithFacebook() async {
     try {
       _isLoading.value = true;
@@ -187,7 +188,7 @@ class AuthController extends GetxController {
       _isLoading.value = false;
     }
   }
-
+*/
   Future<String?> signInWithGithub() async {
     try {
       _isLoading.value = true;

@@ -179,6 +179,7 @@ class TabletLogin extends BaseView<AuthController> {
                               ),
                             ),
                             SizedBox(width: 16.w),
+                            /*
                             Expanded(
                               child: SocialLoginButton(
                                 text: 'Facebook',
@@ -188,6 +189,7 @@ class TabletLogin extends BaseView<AuthController> {
                                 onPressed: controller.signInWithFacebook,
                               ),
                             ),
+                            */
                           ],
                         ),
                         SizedBox(height: 16.h),

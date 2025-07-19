@@ -1,7 +1,7 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:sign_in_with_apple/sign_in_with_apple.dart';
-import 'package:flutter_facebook_auth/flutter_facebook_auth.dart';
+// import 'package:flutter_facebook_auth/flutter_facebook_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:logger/logger.dart';
 import 'package:get/get.dart';
@@ -15,7 +15,7 @@ abstract class IAuthRepository {
       String email, String password, String username);
   Future<UserCredential> signInWithGoogle();
   Future<UserCredential> signInWithGithub();
-  Future<UserCredential> signInWithFacebook();
+//  Future<UserCredential> signInWithFacebook();
   Future<UserCredential> signInWithApple();
   Future<void> signOut();
   Future<void> sendPasswordResetEmail(String email);
@@ -39,25 +39,25 @@ class AuthRepository implements IAuthRepository {
   final FirebaseAuth _auth;
   final FirebaseFirestore _firestore;
   final GoogleSignIn _googleSignIn;
-  final FacebookAuth _facebookAuth;
+  // final FacebookAuth _facebookAuth;
   final GitHubOAuthService _githubOAuthService;
   final Logger _logger;
 
   // Getters for auth instances
   FirebaseAuth get auth => _auth;
   GoogleSignIn get googleSignIn => _googleSignIn;
-  FacebookAuth get facebookAuth => _facebookAuth;
+//  FacebookAuth get facebookAuth => _facebookAuth;
 
   AuthRepository({
     FirebaseAuth? auth,
     FirebaseFirestore? firestore,
     GoogleSignIn? googleSignIn,
-    FacebookAuth? facebookAuth,
+    //  FacebookAuth? facebookAuth,
     required GitHubOAuthService githubOAuthService,
   })  : _auth = auth ?? FirebaseAuth.instance,
         _firestore = firestore ?? FirebaseFirestore.instance,
         _googleSignIn = googleSignIn ?? GoogleSignIn.instance,
-        _facebookAuth = facebookAuth ?? FacebookAuth.instance,
+        //    _facebookAuth = facebookAuth ?? FacebookAuth.instance,
         _githubOAuthService = githubOAuthService,
         _logger = Get.find<Logger>() {
     _initializeGoogleSignIn();
@@ -188,6 +188,7 @@ class AuthRepository implements IAuthRepository {
     }
   }
 
+/*
   @override
   Future<UserCredential> signInWithFacebook() async {
     try {
@@ -216,7 +217,7 @@ class AuthRepository implements IAuthRepository {
       throw _handleAuthException(e);
     }
   }
-
+*/
   @override
   Future<UserCredential> signInWithApple() async {
     try {
@@ -290,7 +291,7 @@ class AuthRepository implements IAuthRepository {
       await Future.wait([
         _auth.signOut(),
         _googleSignIn.signOut(),
-        _facebookAuth.logOut(),
+        //   _facebookAuth.logOut(),
       ]);
     } catch (e) {
       throw _handleAuthException(e);

@@ -58,7 +58,7 @@ void main() {
         when(mockUser.email).thenReturn('test@facebook.com');
 
         // Act
-        await controller.signInWithFacebook();
+        //  await controller.signInWithFacebook();
 
         // Assert
         verify(mockAuthRepository.signInWithFacebook()).called(1);
@@ -72,7 +72,7 @@ void main() {
             .thenThrow(Exception('Facebook login failed'));
 
         // Act
-        await controller.signInWithFacebook();
+        // await controller.signInWithFacebook();
 
         // Assert
         verify(mockAuthRepository.signInWithFacebook()).called(1);
@@ -226,12 +226,12 @@ void main() {
         });
 
         // Act
-        final future = controller.signInWithFacebook();
+        // final future = controller.signInWithFacebook();
 
         // Assert - Loading state should be true during auth
         expect(controller.isLoading, true);
 
-        await future;
+        //  await future;
 
         // Assert - Loading state should be false after auth
         expect(controller.isLoading, false);
