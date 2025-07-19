@@ -10,7 +10,7 @@ import 'package:devshabitat/app/core/services/error_handler_service.dart'
     as _i8;
 import 'package:devshabitat/app/repositories/auth_repository.dart' as _i7;
 import 'package:firebase_auth/firebase_auth.dart' as _i2;
-import 'package:flutter_facebook_auth/flutter_facebook_auth.dart' as _i4;
+// import 'package:flutter_facebook_auth/flutter_facebook_auth.dart' as _i4;
 import 'package:get/get.dart' as _i5;
 import 'package:google_sign_in/google_sign_in.dart' as _i3;
 import 'package:mockito/mockito.dart' as _i1;
@@ -50,6 +50,7 @@ class _FakeGoogleSignIn_1 extends _i1.SmartFake implements _i3.GoogleSignIn {
         );
 }
 
+/*
 class _FakeFacebookAuth_2 extends _i1.SmartFake implements _i4.FacebookAuth {
   _FakeFacebookAuth_2(
     Object parent,
@@ -59,7 +60,7 @@ class _FakeFacebookAuth_2 extends _i1.SmartFake implements _i4.FacebookAuth {
           parentInvocation,
         );
 }
-
+*/
 class _FakeUserCredential_3 extends _i1.SmartFake
     implements _i2.UserCredential {
   _FakeUserCredential_3(
@@ -121,7 +122,7 @@ class MockAuthRepository extends _i1.Mock implements _i7.AuthRepository {
           Invocation.getter(#googleSignIn),
         ),
       ) as _i3.GoogleSignIn);
-
+/*
   @override
   _i4.FacebookAuth get facebookAuth => (super.noSuchMethod(
         Invocation.getter(#facebookAuth),
@@ -134,7 +135,7 @@ class MockAuthRepository extends _i1.Mock implements _i7.AuthRepository {
           Invocation.getter(#facebookAuth),
         ),
       ) as _i4.FacebookAuth);
-
+*/
   @override
   _i6.Stream<_i2.User?> get authStateChanges => (super.noSuchMethod(
         Invocation.getter(#authStateChanges),
@@ -460,10 +461,13 @@ class MockAuthRepository extends _i1.Mock implements _i7.AuthRepository {
       ) as _i6.Future<void>);
 
   @override
-  _i6.Future<void> handleSocialSignIn(_i2.User? user) => (super.noSuchMethod(
+  _i6.Future<void> handleSocialSignIn(_i2.User user,
+          {Map<String, dynamic>? additionalData}) =>
+      (super.noSuchMethod(
         Invocation.method(
           #handleSocialSignIn,
           [user],
+          {#additionalData: additionalData},
         ),
         returnValue: _i6.Future<void>.value(),
         returnValueForMissingStub: _i6.Future<void>.value(),

@@ -6,14 +6,14 @@ import 'social_login_button.dart';
 class SocialAuthButtons extends StatelessWidget {
   final VoidCallback onGoogleSignIn;
   final VoidCallback onGithubSignIn;
-  final VoidCallback onFacebookSignIn;
+  // final VoidCallback onFacebookSignIn;
   final VoidCallback onAppleSignIn;
 
   const SocialAuthButtons({
     super.key,
     required this.onGoogleSignIn,
     required this.onGithubSignIn,
-    required this.onFacebookSignIn,
+    // required this.onFacebookSignIn,
     required this.onAppleSignIn,
   });
 
@@ -43,6 +43,7 @@ class SocialAuthButtons extends StatelessWidget {
         textColor: Colors.white,
       ),
       const SizedBox(height: 16),
+      /*
       SocialLoginButton(
         text: 'Facebook ile Giriş Yap',
         iconPath: AppAssets.facebookLogo,
@@ -50,6 +51,7 @@ class SocialAuthButtons extends StatelessWidget {
         backgroundColor: const Color(0xFF1877F2),
         textColor: Colors.white,
       ),
+      */
     ];
   }
 
@@ -72,6 +74,7 @@ class SocialAuthButtons extends StatelessWidget {
         textColor: Colors.white,
       ),
       const SizedBox(height: 16),
+      /*
       SocialLoginButton(
         text: 'Facebook ile Giriş Yap',
         iconPath: AppAssets.facebookLogo,
@@ -79,6 +82,7 @@ class SocialAuthButtons extends StatelessWidget {
         backgroundColor: const Color(0xFF1877F2),
         textColor: Colors.white,
       ),
+      */
     ];
   }
 }

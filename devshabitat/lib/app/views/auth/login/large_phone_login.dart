@@ -143,6 +143,7 @@ class LargePhoneLogin extends BaseView<AuthController> {
                   textColor: Colors.black87,
                 ),
                 SizedBox(height: 12.h),
+                /*
                 SocialLoginButton(
                   text: 'Facebook ile Giriş Yap',
                   iconPath: 'assets/icons/facebook.png',
@@ -150,6 +151,7 @@ class LargePhoneLogin extends BaseView<AuthController> {
                   backgroundColor: const Color(0xFF1877F2),
                   textColor: Colors.white,
                 ),
+                */
                 SizedBox(height: 12.h),
                 SocialLoginButton(
                   text: 'Apple ile Giriş Yap',

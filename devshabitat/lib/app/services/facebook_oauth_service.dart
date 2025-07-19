@@ -1,3 +1,4 @@
+/*
 import 'package:flutter_facebook_auth/flutter_facebook_auth.dart';
 import 'package:get/get.dart';
 import '../core/config/facebook_config.dart';
@@ -105,3 +106,4 @@ class FacebookOAuthService extends GetxService {
     }
   }
 }
+*/

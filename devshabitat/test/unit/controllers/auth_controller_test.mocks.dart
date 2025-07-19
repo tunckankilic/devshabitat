@@ -13,7 +13,7 @@ import 'package:devshabitat/app/core/services/error_handler_service.dart'
 import 'package:devshabitat/app/repositories/auth_repository.dart' as _i13;
 import 'package:firebase_auth/firebase_auth.dart' as _i4;
 import 'package:flutter/material.dart' as _i2;
-import 'package:flutter_facebook_auth/flutter_facebook_auth.dart' as _i6;
+// import 'package:flutter_facebook_auth/flutter_facebook_auth.dart' as _i6;
 import 'package:get/get.dart' as _i3;
 import 'package:get/get_state_manager/src/simple/list_notifier.dart' as _i10;
 import 'package:google_sign_in/google_sign_in.dart' as _i5;
@@ -76,6 +76,7 @@ class _FakeGoogleSignIn_3 extends _i1.SmartFake implements _i5.GoogleSignIn {
         );
 }
 
+/*
 class _FakeFacebookAuth_4 extends _i1.SmartFake implements _i6.FacebookAuth {
   _FakeFacebookAuth_4(
     Object parent,
@@ -85,7 +86,7 @@ class _FakeFacebookAuth_4 extends _i1.SmartFake implements _i6.FacebookAuth {
           parentInvocation,
         );
 }
-
+*/
 class _FakeUserCredential_5 extends _i1.SmartFake
     implements _i4.UserCredential {
   _FakeUserCredential_5(
@@ -784,7 +785,7 @@ class MockAuthRepository extends _i1.Mock implements _i13.AuthRepository {
           Invocation.getter(#googleSignIn),
         ),
       ) as _i5.GoogleSignIn);
-
+/*
   @override
   _i6.FacebookAuth get facebookAuth => (super.noSuchMethod(
         Invocation.getter(#facebookAuth),
@@ -797,7 +798,7 @@ class MockAuthRepository extends _i1.Mock implements _i13.AuthRepository {
           Invocation.getter(#facebookAuth),
         ),
       ) as _i6.FacebookAuth);
-
+*/
   @override
   _i7.Stream<_i4.User?> get authStateChanges => (super.noSuchMethod(
         Invocation.getter(#authStateChanges),
@@ -1123,10 +1124,13 @@ class MockAuthRepository extends _i1.Mock implements _i13.AuthRepository {
       ) as _i7.Future<void>);
 
   @override
-  _i7.Future<void> handleSocialSignIn(_i4.User? user) => (super.noSuchMethod(
+  _i7.Future<void> handleSocialSignIn(_i4.User user,
+          {Map<String, dynamic>? additionalData}) =>
+      (super.noSuchMethod(
         Invocation.method(
           #handleSocialSignIn,
           [user],
+          {#additionalData: additionalData},
         ),
         returnValue: _i7.Future<void>.value(),
         returnValueForMissingStub: _i7.Future<void>.value(),

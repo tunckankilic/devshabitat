@@ -94,7 +94,7 @@ class ResponsiveAuthWrapper extends StatelessWidget {
         SocialAuthButtons(
           onGoogleSignIn: () => authController.signInWithGoogle(),
           onGithubSignIn: () => authController.signInWithGithub(),
-          onFacebookSignIn: () => authController.signInWithFacebook(),
+          //  onFacebookSignIn: () => authController.signInWithFacebook(),
           onAppleSignIn: () => authController.signInWithApple(),
         ),
       ],
