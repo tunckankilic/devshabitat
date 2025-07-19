@@ -49,6 +49,7 @@ void main() {
   });
 
   group('Social Auth Tests', () {
+    /*
     group('Facebook Sign In Tests', () {
       test('should handle successful Facebook sign in', () async {
         // Arrange
@@ -84,7 +85,7 @@ void main() {
         expect(controller.isLoading, false);
       });
     });
-
+*/
     group('Apple Sign In Tests', () {
       test('should handle successful Apple sign in', () async {
         // Arrange
@@ -218,24 +219,29 @@ void main() {
         expect(mockErrorHandler, isNotNull);
       });
 
-      test('should handle loading states during social auth', () async {
-        // Arrange
-        when(mockAuthRepository.signInWithFacebook()).thenAnswer((_) async {
-          await Future.delayed(const Duration(milliseconds: 100));
-          return mockUserCredential;
-        });
+/*
+      test(
+        'should handle loading states during social auth',
+        () async {
+          // Arrange
+          when(mockAuthRepository.signInWithFacebook()).thenAnswer((_) async {
+            await Future.delayed(const Duration(milliseconds: 100));
+            return mockUserCredential;
+          });
 
-        // Act
-        // final future = controller.signInWithFacebook();
+          // Act
+          // final future = controller.signInWithFacebook();
 
-        // Assert - Loading state should be true during auth
-        expect(controller.isLoading, true);
+          // Assert - Loading state should be true during auth
+          expect(controller.isLoading, true);
 
-        //  await future;
+          //  await future;
 
-        // Assert - Loading state should be false after auth
-        expect(controller.isLoading, false);
-      });
+          // Assert - Loading state should be false after auth
+          expect(controller.isLoading, false);
+        },
+      );
+      */
     });
   });
 }
