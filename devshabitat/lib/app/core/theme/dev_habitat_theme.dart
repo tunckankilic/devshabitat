@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'dev_habitat_colors.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'responsive_theme_helper.dart';
 
 class DevHabitatTheme {
   static ThemeData get darkTheme {
@@ -30,92 +31,56 @@ class DevHabitatTheme {
       appBarTheme: AppBarTheme(
         backgroundColor: DevHabitatColors.darkBackground,
         elevation: 0,
-        centerTitle: 1.sw <= 600,
+        centerTitle: ResponsiveThemeHelper.appBarCenterTitle,
         iconTheme: const IconThemeData(color: DevHabitatColors.textPrimary),
         titleTextStyle: TextStyle(
           color: DevHabitatColors.textPrimary,
-          fontSize: 1.sw <= 600 ? 20.sp : 24.sp,
+          fontSize: ResponsiveThemeHelper.appBarTitleSize,
           fontWeight: FontWeight.bold,
         ),
       ),
       textTheme: TextTheme(
         displayLarge: TextStyle(
           color: DevHabitatColors.textPrimary,
-          fontSize: 1.sw <= 600
-              ? 32.sp
-              : 1.sw <= 900
-                  ? 36.sp
-                  : 40.sp,
+          fontSize: ResponsiveThemeHelper.displayLarge,
           fontWeight: FontWeight.bold,
         ),
         displayMedium: TextStyle(
           color: DevHabitatColors.textPrimary,
-          fontSize: 1.sw <= 600
-              ? 28.sp
-              : 1.sw <= 900
-                  ? 32.sp
-                  : 36.sp,
+          fontSize: ResponsiveThemeHelper.displayMedium,
           fontWeight: FontWeight.bold,
         ),
         displaySmall: TextStyle(
           color: DevHabitatColors.textPrimary,
-          fontSize: 1.sw <= 600
-              ? 24.sp
-              : 1.sw <= 900
-                  ? 28.sp
-                  : 32.sp,
+          fontSize: ResponsiveThemeHelper.displaySmall,
           fontWeight: FontWeight.bold,
         ),
         headlineMedium: TextStyle(
           color: DevHabitatColors.textPrimary,
-          fontSize: 1.sw <= 600
-              ? 20.sp
-              : 1.sw <= 900
-                  ? 24.sp
-                  : 28.sp,
+          fontSize: ResponsiveThemeHelper.headlineMedium,
           fontWeight: FontWeight.w600,
         ),
         headlineSmall: TextStyle(
           color: DevHabitatColors.textPrimary,
-          fontSize: 1.sw <= 600
-              ? 18.sp
-              : 1.sw <= 900
-                  ? 20.sp
-                  : 24.sp,
+          fontSize: ResponsiveThemeHelper.headlineSmall,
           fontWeight: FontWeight.w600,
         ),
         titleLarge: TextStyle(
           color: DevHabitatColors.textPrimary,
-          fontSize: 1.sw <= 600
-              ? 16.sp
-              : 1.sw <= 900
-                  ? 18.sp
-                  : 20.sp,
+          fontSize: ResponsiveThemeHelper.titleLarge,
           fontWeight: FontWeight.w600,
         ),
         bodyLarge: TextStyle(
           color: DevHabitatColors.textPrimary,
-          fontSize: 1.sw <= 600
-              ? 16.sp
-              : 1.sw <= 900
-                  ? 18.sp
-                  : 20.sp,
+          fontSize: ResponsiveThemeHelper.bodyLarge,
         ),
         bodyMedium: TextStyle(
           color: DevHabitatColors.textSecondary,
-          fontSize: 1.sw <= 600
-              ? 14.sp
-              : 1.sw <= 900
-                  ? 16.sp
-                  : 18.sp,
+          fontSize: ResponsiveThemeHelper.bodyMedium,
         ),
         bodySmall: TextStyle(
           color: DevHabitatColors.textTertiary,
-          fontSize: 1.sw <= 600
-              ? 12.sp
-              : 1.sw <= 900
-                  ? 14.sp
-                  : 16.sp,
+          fontSize: ResponsiveThemeHelper.bodySmall,
         ),
       ),
       inputDecorationTheme: InputDecorationTheme(
@@ -155,10 +120,7 @@ class DevHabitatTheme {
         style: ElevatedButton.styleFrom(
           backgroundColor: DevHabitatColors.primary,
           foregroundColor: Colors.white,
-          padding: EdgeInsets.symmetric(
-            horizontal: 1.sw <= 600 ? 16.w : 24.w,
-            vertical: 1.sw <= 600 ? 12.h : 16.h,
-          ),
+          padding: ResponsiveThemeHelper.buttonPadding,
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(12.r),
           ),
@@ -169,10 +131,7 @@ class DevHabitatTheme {
         style: OutlinedButton.styleFrom(
           foregroundColor: DevHabitatColors.primary,
           side: const BorderSide(color: DevHabitatColors.primary),
-          padding: EdgeInsets.symmetric(
-            horizontal: 1.sw <= 600 ? 16.w : 24.w,
-            vertical: 1.sw <= 600 ? 12.h : 16.h,
-          ),
+          padding: ResponsiveThemeHelper.outlinedButtonPadding,
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(12.r),
           ),
@@ -181,10 +140,7 @@ class DevHabitatTheme {
       textButtonTheme: TextButtonThemeData(
         style: TextButton.styleFrom(
           foregroundColor: DevHabitatColors.primary,
-          padding: EdgeInsets.symmetric(
-            horizontal: 1.sw <= 600 ? 12.w : 16.w,
-            vertical: 1.sw <= 600 ? 8.h : 12.h,
-          ),
+          padding: ResponsiveThemeHelper.textButtonPadding,
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(8.r),
           ),
@@ -192,7 +148,7 @@ class DevHabitatTheme {
       ),
       iconTheme: IconThemeData(
         color: DevHabitatColors.textPrimary,
-        size: 1.sw <= 600 ? 20.sp : 24.sp,
+        size: ResponsiveThemeHelper.iconSize,
       ),
       dividerTheme: DividerThemeData(
         color: DevHabitatColors.darkBorder,

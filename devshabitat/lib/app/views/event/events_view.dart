@@ -6,7 +6,7 @@ import 'package:devshabitat/app/routes/app_pages.dart';
 import 'package:devshabitat/app/utils/performance_optimizer.dart';
 
 class EventsView extends GetView<EventController> with PerformanceOptimizer {
-  const EventsView({super.key});
+  EventsView({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -58,7 +58,7 @@ class EventsView extends GetView<EventController> with PerformanceOptimizer {
 
   Widget _buildEventCard(EventModel event) {
     return wrapWithRepaintBoundary(
-      EventCard(event: event).onlyWhenVisible(),
+      EventCard(event: event),
     );
   }
 }

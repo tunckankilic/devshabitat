@@ -246,7 +246,7 @@ class ChatView extends BaseView<MessageChatController>
           ],
         ),
       ),
-    ).onlyWhenVisible();
+    );
   }
 
   void _showMessageOptions(MessageModel message) {

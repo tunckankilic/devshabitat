@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import '../../controllers/home_controller.dart';
+import '../../controllers/responsive_controller.dart';
 import '../base/base_view.dart';
 import 'widgets/profile_summary_card.dart';
 import 'widgets/connections_overview_card.dart';
@@ -19,170 +20,126 @@ class HomeView extends BaseView<HomeController> {
       appBar: AppBar(
         title: Text(
           'Ana Sayfa',
-          style: TextStyle(fontSize: 20.sp),
+          style: TextStyle(
+              fontSize: responsive.responsiveValue(
+            mobile: 20.sp,
+            tablet: 24.sp,
+          )),
         ),
         actions: [
           IconButton(
-            icon: Icon(Icons.notifications_none, size: 24.sp),
+            icon: Icon(Icons.notifications_none,
+                size: responsive.minTouchTarget.sp),
             onPressed: () => Get.toNamed('/notifications'),
           ),
           IconButton(
-            icon: Icon(Icons.search, size: 24.sp),
+            icon: Icon(Icons.search, size: responsive.minTouchTarget.sp),
             onPressed: () => Get.toNamed('/search'),
           ),
         ],
       ),
       body: SafeArea(
         child: Padding(
-          padding: EdgeInsets.all(16.w),
+          padding: responsive.responsivePadding(
+            left: 16,
+            right: 16,
+            top: 16,
+            bottom: 16,
+          ),
           child: Obx(() {
             if (controller.isLoading.value) {
               return const LoadingList();
             }
 
             if (controller.hasError.value) {
-              return Center(
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Icon(Icons.error_outline, size: 48.sp, color: Colors.red),
-                    SizedBox(height: 16.h),
-                    Text(
-                      controller.errorMessage.value,
-                      style: TextStyle(fontSize: 16.sp),
-                      textAlign: TextAlign.center,
-                    ),
-                    SizedBox(height: 16.h),
-                    ElevatedButton(
-                      onPressed: controller.loadData,
-                      child: Text(
-                        'Tekrar Dene',
-                        style: TextStyle(fontSize: 16.sp),
-                      ),
-                    ),
-                  ],
-                ),
-              );
+              return _buildErrorState();
             }
 
-            return LayoutBuilder(
-              builder: (context, constraints) {
-                if (constraints.maxWidth > 1200.w) {
-                  return _buildDesktopLayout();
-                } else if (constraints.maxWidth > 600.w) {
-                  return _buildTabletLayout();
-                } else {
-                  return _buildMobileLayout();
-                }
-              },
-            );
+            return Obx(() => _buildResponsiveLayout());
           }),
         ),
       ),
     );
   }
 
-  Widget _buildDesktopLayout() {
-    return Row(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Expanded(
-          flex: 2,
-          child: Column(
-            children: [
-              const ProfileSummaryCard(),
-              SizedBox(height: 16.h),
-              const QuickActionsCard(),
-            ],
-          ),
+  Widget _buildErrorState() {
+    return Center(
+      child: SingleChildScrollView(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(Icons.error_outline, size: 48.sp, color: Colors.red),
+            SizedBox(height: 16.h),
+            Text(
+              controller.errorMessage.value,
+              style: TextStyle(fontSize: 16.sp),
+              textAlign: TextAlign.center,
+            ),
+            SizedBox(height: 16.h),
+            ElevatedButton(
+              onPressed: controller.loadData,
+              child: Text(
+                'Tekrar Dene',
+                style: TextStyle(fontSize: 16.sp),
+              ),
+            ),
+          ],
         ),
-        SizedBox(width: 16.w),
-        Expanded(
-          flex: 4,
-          child: Column(
-            children: [
-              Obx(() {
-                if (controller.items.isEmpty) {
-                  return Center(
-                    child: Text(
-                      'Henüz içerik yok',
-                      style: TextStyle(fontSize: 16.sp),
-                    ),
-                  );
-                }
-                return ActivityFeedCard(
-                  feedItem: controller.items.first,
-                  onLike: () => controller.onLike(controller.items.first),
-                  onComment: () => controller.onComment(controller.items.first),
-                  onShare: () => controller.onShare(controller.items.first),
-                );
-              }),
-              SizedBox(height: 16.h),
-              const GithubStatsCard(),
-            ],
-          ),
-        ),
-        SizedBox(width: 16.w),
-        Expanded(
-          flex: 2,
-          child: Column(
-            children: [
-              const ConnectionsOverviewCard(),
-            ],
-          ),
-        ),
-      ],
+      ),
     );
   }
 
+  Widget _buildResponsiveLayout() {
+    if (responsive.isTablet) {
+      return _buildTabletLayout();
+    } else {
+      return _buildMobileLayout();
+    }
+  }
+
   Widget _buildTabletLayout() {
-    return Column(
-      children: [
-        Row(
-          children: [
-            const Expanded(
-              flex: 3,
-              child: ProfileSummaryCard(),
+    return SingleChildScrollView(
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // Left Column
+          Expanded(
+            flex: 2,
+            child: Column(
+              children: [
+                const ProfileSummaryCard(),
+                SizedBox(height: 16.h),
+                const QuickActionsCard(),
+                SizedBox(height: 16.h),
+                const ConnectionsOverviewCard(),
+              ],
             ),
-            SizedBox(width: 16.w),
-            const Expanded(
-              flex: 2,
-              child: QuickActionsCard(),
+          ),
+          SizedBox(width: 24.w),
+          // Right Column - Main Content
+          Expanded(
+            flex: 3,
+            child: Column(
+              children: [
+                Obx(() {
+                  if (controller.items.isEmpty) {
+                    return _buildEmptyState();
+                  }
+                  return ActivityFeedCard(
+                    feedItem: controller.items.first,
+                    onLike: () => controller.onLike(controller.items.first),
+                    onComment: () =>
+                        controller.onComment(controller.items.first),
+                    onShare: () => controller.onShare(controller.items.first),
+                  );
+                }),
+                SizedBox(height: 16.h),
+                const GithubStatsCard(),
+              ],
             ),
-          ],
-        ),
-        SizedBox(height: 16.h),
-        Row(
-          children: [
-            const Expanded(
-              flex: 2,
-              child: ConnectionsOverviewCard(),
-            ),
-            SizedBox(width: 16.w),
-            const Expanded(
-              flex: 3,
-              child: GithubStatsCard(),
-            ),
-          ],
-        ),
-        SizedBox(height: 16.h),
-        Obx(() {
-          if (controller.items.isEmpty) {
-            return Center(
-              child: Text(
-                'Henüz içerik yok',
-                style: TextStyle(fontSize: 16.sp),
-              ),
-            );
-          }
-          return ActivityFeedCard(
-            feedItem: controller.items.first,
-            onLike: () => controller.onLike(controller.items.first),
-            onComment: () => controller.onComment(controller.items.first),
-            onShare: () => controller.onShare(controller.items.first),
-          );
-        }),
-      ],
+          ),
+        ],
+      ),
     );
   }
 
@@ -200,12 +157,7 @@ class HomeView extends BaseView<HomeController> {
           SizedBox(height: 16.h),
           Obx(() {
             if (controller.items.isEmpty) {
-              return Center(
-                child: Text(
-                  'Henüz içerik yok',
-                  style: TextStyle(fontSize: 16.sp),
-                ),
-              );
+              return _buildEmptyState();
             }
             return ActivityFeedCard(
               feedItem: controller.items.first,
@@ -214,6 +166,39 @@ class HomeView extends BaseView<HomeController> {
               onShare: () => controller.onShare(controller.items.first),
             );
           }),
+          // Add bottom padding for navigation
+          SizedBox(
+              height: responsive.responsiveValue(
+            mobile: 100.h,
+            tablet: 20.h,
+          )),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildEmptyState() {
+    return Container(
+      padding: EdgeInsets.all(24.r),
+      child: Column(
+        children: [
+          Icon(
+            Icons.explore_outlined,
+            size: 48.sp,
+            color: Theme.of(Get.context!).colorScheme.onSurfaceVariant,
+          ),
+          SizedBox(height: 16.h),
+          Text(
+            'Henüz içerik yok',
+            style: Theme.of(Get.context!).textTheme.titleMedium,
+            textAlign: TextAlign.center,
+          ),
+          SizedBox(height: 8.h),
+          Text(
+            'Topluluklar ve etkinlikler keşfetmeye başlayın',
+            style: Theme.of(Get.context!).textTheme.bodyMedium,
+            textAlign: TextAlign.center,
+          ),
         ],
       ),
     );
