@@ -106,22 +106,7 @@
 		<true/>
 	</dict>
 	
-	<!-- Facebook Configuration -->
-	<key>FacebookAppID</key>
-	<string>{FACEBOOK_APP_ID}</string>
-	<key>FacebookClientToken</key>
-	<string>{FACEBOOK_CLIENT_TOKEN}</string>
-	<key>FacebookDisplayName</key>
-	<string>Devshabitat</string>
 
-	<!-- Query Schemes for Social Media -->
-	<key>LSApplicationQueriesSchemes</key>
-	<array>
-		<string>fbapi</string>
-		<string>fb-messenger-share-api</string>
-		<string>fbauth2</string>
-		<string>fbshareextension</string>
-	</array>
 	
 	<!-- Encryption Declaration -->
 	<key>ITSAppUsesNonExemptEncryption</key>

@@ -173,22 +173,6 @@ class AuthController extends GetxController {
     }
   }
 
-/*
-  Future<void> signInWithFacebook() async {
-    try {
-      _isLoading.value = true;
-      _lastError.value = '';
-
-      await _authRepository.signInWithFacebook();
-      _errorHandler.handleSuccess('Facebook ile giriş başarılı');
-    } catch (e) {
-      _lastError.value = e.toString();
-      _errorHandler.handleError(e, ErrorHandlerService.AUTH_ERROR);
-    } finally {
-      _isLoading.value = false;
-    }
-  }
-*/
   Future<String?> signInWithGithub() async {
     try {
       _isLoading.value = true;

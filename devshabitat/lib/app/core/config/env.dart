@@ -61,16 +61,6 @@ abstract class Env {
   @EnviedField(varName: 'GITHUB_SCOPE', obfuscate: true)
   static final String githubScope = _Env.githubScope;
 
-  // Facebook Configuration
-  @EnviedField(varName: 'FACEBOOK_APP_ID', obfuscate: true)
-  static final String facebookAppId = _Env.facebookAppId;
-
-  @EnviedField(varName: 'FACEBOOK_APP_SECRET', obfuscate: true)
-  static final String facebookAppSecret = _Env.facebookAppSecret;
-
-  @EnviedField(varName: 'FACEBOOK_SCOPE', obfuscate: true)
-  static final String facebookScope = _Env.facebookScope;
-
   // Google Maps Configuration
   @EnviedField(varName: 'GOOGLE_MAPS_API_KEY', obfuscate: true)
   static final String googleMapsApiKey = _Env.googleMapsApiKey;
