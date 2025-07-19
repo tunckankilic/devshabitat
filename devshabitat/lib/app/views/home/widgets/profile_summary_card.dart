@@ -2,19 +2,29 @@ import 'package:devshabitat/app/controllers/auth_controller.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import '../../../controllers/responsive_controller.dart';
 
 class ProfileSummaryCard extends GetView<AuthController> {
   const ProfileSummaryCard({super.key});
 
   @override
   Widget build(BuildContext context) {
+    final responsive = Get.find<ResponsiveController>();
+
     return Card(
       elevation: 2,
       shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(16.r),
+        borderRadius: BorderRadius.circular(
+          responsive.responsiveValue(
+            mobile: 16.r,
+            tablet: 20.r,
+          ),
+        ),
       ),
       child: Padding(
-        padding: EdgeInsets.all(16.w),
+        padding: responsive.responsivePadding(
+          all: 16,
+        ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -23,16 +33,27 @@ class ProfileSummaryCard extends GetView<AuthController> {
                 Obx(() {
                   final user = controller.currentUser;
                   return CircleAvatar(
-                    radius: 30.r,
+                    radius: responsive.responsiveValue(
+                      mobile: 30.r,
+                      tablet: 40.r,
+                    ),
                     backgroundImage: user?.photoURL != null
                         ? NetworkImage(user!.photoURL!)
                         : null,
                     child: user?.photoURL == null
-                        ? Icon(Icons.person, size: 30.r)
+                        ? Icon(
+                            Icons.person,
+                            size: responsive.responsiveValue(
+                              mobile: 30.r,
+                              tablet: 40.r,
+                            ),
+                          )
                         : null,
                   );
                 }),
-                SizedBox(width: 16.w),
+                SizedBox(
+                    width:
+                        responsive.responsiveValue(mobile: 16.w, tablet: 20.w)),
                 Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -42,18 +63,26 @@ class ProfileSummaryCard extends GetView<AuthController> {
                         return Text(
                           user?.displayName ?? 'İsimsiz Kullanıcı',
                           style: TextStyle(
-                            fontSize: 18.sp,
+                            fontSize: responsive.responsiveValue(
+                              mobile: 18.sp,
+                              tablet: 22.sp,
+                            ),
                             fontWeight: FontWeight.bold,
                           ),
                         );
                       }),
-                      SizedBox(height: 4.h),
+                      SizedBox(
+                          height: responsive.responsiveValue(
+                              mobile: 4.h, tablet: 6.h)),
                       Obx(() {
                         final user = controller.currentUser;
                         return Text(
                           user?.email ?? '',
                           style: TextStyle(
-                            fontSize: 14.sp,
+                            fontSize: responsive.responsiveValue(
+                              mobile: 14.sp,
+                              tablet: 16.sp,
+                            ),
                             color: Colors.grey[600],
                           ),
                         );
@@ -63,15 +92,22 @@ class ProfileSummaryCard extends GetView<AuthController> {
                 ),
               ],
             ),
-            SizedBox(height: 16.h),
+            SizedBox(
+                height: responsive.responsiveValue(mobile: 16.h, tablet: 20.h)),
             Obx(() {
               final profile = controller.userProfile;
               return Text(
                 profile['bio'] ?? 'Henüz bir biyografi eklenmemiş.',
-                style: TextStyle(fontSize: 14.sp),
+                style: TextStyle(
+                  fontSize: responsive.responsiveValue(
+                    mobile: 14.sp,
+                    tablet: 16.sp,
+                  ),
+                ),
               );
             }),
-            SizedBox(height: 16.h),
+            SizedBox(
+                height: responsive.responsiveValue(mobile: 16.h, tablet: 20.h)),
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceAround,
               children: [
@@ -103,21 +139,35 @@ class ProfileSummaryCard extends GetView<AuthController> {
     required String label,
     required String value,
   }) {
+    final responsive = Get.find<ResponsiveController>();
+
     return Column(
       children: [
-        Icon(icon, size: 24.r),
-        SizedBox(height: 4.h),
+        Icon(
+          icon,
+          size: responsive.responsiveValue(
+            mobile: 24.r,
+            tablet: 32.r,
+          ),
+        ),
+        SizedBox(height: responsive.responsiveValue(mobile: 4.h, tablet: 6.h)),
         Text(
           value,
           style: TextStyle(
-            fontSize: 16.sp,
+            fontSize: responsive.responsiveValue(
+              mobile: 16.sp,
+              tablet: 18.sp,
+            ),
             fontWeight: FontWeight.bold,
           ),
         ),
         Text(
           label,
           style: TextStyle(
-            fontSize: 12.sp,
+            fontSize: responsive.responsiveValue(
+              mobile: 12.sp,
+              tablet: 14.sp,
+            ),
             color: Colors.grey[600],
           ),
         ),

@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import '../../controllers/responsive_controller.dart';
+import '../../services/responsive_performance_service.dart';
 import 'widgets/auth_form.dart';
 import 'widgets/auth_header.dart';
 import 'widgets/social_auth_buttons.dart';
@@ -21,13 +22,15 @@ class ResponsiveAuthWrapper extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final responsive = Get.find<ResponsiveController>();
+    final performanceService = Get.find<ResponsivePerformanceService>();
 
     return Scaffold(
       body: SafeArea(
         child: Center(
           child: SingleChildScrollView(
             child: Padding(
-              padding: responsive.responsivePadding(
+              padding: performanceService.getOptimizedPadding(
+                cacheKey: 'auth_wrapper_padding',
                 left: 24,
                 right: 24,
                 top: 24,
@@ -50,19 +53,38 @@ class ResponsiveAuthWrapper extends StatelessWidget {
   }
 
   Widget _buildTabletLayout(ResponsiveController responsive) {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: [
-        Expanded(
-          flex: 1,
-          child: _buildLeftColumn(responsive),
+    return ConstrainedBox(
+      constraints: BoxConstraints(
+        maxWidth: responsive.responsiveValue(
+          mobile: 600.w,
+          tablet: 1000.w,
         ),
-        SizedBox(width: responsive.responsiveValue(mobile: 32.w, tablet: 48.w)),
-        Expanded(
-          flex: 1,
-          child: _buildRightColumn(responsive),
-        ),
-      ],
+      ),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Expanded(
+            flex: responsive.responsiveValue(
+              mobile: 1,
+              tablet: 2,
+            ),
+            child: _buildLeftColumn(responsive),
+          ),
+          SizedBox(
+            width: responsive.responsiveValue(
+              mobile: 32.w,
+              tablet: 48.w,
+            ),
+          ),
+          Expanded(
+            flex: responsive.responsiveValue(
+              mobile: 1,
+              tablet: 3,
+            ),
+            child: _buildRightColumn(responsive),
+          ),
+        ],
+      ),
     );
   }
 
@@ -71,7 +93,12 @@ class ResponsiveAuthWrapper extends StatelessWidget {
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
         _buildLeftColumn(responsive),
-        SizedBox(height: 32.h),
+        SizedBox(
+          height: responsive.responsiveValue(
+            mobile: 32.h,
+            tablet: 40.h,
+          ),
+        ),
         _buildRightColumn(responsive),
       ],
     );
@@ -84,7 +111,11 @@ class ResponsiveAuthWrapper extends StatelessWidget {
       children: [
         AuthHeader(isLogin: isLogin),
         SizedBox(
-            height: responsive.responsiveValue(mobile: 24.h, tablet: 32.h)),
+          height: responsive.responsiveValue(
+            mobile: 24.h,
+            tablet: 32.h,
+          ),
+        ),
         SocialAuthButtons(
           onGoogleSignIn: () => authController.signInWithGoogle(),
           onGithubSignIn: () => authController.signInWithGithub(),
@@ -95,36 +126,59 @@ class ResponsiveAuthWrapper extends StatelessWidget {
   }
 
   Widget _buildRightColumn(ResponsiveController responsive) {
+    final performanceService = Get.find<ResponsivePerformanceService>();
+
     return Card(
-      elevation: responsive.responsiveValue(mobile: 2, tablet: 4),
+      elevation: responsive.responsiveValue(
+        mobile: 2,
+        tablet: 4,
+      ),
       shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(16.r),
+        borderRadius: BorderRadius.circular(
+          responsive.responsiveValue(
+            mobile: 16.r,
+            tablet: 20.r,
+          ),
+        ),
       ),
       child: Padding(
-        padding: responsive.responsivePadding(
+        padding: performanceService.getOptimizedPadding(
+          cacheKey: 'auth_form_card_padding',
           left: 24,
           right: 24,
           top: 24,
           bottom: 24,
         ),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            AuthForm(
-              isLogin: isLogin,
-              onSubmit: (email, password) {
-                if (isLogin) {
-                  authController.signInWithEmailAndPassword();
-                } else {
-                  authController.createUserWithEmailAndPassword();
-                }
-              },
+        child: ConstrainedBox(
+          constraints: BoxConstraints(
+            maxWidth: responsive.responsiveValue(
+              mobile: double.infinity,
+              tablet: 400.w,
             ),
-            SizedBox(
-                height: responsive.responsiveValue(mobile: 24.h, tablet: 32.h)),
-            AuthFooter(isLogin: isLogin),
-          ],
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              AuthForm(
+                isLogin: isLogin,
+                onSubmit: (email, password) {
+                  if (isLogin) {
+                    authController.signInWithEmailAndPassword();
+                  } else {
+                    authController.createUserWithEmailAndPassword();
+                  }
+                },
+              ),
+              SizedBox(
+                height: responsive.responsiveValue(
+                  mobile: 24.h,
+                  tablet: 32.h,
+                ),
+              ),
+              AuthFooter(isLogin: isLogin),
+            ],
+          ),
         ),
       ),
     );

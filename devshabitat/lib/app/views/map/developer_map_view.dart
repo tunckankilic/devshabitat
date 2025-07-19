@@ -4,12 +4,14 @@ import 'package:devshabitat/app/widgets/map/custom_map_widget.dart';
 import 'package:devshabitat/app/widgets/map/location_filter_widget.dart';
 import 'package:devshabitat/app/widgets/map/map_controls_widget.dart';
 import 'package:devshabitat/app/controllers/location/map_controller.dart';
+import 'package:devshabitat/app/controllers/responsive_controller.dart';
 
 class DeveloperMapView extends GetView<MapController> {
   const DeveloperMapView({super.key});
 
   @override
   Widget build(BuildContext context) {
+    final responsive = ResponsiveController.to;
     return Scaffold(
       body: Stack(
         children: [
@@ -35,10 +37,11 @@ class DeveloperMapView extends GetView<MapController> {
           Obx(() {
             if (!controller.showFilters.value) return const SizedBox.shrink();
             return Positioned(
-              left: 16,
-              right: 16,
-              top: 16,
+              left: responsive.responsivePadding(left: 16).left,
+              right: responsive.responsivePadding(right: 16).right,
+              top: responsive.responsivePadding(top: 16).top,
               child: SafeArea(
+                minimum: responsive.responsivePadding(all: 16),
                 child: LocationFilterWidget(
                   radius: controller.searchRadius.value,
                   onRadiusChanged: controller.updateSearchRadius,
@@ -51,27 +54,38 @@ class DeveloperMapView extends GetView<MapController> {
             );
           }),
           Positioned(
-            left: 16,
-            right: 80,
-            bottom: 16,
+            left: responsive.responsivePadding(left: 16).left,
+            right: responsive.responsivePadding(right: 80).right,
+            bottom: responsive.responsivePadding(bottom: 16).bottom,
             child: Card(
               child: Padding(
-                padding: const EdgeInsets.all(8.0),
+                padding: responsive.responsivePadding(all: 8),
                 child: Row(
                   children: [
                     Expanded(
                       child: Obx(() {
                         return Text(
                           '${controller.visibleDevelopers.length} geliştirici bulundu',
-                          style: const TextStyle(
-                            fontSize: 16,
+                          style: TextStyle(
+                            fontSize: responsive.responsiveValue(
+                              mobile: 16,
+                              tablet: 18,
+                              desktop: 20,
+                            ),
                             fontWeight: FontWeight.bold,
                           ),
                         );
                       }),
                     ),
                     IconButton(
-                      icon: const Icon(Icons.refresh),
+                      icon: Icon(
+                        Icons.refresh,
+                        size: responsive.responsiveValue(
+                          mobile: 24,
+                          tablet: 28,
+                          desktop: 32,
+                        ),
+                      ),
                       onPressed: controller.refreshDevelopers,
                       tooltip: 'Yenile',
                     ),

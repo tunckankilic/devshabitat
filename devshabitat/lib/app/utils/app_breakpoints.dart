@@ -1,4 +1,14 @@
+import 'package:flutter/material.dart';
+
 class AppBreakpoints {
+  final BuildContext context;
+
+  AppBreakpoints._(this.context);
+
+  static AppBreakpoints of(BuildContext context) {
+    return AppBreakpoints._(context);
+  }
+
   // Ekran boyutu kırılım noktaları
   static const double mobile = 360;
   static const double tablet = 768;
@@ -31,19 +41,31 @@ class AppBreakpoints {
   static const double iconSizeL = 32;
   static const double iconSizeXL = 48;
 
-  // Responsive değerler
-  static double getResponsiveValue({
-    required double mobile,
-    required double tablet,
-    required double desktop,
-    required double screenWidth,
-  }) {
-    if (screenWidth <= AppBreakpoints.mobile) {
-      return mobile;
-    } else if (screenWidth <= AppBreakpoints.tablet) {
-      return tablet;
-    } else {
-      return desktop;
+  bool get isMobile => MediaQuery.of(context).size.width <= mobile;
+  bool get isTablet =>
+      MediaQuery.of(context).size.width <= tablet &&
+      MediaQuery.of(context).size.width > mobile;
+  bool get isDesktop => MediaQuery.of(context).size.width > tablet;
+
+  double responsivePadding({double all = 16, double multiplier = 1}) {
+    if (isDesktop) {
+      return paddingL * multiplier;
+    } else if (isTablet) {
+      return paddingM * multiplier;
     }
+    return all;
+  }
+
+  T responsiveValue<T>({
+    required T mobile,
+    required T tablet,
+    T? desktop,
+  }) {
+    if (isDesktop) {
+      return desktop ?? tablet;
+    } else if (isTablet) {
+      return tablet;
+    }
+    return mobile;
   }
 }

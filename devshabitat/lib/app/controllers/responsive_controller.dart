@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:flutter_screenutil/flutter_screenutil.dart';
 import '../widgets/responsive/animated_responsive_wrapper.dart';
 
 class ResponsiveController extends GetxController {
@@ -117,9 +116,9 @@ class ResponsiveController extends GetxController {
   }) {
     if (all != null) {
       final value = responsiveValue(
-        mobile: all.w,
-        tablet: (all * 1.5).w,
-        desktop: (all * 2).w,
+        mobile: all,
+        tablet: all * 1.5,
+        desktop: all * 2,
       );
       return EdgeInsets.all(value);
     }
@@ -128,16 +127,16 @@ class ResponsiveController extends GetxController {
       return EdgeInsets.symmetric(
         horizontal: horizontal != null
             ? responsiveValue(
-                mobile: horizontal.w,
-                tablet: (horizontal * 1.5).w,
-                desktop: (horizontal * 2).w,
+                mobile: horizontal,
+                tablet: horizontal * 1.5,
+                desktop: horizontal * 2,
               )
             : 0,
         vertical: vertical != null
             ? responsiveValue(
-                mobile: vertical.h,
-                tablet: (vertical * 1.5).h,
-                desktop: (vertical * 2).h,
+                mobile: vertical,
+                tablet: vertical * 1.5,
+                desktop: vertical * 2,
               )
             : 0,
       );
@@ -146,30 +145,30 @@ class ResponsiveController extends GetxController {
     return EdgeInsets.only(
       left: left != null
           ? responsiveValue(
-              mobile: left.w,
-              tablet: (left * 1.5).w,
-              desktop: (left * 2).w,
+              mobile: left,
+              tablet: left * 1.5,
+              desktop: left * 2,
             )
           : 0,
       top: top != null
           ? responsiveValue(
-              mobile: top.h,
-              tablet: (top * 1.5).h,
-              desktop: (top * 2).h,
+              mobile: top,
+              tablet: top * 1.5,
+              desktop: top * 2,
             )
           : 0,
       right: right != null
           ? responsiveValue(
-              mobile: right.w,
-              tablet: (right * 1.5).w,
-              desktop: (right * 2).w,
+              mobile: right,
+              tablet: right * 1.5,
+              desktop: right * 2,
             )
           : 0,
       bottom: bottom != null
           ? responsiveValue(
-              mobile: bottom.h,
-              tablet: (bottom * 1.5).h,
-              desktop: (bottom * 2).h,
+              mobile: bottom,
+              tablet: bottom * 1.5,
+              desktop: bottom * 2,
             )
           : 0,
     );
@@ -208,9 +207,9 @@ class ResponsiveController extends GetxController {
 
   // Layout grid optimization
   double get gridSpacing => responsiveValue(
-        mobile: 8.w,
-        tablet: 16.w,
-        desktop: 24.w,
+        mobile: 8,
+        tablet: 16,
+        desktop: 24,
       );
 
   int get gridColumns => responsiveValue(

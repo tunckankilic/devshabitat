@@ -2,7 +2,6 @@ import 'package:devshabitat/firebase_options.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:firebase_core/firebase_core.dart';
-import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'app/routes/app_pages.dart';
 import 'app/core/theme/dev_habitat_theme.dart';
 import 'app/bindings/app_binding.dart';
@@ -39,22 +38,15 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return ScreenUtilInit(
-      designSize: const Size(375, 812), // iPhone X tasarım boyutları
-      minTextAdapt: true,
-      splitScreenMode: true,
-      builder: (context, child) {
-        return GetMaterialApp(
-          title: 'DevsHabitat',
-          theme: DevHabitatTheme.lightTheme,
-          darkTheme: DevHabitatTheme.darkTheme,
-          initialRoute: _getInitialRoute(),
-          getPages: AppPages.routes,
-          initialBinding: AppBinding(),
-          defaultTransition: Transition.fade,
-          debugShowCheckedModeBanner: false,
-        );
-      },
+    return GetMaterialApp(
+      title: 'DevsHabitat',
+      theme: DevHabitatTheme.lightTheme,
+      darkTheme: DevHabitatTheme.darkTheme,
+      initialRoute: _getInitialRoute(),
+      getPages: AppPages.routes,
+      initialBinding: AppBinding(),
+      defaultTransition: Transition.fade,
+      debugShowCheckedModeBanner: false,
     );
   }
 

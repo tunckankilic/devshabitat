@@ -1,4 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
+import '../../controllers/responsive_controller.dart';
+import '../../services/responsive_performance_service.dart';
 import '../../models/community/community_model.dart';
 
 class CommunityStatsWidget extends StatelessWidget {
@@ -12,18 +16,30 @@ class CommunityStatsWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final responsive = Get.find<ResponsiveController>();
+    final performanceService = Get.find<ResponsivePerformanceService>();
 
     return Card(
       child: Padding(
-        padding: const EdgeInsets.all(16.0),
+        padding: responsive.responsivePadding(all: 16),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
               'Topluluk İstatistikleri',
-              style: theme.textTheme.titleLarge,
+              style: theme.textTheme.titleLarge?.copyWith(
+                fontSize: performanceService.getOptimizedTextSize(
+                  cacheKey: 'community_stats_title',
+                  mobileSize: 20,
+                  tabletSize: 24.sp,
+                ),
+              ),
             ),
-            const SizedBox(height: 16),
+            SizedBox(
+                height: responsive.responsiveValue(
+              mobile: 16.h,
+              tablet: 20.h,
+            )),
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceAround,
               children: [
@@ -47,9 +63,22 @@ class CommunityStatsWidget extends StatelessWidget {
                 ),
               ],
             ),
-            const SizedBox(height: 16),
-            const Divider(),
-            const SizedBox(height: 16),
+            SizedBox(
+                height: responsive.responsiveValue(
+              mobile: 16.h,
+              tablet: 20.h,
+            )),
+            Divider(
+              thickness: responsive.responsiveValue(
+                mobile: 1,
+                tablet: 1.5,
+              ),
+            ),
+            SizedBox(
+                height: responsive.responsiveValue(
+              mobile: 16.h,
+              tablet: 20.h,
+            )),
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceAround,
               children: [
@@ -86,24 +115,48 @@ class CommunityStatsWidget extends StatelessWidget {
     String value,
   ) {
     final theme = Theme.of(context);
+    final responsive = Get.find<ResponsiveController>();
+    final performanceService = Get.find<ResponsivePerformanceService>();
 
     return Column(
       children: [
         Icon(
           icon,
           color: theme.colorScheme.primary,
-          size: 28,
+          size: responsive.responsiveValue(
+            mobile: 28.sp,
+            tablet: 32.sp,
+          ),
         ),
-        const SizedBox(height: 8),
+        SizedBox(
+            height: responsive.responsiveValue(
+          mobile: 8.h,
+          tablet: 12.h,
+        )),
         Text(
           label,
-          style: theme.textTheme.bodyMedium,
+          style: theme.textTheme.bodyMedium?.copyWith(
+            fontSize: performanceService.getOptimizedTextSize(
+              cacheKey: 'community_stats_label',
+              mobileSize: 14.sp,
+              tabletSize: 16.sp,
+            ),
+          ),
         ),
-        const SizedBox(height: 4),
+        SizedBox(
+            height: responsive.responsiveValue(
+          mobile: 4.h,
+          tablet: 6.h,
+        )),
         Text(
           value,
           style: theme.textTheme.titleMedium?.copyWith(
             fontWeight: FontWeight.bold,
+            fontSize: performanceService.getOptimizedTextSize(
+              cacheKey: 'community_stats_value',
+              mobileSize: 16.sp,
+              tabletSize: 18.sp,
+            ),
           ),
         ),
       ],

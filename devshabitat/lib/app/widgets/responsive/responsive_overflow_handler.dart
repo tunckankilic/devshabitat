@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:flutter_screenutil/flutter_screenutil.dart';
 import '../../controllers/responsive_controller.dart';
 
 class ResponsiveOverflowHandler extends StatelessWidget {
@@ -198,58 +197,75 @@ class ResponsiveText extends StatelessWidget {
     // Calculate responsive font size
     double baseFontSize = style?.fontSize ?? 16.0;
     double responsiveFontSize = responsive.responsiveValue(
-      mobile: baseFontSize * 0.9,
-      tablet: baseFontSize,
+      mobile: baseFontSize,
+      tablet: baseFontSize * 1.2,
     );
 
     // Apply min/max constraints
-    if (minFontSize != null) {
-      responsiveFontSize =
-          responsiveFontSize.clamp(minFontSize!, double.infinity);
+    if (minFontSize != null && responsiveFontSize < minFontSize!) {
+      responsiveFontSize = minFontSize!;
     }
-    if (maxFontSize != null) {
-      responsiveFontSize = responsiveFontSize.clamp(0.0, maxFontSize!);
+    if (maxFontSize != null && responsiveFontSize > maxFontSize!) {
+      responsiveFontSize = maxFontSize!;
     }
 
-    final adaptedStyle = (style ?? const TextStyle()).copyWith(
-      fontSize: responsiveFontSize.sp,
+    return Text(
+      text,
+      style: style?.copyWith(fontSize: responsiveFontSize) ??
+          TextStyle(fontSize: responsiveFontSize),
+      maxLines: maxLines,
+      overflow: overflow,
+      textAlign: textAlign,
     );
+  }
+}
 
-    return LayoutBuilder(
-      builder: (context, constraints) {
-        // Check if text might overflow
-        final textPainter = TextPainter(
-          text: TextSpan(text: text, style: adaptedStyle),
-          textDirection: TextDirection.ltr,
-          maxLines: maxLines,
-        );
+// Responsive image that maintains aspect ratio
+class ResponsiveImage extends StatelessWidget {
+  final String imageUrl;
+  final double? width;
+  final double? height;
+  final BoxFit fit;
+  final BorderRadius? borderRadius;
+  final Widget? placeholder;
+  final Widget? errorWidget;
 
-        textPainter.layout(maxWidth: constraints.maxWidth);
+  const ResponsiveImage({
+    super.key,
+    required this.imageUrl,
+    this.width,
+    this.height,
+    this.fit = BoxFit.cover,
+    this.borderRadius,
+    this.placeholder,
+    this.errorWidget,
+  });
 
-        if (textPainter.didExceedMaxLines ||
-            textPainter.width > constraints.maxWidth) {
-          // Reduce font size for better fit
-          final smallerStyle = adaptedStyle.copyWith(
-            fontSize: (responsiveFontSize * 0.9).sp,
-          );
+  @override
+  Widget build(BuildContext context) {
+    final responsive = Get.find<ResponsiveController>();
 
-          return Text(
-            text,
-            style: smallerStyle,
-            maxLines: maxLines,
-            overflow: overflow,
-            textAlign: textAlign,
-          );
-        }
-
-        return Text(
-          text,
-          style: adaptedStyle,
-          maxLines: maxLines,
-          overflow: overflow,
-          textAlign: textAlign,
-        );
+    Widget image = Image.network(
+      imageUrl,
+      width: width,
+      height: height,
+      fit: fit,
+      loadingBuilder: (context, child, loadingProgress) {
+        if (loadingProgress == null) return child;
+        return placeholder ?? const CircularProgressIndicator();
+      },
+      errorBuilder: (context, error, stackTrace) {
+        return errorWidget ?? const Icon(Icons.error);
       },
     );
+
+    if (borderRadius != null) {
+      image = ClipRRect(
+        borderRadius: borderRadius!,
+        child: image,
+      );
+    }
+
+    return image;
   }
 }

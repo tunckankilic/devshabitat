@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import '../controllers/responsive_controller.dart';
 
@@ -130,9 +129,8 @@ class AccessibleButton extends StatelessWidget {
         onTap: enabled ? onPressed : null,
         padding: padding ??
             EdgeInsets.symmetric(
-              horizontal:
-                  responsive.responsiveValue(mobile: 16.w, tablet: 20.w),
-              vertical: responsive.responsiveValue(mobile: 12.h, tablet: 16.h),
+              horizontal: responsive.responsiveValue(mobile: 16, tablet: 20),
+              vertical: responsive.responsiveValue(mobile: 12, tablet: 16),
             ),
         child: child,
       ),

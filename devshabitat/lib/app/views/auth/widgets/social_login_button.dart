@@ -3,6 +3,8 @@ import 'package:get/get.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'dart:io' show Platform;
 import '../../../controllers/auth_controller.dart';
+import '../../../controllers/responsive_controller.dart';
+import '../../../services/responsive_performance_service.dart';
 
 class SocialLoginButton extends StatelessWidget {
   final String text;
@@ -37,6 +39,9 @@ class SocialLoginButton extends StatelessWidget {
   }
 
   Widget _buildPrimaryButton() {
+    final responsive = Get.find<ResponsiveController>();
+    final performanceService = Get.find<ResponsivePerformanceService>();
+
     return Obx(() {
       final isLoading = Get.find<AuthController>().isLoading;
 
@@ -45,35 +50,77 @@ class SocialLoginButton extends StatelessWidget {
         style: ElevatedButton.styleFrom(
           backgroundColor: backgroundColor,
           foregroundColor: textColor,
-          padding: EdgeInsets.symmetric(vertical: 16.h),
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(12.r),
+          padding: EdgeInsets.symmetric(
+            vertical: responsive.responsiveValue(
+              mobile: 16.h,
+              tablet: 20.h,
+            ),
           ),
-          elevation: 2,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(
+              responsive.responsiveValue(
+                mobile: 12.r,
+                tablet: 16.r,
+              ),
+            ),
+          ),
+          elevation: responsive.responsiveValue(
+            mobile: 2,
+            tablet: 3,
+          ),
         ),
         child: Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Image.asset(
               iconPath,
-              width: 24.w,
-              height: 24.w,
+              width: responsive.responsiveValue(
+                mobile: 24.w,
+                tablet: 28.w,
+              ),
+              height: responsive.responsiveValue(
+                mobile: 24.w,
+                tablet: 28.w,
+              ),
             ),
-            SizedBox(width: 12.w),
+            SizedBox(
+              width: responsive.responsiveValue(
+                mobile: 12.w,
+                tablet: 16.w,
+              ),
+            ),
             Text(
               text,
               style: TextStyle(
-                fontSize: 16.sp,
+                fontSize: performanceService.getOptimizedTextSize(
+                  cacheKey: 'social_button_text_$text',
+                  mobileSize: 16.sp,
+                  tabletSize: 18.sp,
+                ),
                 fontWeight: FontWeight.w600,
               ),
             ),
             if (isLoading) ...[
-              const SizedBox(width: 12),
               SizedBox(
-                height: 20,
-                width: 20,
+                width: responsive.responsiveValue(
+                  mobile: 12.w,
+                  tablet: 16.w,
+                ),
+              ),
+              SizedBox(
+                height: responsive.responsiveValue(
+                  mobile: 20.h,
+                  tablet: 24.h,
+                ),
+                width: responsive.responsiveValue(
+                  mobile: 20.w,
+                  tablet: 24.w,
+                ),
                 child: CircularProgressIndicator(
-                  strokeWidth: 2,
+                  strokeWidth: responsive.responsiveValue(
+                    mobile: 2,
+                    tablet: 3,
+                  ),
                   valueColor: AlwaysStoppedAnimation<Color>(textColor),
                 ),
               ),
@@ -85,6 +132,9 @@ class SocialLoginButton extends StatelessWidget {
   }
 
   Widget _buildSecondaryButton() {
+    final responsive = Get.find<ResponsiveController>();
+    final performanceService = Get.find<ResponsivePerformanceService>();
+
     return Obx(() {
       final isLoading = Get.find<AuthController>().isLoading;
 
@@ -93,14 +143,28 @@ class SocialLoginButton extends StatelessWidget {
         style: OutlinedButton.styleFrom(
           backgroundColor: backgroundColor,
           foregroundColor: textColor,
-          padding: EdgeInsets.symmetric(vertical: 12.h),
+          padding: EdgeInsets.symmetric(
+            vertical: responsive.responsiveValue(
+              mobile: 12.h,
+              tablet: 16.h,
+            ),
+          ),
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(8.r),
+            borderRadius: BorderRadius.circular(
+              responsive.responsiveValue(
+                mobile: 8.r,
+                tablet: 12.r,
+              ),
+            ),
           ),
           side: BorderSide(
             color: backgroundColor == Colors.white
                 ? Colors.grey[300]!
                 : backgroundColor,
+            width: responsive.responsiveValue(
+              mobile: 1,
+              tablet: 1.5,
+            ),
           ),
         ),
         child: Row(
@@ -108,24 +172,53 @@ class SocialLoginButton extends StatelessWidget {
           children: [
             Image.asset(
               iconPath,
-              width: 24.w,
-              height: 24.w,
+              width: responsive.responsiveValue(
+                mobile: 24.w,
+                tablet: 28.w,
+              ),
+              height: responsive.responsiveValue(
+                mobile: 24.w,
+                tablet: 28.w,
+              ),
             ),
-            SizedBox(width: 12.w),
+            SizedBox(
+              width: responsive.responsiveValue(
+                mobile: 12.w,
+                tablet: 16.w,
+              ),
+            ),
             Text(
               text,
               style: TextStyle(
-                fontSize: 16.sp,
+                fontSize: performanceService.getOptimizedTextSize(
+                  cacheKey: 'social_button_text_$text',
+                  mobileSize: 16.sp,
+                  tabletSize: 18.sp,
+                ),
                 fontWeight: FontWeight.w500,
               ),
             ),
             if (isLoading) ...[
-              const SizedBox(width: 12),
               SizedBox(
-                height: 20,
-                width: 20,
+                width: responsive.responsiveValue(
+                  mobile: 12.w,
+                  tablet: 16.w,
+                ),
+              ),
+              SizedBox(
+                height: responsive.responsiveValue(
+                  mobile: 20.h,
+                  tablet: 24.h,
+                ),
+                width: responsive.responsiveValue(
+                  mobile: 20.w,
+                  tablet: 24.w,
+                ),
                 child: CircularProgressIndicator(
-                  strokeWidth: 2,
+                  strokeWidth: responsive.responsiveValue(
+                    mobile: 2,
+                    tablet: 3,
+                  ),
                   valueColor: AlwaysStoppedAnimation<Color>(textColor),
                 ),
               ),

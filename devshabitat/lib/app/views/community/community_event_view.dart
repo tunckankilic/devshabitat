@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
+import '../../controllers/responsive_controller.dart';
+import '../../services/responsive_performance_service.dart';
 import '../../models/community/community_model.dart';
 import '../../models/event/event_model.dart';
 import '../../models/event/event_category_model.dart';
@@ -87,40 +90,40 @@ class _CommunityEventViewState extends State<CommunityEventView>
 
   Future<void> _loadCategories() async {
     try {
-      // Mock categories - gerçek uygulamada Firebase'den yüklenir
+      // Mock categories - will be loaded from Firebase in real app
       _categories = [
         EventCategoryModel(
           id: '1',
           name: 'Workshop',
-          description: 'Pratik öğrenme oturumları',
+          description: 'Hands-on learning sessions',
           createdAt: DateTime.now(),
           updatedAt: DateTime.now(),
         ),
         EventCategoryModel(
           id: '2',
           name: 'Meetup',
-          description: 'Topluluk buluşmaları',
+          description: 'Community gatherings',
           createdAt: DateTime.now(),
           updatedAt: DateTime.now(),
         ),
         EventCategoryModel(
           id: '3',
-          name: 'Konferans',
-          description: 'Büyük ölçekli etkinlikler',
+          name: 'Conference',
+          description: 'Large-scale events',
           createdAt: DateTime.now(),
           updatedAt: DateTime.now(),
         ),
         EventCategoryModel(
           id: '4',
           name: 'Hackathon',
-          description: 'Kodlama yarışmaları',
+          description: 'Coding competitions',
           createdAt: DateTime.now(),
           updatedAt: DateTime.now(),
         ),
       ];
       setState(() {});
     } catch (e) {
-      print('Kategoriler yüklenirken hata: $e');
+      print('Error loading categories: $e');
     }
   }
 
@@ -172,31 +175,80 @@ class _CommunityEventViewState extends State<CommunityEventView>
 
   @override
   Widget build(BuildContext context) {
+    final responsive = Get.find<ResponsiveController>();
+    final performanceService = Get.find<ResponsivePerformanceService>();
+
     return Scaffold(
       appBar: AppBar(
         title: Text(
           widget.community != null
               ? '${widget.community!.name} Etkinlikleri'
               : 'Topluluk Etkinlikleri',
+          style: TextStyle(
+            fontSize: performanceService.getOptimizedTextSize(
+              cacheKey: 'community_event_appbar_title',
+              mobileSize: 18.sp,
+              tabletSize: 20.sp,
+            ),
+          ),
         ),
         actions: [
           IconButton(
-            icon: const Icon(Icons.filter_list),
+            icon: Icon(
+              Icons.filter_list,
+              size: responsive.minTouchTarget.sp,
+            ),
             onPressed: _showFilterDialog,
             tooltip: 'Filtrele',
           ),
           IconButton(
-            icon: const Icon(Icons.add),
+            icon: Icon(
+              Icons.add,
+              size: responsive.minTouchTarget.sp,
+            ),
             onPressed: _createNewEvent,
             tooltip: 'Yeni Etkinlik',
           ),
         ],
         bottom: TabBar(
           controller: _tabController,
-          tabs: const [
-            Tab(text: 'Tüm Etkinlikler'),
-            Tab(text: 'Yaklaşan'),
-            Tab(text: 'Geçmiş'),
+          tabs: [
+            Tab(
+              child: Text(
+                'Tüm Etkinlikler',
+                style: TextStyle(
+                  fontSize: performanceService.getOptimizedTextSize(
+                    cacheKey: 'community_event_tab_all',
+                    mobileSize: 14.sp,
+                    tabletSize: 16.sp,
+                  ),
+                ),
+              ),
+            ),
+            Tab(
+              child: Text(
+                'Yaklaşan',
+                style: TextStyle(
+                  fontSize: performanceService.getOptimizedTextSize(
+                    cacheKey: 'community_event_tab_upcoming',
+                    mobileSize: 14.sp,
+                    tabletSize: 16.sp,
+                  ),
+                ),
+              ),
+            ),
+            Tab(
+              child: Text(
+                'Geçmiş',
+                style: TextStyle(
+                  fontSize: performanceService.getOptimizedTextSize(
+                    cacheKey: 'community_event_tab_past',
+                    mobileSize: 14.sp,
+                    tabletSize: 16.sp,
+                  ),
+                ),
+              ),
+            ),
           ],
         ),
       ),
@@ -225,28 +277,68 @@ class _CommunityEventViewState extends State<CommunityEventView>
       ),
       floatingActionButton: FloatingActionButton.extended(
         onPressed: _createNewEvent,
-        icon: const Icon(Icons.add),
-        label: const Text('Yeni Etkinlik'),
+        icon: Icon(
+          Icons.add,
+          size: responsive.minTouchTarget.sp,
+        ),
+        label: Text(
+          'Yeni Etkinlik',
+          style: TextStyle(
+            fontSize: performanceService.getOptimizedTextSize(
+              cacheKey: 'community_event_fab_text',
+              mobileSize: 14.sp,
+              tabletSize: 16.sp,
+            ),
+          ),
+        ),
       ),
     );
   }
 
   Widget _buildSearchBar() {
+    final responsive = Get.find<ResponsiveController>();
+    final performanceService = Get.find<ResponsivePerformanceService>();
+
     return Padding(
-      padding: const EdgeInsets.all(16.0),
+      padding: responsive.responsivePadding(all: 16),
       child: TextField(
         onChanged: (value) => setState(() => _searchQuery = value),
+        style: TextStyle(
+          fontSize: performanceService.getOptimizedTextSize(
+            cacheKey: 'community_event_search_text',
+            mobileSize: 16.sp,
+            tabletSize: 18.sp,
+          ),
+        ),
         decoration: InputDecoration(
           hintText: 'Etkinlik ara...',
-          prefixIcon: const Icon(Icons.search),
+          hintStyle: TextStyle(
+            fontSize: performanceService.getOptimizedTextSize(
+              cacheKey: 'community_event_search_hint',
+              mobileSize: 16.sp,
+              tabletSize: 18.sp,
+            ),
+          ),
+          prefixIcon: Icon(
+            Icons.search,
+            size: responsive.minTouchTarget.sp,
+          ),
           suffixIcon: _searchQuery.isNotEmpty
               ? IconButton(
-                  icon: const Icon(Icons.clear),
+                  icon: Icon(
+                    Icons.clear,
+                    size: responsive.minTouchTarget.sp,
+                  ),
                   onPressed: () => setState(() => _searchQuery = ''),
                 )
               : null,
           border: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(12),
+            borderRadius: BorderRadius.circular(
+              responsive.responsiveValue(
+                mobile: 12.r,
+                tablet: 16.r,
+              ),
+            ),
           ),
           filled: true,
         ),
@@ -255,9 +347,11 @@ class _CommunityEventViewState extends State<CommunityEventView>
   }
 
   Widget _buildFilterChips() {
+    final responsive = Get.find<ResponsiveController>();
+
     return SingleChildScrollView(
       scrollDirection: Axis.horizontal,
-      padding: const EdgeInsets.symmetric(horizontal: 16),
+      padding: responsive.responsivePadding(horizontal: 16),
       child: Row(
         children: [
           if (_selectedEventType != null)
@@ -296,11 +390,34 @@ class _CommunityEventViewState extends State<CommunityEventView>
   }
 
   Widget _buildFilterChip(String label, VoidCallback onRemove) {
+    final responsive = Get.find<ResponsiveController>();
+    final performanceService = Get.find<ResponsivePerformanceService>();
+
     return Padding(
-      padding: const EdgeInsets.only(right: 8),
+      padding: EdgeInsets.only(
+        right: responsive.responsiveValue(
+          mobile: 8.w,
+          tablet: 12.w,
+        ),
+      ),
       child: Chip(
-        label: Text(label),
-        deleteIcon: const Icon(Icons.close, size: 18),
+        label: Text(
+          label,
+          style: TextStyle(
+            fontSize: performanceService.getOptimizedTextSize(
+              cacheKey: 'community_event_filter_chip',
+              mobileSize: 12.sp,
+              tabletSize: 14.sp,
+            ),
+          ),
+        ),
+        deleteIcon: Icon(
+          Icons.close,
+          size: responsive.responsiveValue(
+            mobile: 18.sp,
+            tablet: 20.sp,
+          ),
+        ),
         onDeleted: onRemove,
         backgroundColor: Theme.of(context).colorScheme.primaryContainer,
       ),
@@ -308,8 +425,17 @@ class _CommunityEventViewState extends State<CommunityEventView>
   }
 
   Widget _buildEventsList(List<EventModel> events) {
+    final responsive = Get.find<ResponsiveController>();
+
     if (_isLoading) {
-      return const Center(child: CircularProgressIndicator());
+      return Center(
+        child: CircularProgressIndicator(
+          strokeWidth: responsive.responsiveValue(
+            mobile: 2.w,
+            tablet: 3.w,
+          ),
+        ),
+      );
     }
 
     if (events.isEmpty) {
@@ -319,18 +445,39 @@ class _CommunityEventViewState extends State<CommunityEventView>
           children: [
             Icon(
               Icons.event_busy,
-              size: 64,
+              size: responsive.responsiveValue(
+                mobile: 64.sp,
+                tablet: 80.sp,
+              ),
               color: Theme.of(context).colorScheme.secondary,
             ),
-            const SizedBox(height: 16),
+            SizedBox(
+                height: responsive.responsiveValue(
+              mobile: 16.h,
+              tablet: 20.h,
+            )),
             Text(
               'Etkinlik bulunamadı',
-              style: Theme.of(context).textTheme.titleMedium,
+              style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                    fontSize: responsive.responsiveValue(
+                      mobile: 16.sp,
+                      tablet: 18.sp,
+                    ),
+                  ),
             ),
-            const SizedBox(height: 8),
+            SizedBox(
+                height: responsive.responsiveValue(
+              mobile: 8.h,
+              tablet: 12.h,
+            )),
             Text(
               'Filtreleri değiştirmeyi deneyin',
-              style: Theme.of(context).textTheme.bodyMedium,
+              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                    fontSize: responsive.responsiveValue(
+                      mobile: 14.sp,
+                      tablet: 16.sp,
+                    ),
+                  ),
             ),
           ],
         ),
@@ -338,7 +485,7 @@ class _CommunityEventViewState extends State<CommunityEventView>
     }
 
     return ListView.builder(
-      padding: const EdgeInsets.all(16),
+      padding: responsive.responsivePadding(all: 16),
       itemCount: events.length,
       itemBuilder: (context, index) {
         final event = events[index];
@@ -349,33 +496,53 @@ class _CommunityEventViewState extends State<CommunityEventView>
 
   Widget _buildEventCard(EventModel event) {
     final theme = Theme.of(context);
+    final responsive = Get.find<ResponsiveController>();
+    final performanceService = Get.find<ResponsivePerformanceService>();
 
     return Card(
-      margin: const EdgeInsets.only(bottom: 16),
+      margin: EdgeInsets.only(
+        bottom: responsive.responsiveValue(
+          mobile: 16.h,
+          tablet: 20.h,
+        ),
+      ),
       child: InkWell(
         onTap: () => _openEventDetails(event),
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: BorderRadius.circular(
+          responsive.responsiveValue(
+            mobile: 12.r,
+            tablet: 16.r,
+          ),
+        ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             // Etkinlik kapak fotoğrafı
             if (event.coverImageUrl != null)
               Container(
-                height: 160,
+                height: responsive.responsiveValue(
+                  mobile: 160.h,
+                  tablet: 200.h,
+                ),
                 width: double.infinity,
                 decoration: BoxDecoration(
                   image: DecorationImage(
                     image: NetworkImage(event.coverImageUrl!),
                     fit: BoxFit.cover,
                   ),
-                  borderRadius: const BorderRadius.vertical(
-                    top: Radius.circular(12),
+                  borderRadius: BorderRadius.vertical(
+                    top: Radius.circular(
+                      responsive.responsiveValue(
+                        mobile: 12.r,
+                        tablet: 16.r,
+                      ),
+                    ),
                   ),
                 ),
               ),
 
             Padding(
-              padding: const EdgeInsets.all(16),
+              padding: responsive.responsivePadding(all: 16),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -387,6 +554,11 @@ class _CommunityEventViewState extends State<CommunityEventView>
                           event.title,
                           style: theme.textTheme.titleLarge?.copyWith(
                             fontWeight: FontWeight.bold,
+                            fontSize: performanceService.getOptimizedTextSize(
+                              cacheKey: 'community_event_card_title',
+                              mobileSize: 18.sp,
+                              tabletSize: 20.sp,
+                            ),
                           ),
                           maxLines: 2,
                           overflow: TextOverflow.ellipsis,
@@ -396,70 +568,131 @@ class _CommunityEventViewState extends State<CommunityEventView>
                     ],
                   ),
 
-                  const SizedBox(height: 8),
+                  SizedBox(
+                      height: responsive.responsiveValue(
+                    mobile: 8.h,
+                    tablet: 12.h,
+                  )),
 
                   // Etkinlik açıklaması
                   Text(
                     event.description,
-                    style: theme.textTheme.bodyMedium,
+                    style: theme.textTheme.bodyMedium?.copyWith(
+                      fontSize: performanceService.getOptimizedTextSize(
+                        cacheKey: 'community_event_card_description',
+                        mobileSize: 14.sp,
+                        tabletSize: 16.sp,
+                      ),
+                    ),
                     maxLines: 3,
                     overflow: TextOverflow.ellipsis,
                   ),
 
-                  const SizedBox(height: 16),
+                  SizedBox(
+                      height: responsive.responsiveValue(
+                    mobile: 16.h,
+                    tablet: 20.h,
+                  )),
 
                   // Etkinlik bilgileri
                   Row(
                     children: [
                       Icon(
                         Icons.calendar_today,
-                        size: 16,
+                        size: responsive.responsiveValue(
+                          mobile: 16.sp,
+                          tablet: 18.sp,
+                        ),
                         color: theme.colorScheme.secondary,
                       ),
-                      const SizedBox(width: 4),
+                      SizedBox(
+                          width: responsive.responsiveValue(
+                        mobile: 4.w,
+                        tablet: 8.w,
+                      )),
                       Text(
                         _formatEventDate(event.startDate, event.endDate),
-                        style: theme.textTheme.bodySmall,
+                        style: theme.textTheme.bodySmall?.copyWith(
+                          fontSize: performanceService.getOptimizedTextSize(
+                            cacheKey: 'community_event_card_date',
+                            mobileSize: 12.sp,
+                            tabletSize: 14.sp,
+                          ),
+                        ),
                       ),
                       const Spacer(),
                       Icon(
                         event.location == EventLocation.online
                             ? Icons.video_call
                             : Icons.location_on,
-                        size: 16,
+                        size: responsive.responsiveValue(
+                          mobile: 16.sp,
+                          tablet: 18.sp,
+                        ),
                         color: theme.colorScheme.secondary,
                       ),
-                      const SizedBox(width: 4),
+                      SizedBox(
+                          width: responsive.responsiveValue(
+                        mobile: 4.w,
+                        tablet: 8.w,
+                      )),
                       Text(
                         event.location == EventLocation.online
                             ? 'Online'
                             : event.venueAddress ?? 'Konum belirtilmemiş',
-                        style: theme.textTheme.bodySmall,
+                        style: theme.textTheme.bodySmall?.copyWith(
+                          fontSize: performanceService.getOptimizedTextSize(
+                            cacheKey: 'community_event_card_location',
+                            mobileSize: 12.sp,
+                            tabletSize: 14.sp,
+                          ),
+                        ),
                       ),
                     ],
                   ),
 
-                  const SizedBox(height: 12),
+                  SizedBox(
+                      height: responsive.responsiveValue(
+                    mobile: 12.h,
+                    tablet: 16.h,
+                  )),
 
                   // Katılımcı bilgisi
                   Row(
                     children: [
                       Icon(
                         Icons.people,
-                        size: 16,
+                        size: responsive.responsiveValue(
+                          mobile: 16.sp,
+                          tablet: 18.sp,
+                        ),
                         color: theme.colorScheme.secondary,
                       ),
-                      const SizedBox(width: 4),
+                      SizedBox(
+                          width: responsive.responsiveValue(
+                        mobile: 4.w,
+                        tablet: 8.w,
+                      )),
                       Text(
                         '${event.currentParticipants}/${event.participantLimit} katılımcı',
-                        style: theme.textTheme.bodySmall,
+                        style: theme.textTheme.bodySmall?.copyWith(
+                          fontSize: performanceService.getOptimizedTextSize(
+                            cacheKey: 'community_event_card_participants',
+                            mobileSize: 12.sp,
+                            tabletSize: 14.sp,
+                          ),
+                        ),
                       ),
                       const Spacer(),
                       _buildEventTypeChip(event.type),
                     ],
                   ),
 
-                  const SizedBox(height: 16),
+                  SizedBox(
+                      height: responsive.responsiveValue(
+                    mobile: 16.h,
+                    tablet: 20.h,
+                  )),
 
                   // Aksiyon butonları
                   Row(
@@ -467,19 +700,41 @@ class _CommunityEventViewState extends State<CommunityEventView>
                       Expanded(
                         child: OutlinedButton.icon(
                           onPressed: () => _joinEvent(event),
-                          icon: const Icon(Icons.person_add),
-                          label: const Text('Katıl'),
+                          icon: Icon(
+                            Icons.person_add,
+                            size: responsive.minTouchTarget.sp,
+                          ),
+                          label: Text(
+                            'Katıl',
+                            style: TextStyle(
+                              fontSize: performanceService.getOptimizedTextSize(
+                                cacheKey: 'community_event_card_join_button',
+                                mobileSize: 14.sp,
+                                tabletSize: 16.sp,
+                              ),
+                            ),
+                          ),
                         ),
                       ),
-                      const SizedBox(width: 8),
+                      SizedBox(
+                          width: responsive.responsiveValue(
+                        mobile: 8.w,
+                        tablet: 12.w,
+                      )),
                       IconButton(
                         onPressed: () => _shareEvent(event),
-                        icon: const Icon(Icons.share),
+                        icon: Icon(
+                          Icons.share,
+                          size: responsive.minTouchTarget.sp,
+                        ),
                         tooltip: 'Paylaş',
                       ),
                       IconButton(
                         onPressed: () => _showEventOptions(event),
-                        icon: const Icon(Icons.more_vert),
+                        icon: Icon(
+                          Icons.more_vert,
+                          size: responsive.minTouchTarget.sp,
+                        ),
                         tooltip: 'Daha fazla',
                       ),
                     ],
@@ -494,6 +749,9 @@ class _CommunityEventViewState extends State<CommunityEventView>
   }
 
   Widget _buildEventStatusChip(EventModel event) {
+    final responsive = Get.find<ResponsiveController>();
+    final performanceService = Get.find<ResponsivePerformanceService>();
+
     Color color;
     String text;
     IconData icon;
@@ -513,22 +771,45 @@ class _CommunityEventViewState extends State<CommunityEventView>
     }
 
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+      padding: responsive.responsivePadding(
+        horizontal: 8,
+        vertical: 4,
+      ),
       decoration: BoxDecoration(
         color: color.withOpacity(0.1),
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: BorderRadius.circular(
+          responsive.responsiveValue(
+            mobile: 12.r,
+            tablet: 16.r,
+          ),
+        ),
         border: Border.all(color: color.withOpacity(0.3)),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(icon, size: 12, color: color),
-          const SizedBox(width: 4),
+          Icon(
+            icon,
+            size: responsive.responsiveValue(
+              mobile: 12.sp,
+              tablet: 14.sp,
+            ),
+            color: color,
+          ),
+          SizedBox(
+              width: responsive.responsiveValue(
+            mobile: 4.w,
+            tablet: 6.w,
+          )),
           Text(
             text,
             style: TextStyle(
               color: color,
-              fontSize: 10,
+              fontSize: performanceService.getOptimizedTextSize(
+                cacheKey: 'community_event_status_chip',
+                mobileSize: 10.sp,
+                tabletSize: 12.sp,
+              ),
               fontWeight: FontWeight.w500,
             ),
           ),
@@ -538,6 +819,9 @@ class _CommunityEventViewState extends State<CommunityEventView>
   }
 
   Widget _buildEventTypeChip(EventType type) {
+    final responsive = Get.find<ResponsiveController>();
+    final performanceService = Get.find<ResponsivePerformanceService>();
+
     final typeNames = {
       EventType.workshop: 'Workshop',
       EventType.meetup: 'Meetup',
@@ -547,16 +831,28 @@ class _CommunityEventViewState extends State<CommunityEventView>
     };
 
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+      padding: responsive.responsivePadding(
+        horizontal: 8,
+        vertical: 4,
+      ),
       decoration: BoxDecoration(
         color: Theme.of(context).colorScheme.primaryContainer,
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: BorderRadius.circular(
+          responsive.responsiveValue(
+            mobile: 12.r,
+            tablet: 16.r,
+          ),
+        ),
       ),
       child: Text(
         typeNames[type] ?? 'Diğer',
         style: TextStyle(
           color: Theme.of(context).colorScheme.onPrimaryContainer,
-          fontSize: 10,
+          fontSize: performanceService.getOptimizedTextSize(
+            cacheKey: 'community_event_type_chip',
+            mobileSize: 10.sp,
+            tabletSize: 12.sp,
+          ),
           fontWeight: FontWeight.w500,
         ),
       ),
@@ -601,7 +897,17 @@ class _CommunityEventViewState extends State<CommunityEventView>
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Filtreler'),
+        title: Text(
+          'Filtreler',
+          style: TextStyle(
+            fontSize:
+                Get.find<ResponsivePerformanceService>().getOptimizedTextSize(
+              cacheKey: 'community_event_filter_dialog_title',
+              mobileSize: 18.sp,
+              tabletSize: 20.sp,
+            ),
+          ),
+        ),
         content: StatefulBuilder(
           builder: (context, setState) => Column(
             mainAxisSize: MainAxisSize.min,
@@ -609,9 +915,16 @@ class _CommunityEventViewState extends State<CommunityEventView>
               // Etkinlik türü filtresi
               DropdownButtonFormField<EventType>(
                 value: _selectedEventType,
-                decoration: const InputDecoration(
+                decoration: InputDecoration(
                   labelText: 'Etkinlik Türü',
-                  border: OutlineInputBorder(),
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(
+                      Get.find<ResponsiveController>().responsiveValue(
+                        mobile: 12.r,
+                        tablet: 16.r,
+                      ),
+                    ),
+                  ),
                 ),
                 items: [
                   const DropdownMenuItem(
@@ -627,14 +940,25 @@ class _CommunityEventViewState extends State<CommunityEventView>
                     setState(() => _selectedEventType = value),
               ),
 
-              const SizedBox(height: 16),
+              SizedBox(
+                  height: Get.find<ResponsiveController>().responsiveValue(
+                mobile: 16.h,
+                tablet: 20.h,
+              )),
 
               // Lokasyon filtresi
               DropdownButtonFormField<EventLocation>(
                 value: _selectedLocation,
-                decoration: const InputDecoration(
+                decoration: InputDecoration(
                   labelText: 'Lokasyon',
-                  border: OutlineInputBorder(),
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(
+                      Get.find<ResponsiveController>().responsiveValue(
+                        mobile: 12.r,
+                        tablet: 16.r,
+                      ),
+                    ),
+                  ),
                 ),
                 items: [
                   const DropdownMenuItem(
@@ -649,14 +973,25 @@ class _CommunityEventViewState extends State<CommunityEventView>
                 onChanged: (value) => setState(() => _selectedLocation = value),
               ),
 
-              const SizedBox(height: 16),
+              SizedBox(
+                  height: Get.find<ResponsiveController>().responsiveValue(
+                mobile: 16.h,
+                tablet: 20.h,
+              )),
 
               // Kategori filtresi
               DropdownButtonFormField<String>(
                 value: _selectedCategoryId,
-                decoration: const InputDecoration(
+                decoration: InputDecoration(
                   labelText: 'Kategori',
-                  border: OutlineInputBorder(),
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(
+                      Get.find<ResponsiveController>().responsiveValue(
+                        mobile: 12.r,
+                        tablet: 16.r,
+                      ),
+                    ),
+                  ),
                 ),
                 items: [
                   const DropdownMenuItem(
@@ -672,22 +1007,56 @@ class _CommunityEventViewState extends State<CommunityEventView>
                     setState(() => _selectedCategoryId = value),
               ),
 
-              const SizedBox(height: 16),
+              SizedBox(
+                  height: Get.find<ResponsiveController>().responsiveValue(
+                mobile: 16.h,
+                tablet: 20.h,
+              )),
 
               // Checkbox filtreleri
               CheckboxListTile(
-                title: const Text('Sadece yaklaşan etkinlikler'),
+                title: Text(
+                  'Sadece yaklaşan etkinlikler',
+                  style: TextStyle(
+                    fontSize: Get.find<ResponsivePerformanceService>()
+                        .getOptimizedTextSize(
+                      cacheKey: 'community_event_filter_checkbox_title',
+                      mobileSize: 14.sp,
+                      tabletSize: 16.sp,
+                    ),
+                  ),
+                ),
                 value: _showOnlyUpcoming,
                 onChanged: (value) =>
                     setState(() => _showOnlyUpcoming = value!),
               ),
               CheckboxListTile(
-                title: const Text('Sadece online etkinlikler'),
+                title: Text(
+                  'Sadece online etkinlikler',
+                  style: TextStyle(
+                    fontSize: Get.find<ResponsivePerformanceService>()
+                        .getOptimizedTextSize(
+                      cacheKey: 'community_event_filter_checkbox_online',
+                      mobileSize: 14.sp,
+                      tabletSize: 16.sp,
+                    ),
+                  ),
+                ),
                 value: _showOnlyOnline,
                 onChanged: (value) => setState(() => _showOnlyOnline = value!),
               ),
               CheckboxListTile(
-                title: const Text('Sadece offline etkinlikler'),
+                title: Text(
+                  'Sadece offline etkinlikler',
+                  style: TextStyle(
+                    fontSize: Get.find<ResponsivePerformanceService>()
+                        .getOptimizedTextSize(
+                      cacheKey: 'community_event_filter_checkbox_offline',
+                      mobileSize: 14.sp,
+                      tabletSize: 16.sp,
+                    ),
+                  ),
+                ),
                 value: _showOnlyOffline,
                 onChanged: (value) => setState(() => _showOnlyOffline = value!),
               ),
@@ -707,11 +1076,31 @@ class _CommunityEventViewState extends State<CommunityEventView>
               });
               Navigator.pop(context);
             },
-            child: const Text('Sıfırla'),
+            child: Text(
+              'Sıfırla',
+              style: TextStyle(
+                fontSize: Get.find<ResponsivePerformanceService>()
+                    .getOptimizedTextSize(
+                  cacheKey: 'community_event_filter_dialog_reset_button',
+                  mobileSize: 14.sp,
+                  tabletSize: 16.sp,
+                ),
+              ),
+            ),
           ),
           ElevatedButton(
             onPressed: () => Navigator.pop(context),
-            child: const Text('Uygula'),
+            child: Text(
+              'Uygula',
+              style: TextStyle(
+                fontSize: Get.find<ResponsivePerformanceService>()
+                    .getOptimizedTextSize(
+                  cacheKey: 'community_event_filter_dialog_apply_button',
+                  mobileSize: 14.sp,
+                  tabletSize: 16.sp,
+                ),
+              ),
+            ),
           ),
         ],
       ),
@@ -753,24 +1142,63 @@ class _CommunityEventViewState extends State<CommunityEventView>
         mainAxisSize: MainAxisSize.min,
         children: [
           ListTile(
-            leading: const Icon(Icons.edit),
-            title: const Text('Düzenle'),
+            leading: Icon(
+              Icons.edit,
+              size: Get.find<ResponsiveController>().minTouchTarget.sp,
+            ),
+            title: Text(
+              'Düzenle',
+              style: TextStyle(
+                fontSize: Get.find<ResponsivePerformanceService>()
+                    .getOptimizedTextSize(
+                  cacheKey: 'community_event_options_edit_title',
+                  mobileSize: 16.sp,
+                  tabletSize: 18.sp,
+                ),
+              ),
+            ),
             onTap: () {
               Navigator.pop(context);
               // Etkinlik düzenleme sayfasına yönlendir
             },
           ),
           ListTile(
-            leading: const Icon(Icons.delete),
-            title: const Text('Sil'),
+            leading: Icon(
+              Icons.delete,
+              size: Get.find<ResponsiveController>().minTouchTarget.sp,
+            ),
+            title: Text(
+              'Sil',
+              style: TextStyle(
+                fontSize: Get.find<ResponsivePerformanceService>()
+                    .getOptimizedTextSize(
+                  cacheKey: 'community_event_options_delete_title',
+                  mobileSize: 16.sp,
+                  tabletSize: 18.sp,
+                ),
+              ),
+            ),
             onTap: () {
               Navigator.pop(context);
               _deleteEvent(event);
             },
           ),
           ListTile(
-            leading: const Icon(Icons.copy),
-            title: const Text('Linki Kopyala'),
+            leading: Icon(
+              Icons.copy,
+              size: Get.find<ResponsiveController>().minTouchTarget.sp,
+            ),
+            title: Text(
+              'Linki Kopyala',
+              style: TextStyle(
+                fontSize: Get.find<ResponsivePerformanceService>()
+                    .getOptimizedTextSize(
+                  cacheKey: 'community_event_options_copy_title',
+                  mobileSize: 16.sp,
+                  tabletSize: 18.sp,
+                ),
+              ),
+            ),
             onTap: () {
               Navigator.pop(context);
               _shareEvent(event);
@@ -785,12 +1213,42 @@ class _CommunityEventViewState extends State<CommunityEventView>
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Etkinliği Sil'),
-        content: const Text('Bu etkinliği silmek istediğinizden emin misiniz?'),
+        title: Text(
+          'Etkinliği Sil',
+          style: TextStyle(
+            fontSize:
+                Get.find<ResponsivePerformanceService>().getOptimizedTextSize(
+              cacheKey: 'community_event_delete_dialog_title',
+              mobileSize: 18.sp,
+              tabletSize: 20.sp,
+            ),
+          ),
+        ),
+        content: Text(
+          'Bu etkinliği silmek istediğinizden emin misiniz?',
+          style: TextStyle(
+            fontSize:
+                Get.find<ResponsivePerformanceService>().getOptimizedTextSize(
+              cacheKey: 'community_event_delete_dialog_content',
+              mobileSize: 14.sp,
+              tabletSize: 16.sp,
+            ),
+          ),
+        ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: const Text('İptal'),
+            child: Text(
+              'İptal',
+              style: TextStyle(
+                fontSize: Get.find<ResponsivePerformanceService>()
+                    .getOptimizedTextSize(
+                  cacheKey: 'community_event_delete_dialog_cancel_button',
+                  mobileSize: 14.sp,
+                  tabletSize: 16.sp,
+                ),
+              ),
+            ),
           ),
           ElevatedButton(
             onPressed: () {
@@ -805,7 +1263,17 @@ class _CommunityEventViewState extends State<CommunityEventView>
             style: ElevatedButton.styleFrom(
               backgroundColor: Colors.red,
             ),
-            child: const Text('Sil'),
+            child: Text(
+              'Sil',
+              style: TextStyle(
+                fontSize: Get.find<ResponsivePerformanceService>()
+                    .getOptimizedTextSize(
+                  cacheKey: 'community_event_delete_dialog_delete_button',
+                  mobileSize: 14.sp,
+                  tabletSize: 16.sp,
+                ),
+              ),
+            ),
           ),
         ],
       ),

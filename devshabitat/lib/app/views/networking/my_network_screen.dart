@@ -1,19 +1,25 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:flutter_screenutil/flutter_screenutil.dart';
+import '../../controllers/responsive_controller.dart';
 
 class MyNetworkScreen extends StatelessWidget {
   const MyNetworkScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
+    final responsive = Get.find<ResponsiveController>();
+
     return DefaultTabController(
       length: 3,
       child: Scaffold(
         appBar: AppBar(
-          title: Text('Ağım', style: TextStyle(fontSize: 18.sp)),
+          title: Text('Ağım',
+              style: TextStyle(
+                  fontSize:
+                      responsive.responsiveValue(mobile: 18, tablet: 20))),
           bottom: TabBar(
-            labelStyle: TextStyle(fontSize: 14.sp),
+            labelStyle: TextStyle(
+                fontSize: responsive.responsiveValue(mobile: 14, tablet: 16)),
             tabs: const [
               Tab(text: 'Genel Bakış'),
               Tab(text: 'Bağlantılar'),
@@ -36,17 +42,19 @@ class MyNetworkScreen extends StatelessWidget {
 class _OverviewTab extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
+    final responsive = Get.find<ResponsiveController>();
+
     return SingleChildScrollView(
-      padding: EdgeInsets.all(16.r),
+      padding: responsive.responsivePadding(all: 16),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           _buildStatCards(),
-          SizedBox(height: 24.h),
+          SizedBox(height: responsive.responsiveValue(mobile: 24, tablet: 32)),
           _buildWeeklyGrowthChart(),
-          SizedBox(height: 24.h),
+          SizedBox(height: responsive.responsiveValue(mobile: 24, tablet: 32)),
           _buildTopSkills(),
-          SizedBox(height: 24.h),
+          SizedBox(height: responsive.responsiveValue(mobile: 24, tablet: 32)),
           _buildRecentActivity(),
         ],
       ),
@@ -54,13 +62,16 @@ class _OverviewTab extends StatelessWidget {
   }
 
   Widget _buildStatCards() {
+    final responsive = Get.find<ResponsiveController>();
+
     return GridView.count(
       shrinkWrap: true,
       physics: const NeverScrollableScrollPhysics(),
-      crossAxisCount: MediaQuery.of(Get.context!).size.width > 600 ? 3 : 2,
-      mainAxisSpacing: 16.h,
-      crossAxisSpacing: 16.w,
-      childAspectRatio: 1.5.w,
+      crossAxisCount: responsive.gridColumns,
+      mainAxisSpacing: responsive.gridSpacing,
+      crossAxisSpacing: responsive.gridSpacing,
+      childAspectRatio:
+          responsive.responsiveValue(mobile: 1.5, tablet: 1.8, desktop: 2.0),
       children: [
         _StatCard(
           title: 'Toplam Bağlantı',
@@ -95,22 +106,25 @@ class _OverviewTab extends StatelessWidget {
   }
 
   Widget _buildWeeklyGrowthChart() {
+    final responsive = Get.find<ResponsiveController>();
+
     return Card(
       child: Padding(
-        padding: EdgeInsets.all(16.r),
+        padding: responsive.responsivePadding(all: 16),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
               'Haftalık Büyüme',
               style: TextStyle(
-                fontSize: 18.sp,
+                fontSize: responsive.responsiveValue(mobile: 18, tablet: 20),
                 fontWeight: FontWeight.bold,
               ),
             ),
-            SizedBox(height: 16.h),
             SizedBox(
-              height: 200.h,
+                height: responsive.responsiveValue(mobile: 16, tablet: 20)),
+            SizedBox(
+              height: responsive.responsiveValue(mobile: 200, tablet: 250),
               child: _SimpleBarChart(
                 data: [
                   _ChartData('Pzt', 45),
@@ -130,38 +144,41 @@ class _OverviewTab extends StatelessWidget {
   }
 
   Widget _buildTopSkills() {
+    final responsive = Get.find<ResponsiveController>();
+
     return Card(
       child: Padding(
-        padding: EdgeInsets.all(16.r),
+        padding: responsive.responsivePadding(all: 16),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
               'En İyi Yetenekler',
               style: TextStyle(
-                fontSize: 18.sp,
+                fontSize: responsive.responsiveValue(mobile: 18, tablet: 20),
                 fontWeight: FontWeight.bold,
               ),
             ),
-            SizedBox(height: 16.h),
+            SizedBox(
+                height: responsive.responsiveValue(mobile: 16, tablet: 20)),
             _SkillBar(
               skill: 'Flutter',
               percentage: 85,
               color: Colors.blue,
             ),
-            SizedBox(height: 8.h),
+            SizedBox(height: responsive.responsiveValue(mobile: 8, tablet: 12)),
             _SkillBar(
               skill: 'Dart',
               percentage: 80,
               color: Colors.green,
             ),
-            SizedBox(height: 8.h),
+            SizedBox(height: responsive.responsiveValue(mobile: 8, tablet: 12)),
             _SkillBar(
               skill: 'Firebase',
               percentage: 75,
               color: Colors.orange,
             ),
-            SizedBox(height: 8.h),
+            SizedBox(height: responsive.responsiveValue(mobile: 8, tablet: 12)),
             _SkillBar(
               skill: 'UI/UX',
               percentage: 70,
@@ -174,34 +191,37 @@ class _OverviewTab extends StatelessWidget {
   }
 
   Widget _buildRecentActivity() {
+    final responsive = Get.find<ResponsiveController>();
+
     return Card(
       child: Padding(
-        padding: EdgeInsets.all(16.r),
+        padding: responsive.responsivePadding(all: 16),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
               'Son Aktiviteler',
               style: TextStyle(
-                fontSize: 18.sp,
+                fontSize: responsive.responsiveValue(mobile: 18, tablet: 20),
                 fontWeight: FontWeight.bold,
               ),
             ),
-            SizedBox(height: 16.h),
+            SizedBox(
+                height: responsive.responsiveValue(mobile: 16, tablet: 20)),
             _ActivityItem(
               title: 'Yeni Bağlantı',
               description: 'Ahmet Y. ile bağlantı kuruldu',
               time: '2 saat önce',
               icon: Icons.person_add,
             ),
-            SizedBox(height: 8.h),
+            SizedBox(height: responsive.responsiveValue(mobile: 8, tablet: 12)),
             _ActivityItem(
               title: 'Profil Görüntüleme',
               description: 'Profiliniz 25 kez görüntülendi',
               time: '1 gün önce',
               icon: Icons.visibility,
             ),
-            SizedBox(height: 8.h),
+            SizedBox(height: responsive.responsiveValue(mobile: 8, tablet: 12)),
             _ActivityItem(
               title: 'Yetenek Onayı',
               description: 'Flutter yeteneğiniz 3 kişi tarafından onaylandı',
@@ -218,32 +238,44 @@ class _OverviewTab extends StatelessWidget {
 class _ConnectionsTab extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
+    final responsive = Get.find<ResponsiveController>();
+
     return Column(
       children: [
         Padding(
-          padding: EdgeInsets.all(16.r),
+          padding: responsive.responsivePadding(all: 16),
           child: Row(
             children: [
               Expanded(
                 child: TextField(
-                  style: TextStyle(fontSize: 16.sp),
+                  style: TextStyle(
+                      fontSize:
+                          responsive.responsiveValue(mobile: 16, tablet: 18)),
                   decoration: InputDecoration(
                     hintText: 'Bağlantılarda ara...',
-                    hintStyle: TextStyle(fontSize: 16.sp),
-                    prefixIcon: Icon(Icons.search, size: 24.sp),
+                    hintStyle: TextStyle(
+                        fontSize:
+                            responsive.responsiveValue(mobile: 16, tablet: 18)),
+                    prefixIcon: Icon(Icons.search,
+                        size:
+                            responsive.responsiveValue(mobile: 24, tablet: 28)),
                     border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(12.r),
+                      borderRadius: BorderRadius.circular(
+                          responsive.responsiveValue(mobile: 12, tablet: 16)),
                     ),
                   ),
                 ),
               ),
-              SizedBox(width: 8.w),
+              SizedBox(
+                  width: responsive.responsiveValue(mobile: 8, tablet: 12)),
               IconButton(
-                icon: Icon(Icons.filter_list, size: 24.sp),
+                icon: Icon(Icons.filter_list,
+                    size: responsive.responsiveValue(mobile: 24, tablet: 28)),
                 onPressed: () => _showFilterDialog(),
               ),
               IconButton(
-                icon: Icon(Icons.sort, size: 24.sp),
+                icon: Icon(Icons.sort,
+                    size: responsive.responsiveValue(mobile: 24, tablet: 28)),
                 onPressed: () => _showSortDialog(),
               ),
             ],
@@ -251,12 +283,13 @@ class _ConnectionsTab extends StatelessWidget {
         ),
         Expanded(
           child: GridView.builder(
-            padding: EdgeInsets.all(16.r),
+            padding: responsive.responsivePadding(all: 16),
             gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-              crossAxisCount: MediaQuery.of(context).size.width > 600 ? 3 : 2,
-              childAspectRatio: 0.8.w,
-              crossAxisSpacing: 16.w,
-              mainAxisSpacing: 16.h,
+              crossAxisCount: responsive.gridColumns,
+              childAspectRatio: responsive.responsiveValue(
+                  mobile: 0.8, tablet: 1.0, desktop: 1.2),
+              crossAxisSpacing: responsive.gridSpacing,
+              mainAxisSpacing: responsive.gridSpacing,
             ),
             itemCount: 10, // Örnek veri
             itemBuilder: (context, index) {
@@ -276,8 +309,10 @@ class _ConnectionsTab extends StatelessWidget {
 class _AnalyticsTab extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
+    final responsive = Get.find<ResponsiveController>();
+
     return SingleChildScrollView(
-      padding: EdgeInsets.all(16.r),
+      padding: responsive.responsivePadding(all: 16),
       child: Column(
         children: [
           _buildAnalyticCard(
@@ -290,12 +325,12 @@ class _AnalyticsTab extends StatelessWidget {
               ],
             ),
           ),
-          SizedBox(height: 16.h),
+          SizedBox(height: responsive.responsiveValue(mobile: 16, tablet: 24)),
           _buildAnalyticCard(
             'Etkileşim Analizi',
             _InteractionChart(),
           ),
-          SizedBox(height: 16.h),
+          SizedBox(height: responsive.responsiveValue(mobile: 16, tablet: 24)),
           _buildAnalyticCard(
             'Büyüme Trendi',
             _TrendLineChart(),
@@ -306,22 +341,25 @@ class _AnalyticsTab extends StatelessWidget {
   }
 
   Widget _buildAnalyticCard(String title, Widget chart) {
+    final responsive = Get.find<ResponsiveController>();
+
     return Card(
       child: Padding(
-        padding: EdgeInsets.all(16.r),
+        padding: responsive.responsivePadding(all: 16),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
               title,
               style: TextStyle(
-                fontSize: 18.sp,
+                fontSize: responsive.responsiveValue(mobile: 18, tablet: 20),
                 fontWeight: FontWeight.bold,
               ),
             ),
-            SizedBox(height: 16.h),
             SizedBox(
-              height: 200.h,
+                height: responsive.responsiveValue(mobile: 16, tablet: 20)),
+            SizedBox(
+              height: responsive.responsiveValue(mobile: 200, tablet: 250),
               child: chart,
             ),
           ],
@@ -348,20 +386,25 @@ class _StatCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final responsive = Get.find<ResponsiveController>();
+
     return Card(
       child: Padding(
-        padding: EdgeInsets.all(16.r),
+        padding: responsive.responsivePadding(all: 16),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Row(
               children: [
-                Icon(icon, size: 24.sp),
-                SizedBox(width: 8.w),
+                Icon(icon,
+                    size: responsive.responsiveValue(mobile: 24, tablet: 28)),
+                SizedBox(
+                    width: responsive.responsiveValue(mobile: 8, tablet: 12)),
                 Text(
                   title,
                   style: TextStyle(
-                    fontSize: 14.sp,
+                    fontSize:
+                        responsive.responsiveValue(mobile: 14, tablet: 16),
                     fontWeight: FontWeight.w500,
                   ),
                 ),
@@ -371,16 +414,16 @@ class _StatCard extends StatelessWidget {
             Text(
               value,
               style: TextStyle(
-                fontSize: 24.sp,
+                fontSize: responsive.responsiveValue(mobile: 24, tablet: 28),
                 fontWeight: FontWeight.bold,
               ),
             ),
-            SizedBox(height: 4.h),
+            SizedBox(height: responsive.responsiveValue(mobile: 4, tablet: 6)),
             Row(
               children: [
                 Icon(
                   isPositive ? Icons.arrow_upward : Icons.arrow_downward,
-                  size: 16.sp,
+                  size: responsive.responsiveValue(mobile: 16, tablet: 18),
                   color: isPositive ? Colors.green : Colors.red,
                 ),
                 Text(
@@ -388,7 +431,8 @@ class _StatCard extends StatelessWidget {
                   style: TextStyle(
                     color: isPositive ? Colors.green : Colors.red,
                     fontWeight: FontWeight.w500,
-                    fontSize: 14.sp,
+                    fontSize:
+                        responsive.responsiveValue(mobile: 14, tablet: 16),
                   ),
                 ),
               ],
@@ -413,23 +457,32 @@ class _SkillBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final responsive = Get.find<ResponsiveController>();
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            Text(skill, style: TextStyle(fontSize: 14.sp)),
-            Text('$percentage%', style: TextStyle(fontSize: 14.sp)),
+            Text(skill,
+                style: TextStyle(
+                    fontSize:
+                        responsive.responsiveValue(mobile: 14, tablet: 16))),
+            Text('$percentage%',
+                style: TextStyle(
+                    fontSize:
+                        responsive.responsiveValue(mobile: 14, tablet: 16))),
           ],
         ),
-        SizedBox(height: 4.h),
+        SizedBox(height: responsive.responsiveValue(mobile: 4, tablet: 6)),
         LinearProgressIndicator(
           value: percentage / 100,
           backgroundColor: color.withOpacity(0.2),
           valueColor: AlwaysStoppedAnimation<Color>(color),
-          minHeight: 8.h,
-          borderRadius: BorderRadius.circular(4.r),
+          minHeight: responsive.responsiveValue(mobile: 8, tablet: 10),
+          borderRadius: BorderRadius.circular(
+              responsive.responsiveValue(mobile: 4, tablet: 6)),
         ),
       ],
     );
@@ -451,14 +504,18 @@ class _ActivityItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final responsive = Get.find<ResponsiveController>();
+
     return Row(
       children: [
         CircleAvatar(
-          radius: 20.r,
+          radius: responsive.responsiveValue(mobile: 20, tablet: 24),
           backgroundColor: Theme.of(context).primaryColor.withOpacity(0.1),
-          child: Icon(icon, size: 24.sp, color: Theme.of(context).primaryColor),
+          child: Icon(icon,
+              size: responsive.responsiveValue(mobile: 24, tablet: 28),
+              color: Theme.of(context).primaryColor),
         ),
-        SizedBox(width: 12.w),
+        SizedBox(width: responsive.responsiveValue(mobile: 12, tablet: 16)),
         Expanded(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -466,20 +523,24 @@ class _ActivityItem extends StatelessWidget {
               Text(
                 title,
                 style: TextStyle(
-                  fontSize: 16.sp,
+                  fontSize: responsive.responsiveValue(mobile: 16, tablet: 18),
                   fontWeight: FontWeight.bold,
                 ),
               ),
-              SizedBox(height: 4.h),
+              SizedBox(
+                  height: responsive.responsiveValue(mobile: 4, tablet: 6)),
               Text(
                 description,
-                style: TextStyle(fontSize: 14.sp),
+                style: TextStyle(
+                    fontSize:
+                        responsive.responsiveValue(mobile: 14, tablet: 16)),
               ),
-              SizedBox(height: 4.h),
+              SizedBox(
+                  height: responsive.responsiveValue(mobile: 4, tablet: 6)),
               Text(
                 time,
                 style: TextStyle(
-                  fontSize: 12.sp,
+                  fontSize: responsive.responsiveValue(mobile: 12, tablet: 14),
                   color: Colors.grey[600],
                 ),
               ),
@@ -498,26 +559,35 @@ class _SimpleBarChart extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final responsive = Get.find<ResponsiveController>();
     final maxValue = data.map((e) => e.value).reduce((a, b) => a > b ? a : b);
 
     return Row(
       crossAxisAlignment: CrossAxisAlignment.end,
       children: data.map((item) {
-        final height = (item.value / maxValue) * 150.h;
+        final height = (item.value / maxValue) *
+            responsive.responsiveValue(mobile: 150, tablet: 180);
         return Expanded(
           child: Column(
             mainAxisAlignment: MainAxisAlignment.end,
             children: [
               Container(
                 height: height,
-                margin: EdgeInsets.symmetric(horizontal: 4.w),
+                margin: EdgeInsets.symmetric(
+                    horizontal:
+                        responsive.responsiveValue(mobile: 4, tablet: 6)),
                 decoration: BoxDecoration(
                   color: Theme.of(context).primaryColor,
-                  borderRadius: BorderRadius.circular(4.r),
+                  borderRadius: BorderRadius.circular(
+                      responsive.responsiveValue(mobile: 4, tablet: 6)),
                 ),
               ),
-              SizedBox(height: 8.h),
-              Text(item.label, style: TextStyle(fontSize: 12.sp)),
+              SizedBox(
+                  height: responsive.responsiveValue(mobile: 8, tablet: 10)),
+              Text(item.label,
+                  style: TextStyle(
+                      fontSize:
+                          responsive.responsiveValue(mobile: 12, tablet: 14))),
             ],
           ),
         );
@@ -540,9 +610,13 @@ class _PieChartWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final responsive = Get.find<ResponsiveController>();
     return CustomPaint(
       painter: _PieChartPainter(segments),
-      size: Size(200.w, 200.h),
+      size: Size(
+        responsive.responsiveValue(mobile: 200, tablet: 250),
+        responsive.responsiveValue(mobile: 200, tablet: 250),
+      ),
     );
   }
 }
@@ -591,9 +665,11 @@ class _PieChartPainter extends CustomPainter {
 class _InteractionChart extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
+    final responsive = Get.find<ResponsiveController>();
     return CustomPaint(
       painter: _InteractionPainter(),
-      size: Size(double.infinity, 200.h),
+      size: Size(double.infinity,
+          responsive.responsiveValue(mobile: 200, tablet: 250)),
     );
   }
 }
@@ -603,7 +679,7 @@ class _InteractionPainter extends CustomPainter {
   void paint(Canvas canvas, Size size) {
     final paint = Paint()
       ..color = Colors.blue
-      ..strokeWidth = 2.w
+      ..strokeWidth = 2
       ..style = PaintingStyle.stroke;
 
     final path = Path();
@@ -631,9 +707,11 @@ class _InteractionPainter extends CustomPainter {
 class _TrendLineChart extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
+    final responsive = Get.find<ResponsiveController>();
     return CustomPaint(
       painter: _TrendLinePainter(),
-      size: Size(double.infinity, 200.h),
+      size: Size(double.infinity,
+          responsive.responsiveValue(mobile: 200, tablet: 250)),
     );
   }
 }
@@ -643,7 +721,7 @@ class _TrendLinePainter extends CustomPainter {
   void paint(Canvas canvas, Size size) {
     final paint = Paint()
       ..color = Colors.green
-      ..strokeWidth = 2.w
+      ..strokeWidth = 2
       ..style = PaintingStyle.stroke;
 
     final path = Path();
@@ -662,11 +740,13 @@ class _TrendLinePainter extends CustomPainter {
 }
 
 void _showFilterDialog() {
+  final responsive = Get.find<ResponsiveController>();
   Get.dialog(
     AlertDialog(
       title: Text(
         'Filtreleme Seçenekleri',
-        style: TextStyle(fontSize: 18.sp),
+        style: TextStyle(
+            fontSize: responsive.responsiveValue(mobile: 18, tablet: 20)),
       ),
       content: Column(
         mainAxisSize: MainAxisSize.min,
@@ -674,9 +754,11 @@ void _showFilterDialog() {
           ListTile(
             title: Text(
               'Tüm Bağlantılar',
-              style: TextStyle(fontSize: 16.sp),
+              style: TextStyle(
+                  fontSize: responsive.responsiveValue(mobile: 16, tablet: 18)),
             ),
-            leading: Icon(Icons.people, size: 24.sp),
+            leading: Icon(Icons.people,
+                size: responsive.responsiveValue(mobile: 24, tablet: 28)),
             onTap: () {
               Get.back();
               // Tüm bağlantıları göster
@@ -685,9 +767,11 @@ void _showFilterDialog() {
           ListTile(
             title: Text(
               'Yeni Bağlantılar',
-              style: TextStyle(fontSize: 16.sp),
+              style: TextStyle(
+                  fontSize: responsive.responsiveValue(mobile: 16, tablet: 18)),
             ),
-            leading: Icon(Icons.person_add, size: 24.sp),
+            leading: Icon(Icons.person_add,
+                size: responsive.responsiveValue(mobile: 24, tablet: 28)),
             onTap: () {
               Get.back();
               // Yeni bağlantıları göster
@@ -696,9 +780,11 @@ void _showFilterDialog() {
           ListTile(
             title: Text(
               'Aktif Bağlantılar',
-              style: TextStyle(fontSize: 16.sp),
+              style: TextStyle(
+                  fontSize: responsive.responsiveValue(mobile: 16, tablet: 18)),
             ),
-            leading: Icon(Icons.star, size: 24.sp),
+            leading: Icon(Icons.star,
+                size: responsive.responsiveValue(mobile: 24, tablet: 28)),
             onTap: () {
               Get.back();
               // Aktif bağlantıları göster
@@ -711,7 +797,8 @@ void _showFilterDialog() {
           onPressed: () => Get.back(),
           child: Text(
             'İptal',
-            style: TextStyle(fontSize: 14.sp),
+            style: TextStyle(
+                fontSize: responsive.responsiveValue(mobile: 14, tablet: 16)),
           ),
         ),
       ],
@@ -720,11 +807,13 @@ void _showFilterDialog() {
 }
 
 void _showSortDialog() {
+  final responsive = Get.find<ResponsiveController>();
   Get.dialog(
     AlertDialog(
       title: Text(
         'Sıralama Seçenekleri',
-        style: TextStyle(fontSize: 18.sp),
+        style: TextStyle(
+            fontSize: responsive.responsiveValue(mobile: 18, tablet: 20)),
       ),
       content: Column(
         mainAxisSize: MainAxisSize.min,
@@ -732,9 +821,11 @@ void _showSortDialog() {
           ListTile(
             title: Text(
               'İsme Göre',
-              style: TextStyle(fontSize: 16.sp),
+              style: TextStyle(
+                  fontSize: responsive.responsiveValue(mobile: 16, tablet: 18)),
             ),
-            leading: Icon(Icons.sort_by_alpha, size: 24.sp),
+            leading: Icon(Icons.sort_by_alpha,
+                size: responsive.responsiveValue(mobile: 24, tablet: 28)),
             onTap: () {
               Get.back();
               // İsme göre sırala
@@ -743,9 +834,11 @@ void _showSortDialog() {
           ListTile(
             title: Text(
               'Bağlantı Tarihine Göre',
-              style: TextStyle(fontSize: 16.sp),
+              style: TextStyle(
+                  fontSize: responsive.responsiveValue(mobile: 16, tablet: 18)),
             ),
-            leading: Icon(Icons.date_range, size: 24.sp),
+            leading: Icon(Icons.date_range,
+                size: responsive.responsiveValue(mobile: 24, tablet: 28)),
             onTap: () {
               Get.back();
               // Tarihe göre sırala
@@ -754,9 +847,11 @@ void _showSortDialog() {
           ListTile(
             title: Text(
               'Etkileşime Göre',
-              style: TextStyle(fontSize: 16.sp),
+              style: TextStyle(
+                  fontSize: responsive.responsiveValue(mobile: 16, tablet: 18)),
             ),
-            leading: Icon(Icons.trending_up, size: 24.sp),
+            leading: Icon(Icons.trending_up,
+                size: responsive.responsiveValue(mobile: 24, tablet: 28)),
             onTap: () {
               Get.back();
               // Etkileşime göre sırala
@@ -769,7 +864,8 @@ void _showSortDialog() {
           onPressed: () => Get.back(),
           child: Text(
             'İptal',
-            style: TextStyle(fontSize: 14.sp),
+            style: TextStyle(
+                fontSize: responsive.responsiveValue(mobile: 14, tablet: 16)),
           ),
         ),
       ],
@@ -778,46 +874,49 @@ void _showSortDialog() {
 }
 
 Widget _buildConnectionCard(String name, String title, String imageUrl) {
+  final responsive = Get.find<ResponsiveController>();
   return Card(
     child: Padding(
-      padding: EdgeInsets.all(12.r),
+      padding: responsive.responsivePadding(all: 12),
       child: Column(
         children: [
           CircleAvatar(
-            radius: 32.r,
+            radius: responsive.responsiveValue(mobile: 32, tablet: 40),
             backgroundImage: NetworkImage(imageUrl),
           ),
-          SizedBox(height: 8.h),
+          SizedBox(height: responsive.responsiveValue(mobile: 8, tablet: 12)),
           Text(
             name,
             style: TextStyle(
-              fontSize: 16.sp,
+              fontSize: responsive.responsiveValue(mobile: 16, tablet: 18),
               fontWeight: FontWeight.bold,
             ),
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
           ),
-          SizedBox(height: 4.h),
+          SizedBox(height: responsive.responsiveValue(mobile: 4, tablet: 6)),
           Text(
             title,
             style: TextStyle(
-              fontSize: 14.sp,
+              fontSize: responsive.responsiveValue(mobile: 14, tablet: 16),
               color: Colors.grey[600],
             ),
             maxLines: 2,
             overflow: TextOverflow.ellipsis,
             textAlign: TextAlign.center,
           ),
-          SizedBox(height: 8.h),
+          SizedBox(height: responsive.responsiveValue(mobile: 8, tablet: 12)),
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
             children: [
               IconButton(
-                icon: Icon(Icons.message, size: 24.sp),
+                icon: Icon(Icons.message,
+                    size: responsive.responsiveValue(mobile: 24, tablet: 28)),
                 onPressed: () {},
               ),
               IconButton(
-                icon: Icon(Icons.person, size: 24.sp),
+                icon: Icon(Icons.person,
+                    size: responsive.responsiveValue(mobile: 24, tablet: 28)),
                 onPressed: () {},
               ),
             ],

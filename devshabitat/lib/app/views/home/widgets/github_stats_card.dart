@@ -2,19 +2,29 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import '../../../controllers/home_controller.dart';
+import '../../../controllers/responsive_controller.dart';
 
 class GithubStatsCard extends GetView<HomeController> {
   const GithubStatsCard({super.key});
 
   @override
   Widget build(BuildContext context) {
+    final responsive = Get.find<ResponsiveController>();
+
     return Card(
       elevation: 2,
       shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(16.r),
+        borderRadius: BorderRadius.circular(
+          responsive.responsiveValue(
+            mobile: 16.r,
+            tablet: 20.r,
+          ),
+        ),
       ),
       child: Padding(
-        padding: EdgeInsets.all(16.w),
+        padding: responsive.responsivePadding(
+          all: 16,
+        ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -24,17 +34,27 @@ class GithubStatsCard extends GetView<HomeController> {
                 Text(
                   'GitHub İstatistikleri',
                   style: TextStyle(
-                    fontSize: 18.sp,
+                    fontSize: responsive.responsiveValue(
+                      mobile: 18.sp,
+                      tablet: 22.sp,
+                    ),
                     fontWeight: FontWeight.bold,
                   ),
                 ),
                 IconButton(
-                  icon: const Icon(Icons.refresh),
+                  icon: Icon(
+                    Icons.refresh,
+                    size: responsive.responsiveValue(
+                      mobile: 24.r,
+                      tablet: 28.r,
+                    ),
+                  ),
                   onPressed: controller.refreshData,
                 ),
               ],
             ),
-            SizedBox(height: 16.h),
+            SizedBox(
+                height: responsive.responsiveValue(mobile: 16.h, tablet: 20.h)),
             Obx(() {
               if (controller.isLoading.value) {
                 return const Center(child: CircularProgressIndicator());
@@ -48,19 +68,25 @@ class GithubStatsCard extends GetView<HomeController> {
                     value: stats['totalCommits']?.toString() ?? '0',
                     icon: Icons.commit,
                   ),
-                  SizedBox(height: 12.h),
+                  SizedBox(
+                      height: responsive.responsiveValue(
+                          mobile: 12.h, tablet: 16.h)),
                   _buildStatRow(
                     label: 'Açık PR\'lar',
                     value: stats['openPRs']?.toString() ?? '0',
                     icon: Icons.call_merge,
                   ),
-                  SizedBox(height: 12.h),
+                  SizedBox(
+                      height: responsive.responsiveValue(
+                          mobile: 12.h, tablet: 16.h)),
                   _buildStatRow(
                     label: 'Katkı Yapılan Repolar',
                     value: stats['contributedRepos']?.toString() ?? '0',
                     icon: Icons.source,
                   ),
-                  SizedBox(height: 12.h),
+                  SizedBox(
+                      height: responsive.responsiveValue(
+                          mobile: 12.h, tablet: 16.h)),
                   _buildStatRow(
                     label: 'Yıldızlı Repolar',
                     value: stats['starredRepos']?.toString() ?? '0',
@@ -80,21 +106,41 @@ class GithubStatsCard extends GetView<HomeController> {
     required String value,
     required IconData icon,
   }) {
+    final responsive = Get.find<ResponsiveController>();
+
     return Container(
-      padding: EdgeInsets.symmetric(vertical: 8.h, horizontal: 12.w),
+      padding: responsive.responsivePadding(
+        vertical: 8,
+        horizontal: 12,
+      ),
       decoration: BoxDecoration(
         color: Colors.grey[100],
-        borderRadius: BorderRadius.circular(8.r),
+        borderRadius: BorderRadius.circular(
+          responsive.responsiveValue(
+            mobile: 8.r,
+            tablet: 12.r,
+          ),
+        ),
       ),
       child: Row(
         children: [
-          Icon(icon, size: 20.r),
-          SizedBox(width: 12.w),
+          Icon(
+            icon,
+            size: responsive.responsiveValue(
+              mobile: 20.r,
+              tablet: 24.r,
+            ),
+          ),
+          SizedBox(
+              width: responsive.responsiveValue(mobile: 12.w, tablet: 16.w)),
           Expanded(
             child: Text(
               label,
               style: TextStyle(
-                fontSize: 14.sp,
+                fontSize: responsive.responsiveValue(
+                  mobile: 14.sp,
+                  tablet: 16.sp,
+                ),
                 color: Colors.grey[700],
               ),
             ),
@@ -102,7 +148,10 @@ class GithubStatsCard extends GetView<HomeController> {
           Text(
             value,
             style: TextStyle(
-              fontSize: 16.sp,
+              fontSize: responsive.responsiveValue(
+                mobile: 16.sp,
+                tablet: 18.sp,
+              ),
               fontWeight: FontWeight.bold,
             ),
           ),

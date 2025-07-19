@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:flutter_screenutil/flutter_screenutil.dart';
 import '../../controllers/community/community_discovery_controller.dart';
 import '../../widgets/community/community_card_widget.dart';
 import '../../routes/app_pages.dart';
@@ -23,8 +22,8 @@ class CommunityDiscoveryView extends BaseView<CommunityDiscoveryController> {
           'Toplulukları Keşfet',
           style: TextStyle(
             fontSize: responsive.responsiveValue(
-              mobile: 18.sp,
-              tablet: 22.sp,
+              mobile: 18,
+              tablet: 22,
             ),
           ),
         ),
@@ -33,14 +32,14 @@ class CommunityDiscoveryView extends BaseView<CommunityDiscoveryController> {
             onTap: controller.showFilters,
             child: Icon(
               Icons.filter_list,
-              size: responsive.minTouchTarget.sp,
+              size: responsive.minTouchTarget,
             ),
           ),
           AdaptiveTouchTarget(
             onTap: controller.showSearch,
             child: Icon(
               Icons.search,
-              size: responsive.minTouchTarget.sp,
+              size: responsive.minTouchTarget,
             ),
           ),
         ],
@@ -54,8 +53,8 @@ class CommunityDiscoveryView extends BaseView<CommunityDiscoveryController> {
                 return Center(
                   child: CircularProgressIndicator(
                     strokeWidth: responsive.responsiveValue(
-                      mobile: 2.w,
-                      tablet: 3.w,
+                      mobile: 2,
+                      tablet: 3,
                     ),
                   ),
                 );
@@ -71,20 +70,20 @@ class CommunityDiscoveryView extends BaseView<CommunityDiscoveryController> {
                         textAlign: TextAlign.center,
                         style: TextStyle(
                           fontSize: responsive.responsiveValue(
-                            mobile: 16.sp,
-                            tablet: 18.sp,
+                            mobile: 16,
+                            tablet: 18,
                           ),
                         ),
                       ),
-                      SizedBox(height: 16.h),
+                      SizedBox(height: 16),
                       ElevatedButton(
                         onPressed: controller.refreshCommunities,
                         child: ResponsiveText(
                           'Tekrar Dene',
                           style: TextStyle(
                             fontSize: responsive.responsiveValue(
-                              mobile: 14.sp,
-                              tablet: 16.sp,
+                              mobile: 14,
+                              tablet: 16,
                             ),
                           ),
                         ),
@@ -100,8 +99,8 @@ class CommunityDiscoveryView extends BaseView<CommunityDiscoveryController> {
                     'Henüz topluluk bulunmamaktadır.',
                     style: TextStyle(
                       fontSize: responsive.responsiveValue(
-                        mobile: 16.sp,
-                        tablet: 18.sp,
+                        mobile: 16,
+                        tablet: 18,
                       ),
                     ),
                   ),
@@ -124,16 +123,16 @@ class CommunityDiscoveryView extends BaseView<CommunityDiscoveryController> {
         icon: Icon(
           Icons.add,
           size: responsive.responsiveValue(
-            mobile: 24.sp,
-            tablet: 28.sp,
+            mobile: 24,
+            tablet: 28,
           ),
         ),
         label: ResponsiveText(
           'Topluluk Oluştur',
           style: TextStyle(
             fontSize: responsive.responsiveValue(
-              mobile: 14.sp,
-              tablet: 16.sp,
+              mobile: 14,
+              tablet: 16,
             ),
           ),
         ),
@@ -165,9 +164,9 @@ class CommunityDiscoveryView extends BaseView<CommunityDiscoveryController> {
       ),
       gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
         crossAxisCount: 2,
-        childAspectRatio: 1.5.w,
-        crossAxisSpacing: 24.w,
-        mainAxisSpacing: 24.h,
+        childAspectRatio: 1.5,
+        crossAxisSpacing: 24,
+        mainAxisSpacing: 24,
       ),
       itemCount: controller.communities.length,
       itemBuilder: (context, index) {

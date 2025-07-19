@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:flutter_screenutil/flutter_screenutil.dart';
 import '../../controllers/community/community_controller.dart';
+import '../../controllers/responsive_controller.dart';
+import '../../services/responsive_performance_service.dart';
 import '../../widgets/community/community_stats_widget.dart';
 import '../../widgets/community/member_list_widget.dart';
 import '../../widgets/community/membership_request_widget.dart';
@@ -19,6 +20,9 @@ class CommunityDetailView extends BaseView<CommunityController> {
 
   @override
   Widget buildView(BuildContext context) {
+    final responsive = Get.find<ResponsiveController>();
+    final performanceService = Get.find<ResponsivePerformanceService>();
+
     return Scaffold(
       body: ResponsiveSafeArea(
         child: Obx(
@@ -27,8 +31,8 @@ class CommunityDetailView extends BaseView<CommunityController> {
               return Center(
                 child: CircularProgressIndicator(
                   strokeWidth: responsive.responsiveValue(
-                    mobile: 2.w,
-                    tablet: 3.w,
+                    mobile: 2,
+                    tablet: 3,
                   ),
                 ),
               );
@@ -43,22 +47,28 @@ class CommunityDetailView extends BaseView<CommunityController> {
                       'Hata: ${controller.error.value}',
                       textAlign: TextAlign.center,
                       style: TextStyle(
-                        fontSize: responsive.responsiveValue(
-                          mobile: 16.sp,
-                          tablet: 18.sp,
+                        fontSize: performanceService.getOptimizedTextSize(
+                          cacheKey: 'community_detail_error',
+                          mobileSize: 16,
+                          tabletSize: 18,
                         ),
                       ),
                     ),
-                    SizedBox(height: 16.h),
+                    SizedBox(
+                        height: responsive.responsiveValue(
+                      mobile: 16,
+                      tablet: 20,
+                    )),
                     ElevatedButton(
                       onPressed: () => controller
                           .loadCommunity(controller.community.value?.id ?? ''),
                       child: ResponsiveText(
                         'Tekrar Dene',
                         style: TextStyle(
-                          fontSize: responsive.responsiveValue(
-                            mobile: 14.sp,
-                            tablet: 16.sp,
+                          fontSize: performanceService.getOptimizedTextSize(
+                            cacheKey: 'community_detail_retry',
+                            mobileSize: 14,
+                            tabletSize: 16,
                           ),
                         ),
                       ),
@@ -74,9 +84,10 @@ class CommunityDetailView extends BaseView<CommunityController> {
                 child: ResponsiveText(
                   'Topluluk bulunamadı',
                   style: TextStyle(
-                    fontSize: responsive.responsiveValue(
-                      mobile: 16.sp,
-                      tablet: 18.sp,
+                    fontSize: performanceService.getOptimizedTextSize(
+                      cacheKey: 'community_detail_not_found',
+                      mobileSize: 16,
+                      tabletSize: 18,
                     ),
                   ),
                 ),
@@ -97,6 +108,9 @@ class CommunityDetailView extends BaseView<CommunityController> {
   }
 
   Widget _buildMobileCommunityDetail(dynamic community, BuildContext context) {
+    final responsive = Get.find<ResponsiveController>();
+    final performanceService = Get.find<ResponsivePerformanceService>();
+
     return CustomScrollView(
       slivers: [
         _buildAppBar(community, context),
@@ -107,11 +121,23 @@ class CommunityDetailView extends BaseView<CommunityController> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 _buildDescription(community, context),
-                SizedBox(height: 24.h),
+                SizedBox(
+                    height: responsive.responsiveValue(
+                  mobile: 24,
+                  tablet: 32,
+                )),
                 _buildStats(community),
-                SizedBox(height: 24.h),
+                SizedBox(
+                    height: responsive.responsiveValue(
+                  mobile: 24,
+                  tablet: 32,
+                )),
                 _buildMembershipButton(),
-                SizedBox(height: 24.h),
+                SizedBox(
+                    height: responsive.responsiveValue(
+                  mobile: 24,
+                  tablet: 32,
+                )),
                 _buildMembershipRequests(),
                 _buildMembersList(context),
               ],
@@ -123,6 +149,8 @@ class CommunityDetailView extends BaseView<CommunityController> {
   }
 
   Widget _buildTabletCommunityDetail(dynamic community, BuildContext context) {
+    final responsive = Get.find<ResponsiveController>();
+
     return CustomScrollView(
       slivers: [
         _buildAppBar(community, context),
@@ -138,14 +166,26 @@ class CommunityDetailView extends BaseView<CommunityController> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       _buildDescription(community, context),
-                      SizedBox(height: 24.h),
+                      SizedBox(
+                          height: responsive.responsiveValue(
+                        mobile: 24,
+                        tablet: 32,
+                      )),
                       _buildStats(community),
-                      SizedBox(height: 24.h),
+                      SizedBox(
+                          height: responsive.responsiveValue(
+                        mobile: 24,
+                        tablet: 32,
+                      )),
                       _buildMembershipButton(),
                     ],
                   ),
                 ),
-                SizedBox(width: 32.w),
+                SizedBox(
+                    width: responsive.responsiveValue(
+                  mobile: 16,
+                  tablet: 32,
+                )),
                 Expanded(
                   flex: 3,
                   child: Column(
@@ -165,19 +205,23 @@ class CommunityDetailView extends BaseView<CommunityController> {
   }
 
   Widget _buildAppBar(dynamic community, BuildContext context) {
+    final responsive = Get.find<ResponsiveController>();
+    final performanceService = Get.find<ResponsivePerformanceService>();
+
     return SliverAppBar(
       expandedHeight: responsive.responsiveValue(
-        mobile: 200.h,
-        tablet: 300.h,
+        mobile: 200,
+        tablet: 300,
       ),
       pinned: true,
       flexibleSpace: FlexibleSpaceBar(
         title: ResponsiveText(
           community.name,
           style: TextStyle(
-            fontSize: responsive.responsiveValue(
-              mobile: 20.sp,
-              tablet: 24.sp,
+            fontSize: performanceService.getOptimizedTextSize(
+              cacheKey: 'community_detail_appbar_title',
+              mobileSize: 20,
+              tabletSize: 24,
             ),
           ),
         ),
@@ -199,7 +243,7 @@ class CommunityDetailView extends BaseView<CommunityController> {
             ),
             child: Icon(
               Icons.settings,
-              size: responsive.minTouchTarget.sp,
+              size: responsive.minTouchTarget,
             ),
           ),
       ],
@@ -207,12 +251,15 @@ class CommunityDetailView extends BaseView<CommunityController> {
   }
 
   Widget _buildDescription(dynamic community, BuildContext context) {
+    final performanceService = Get.find<ResponsivePerformanceService>();
+
     return ResponsiveText(
       community.description,
       style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-            fontSize: responsive.responsiveValue(
-              mobile: 16.sp,
-              tablet: 18.sp,
+            fontSize: performanceService.getOptimizedTextSize(
+              cacheKey: 'community_detail_description',
+              mobileSize: 16,
+              tabletSize: 18,
             ),
           ),
     );
@@ -223,6 +270,9 @@ class CommunityDetailView extends BaseView<CommunityController> {
   }
 
   Widget _buildMembershipButton() {
+    final responsive = Get.find<ResponsiveController>();
+    final performanceService = Get.find<ResponsivePerformanceService>();
+
     if (controller.isUserModerator.value) return const SizedBox.shrink();
 
     return Obx(
@@ -233,17 +283,19 @@ class CommunityDetailView extends BaseView<CommunityController> {
               : controller.joinCommunity,
           icon: Icon(
             controller.isMember.value ? Icons.exit_to_app : Icons.person_add,
-            size: responsive.responsiveValue(
-              mobile: 24.sp,
-              tablet: 28.sp,
+            size: performanceService.getOptimizedTextSize(
+              cacheKey: 'community_detail_button_icon',
+              mobileSize: 24,
+              tabletSize: 28,
             ),
           ),
           label: ResponsiveText(
             controller.isMember.value ? 'Topluluktan Ayrıl' : 'Topluluğa Katıl',
             style: TextStyle(
-              fontSize: responsive.responsiveValue(
-                mobile: 14.sp,
-                tablet: 16.sp,
+              fontSize: performanceService.getOptimizedTextSize(
+                cacheKey: 'community_detail_button_text',
+                mobileSize: 14,
+                tabletSize: 16,
               ),
             ),
           ),
@@ -260,6 +312,8 @@ class CommunityDetailView extends BaseView<CommunityController> {
   }
 
   Widget _buildMembershipRequests() {
+    final responsive = Get.find<ResponsiveController>();
+
     if (!controller.isUserModerator.value ||
         controller.pendingMembers.isEmpty) {
       return const SizedBox.shrink();
@@ -273,25 +327,37 @@ class CommunityDetailView extends BaseView<CommunityController> {
           onAccept: controller.acceptMember,
           onReject: controller.rejectMember,
         ),
-        SizedBox(height: 24.h),
+        SizedBox(
+            height: responsive.responsiveValue(
+          mobile: 24,
+          tablet: 32,
+        )),
       ],
     );
   }
 
   Widget _buildMembersList(BuildContext context) {
+    final responsive = Get.find<ResponsiveController>();
+    final performanceService = Get.find<ResponsivePerformanceService>();
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         ResponsiveText(
           'Üyeler',
           style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                fontSize: responsive.responsiveValue(
-                  mobile: 20.sp,
-                  tablet: 24.sp,
+                fontSize: performanceService.getOptimizedTextSize(
+                  cacheKey: 'community_detail_members_title',
+                  mobileSize: 20,
+                  tabletSize: 24,
                 ),
               ),
         ),
-        SizedBox(height: 16.h),
+        SizedBox(
+            height: responsive.responsiveValue(
+          mobile: 16,
+          tablet: 20,
+        )),
         MemberListWidget(
           members: controller.members,
           isAdmin: controller.isUserModerator.value,

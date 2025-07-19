@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import '../../../constants/app_assets.dart';
+import '../../../controllers/responsive_controller.dart';
 import 'dart:io' show Platform;
 import 'social_login_button.dart';
 
@@ -25,6 +28,8 @@ class SocialAuthButtons extends StatelessWidget {
   }
 
   List<Widget> _buildIOSButtons() {
+    final responsive = Get.find<ResponsiveController>();
+
     return [
       // iOS'ta Apple Sign In en üstte
       SocialLoginButton(
@@ -34,7 +39,12 @@ class SocialAuthButtons extends StatelessWidget {
         backgroundColor: Colors.black,
         textColor: Colors.white,
       ),
-      const SizedBox(height: 16),
+      SizedBox(
+        height: responsive.responsiveValue(
+          mobile: 16.h,
+          tablet: 20.h,
+        ),
+      ),
       SocialLoginButton(
         text: 'GitHub ile Giriş Yap',
         iconPath: AppAssets.githubLogo,
@@ -42,7 +52,12 @@ class SocialAuthButtons extends StatelessWidget {
         backgroundColor: Colors.black87,
         textColor: Colors.white,
       ),
-      const SizedBox(height: 16),
+      SizedBox(
+        height: responsive.responsiveValue(
+          mobile: 16.h,
+          tablet: 20.h,
+        ),
+      ),
       /*
       SocialLoginButton(
         text: 'Facebook ile Giriş Yap',
@@ -56,6 +71,8 @@ class SocialAuthButtons extends StatelessWidget {
   }
 
   List<Widget> _buildAndroidButtons() {
+    final responsive = Get.find<ResponsiveController>();
+
     return [
       // Android'de Google Sign In en üstte
       SocialLoginButton(
@@ -65,7 +82,12 @@ class SocialAuthButtons extends StatelessWidget {
         backgroundColor: Colors.white,
         textColor: Colors.black87,
       ),
-      const SizedBox(height: 16),
+      SizedBox(
+        height: responsive.responsiveValue(
+          mobile: 16.h,
+          tablet: 20.h,
+        ),
+      ),
       SocialLoginButton(
         text: 'GitHub ile Giriş Yap',
         iconPath: AppAssets.githubLogo,
@@ -73,7 +95,12 @@ class SocialAuthButtons extends StatelessWidget {
         backgroundColor: Colors.black87,
         textColor: Colors.white,
       ),
-      const SizedBox(height: 16),
+      SizedBox(
+        height: responsive.responsiveValue(
+          mobile: 16.h,
+          tablet: 20.h,
+        ),
+      ),
       /*
       SocialLoginButton(
         text: 'Facebook ile Giriş Yap',

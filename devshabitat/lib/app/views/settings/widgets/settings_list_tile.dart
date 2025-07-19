@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
+import '../../../controllers/responsive_controller.dart';
 
 class SettingsListTile extends StatelessWidget {
   final String title;
@@ -6,7 +9,6 @@ class SettingsListTile extends StatelessWidget {
   final IconData icon;
   final Widget? trailing;
   final VoidCallback? onTap;
-  final bool isLargeScreen;
 
   const SettingsListTile({
     super.key,
@@ -15,25 +17,32 @@ class SettingsListTile extends StatelessWidget {
     required this.icon,
     this.trailing,
     this.onTap,
-    this.isLargeScreen = false,
   });
 
   @override
   Widget build(BuildContext context) {
+    final responsive = Get.find<ResponsiveController>();
+
     return ListTile(
-      contentPadding: EdgeInsets.symmetric(
-        horizontal: isLargeScreen ? 32.0 : 16.0,
-        vertical: 8.0,
+      contentPadding: responsive.responsivePadding(
+        horizontal: 16,
+        vertical: 8,
       ),
       leading: Icon(
         icon,
-        size: isLargeScreen ? 32.0 : 24.0,
+        size: responsive.responsiveValue(
+          mobile: 24.sp,
+          tablet: 32.sp,
+        ),
         color: Theme.of(context).primaryColor,
       ),
       title: Text(
         title,
         style: TextStyle(
-          fontSize: isLargeScreen ? 18.0 : 16.0,
+          fontSize: responsive.responsiveValue(
+            mobile: 16.sp,
+            tablet: 18.sp,
+          ),
           fontWeight: FontWeight.w500,
         ),
       ),
@@ -41,7 +50,10 @@ class SettingsListTile extends StatelessWidget {
           ? Text(
               subtitle!,
               style: TextStyle(
-                fontSize: isLargeScreen ? 14.0 : 12.0,
+                fontSize: responsive.responsiveValue(
+                  mobile: 12.sp,
+                  tablet: 14.sp,
+                ),
               ),
             )
           : null,

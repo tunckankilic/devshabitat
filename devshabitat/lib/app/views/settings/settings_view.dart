@@ -5,12 +5,13 @@ import '../../controllers/settings_controller.dart';
 import '../../routes/app_pages.dart';
 import 'widgets/settings_list_tile.dart';
 import '../base/base_view.dart';
-import '../../widgets/adaptive_touch_target.dart';
+
 import '../../widgets/responsive/responsive_safe_area.dart';
 import '../../widgets/responsive/responsive_text.dart';
 import '../../widgets/responsive/responsive_overflow_handler.dart'
     hide ResponsiveText, ResponsiveSafeArea;
 import '../../widgets/responsive/animated_responsive_layout.dart';
+import '../../services/responsive_performance_service.dart';
 
 class SettingsView extends BaseView<SettingsController> {
   const SettingsView({super.key});
@@ -57,11 +58,13 @@ class SettingsView extends BaseView<SettingsController> {
   Widget _buildTabletSettings(BuildContext context) {
     return Center(
       child: Container(
-        constraints: BoxConstraints(maxWidth: 800.w),
+        constraints: BoxConstraints(
+            maxWidth: responsive.responsiveValue(mobile: 600.w, tablet: 800.w)),
         padding: responsive.responsivePadding(all: 24),
         child: ListView(
           children: [
-            SizedBox(height: 20.h),
+            SizedBox(
+                height: responsive.responsiveValue(mobile: 16.h, tablet: 20.h)),
             Row(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -73,7 +76,9 @@ class SettingsView extends BaseView<SettingsController> {
                     ],
                   ),
                 ),
-                SizedBox(width: 32.w),
+                SizedBox(
+                    width:
+                        responsive.responsiveValue(mobile: 24.w, tablet: 32.w)),
                 Expanded(
                   child: Column(
                     children: [
@@ -98,7 +103,6 @@ class SettingsView extends BaseView<SettingsController> {
           () => SettingsListTile(
             title: 'Karanlık Mod',
             icon: Icons.dark_mode,
-            isLargeScreen: responsive.isTablet,
             trailing: Switch(
               value: controller.isDarkMode.value,
               onChanged: (_) => controller.toggleTheme(),
@@ -116,14 +120,12 @@ class SettingsView extends BaseView<SettingsController> {
         SettingsListTile(
           title: 'Bildirim Ayarları',
           icon: Icons.notifications_active,
-          isLargeScreen: responsive.isTablet,
           onTap: () => Get.toNamed(AppRoutes.notificationSettings),
         ),
         Obx(
           () => SettingsListTile(
             title: 'Bildirimleri Etkinleştir',
             icon: Icons.notifications,
-            isLargeScreen: responsive.isTablet,
             trailing: Switch(
               value: controller.isNotificationsEnabled.value,
               onChanged: (_) => controller.toggleNotifications(),
@@ -134,7 +136,6 @@ class SettingsView extends BaseView<SettingsController> {
           () => SettingsListTile(
             title: 'Ses',
             icon: Icons.volume_up,
-            isLargeScreen: responsive.isTablet,
             trailing: Switch(
               value: controller.isSoundEnabled.value,
               onChanged: (_) => controller.toggleSound(),
@@ -154,7 +155,6 @@ class SettingsView extends BaseView<SettingsController> {
             title: 'Uygulama Dili',
             subtitle: controller.selectedLanguage.value,
             icon: Icons.language,
-            isLargeScreen: responsive.isTablet,
             onTap: () => _showLanguageDialog(Get.context!),
           ),
         ),
@@ -169,7 +169,6 @@ class SettingsView extends BaseView<SettingsController> {
         SettingsListTile(
           title: 'Çıkış Yap',
           icon: Icons.exit_to_app,
-          isLargeScreen: responsive.isTablet,
           onTap: () => controller.signOut(),
         ),
       ],
@@ -177,17 +176,26 @@ class SettingsView extends BaseView<SettingsController> {
   }
 
   Widget _buildSection(String title, List<Widget> children) {
+    final performanceService = Get.find<ResponsivePerformanceService>();
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Padding(
-          padding: responsive.responsivePadding(all: 16),
+          padding: performanceService.getOptimizedPadding(
+            cacheKey: 'section_padding_$title',
+            left: 16,
+            top: 16,
+            right: 16,
+            bottom: 16,
+          ),
           child: ResponsiveText(
             title,
             style: TextStyle(
-              fontSize: responsive.responsiveValue(
-                mobile: 14.sp,
-                tablet: 16.sp,
+              fontSize: performanceService.getOptimizedTextSize(
+                cacheKey: 'section_title_$title',
+                mobileSize: 14.sp,
+                tabletSize: 16.sp,
               ),
               fontWeight: FontWeight.bold,
               color: Colors.grey,
@@ -195,8 +203,9 @@ class SettingsView extends BaseView<SettingsController> {
           ),
         ),
         ...children,
-        Divider(height: 1.h),
-        SizedBox(height: 16.h),
+        Divider(height: responsive.responsiveValue(mobile: 1.h, tablet: 2.h)),
+        SizedBox(
+            height: responsive.responsiveValue(mobile: 16.h, tablet: 24.h)),
       ],
     );
   }
@@ -236,6 +245,7 @@ class SettingsView extends BaseView<SettingsController> {
               )
               .toList(),
         ),
+        contentPadding: responsive.responsivePadding(all: 16),
       ),
     );
   }

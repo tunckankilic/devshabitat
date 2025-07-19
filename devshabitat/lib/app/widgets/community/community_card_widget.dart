@@ -1,7 +1,9 @@
 import 'package:devshabitat/app/routes/app_pages.dart';
 import 'package:flutter/material.dart';
-import '../../models/community/community_model.dart';
 import 'package:get/get.dart';
+import '../../controllers/responsive_controller.dart';
+import '../../services/responsive_performance_service.dart';
+import '../../models/community/community_model.dart';
 
 class CommunityCardWidget extends StatelessWidget {
   final CommunityModel community;
@@ -18,10 +20,18 @@ class CommunityCardWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final responsive = Get.find<ResponsiveController>();
+    final performanceService = Get.find<ResponsivePerformanceService>();
 
     return Card(
-      elevation: 2,
-      margin: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
+      elevation: responsive.responsiveValue(
+        mobile: 2,
+        tablet: 3,
+      ),
+      margin: responsive.responsivePadding(
+        vertical: 8,
+        horizontal: 16,
+      ),
       child: InkWell(
         onTap: onTap ??
             () => Get.toNamed(
@@ -34,21 +44,29 @@ class CommunityCardWidget extends StatelessWidget {
             // Topluluk Kapak Fotoğrafı
             if (community.coverImageUrl != null)
               Container(
-                height: 120,
+                height: responsive.responsiveValue(
+                  mobile: 120,
+                  tablet: 160,
+                ),
                 width: double.infinity,
                 decoration: BoxDecoration(
                   image: DecorationImage(
                     image: NetworkImage(community.coverImageUrl!),
                     fit: BoxFit.cover,
                   ),
-                  borderRadius: const BorderRadius.vertical(
-                    top: Radius.circular(12),
+                  borderRadius: BorderRadius.vertical(
+                    top: Radius.circular(
+                      responsive.responsiveValue(
+                        mobile: 12,
+                        tablet: 16,
+                      ),
+                    ),
                   ),
                 ),
               ),
 
             Padding(
-              padding: const EdgeInsets.all(16),
+              padding: responsive.responsivePadding(all: 16),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -60,6 +78,11 @@ class CommunityCardWidget extends StatelessWidget {
                           community.name,
                           style: theme.textTheme.titleLarge?.copyWith(
                             fontWeight: FontWeight.bold,
+                            fontSize: performanceService.getOptimizedTextSize(
+                              cacheKey: 'community_card_title',
+                              mobileSize: 18,
+                              tabletSize: 20,
+                            ),
                           ),
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
@@ -69,21 +92,39 @@ class CommunityCardWidget extends StatelessWidget {
                         Icon(
                           Icons.admin_panel_settings,
                           color: theme.colorScheme.primary,
+                          size: responsive.responsiveValue(
+                            mobile: 20,
+                            tablet: 24,
+                          ),
                         ),
                     ],
                   ),
 
-                  const SizedBox(height: 8),
+                  SizedBox(
+                      height: responsive.responsiveValue(
+                    mobile: 8,
+                    tablet: 12,
+                  )),
 
                   // Topluluk Açıklaması
                   Text(
                     community.description,
-                    style: theme.textTheme.bodyMedium,
+                    style: theme.textTheme.bodyMedium?.copyWith(
+                      fontSize: performanceService.getOptimizedTextSize(
+                        cacheKey: 'community_card_description',
+                        mobileSize: 14,
+                        tabletSize: 16,
+                      ),
+                    ),
                     maxLines: 2,
                     overflow: TextOverflow.ellipsis,
                   ),
 
-                  const SizedBox(height: 16),
+                  SizedBox(
+                      height: responsive.responsiveValue(
+                    mobile: 16,
+                    tablet: 20,
+                  )),
 
                   // Topluluk İstatistikleri
                   Row(
@@ -116,17 +157,33 @@ class CommunityCardWidget extends StatelessWidget {
   }
 
   Widget _buildStat(BuildContext context, IconData icon, String text) {
+    final responsive = Get.find<ResponsiveController>();
+    final performanceService = Get.find<ResponsivePerformanceService>();
+
     return Row(
       children: [
         Icon(
           icon,
-          size: 16,
+          size: responsive.responsiveValue(
+            mobile: 16,
+            tablet: 18,
+          ),
           color: Theme.of(context).colorScheme.secondary,
         ),
-        const SizedBox(width: 4),
+        SizedBox(
+            width: responsive.responsiveValue(
+          mobile: 4,
+          tablet: 6,
+        )),
         Text(
           text,
-          style: Theme.of(context).textTheme.bodySmall,
+          style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                fontSize: performanceService.getOptimizedTextSize(
+                  cacheKey: 'community_card_stat_text',
+                  mobileSize: 12,
+                  tabletSize: 14,
+                ),
+              ),
         ),
       ],
     );
