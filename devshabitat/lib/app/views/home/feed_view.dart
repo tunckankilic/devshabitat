@@ -61,7 +61,7 @@ class FeedView extends StatelessWidget with PerformanceOptimizer {
         onLike: () => controller.likeFeedItem(item.id),
         onComment: () => controller.commentOnFeedItem(item.id),
         onShare: () => controller.shareFeedItem(item.id),
-      ).onlyWhenVisible(),
+      ),
     );
   }
 }

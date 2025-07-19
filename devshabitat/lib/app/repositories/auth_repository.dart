@@ -46,18 +46,15 @@ class AuthRepository implements IAuthRepository {
   // Getters for auth instances
   FirebaseAuth get auth => _auth;
   GoogleSignIn get googleSignIn => _googleSignIn;
-//  FacebookAuth get facebookAuth => _facebookAuth;
 
   AuthRepository({
     FirebaseAuth? auth,
     FirebaseFirestore? firestore,
     GoogleSignIn? googleSignIn,
-    //  FacebookAuth? facebookAuth,
     required GitHubOAuthService githubOAuthService,
   })  : _auth = auth ?? FirebaseAuth.instance,
         _firestore = firestore ?? FirebaseFirestore.instance,
         _googleSignIn = googleSignIn ?? GoogleSignIn.instance,
-        //    _facebookAuth = facebookAuth ?? FacebookAuth.instance,
         _githubOAuthService = githubOAuthService,
         _logger = Get.find<Logger>() {
     _initializeGoogleSignIn();
@@ -190,33 +187,7 @@ class AuthRepository implements IAuthRepository {
 
 /*
   @override
-  Future<UserCredential> signInWithFacebook() async {
-    try {
-      final LoginResult result = await _facebookAuth.login();
-      if (result.status != LoginStatus.success) {
-        throw Exception(AppStrings.facebookLoginFailed);
-      }
 
-      // Facebook'tan kullanıcı bilgilerini al
-      final userData = await _facebookAuth.getUserData();
-      final email = userData['email'] as String?;
-
-      if (email != null) {
-        // Email çakışmasını kontrol et
-        await _checkEmailBeforeSocialSignIn(email, 'facebook.com');
-      }
-
-      final AccessToken accessToken = result.accessToken!;
-      final OAuthCredential credential =
-          FacebookAuthProvider.credential(accessToken.token);
-
-      final userCredential = await _auth.signInWithCredential(credential);
-      await handleSocialSignIn(userCredential.user!);
-      return userCredential;
-    } catch (e) {
-      throw _handleAuthException(e);
-    }
-  }
 */
   @override
   Future<UserCredential> signInWithApple() async {
@@ -291,7 +262,6 @@ class AuthRepository implements IAuthRepository {
       await Future.wait([
         _auth.signOut(),
         _googleSignIn.signOut(),
-        //   _facebookAuth.logOut(),
       ]);
     } catch (e) {
       throw _handleAuthException(e);

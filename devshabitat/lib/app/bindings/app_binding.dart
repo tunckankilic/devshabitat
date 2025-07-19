@@ -17,6 +17,7 @@ import '../controllers/app_controller.dart';
 import '../controllers/responsive_controller.dart';
 import '../controllers/auth_state_controller.dart';
 import '../controllers/email_auth_controller.dart';
+import '../services/responsive_performance_service.dart';
 
 class AppBinding extends Bindings {
   @override
@@ -75,6 +76,15 @@ class AppBinding extends Bindings {
       errorHandler: errorHandler,
     ));
     Get.put(ResponsiveController());
+
+    // Responsive system
+    Get.put<ResponsiveController>(ResponsiveController(), permanent: true);
+    Get.put<ResponsivePerformanceService>(ResponsivePerformanceService(),
+        permanent: true);
+
+    // Initialize responsive performance service
+    final performanceService = Get.find<ResponsivePerformanceService>();
+    performanceService.preCalculateCommonValues();
 
     // Other Services
     Get.put(PostService(

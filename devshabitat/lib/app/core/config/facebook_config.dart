@@ -1,9 +1,8 @@
-import 'package:devshabitat/app/core/config/env.dart';
-
+// Facebook configuration disabled
 class FacebookConfig {
-  static String get appId => Env.facebookAppId;
-  static String get appSecret => Env.facebookAppSecret;
-  static String get scope => Env.facebookScope;
+  static String get appId => '';
+  static String get appSecret => '';
+  static String get scope => '';
 
-  static bool get isConfigured => appId.isNotEmpty && appSecret.isNotEmpty;
+  static bool get isConfigured => false;
 }

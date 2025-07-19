@@ -1,55 +1,141 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:get/get.dart';
+import '../controllers/responsive_controller.dart';
 
 class AdaptiveTouchTarget extends StatelessWidget {
   final Widget child;
   final VoidCallback? onTap;
-  final double minSize;
-  final EdgeInsets? padding;
+  final VoidCallback? onLongPress;
+  final String? tooltip;
+  final bool enabled;
   final Color? splashColor;
   final Color? highlightColor;
-  final BorderRadius? borderRadius;
+  final Color? hoverColor;
+  final Color? focusColor;
+  final double? customMinSize;
+  final EdgeInsets? padding;
+  final bool adaptivePadding;
+  final bool maintainSize;
 
   const AdaptiveTouchTarget({
     super.key,
     required this.child,
     this.onTap,
-    this.minSize = 48.0,
-    this.padding,
+    this.onLongPress,
+    this.tooltip,
+    this.enabled = true,
     this.splashColor,
     this.highlightColor,
-    this.borderRadius,
+    this.hoverColor,
+    this.focusColor,
+    this.customMinSize,
+    this.padding,
+    this.adaptivePadding = true,
+    this.maintainSize = true,
   });
 
   @override
   Widget build(BuildContext context) {
-    final screenWidth = MediaQuery.of(context).size.width;
-    final isSmallScreen = screenWidth <= 480;
+    final responsive = Get.find<ResponsiveController>();
+    final minSize = customMinSize ?? responsive.minTouchTarget;
+
+    Widget result = child;
+
+    if (maintainSize) {
+      result = SizedBox(
+        width: minSize,
+        height: minSize,
+        child: Center(child: result),
+      );
+    }
+
+    if (padding != null) {
+      EdgeInsets finalPadding = padding!;
+      if (adaptivePadding) {
+        finalPadding = EdgeInsets.only(
+          left: responsive.responsiveValue(
+            mobile: padding!.left,
+            tablet: padding!.left * 1.5,
+          ),
+          top: responsive.responsiveValue(
+            mobile: padding!.top,
+            tablet: padding!.top * 1.5,
+          ),
+          right: responsive.responsiveValue(
+            mobile: padding!.right,
+            tablet: padding!.right * 1.5,
+          ),
+          bottom: responsive.responsiveValue(
+            mobile: padding!.bottom,
+            tablet: padding!.bottom * 1.5,
+          ),
+        );
+      }
+      result = Padding(
+        padding: finalPadding,
+        child: result,
+      );
+    }
+
+    if (tooltip != null) {
+      result = Tooltip(
+        message: tooltip!,
+        child: result,
+      );
+    }
 
     return Material(
-      color: Colors.transparent,
+      type: MaterialType.transparency,
       child: InkWell(
-        onTap: onTap,
-        splashColor: splashColor ?? Theme.of(context).splashColor,
-        highlightColor: highlightColor ?? Theme.of(context).highlightColor,
-        borderRadius: borderRadius ?? BorderRadius.circular(8.r),
-        child: Container(
-          constraints: BoxConstraints(
-            minWidth: isSmallScreen ? minSize.w : (minSize * 1.2).w,
-            minHeight: isSmallScreen ? minSize.h : (minSize * 1.2).h,
-          ),
-          padding: padding ?? EdgeInsets.all(8.r),
-          child: Center(child: child),
-        ),
+        onTap: enabled ? onTap : null,
+        onLongPress: enabled ? onLongPress : null,
+        splashColor: splashColor,
+        highlightColor: highlightColor,
+        hoverColor: hoverColor,
+        focusColor: focusColor,
+        borderRadius: BorderRadius.circular(minSize / 2),
+        child: result,
       ),
     );
   }
 }
 
-// Kullanım örneği:
-/*
-AdaptiveTouchTarget(
-  onTap: () => print('Tapped!'),
-  child: Icon(Icons.add),
-)
-*/
+// Accessibility-compliant button wrapper
+class AccessibleButton extends StatelessWidget {
+  final Widget child;
+  final VoidCallback? onPressed;
+  final String? semanticLabel;
+  final bool enabled;
+  final EdgeInsets? padding;
+
+  const AccessibleButton({
+    super.key,
+    required this.child,
+    this.onPressed,
+    this.semanticLabel,
+    this.enabled = true,
+    this.padding,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final responsive = Get.find<ResponsiveController>();
+
+    return Semantics(
+      button: true,
+      label: semanticLabel,
+      enabled: enabled,
+      child: AdaptiveTouchTarget(
+        onTap: enabled ? onPressed : null,
+        padding: padding ??
+            EdgeInsets.symmetric(
+              horizontal:
+                  responsive.responsiveValue(mobile: 16.w, tablet: 20.w),
+              vertical: responsive.responsiveValue(mobile: 12.h, tablet: 16.h),
+            ),
+        child: child,
+      ),
+    );
+  }
+}

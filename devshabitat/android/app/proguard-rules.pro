@@ -66,10 +66,7 @@
 -keepattributes Signature
 -keepattributes *Annotation*
 
-# Facebook SDK
--keep class com.facebook.** { *; }
--keepattributes Signature
--dontwarn com.facebook.**
+
 
 # Image Picker & Cropper
 -keep class io.flutter.plugins.imagepicker.** { *; }

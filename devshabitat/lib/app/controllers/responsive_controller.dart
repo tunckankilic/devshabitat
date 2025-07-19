@@ -1,63 +1,222 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import '../widgets/responsive/animated_responsive_wrapper.dart';
 
 class ResponsiveController extends GetxController {
+  static ResponsiveController get to => Get.find();
+
+  // Current breakpoint
   final Rx<ScreenBreakpoint> currentBreakpoint =
-      ScreenBreakpoint.smallPhone.obs;
+      ScreenBreakpoint.largePhone.obs;
+
+  // Breakpoints
+  final double smallPhoneBreakpoint = 360.0;
+  final double largePhoneBreakpoint = 480.0;
+  final double tabletBreakpoint = 768.0;
+  final double desktopBreakpoint = 1024.0;
+  final double largeDesktopBreakpoint = 1440.0;
+
+  // Minimum touch target size (44pt as per iOS HIG)
+  final double minTouchTarget = 44.0;
+
+  // Performance optimization: prevent unnecessary updates
+  static const double _breakpointThreshold = 5.0;
+  final RxDouble _lastWidth = 0.0.obs;
+  final RxDouble _lastHeight = 0.0.obs;
+
+  // Screen metrics
   final RxDouble screenWidth = 0.0.obs;
   final RxDouble screenHeight = 0.0.obs;
+  final RxDouble devicePixelRatio = 1.0.obs;
+  final Rx<Orientation> orientation = Orientation.portrait.obs;
 
-  void updateScreenSize(BuildContext context) {
-    screenWidth.value = MediaQuery.of(context).size.width;
-    screenHeight.value = MediaQuery.of(context).size.height;
-    _updateBreakpoint();
+  // Breakpoint states
+  bool get isSmallPhone => screenWidth.value < smallPhoneBreakpoint;
+  bool get isLargePhone =>
+      screenWidth.value >= smallPhoneBreakpoint &&
+      screenWidth.value < tabletBreakpoint;
+  bool get isTablet =>
+      screenWidth.value >= tabletBreakpoint &&
+      screenWidth.value < desktopBreakpoint;
+  bool get isDesktop =>
+      screenWidth.value >= desktopBreakpoint &&
+      screenWidth.value < largeDesktopBreakpoint;
+  bool get isLargeDesktop => screenWidth.value >= largeDesktopBreakpoint;
+
+  bool get isMobile => isSmallPhone || isLargePhone;
+  bool get isLandscape => orientation.value == Orientation.landscape;
+  bool get isPortrait => orientation.value == Orientation.portrait;
+
+  @override
+  void onInit() {
+    super.onInit();
+    _updateScreenMetrics();
+    ever(screenWidth, (_) => _onScreenMetricsChanged());
+    ever(screenHeight, (_) => _onScreenMetricsChanged());
   }
 
-  void _updateBreakpoint() {
-    if (screenWidth.value <= 480) {
-      currentBreakpoint.value = ScreenBreakpoint.smallPhone;
-    } else if (screenWidth.value <= 768) {
-      currentBreakpoint.value = ScreenBreakpoint.largePhone;
-    } else {
-      currentBreakpoint.value = ScreenBreakpoint.tablet;
+  void _updateScreenMetrics() {
+    final context = Get.context;
+    if (context == null) return;
+
+    final mediaQuery = MediaQuery.of(context);
+    final size = mediaQuery.size;
+    final pixelRatio = mediaQuery.devicePixelRatio;
+    final newOrientation = mediaQuery.orientation;
+
+    // Only update if significant change
+    if ((size.width - _lastWidth.value).abs() > _breakpointThreshold ||
+        (size.height - _lastHeight.value).abs() > _breakpointThreshold) {
+      screenWidth.value = size.width;
+      screenHeight.value = size.height;
+      devicePixelRatio.value = pixelRatio;
+      orientation.value = newOrientation;
+
+      // Update current breakpoint
+      if (size.width < smallPhoneBreakpoint) {
+        currentBreakpoint.value = ScreenBreakpoint.smallPhone;
+      } else if (size.width < tabletBreakpoint) {
+        currentBreakpoint.value = ScreenBreakpoint.largePhone;
+      } else {
+        currentBreakpoint.value = ScreenBreakpoint.tablet;
+      }
+
+      _lastWidth.value = size.width;
+      _lastHeight.value = size.height;
     }
   }
 
-  // ScreenUtil için yardımcı metodlar
-  double get statusBarHeight => ScreenUtil().statusBarHeight;
-  double get bottomBarHeight => ScreenUtil().bottomBarHeight;
+  void _onScreenMetricsChanged() {
+    // Trigger layout updates only when necessary
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      Get.forceAppUpdate();
+    });
+  }
 
-  // Responsive boyutlar için yardımcı metodlar
-  double sp(double size) => size.sp;
-  double w(double size) => size.w;
-  double h(double size) => size.h;
-  double r(double size) => size.r;
-
-  // Responsive padding ve margin için yardımcı metodlar
-  EdgeInsets responsivePadding({
-    double left = 0,
-    double top = 0,
-    double right = 0,
-    double bottom = 0,
+  T responsiveValue<T>({
+    required T mobile,
+    required T tablet,
+    T? desktop,
+    T? largeDesktop,
   }) {
-    return EdgeInsets.fromLTRB(
-      w(left),
-      h(top),
-      w(right),
-      h(bottom),
+    if (isLargeDesktop && largeDesktop != null) return largeDesktop;
+    if (isDesktop && desktop != null) return desktop;
+    if (isTablet) return tablet;
+    return mobile;
+  }
+
+  EdgeInsets responsivePadding({
+    double? left,
+    double? top,
+    double? right,
+    double? bottom,
+    double? horizontal,
+    double? vertical,
+    double? all,
+  }) {
+    if (all != null) {
+      final value = responsiveValue(
+        mobile: all.w,
+        tablet: (all * 1.5).w,
+        desktop: (all * 2).w,
+      );
+      return EdgeInsets.all(value);
+    }
+
+    if (horizontal != null || vertical != null) {
+      return EdgeInsets.symmetric(
+        horizontal: horizontal != null
+            ? responsiveValue(
+                mobile: horizontal.w,
+                tablet: (horizontal * 1.5).w,
+                desktop: (horizontal * 2).w,
+              )
+            : 0,
+        vertical: vertical != null
+            ? responsiveValue(
+                mobile: vertical.h,
+                tablet: (vertical * 1.5).h,
+                desktop: (vertical * 2).h,
+              )
+            : 0,
+      );
+    }
+
+    return EdgeInsets.only(
+      left: left != null
+          ? responsiveValue(
+              mobile: left.w,
+              tablet: (left * 1.5).w,
+              desktop: (left * 2).w,
+            )
+          : 0,
+      top: top != null
+          ? responsiveValue(
+              mobile: top.h,
+              tablet: (top * 1.5).h,
+              desktop: (top * 2).h,
+            )
+          : 0,
+      right: right != null
+          ? responsiveValue(
+              mobile: right.w,
+              tablet: (right * 1.5).w,
+              desktop: (right * 2).w,
+            )
+          : 0,
+      bottom: bottom != null
+          ? responsiveValue(
+              mobile: bottom.h,
+              tablet: (bottom * 1.5).h,
+              desktop: (bottom * 2).h,
+            )
+          : 0,
     );
   }
 
-  bool get isSmallPhone =>
-      currentBreakpoint.value == ScreenBreakpoint.smallPhone;
-  bool get isLargePhone =>
-      currentBreakpoint.value == ScreenBreakpoint.largePhone;
-  bool get isTablet => currentBreakpoint.value == ScreenBreakpoint.tablet;
-}
+  // Performance optimized scaling functions
+  double get textScaleFactor => responsiveValue(
+        mobile: 1.0,
+        tablet: 1.1,
+        desktop: 1.2,
+        largeDesktop: 1.3,
+      );
 
-enum ScreenBreakpoint {
-  smallPhone, // 320-480px
-  largePhone, // 480-768px
-  tablet, // 768px+
+  double get iconScaleFactor => responsiveValue(
+        mobile: 1.0,
+        tablet: 1.2,
+        desktop: 1.4,
+        largeDesktop: 1.6,
+      );
+
+  // Touch target optimization
+  double get minTouchTargetSize => responsiveValue(
+        mobile: minTouchTarget,
+        tablet: minTouchTarget * 1.2,
+        desktop: minTouchTarget * 1.4,
+      );
+
+  // Animation duration optimization
+  Duration get transitionDuration => Duration(
+        milliseconds: responsiveValue(
+          mobile: 200,
+          tablet: 250,
+          desktop: 300,
+        ),
+      );
+
+  // Layout grid optimization
+  double get gridSpacing => responsiveValue(
+        mobile: 8.w,
+        tablet: 16.w,
+        desktop: 24.w,
+      );
+
+  int get gridColumns => responsiveValue(
+        mobile: 2,
+        tablet: 3,
+        desktop: 4,
+        largeDesktop: 6,
+      );
 }

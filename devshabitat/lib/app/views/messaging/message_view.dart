@@ -7,6 +7,12 @@ import '../../controllers/message/message_search_controller.dart';
 import '../../controllers/message/message_interaction_controller.dart';
 import '../../models/conversation_model.dart';
 import '../base/base_view.dart';
+import '../../widgets/adaptive_touch_target.dart';
+import '../../widgets/responsive/responsive_safe_area.dart';
+import '../../widgets/responsive/responsive_text.dart';
+import '../../widgets/responsive/responsive_overflow_handler.dart'
+    hide ResponsiveText, ResponsiveSafeArea;
+import '../../widgets/responsive/animated_responsive_layout.dart';
 
 class MessageView extends BaseView<MessageChatController> {
   final MessageListController listController = Get.find();
@@ -19,115 +25,195 @@ class MessageView extends BaseView<MessageChatController> {
   Widget buildView(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Mesajlar', style: TextStyle(fontSize: 18.sp)),
+        title: ResponsiveText(
+          'Mesajlar',
+          style: TextStyle(
+            fontSize: responsive.responsiveValue(
+              mobile: 18.sp,
+              tablet: 22.sp,
+            ),
+          ),
+        ),
         actions: [
-          IconButton(
-            icon: Icon(Icons.search, size: 24.sp),
-            onPressed: () {
-              // Arama sayfasına git
-              Get.toNamed('/message-search');
-            },
+          AdaptiveTouchTarget(
+            onTap: () => Get.toNamed('/message-search'),
+            child: Icon(
+              Icons.search,
+              size: responsive.minTouchTarget.sp,
+            ),
           ),
         ],
       ),
-      body: Column(
-        children: [
-          // Konuşma listesi
-          Expanded(
-            child: Obx(() {
-              if (listController.isLoading) {
-                return const Center(child: CircularProgressIndicator());
-              }
+      body: ResponsiveSafeArea(
+        child: ResponsiveOverflowHandler(
+          child: Column(
+            children: [
+              Expanded(
+                child: Obx(() {
+                  if (listController.isLoading) {
+                    return Center(
+                      child: CircularProgressIndicator(
+                        strokeWidth: responsive.responsiveValue(
+                          mobile: 2.w,
+                          tablet: 3.w,
+                        ),
+                      ),
+                    );
+                  }
 
-              if (listController.conversations.isEmpty) {
-                return Center(
-                  child: Text(
-                    'Henüz bir konuşma yok',
-                    style: TextStyle(fontSize: 16.sp),
-                  ),
-                );
-              }
+                  if (listController.conversations.isEmpty) {
+                    return Center(
+                      child: ResponsiveText(
+                        'Henüz bir konuşma yok',
+                        style: TextStyle(
+                          fontSize: responsive.responsiveValue(
+                            mobile: 16.sp,
+                            tablet: 18.sp,
+                          ),
+                        ),
+                      ),
+                    );
+                  }
 
-              return ListView.builder(
-                itemCount: listController.conversations.length,
-                itemBuilder: (context, index) {
-                  final conversation = listController.conversations[index];
-                  return _buildConversationTile(conversation);
-                },
-              );
-            }),
+                  return AnimatedResponsiveLayout(
+                    mobile: _buildMobileConversationList(),
+                    tablet: _buildTabletConversationList(),
+                    animationDuration: const Duration(milliseconds: 300),
+                  );
+                }),
+              ),
+            ],
           ),
-        ],
+        ),
       ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () {
-          // Yeni konuşma başlat
-          Get.toNamed('/new-conversation');
-        },
-        child: Icon(Icons.message, size: 24.sp),
+      floatingActionButton: AdaptiveTouchTarget(
+        onTap: () => Get.toNamed('/new-conversation'),
+        child: Icon(
+          Icons.message,
+          size: responsive.minTouchTarget.sp,
+        ),
       ),
     );
   }
 
+  Widget _buildMobileConversationList() {
+    return ListView.builder(
+      padding: responsive.responsivePadding(all: 16),
+      itemCount: listController.conversations.length,
+      itemBuilder: (context, index) {
+        final conversation = listController.conversations[index];
+        return _buildConversationTile(conversation);
+      },
+    );
+  }
+
+  Widget _buildTabletConversationList() {
+    return GridView.builder(
+      padding: responsive.responsivePadding(all: 24),
+      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+        crossAxisCount: 2,
+        childAspectRatio: 4.w,
+        crossAxisSpacing: 24.w,
+        mainAxisSpacing: 24.h,
+      ),
+      itemCount: listController.conversations.length,
+      itemBuilder: (context, index) {
+        final conversation = listController.conversations[index];
+        return _buildConversationTile(conversation);
+      },
+    );
+  }
+
   Widget _buildConversationTile(ConversationModel conversation) {
-    return ListTile(
-      leading: CircleAvatar(
-        radius: 24.r,
-        child: Text(
-          (conversation.participantName)[0].toUpperCase(),
-          style: TextStyle(fontSize: 16.sp),
+    return Card(
+      margin: responsive.responsivePadding(
+        bottom: responsive.responsiveValue(
+          mobile: 8,
+          tablet: 12,
         ),
       ),
-      title: Text(
-        conversation.participantName,
-        style: TextStyle(fontSize: 16.sp),
-      ),
-      subtitle: Text(
-        conversation.lastMessage ?? 'Mesaj yok',
-        style: TextStyle(fontSize: 14.sp),
-        maxLines: 1,
-        overflow: TextOverflow.ellipsis,
-      ),
-      trailing: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        crossAxisAlignment: CrossAxisAlignment.end,
-        children: [
-          Text(
-            _formatTime(conversation.lastMessageTime),
-            style: TextStyle(fontSize: 12.sp),
+      child: ListTile(
+        leading: CircleAvatar(
+          radius: responsive.responsiveValue(
+            mobile: 24.r,
+            tablet: 32.r,
           ),
-          if (conversation.unreadCount > 0)
-            Container(
-              padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 4.h),
-              decoration: BoxDecoration(
-                color: Theme.of(Get.context!).primaryColor,
-                borderRadius: BorderRadius.circular(12.r),
+          child: ResponsiveText(
+            (conversation.participantName)[0].toUpperCase(),
+            style: TextStyle(
+              fontSize: responsive.responsiveValue(
+                mobile: 16.sp,
+                tablet: 20.sp,
               ),
-              child: Text(
-                'Yeni',
-                style: TextStyle(
-                  color: Colors.white,
-                  fontSize: 12.sp,
+            ),
+          ),
+        ),
+        title: ResponsiveText(
+          conversation.participantName,
+          style: TextStyle(
+            fontSize: responsive.responsiveValue(
+              mobile: 16.sp,
+              tablet: 18.sp,
+            ),
+          ),
+        ),
+        subtitle: ResponsiveText(
+          conversation.lastMessage ?? 'Mesaj yok',
+          style: TextStyle(
+            fontSize: responsive.responsiveValue(
+              mobile: 14.sp,
+              tablet: 16.sp,
+            ),
+          ),
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
+        ),
+        trailing: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          crossAxisAlignment: CrossAxisAlignment.end,
+          children: [
+            ResponsiveText(
+              _formatTime(conversation.lastMessageTime),
+              style: TextStyle(
+                fontSize: responsive.responsiveValue(
+                  mobile: 12.sp,
+                  tablet: 14.sp,
                 ),
               ),
             ),
-        ],
+            if (conversation.unreadCount > 0)
+              Container(
+                padding: responsive.responsivePadding(
+                  horizontal: 8,
+                  vertical: 4,
+                ),
+                decoration: BoxDecoration(
+                  color: Theme.of(Get.context!).primaryColor,
+                  borderRadius: BorderRadius.circular(12.r),
+                ),
+                child: ResponsiveText(
+                  'Yeni',
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontSize: responsive.responsiveValue(
+                      mobile: 12.sp,
+                      tablet: 14.sp,
+                    ),
+                  ),
+                ),
+              ),
+          ],
+        ),
+        onTap: () => Get.toNamed('/chat/${conversation.id}'),
+        onLongPress: () => _showConversationOptions(conversation),
       ),
-      onTap: () {
-        // Konuşma detayına git
-        Get.toNamed('/chat/${conversation.id}');
-      },
-      onLongPress: () {
-        // Konuşma seçeneklerini göster
-        _showConversationOptions(conversation);
-      },
     );
   }
 
   void _showConversationOptions(ConversationModel conversation) {
     Get.bottomSheet(
       Container(
-        padding: EdgeInsets.all(16.r),
+        padding: responsive.responsivePadding(all: 16),
         decoration: BoxDecoration(
           color: Theme.of(Get.context!).scaffoldBackgroundColor,
           borderRadius: BorderRadius.vertical(
@@ -138,10 +224,18 @@ class MessageView extends BaseView<MessageChatController> {
           mainAxisSize: MainAxisSize.min,
           children: [
             ListTile(
-              leading: Icon(Icons.delete, size: 24.sp),
-              title: Text(
+              leading: Icon(
+                Icons.delete,
+                size: responsive.minTouchTarget.sp,
+              ),
+              title: ResponsiveText(
                 'Konuşmayı Sil',
-                style: TextStyle(fontSize: 16.sp),
+                style: TextStyle(
+                  fontSize: responsive.responsiveValue(
+                    mobile: 16.sp,
+                    tablet: 18.sp,
+                  ),
+                ),
               ),
               onTap: () {
                 Get.back();
@@ -149,10 +243,18 @@ class MessageView extends BaseView<MessageChatController> {
               },
             ),
             ListTile(
-              leading: Icon(Icons.archive, size: 24.sp),
-              title: Text(
+              leading: Icon(
+                Icons.archive,
+                size: responsive.minTouchTarget.sp,
+              ),
+              title: ResponsiveText(
                 'Arşivle',
-                style: TextStyle(fontSize: 16.sp),
+                style: TextStyle(
+                  fontSize: responsive.responsiveValue(
+                    mobile: 16.sp,
+                    tablet: 18.sp,
+                  ),
+                ),
               ),
               onTap: () {
                 Get.back();
@@ -160,10 +262,18 @@ class MessageView extends BaseView<MessageChatController> {
               },
             ),
             ListTile(
-              leading: Icon(Icons.block, size: 24.sp),
-              title: Text(
+              leading: Icon(
+                Icons.block,
+                size: responsive.minTouchTarget.sp,
+              ),
+              title: ResponsiveText(
                 'Engelle',
-                style: TextStyle(fontSize: 16.sp),
+                style: TextStyle(
+                  fontSize: responsive.responsiveValue(
+                    mobile: 16.sp,
+                    tablet: 18.sp,
+                  ),
+                ),
               ),
               onTap: () {
                 Get.back();
@@ -179,20 +289,35 @@ class MessageView extends BaseView<MessageChatController> {
   void _confirmDeleteConversation(ConversationModel conversation) {
     Get.dialog(
       AlertDialog(
-        title: Text(
+        title: ResponsiveText(
           'Konuşmayı Sil',
-          style: TextStyle(fontSize: 18.sp),
+          style: TextStyle(
+            fontSize: responsive.responsiveValue(
+              mobile: 18.sp,
+              tablet: 20.sp,
+            ),
+          ),
         ),
-        content: Text(
+        content: ResponsiveText(
           'Bu konuşmayı silmek istediğinize emin misiniz?',
-          style: TextStyle(fontSize: 16.sp),
+          style: TextStyle(
+            fontSize: responsive.responsiveValue(
+              mobile: 16.sp,
+              tablet: 18.sp,
+            ),
+          ),
         ),
         actions: [
           TextButton(
             onPressed: () => Get.back(),
-            child: Text(
+            child: ResponsiveText(
               'İptal',
-              style: TextStyle(fontSize: 14.sp),
+              style: TextStyle(
+                fontSize: responsive.responsiveValue(
+                  mobile: 14.sp,
+                  tablet: 16.sp,
+                ),
+              ),
             ),
           ),
           TextButton(
@@ -200,10 +325,13 @@ class MessageView extends BaseView<MessageChatController> {
               Get.back();
               listController.deleteConversation(conversation.id);
             },
-            child: Text(
+            child: ResponsiveText(
               'Sil',
               style: TextStyle(
-                fontSize: 14.sp,
+                fontSize: responsive.responsiveValue(
+                  mobile: 14.sp,
+                  tablet: 16.sp,
+                ),
                 color: Colors.red,
               ),
             ),

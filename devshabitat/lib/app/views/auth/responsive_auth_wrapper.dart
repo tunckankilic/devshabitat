@@ -1,5 +1,8 @@
 import 'package:devshabitat/app/controllers/auth_controller.dart';
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
+import '../../controllers/responsive_controller.dart';
 import 'widgets/auth_form.dart';
 import 'widgets/auth_header.dart';
 import 'widgets/social_auth_buttons.dart';
@@ -17,23 +20,20 @@ class ResponsiveAuthWrapper extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final responsive = Get.find<ResponsiveController>();
+
     return Scaffold(
       body: SafeArea(
         child: Center(
           child: SingleChildScrollView(
             child: Padding(
-              padding: const EdgeInsets.all(24.0),
-              child: LayoutBuilder(
-                builder: (context, constraints) {
-                  if (constraints.maxWidth > 1200) {
-                    return _buildLargeLayout(context);
-                  } else if (constraints.maxWidth > 800) {
-                    return _buildMediumLayout(context);
-                  } else {
-                    return _buildSmallLayout(context);
-                  }
-                },
+              padding: responsive.responsivePadding(
+                left: 24,
+                right: 24,
+                top: 24,
+                bottom: 24,
               ),
+              child: Obx(() => _buildResponsiveLayout(responsive)),
             ),
           ),
         ),
@@ -41,74 +41,72 @@ class ResponsiveAuthWrapper extends StatelessWidget {
     );
   }
 
-  Widget _buildLargeLayout(BuildContext context) {
+  Widget _buildResponsiveLayout(ResponsiveController responsive) {
+    if (responsive.isTablet) {
+      return _buildTabletLayout(responsive);
+    } else {
+      return _buildMobileLayout(responsive);
+    }
+  }
+
+  Widget _buildTabletLayout(ResponsiveController responsive) {
     return Row(
+      mainAxisAlignment: MainAxisAlignment.center,
       children: [
         Expanded(
           flex: 1,
-          child: _buildLeftColumn(context),
+          child: _buildLeftColumn(responsive),
         ),
-        const SizedBox(width: 48),
+        SizedBox(width: responsive.responsiveValue(mobile: 32.w, tablet: 48.w)),
         Expanded(
           flex: 1,
-          child: _buildRightColumn(context),
+          child: _buildRightColumn(responsive),
         ),
       ],
     );
   }
 
-  Widget _buildMediumLayout(BuildContext context) {
-    return Row(
-      children: [
-        Expanded(
-          flex: 2,
-          child: _buildLeftColumn(context),
-        ),
-        const SizedBox(width: 32),
-        Expanded(
-          flex: 3,
-          child: _buildRightColumn(context),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildSmallLayout(BuildContext context) {
+  Widget _buildMobileLayout(ResponsiveController responsive) {
     return Column(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
-        _buildLeftColumn(context),
-        const SizedBox(height: 32),
-        _buildRightColumn(context),
+        _buildLeftColumn(responsive),
+        SizedBox(height: 32.h),
+        _buildRightColumn(responsive),
       ],
     );
   }
 
-  Widget _buildLeftColumn(BuildContext context) {
+  Widget _buildLeftColumn(ResponsiveController responsive) {
     return Column(
       mainAxisAlignment: MainAxisAlignment.center,
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         AuthHeader(isLogin: isLogin),
-        const SizedBox(height: 24),
+        SizedBox(
+            height: responsive.responsiveValue(mobile: 24.h, tablet: 32.h)),
         SocialAuthButtons(
           onGoogleSignIn: () => authController.signInWithGoogle(),
           onGithubSignIn: () => authController.signInWithGithub(),
-          //  onFacebookSignIn: () => authController.signInWithFacebook(),
           onAppleSignIn: () => authController.signInWithApple(),
         ),
       ],
     );
   }
 
-  Widget _buildRightColumn(BuildContext context) {
+  Widget _buildRightColumn(ResponsiveController responsive) {
     return Card(
-      elevation: 4,
+      elevation: responsive.responsiveValue(mobile: 2, tablet: 4),
       shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(16),
+        borderRadius: BorderRadius.circular(16.r),
       ),
       child: Padding(
-        padding: const EdgeInsets.all(32.0),
+        padding: responsive.responsivePadding(
+          left: 24,
+          right: 24,
+          top: 24,
+          bottom: 24,
+        ),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -123,7 +121,8 @@ class ResponsiveAuthWrapper extends StatelessWidget {
                 }
               },
             ),
-            const SizedBox(height: 24),
+            SizedBox(
+                height: responsive.responsiveValue(mobile: 24.h, tablet: 32.h)),
             AuthFooter(isLogin: isLogin),
           ],
         ),

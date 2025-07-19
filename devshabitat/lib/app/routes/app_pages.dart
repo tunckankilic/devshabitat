@@ -114,7 +114,7 @@ class AppPages {
     ),
     GetPage(
       name: AppRoutes.events,
-      page: () => const EventsView(),
+      page: () => EventsView(),
       binding: EventBinding(),
     ),
     GetPage(
