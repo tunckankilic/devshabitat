@@ -59,7 +59,7 @@ class AppPages {
     ),
     GetPage(
       name: AppRoutes.register,
-      page: () => const RegisterView(),
+      page: () => RegisterView(),
       binding: AuthBinding(),
     ),
     GetPage(
