@@ -1,5 +1,8 @@
 import 'package:devshabitat/app/models/user_profile_model.dart';
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
+import '../../controllers/responsive_controller.dart';
+import '../../services/responsive_performance_service.dart';
 
 class MembershipRequestWidget extends StatelessWidget {
   final List<UserProfile> pendingMembers;
@@ -15,12 +18,24 @@ class MembershipRequestWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final responsive = Get.find<ResponsiveController>();
+    final performanceService = Get.find<ResponsivePerformanceService>();
+
     if (pendingMembers.isEmpty) {
-      return const Card(
+      return Card(
         child: Padding(
-          padding: EdgeInsets.all(16.0),
+          padding: responsive.responsivePadding(all: 16),
           child: Center(
-            child: Text('Bekleyen üyelik talebi bulunmamaktadır.'),
+            child: Text(
+              'Bekleyen üyelik talebi bulunmamaktadır.',
+              style: TextStyle(
+                fontSize: performanceService.getOptimizedTextSize(
+                  cacheKey: 'membership_request_empty',
+                  mobileSize: 14.0,
+                  tabletSize: 16.0,
+                ),
+              ),
+            ),
           ),
         ),
       );
@@ -31,10 +46,16 @@ class MembershipRequestWidget extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Padding(
-            padding: const EdgeInsets.all(16.0),
+            padding: responsive.responsivePadding(all: 16),
             child: Text(
               'Üyelik Talepleri',
-              style: Theme.of(context).textTheme.titleLarge,
+              style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                    fontSize: performanceService.getOptimizedTextSize(
+                      cacheKey: 'membership_request_title',
+                      mobileSize: 20.0,
+                      tabletSize: 24.0,
+                    ),
+                  ),
             ),
           ),
           ListView.builder(
@@ -45,26 +66,63 @@ class MembershipRequestWidget extends StatelessWidget {
               final member = pendingMembers[index];
               return ListTile(
                 leading: CircleAvatar(
+                  radius: responsive.responsiveValue(
+                    mobile: 20.0,
+                    tablet: 24.0,
+                  ),
                   backgroundImage: member.photoUrl != null
                       ? NetworkImage(member.photoUrl!)
                       : null,
                   child: member.photoUrl == null && member.fullName != ""
-                      ? Text(member.fullName.characters.first.toUpperCase())
+                      ? Text(
+                          member.fullName.characters.first.toUpperCase(),
+                          style: TextStyle(
+                            fontSize: performanceService.getOptimizedTextSize(
+                              cacheKey: 'membership_request_avatar_text',
+                              mobileSize: 16.0,
+                              tabletSize: 18.0,
+                            ),
+                          ),
+                        )
                       : null,
                 ),
-                title: Text(member.fullName),
-                subtitle: Text(member.title.toString()),
+                title: Text(
+                  member.fullName,
+                  style: TextStyle(
+                    fontSize: performanceService.getOptimizedTextSize(
+                      cacheKey: 'membership_request_name',
+                      mobileSize: 16.0,
+                      tabletSize: 18.0,
+                    ),
+                  ),
+                ),
+                subtitle: Text(
+                  member.title.toString(),
+                  style: TextStyle(
+                    fontSize: performanceService.getOptimizedTextSize(
+                      cacheKey: 'membership_request_title_text',
+                      mobileSize: 14.0,
+                      tabletSize: 16.0,
+                    ),
+                  ),
+                ),
                 trailing: Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     IconButton(
-                      icon: const Icon(Icons.check_circle),
+                      icon: Icon(
+                        Icons.check_circle,
+                        size: responsive.minTouchTargetSize,
+                      ),
                       color: Colors.green,
                       onPressed: () => onAccept(member),
                       tooltip: 'Kabul Et',
                     ),
                     IconButton(
-                      icon: const Icon(Icons.cancel),
+                      icon: Icon(
+                        Icons.cancel,
+                        size: responsive.minTouchTargetSize,
+                      ),
                       color: Colors.red,
                       onPressed: () => onReject(member),
                       tooltip: 'Reddet',

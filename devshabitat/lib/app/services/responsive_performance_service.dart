@@ -64,6 +64,9 @@ class ResponsivePerformanceService extends GetxService {
     double top = 0,
     double right = 0,
     double bottom = 0,
+    double? horizontal,
+    double? vertical,
+    double? all,
   }) {
     if (_calculationCache.containsKey(cacheKey)) {
       return _calculationCache[cacheKey] as EdgeInsets;
@@ -75,6 +78,9 @@ class ResponsivePerformanceService extends GetxService {
       top: top,
       right: right,
       bottom: bottom,
+      horizontal: horizontal,
+      vertical: vertical,
+      all: all,
     );
 
     _calculationCache[cacheKey] = result;

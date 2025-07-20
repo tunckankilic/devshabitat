@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import '../../controllers/responsive_controller.dart';
 
@@ -10,102 +9,102 @@ class ResponsiveThemeHelper {
   // Font sizes based on breakpoints
   static double get displayLarge {
     return _responsive.responsiveValue(
-      mobile: 32.sp,
-      tablet: 40.sp,
+      mobile: 32,
+      tablet: 40,
     );
   }
 
   static double get displayMedium {
     return _responsive.responsiveValue(
-      mobile: 28.sp,
-      tablet: 36.sp,
+      mobile: 28,
+      tablet: 36,
     );
   }
 
   static double get displaySmall {
     return _responsive.responsiveValue(
-      mobile: 24.sp,
-      tablet: 32.sp,
+      mobile: 24,
+      tablet: 32,
     );
   }
 
   static double get headlineMedium {
     return _responsive.responsiveValue(
-      mobile: 20.sp,
-      tablet: 28.sp,
+      mobile: 20,
+      tablet: 28,
     );
   }
 
   static double get headlineSmall {
     return _responsive.responsiveValue(
-      mobile: 18.sp,
-      tablet: 24.sp,
+      mobile: 18,
+      tablet: 24,
     );
   }
 
   static double get titleLarge {
     return _responsive.responsiveValue(
-      mobile: 16.sp,
-      tablet: 20.sp,
+      mobile: 16,
+      tablet: 20,
     );
   }
 
   static double get bodyLarge {
     return _responsive.responsiveValue(
-      mobile: 16.sp,
-      tablet: 18.sp,
+      mobile: 16,
+      tablet: 18,
     );
   }
 
   static double get bodyMedium {
     return _responsive.responsiveValue(
-      mobile: 14.sp,
-      tablet: 16.sp,
+      mobile: 14,
+      tablet: 16,
     );
   }
 
   static double get bodySmall {
     return _responsive.responsiveValue(
-      mobile: 12.sp,
-      tablet: 14.sp,
+      mobile: 12,
+      tablet: 14,
     );
   }
 
   // Button padding
   static EdgeInsets get buttonPadding {
     return _responsive.responsiveValue(
-      mobile: EdgeInsets.symmetric(horizontal: 16.w, vertical: 12.h),
-      tablet: EdgeInsets.symmetric(horizontal: 24.w, vertical: 16.h),
+      mobile: EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+      tablet: EdgeInsets.symmetric(horizontal: 24, vertical: 16),
     );
   }
 
   static EdgeInsets get outlinedButtonPadding {
     return _responsive.responsiveValue(
-      mobile: EdgeInsets.symmetric(horizontal: 16.w, vertical: 12.h),
-      tablet: EdgeInsets.symmetric(horizontal: 24.w, vertical: 16.h),
+      mobile: EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+      tablet: EdgeInsets.symmetric(horizontal: 24, vertical: 16),
     );
   }
 
   static EdgeInsets get textButtonPadding {
     return _responsive.responsiveValue(
-      mobile: EdgeInsets.symmetric(horizontal: 12.w, vertical: 8.h),
-      tablet: EdgeInsets.symmetric(horizontal: 16.w, vertical: 12.h),
+      mobile: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+      tablet: EdgeInsets.symmetric(horizontal: 16, vertical: 12),
     );
   }
 
   // Icon sizes
   static double get iconSize {
     return _responsive.responsiveValue(
-      mobile: 20.sp,
-      tablet: 24.sp,
+      mobile: 20,
+      tablet: 24,
     );
   }
 
   // AppBar title size
   static double get appBarTitleSize {
     return _responsive.responsiveValue(
-      mobile: 20.sp,
-      tablet: 24.sp,
+      mobile: 20,
+      tablet: 24,
     );
   }
 

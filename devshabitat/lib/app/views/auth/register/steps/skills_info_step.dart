@@ -1,15 +1,17 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:flutter_screenutil/flutter_screenutil.dart';
 import '../../../../controllers/registration_controller.dart';
+import '../../../../controllers/responsive_controller.dart';
 
 class SkillsInfoStep extends GetView<RegistrationController> {
   const SkillsInfoStep({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
+    final responsive = Get.find<ResponsiveController>();
+
     return SingleChildScrollView(
-      padding: EdgeInsets.all(16.w),
+      padding: responsive.responsivePadding(all: 16),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -17,150 +19,162 @@ class SkillsInfoStep extends GetView<RegistrationController> {
           Text(
             'Yetenekler',
             style: TextStyle(
-              fontSize: 18.sp,
+              fontSize: responsive.responsiveValue(mobile: 18, tablet: 22),
               fontWeight: FontWeight.bold,
             ),
           ),
-          SizedBox(height: 8.h),
+          SizedBox(height: responsive.responsiveValue(mobile: 8, tablet: 12)),
           Wrap(
-            spacing: 8.w,
-            runSpacing: 8.h,
+            spacing: responsive.responsiveValue(mobile: 8, tablet: 12),
+            runSpacing: responsive.responsiveValue(mobile: 8, tablet: 12),
             children: [
               ...controller.selectedSkills.map(
                 (skill) => Chip(
                   label: Text(
                     skill,
-                    style: TextStyle(fontSize: 14.sp),
+                    style: TextStyle(
+                        fontSize:
+                            responsive.responsiveValue(mobile: 14, tablet: 16)),
                   ),
                   onDeleted: () => controller.selectedSkills.remove(skill),
                 ),
               ),
               ActionChip(
-                label: Icon(Icons.add, size: 20.sp),
+                label: Icon(Icons.add,
+                    size: responsive.responsiveValue(mobile: 20, tablet: 24)),
                 onPressed: () => _showAddDialog(
                     context, 'Yetenek', controller.selectedSkills),
               ),
             ],
           ),
-          SizedBox(height: 24.h),
+          SizedBox(height: responsive.responsiveValue(mobile: 24, tablet: 32)),
 
           // Programlama Dilleri
           Text(
             'Programlama Dilleri',
             style: TextStyle(
-              fontSize: 18.sp,
+              fontSize: responsive.responsiveValue(mobile: 18, tablet: 22),
               fontWeight: FontWeight.bold,
             ),
           ),
-          SizedBox(height: 8.h),
+          SizedBox(height: responsive.responsiveValue(mobile: 8, tablet: 12)),
           Wrap(
-            spacing: 8.w,
-            runSpacing: 8.h,
+            spacing: responsive.responsiveValue(mobile: 8, tablet: 12),
+            runSpacing: responsive.responsiveValue(mobile: 8, tablet: 12),
             children: [
               ...controller.selectedLanguages.map(
                 (language) => Chip(
                   label: Text(
                     language,
-                    style: TextStyle(fontSize: 14.sp),
+                    style: TextStyle(
+                        fontSize:
+                            responsive.responsiveValue(mobile: 14, tablet: 16)),
                   ),
                   onDeleted: () =>
                       controller.selectedLanguages.remove(language),
                 ),
               ),
               ActionChip(
-                label: Icon(Icons.add, size: 20.sp),
+                label: Icon(Icons.add,
+                    size: responsive.responsiveValue(mobile: 20, tablet: 24)),
                 onPressed: () => _showAddDialog(
                     context, 'Programlama Dili', controller.selectedLanguages),
               ),
             ],
           ),
-          SizedBox(height: 24.h),
+          SizedBox(height: responsive.responsiveValue(mobile: 24, tablet: 32)),
 
           // İlgi Alanları
           Text(
             'İlgi Alanları',
             style: TextStyle(
-              fontSize: 18.sp,
+              fontSize: responsive.responsiveValue(mobile: 18, tablet: 22),
               fontWeight: FontWeight.bold,
             ),
           ),
-          SizedBox(height: 8.h),
+          SizedBox(height: responsive.responsiveValue(mobile: 8, tablet: 12)),
           Wrap(
-            spacing: 8.w,
-            runSpacing: 8.h,
+            spacing: responsive.responsiveValue(mobile: 8, tablet: 12),
+            runSpacing: responsive.responsiveValue(mobile: 8, tablet: 12),
             children: [
               ...controller.selectedInterests.map(
                 (interest) => Chip(
                   label: Text(
                     interest,
-                    style: TextStyle(fontSize: 14.sp),
+                    style: TextStyle(
+                        fontSize:
+                            responsive.responsiveValue(mobile: 14, tablet: 16)),
                   ),
                   onDeleted: () =>
                       controller.selectedInterests.remove(interest),
                 ),
               ),
               ActionChip(
-                label: Icon(Icons.add, size: 20.sp),
+                label: Icon(Icons.add,
+                    size: responsive.responsiveValue(mobile: 20, tablet: 24)),
                 onPressed: () => _showAddDialog(
                     context, 'İlgi Alanı', controller.selectedInterests),
               ),
             ],
           ),
-          SizedBox(height: 24.h),
+          SizedBox(height: responsive.responsiveValue(mobile: 24, tablet: 32)),
 
           // Sosyal Medya Bağlantıları
           Text(
             'Sosyal Medya Bağlantıları',
             style: TextStyle(
-              fontSize: 18.sp,
+              fontSize: responsive.responsiveValue(mobile: 18, tablet: 22),
               fontWeight: FontWeight.bold,
             ),
           ),
-          SizedBox(height: 16.h),
+          SizedBox(height: responsive.responsiveValue(mobile: 16, tablet: 20)),
           _buildSocialLinkField('LinkedIn', 'linkedin'),
-          SizedBox(height: 8.h),
+          SizedBox(height: responsive.responsiveValue(mobile: 8, tablet: 12)),
           _buildSocialLinkField('GitHub', 'github'),
-          SizedBox(height: 8.h),
+          SizedBox(height: responsive.responsiveValue(mobile: 8, tablet: 12)),
           _buildSocialLinkField('Twitter', 'twitter'),
-          SizedBox(height: 24.h),
+          SizedBox(height: responsive.responsiveValue(mobile: 24, tablet: 32)),
 
           // Portfolyo URL'leri
           Text(
             'Portfolyo URL\'leri',
             style: TextStyle(
-              fontSize: 18.sp,
+              fontSize: responsive.responsiveValue(mobile: 18, tablet: 22),
               fontWeight: FontWeight.bold,
             ),
           ),
-          SizedBox(height: 8.h),
+          SizedBox(height: responsive.responsiveValue(mobile: 8, tablet: 12)),
           Wrap(
-            spacing: 8.w,
-            runSpacing: 8.h,
+            spacing: responsive.responsiveValue(mobile: 8, tablet: 12),
+            runSpacing: responsive.responsiveValue(mobile: 8, tablet: 12),
             children: [
               ...controller.portfolioUrls.map(
                 (url) => Chip(
                   label: Text(
                     url,
-                    style: TextStyle(fontSize: 14.sp),
+                    style: TextStyle(
+                        fontSize:
+                            responsive.responsiveValue(mobile: 14, tablet: 16)),
                   ),
                   onDeleted: () => controller.portfolioUrls.remove(url),
                 ),
               ),
               ActionChip(
-                label: Icon(Icons.add, size: 20.sp),
+                label: Icon(Icons.add,
+                    size: responsive.responsiveValue(mobile: 20, tablet: 24)),
                 onPressed: () => _showAddDialog(
                     context, 'Portfolyo URL', controller.portfolioUrls),
               ),
             ],
           ),
-          SizedBox(height: 24.h),
+          SizedBox(height: responsive.responsiveValue(mobile: 24, tablet: 32)),
 
           // Bilgilendirme Metni
           Text(
             'Bu bilgileri daha sonra profilinizden güncelleyebilirsiniz.',
             style: TextStyle(
               color: Colors.grey,
-              fontSize: 12.sp,
+              fontSize: responsive.responsiveValue(mobile: 12, tablet: 14),
             ),
           ),
         ],
@@ -169,6 +183,8 @@ class SkillsInfoStep extends GetView<RegistrationController> {
   }
 
   Widget _buildSocialLinkField(String label, String key) {
+    final responsive = Get.find<ResponsiveController>();
+
     return TextFormField(
       initialValue: controller.socialLinks[key],
       onChanged: (value) => controller.socialLinks[key] = value,
@@ -181,48 +197,67 @@ class SkillsInfoStep extends GetView<RegistrationController> {
               : key == 'github'
                   ? Icons.code
                   : Icons.alternate_email,
-          size: 24.sp,
+          size: responsive.responsiveValue(mobile: 24, tablet: 28),
         ),
         border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(8.r),
+          borderRadius: BorderRadius.circular(
+              responsive.responsiveValue(mobile: 8, tablet: 12)),
         ),
-        contentPadding: EdgeInsets.symmetric(
-          horizontal: 16.w,
-          vertical: 16.h,
+        contentPadding: responsive.responsivePadding(
+          horizontal: 16,
+          vertical: 16,
         ),
       ),
-      style: TextStyle(fontSize: 16.sp),
+      style: TextStyle(
+          fontSize: responsive.responsiveValue(mobile: 16, tablet: 18)),
     );
   }
 
   void _showAddDialog(BuildContext context, String type, RxList<String> list) {
     final textController = TextEditingController();
+    final responsive = Get.find<ResponsiveController>();
 
-    Get.dialog(
-      AlertDialog(
-        title: Text('$type Ekle'),
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text(
+          '$type Ekle',
+          style: TextStyle(
+              fontSize: responsive.responsiveValue(mobile: 18, tablet: 22)),
+        ),
         content: TextField(
           controller: textController,
           decoration: InputDecoration(
             labelText: type,
             border: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(8.r),
+              borderRadius: BorderRadius.circular(
+                  responsive.responsiveValue(mobile: 8, tablet: 12)),
             ),
           ),
+          style: TextStyle(
+              fontSize: responsive.responsiveValue(mobile: 16, tablet: 18)),
         ),
         actions: [
           TextButton(
-            onPressed: () => Get.back(),
-            child: Text('İptal'),
+            onPressed: () => Navigator.pop(context),
+            child: Text(
+              'İptal',
+              style: TextStyle(
+                  fontSize: responsive.responsiveValue(mobile: 16, tablet: 18)),
+            ),
           ),
           ElevatedButton(
             onPressed: () {
               if (textController.text.isNotEmpty) {
                 list.add(textController.text);
-                Get.back();
+                Navigator.pop(context);
               }
             },
-            child: Text('Ekle'),
+            child: Text(
+              'Ekle',
+              style: TextStyle(
+                  fontSize: responsive.responsiveValue(mobile: 16, tablet: 18)),
+            ),
           ),
         ],
       ),

@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
+import 'package:devshabitat/app/controllers/responsive_controller.dart';
 
 class LocationFilterWidget extends StatelessWidget {
   final double radius;
@@ -20,16 +22,31 @@ class LocationFilterWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final responsive = ResponsiveController.to;
     return Container(
-      padding: const EdgeInsets.all(16),
+      padding: responsive.responsivePadding(all: 16),
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: BorderRadius.circular(responsive.responsiveValue(
+          mobile: 12,
+          tablet: 16,
+          desktop: 20,
+        )),
         boxShadow: [
           BoxShadow(
             color: Colors.black.withOpacity(0.1),
-            blurRadius: 8,
-            offset: const Offset(0, 2),
+            blurRadius: responsive.responsiveValue(
+              mobile: 8,
+              tablet: 12,
+              desktop: 16,
+            ),
+            offset: Offset(
+                0,
+                responsive.responsiveValue(
+                  mobile: 2,
+                  tablet: 3,
+                  desktop: 4,
+                )),
           ),
         ],
       ),
@@ -37,10 +54,14 @@ class LocationFilterWidget extends StatelessWidget {
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text(
+          Text(
             'Mesafe Filtresi',
             style: TextStyle(
-              fontSize: 16,
+              fontSize: responsive.responsiveValue(
+                mobile: 16,
+                tablet: 18,
+                desktop: 20,
+              ),
               fontWeight: FontWeight.bold,
             ),
           ),
@@ -52,16 +73,29 @@ class LocationFilterWidget extends StatelessWidget {
             label: '${radius.round()} km',
             onChanged: onRadiusChanged,
           ),
-          const SizedBox(height: 16),
-          const Text(
+          SizedBox(height: responsive.responsivePadding(vertical: 16).top),
+          Text(
             'Kategoriler',
             style: TextStyle(
-              fontSize: 16,
+              fontSize: responsive.responsiveValue(
+                mobile: 16,
+                tablet: 18,
+                desktop: 20,
+              ),
               fontWeight: FontWeight.bold,
             ),
           ),
           Wrap(
-            spacing: 8,
+            spacing: responsive.responsiveValue(
+              mobile: 8,
+              tablet: 12,
+              desktop: 16,
+            ),
+            runSpacing: responsive.responsiveValue(
+              mobile: 8,
+              tablet: 12,
+              desktop: 16,
+            ),
             children: [
               'Frontend',
               'Backend',
@@ -72,7 +106,16 @@ class LocationFilterWidget extends StatelessWidget {
             ].map((category) {
               final isSelected = selectedCategories.contains(category);
               return FilterChip(
-                label: Text(category),
+                label: Text(
+                  category,
+                  style: TextStyle(
+                    fontSize: responsive.responsiveValue(
+                      mobile: 14,
+                      tablet: 16,
+                      desktop: 18,
+                    ),
+                  ),
+                ),
                 selected: isSelected,
                 onSelected: (selected) {
                   final newCategories = List<String>.from(selectedCategories);
@@ -83,12 +126,23 @@ class LocationFilterWidget extends StatelessWidget {
                   }
                   onCategoriesChanged(newCategories);
                 },
+                padding:
+                    responsive.responsivePadding(horizontal: 12, vertical: 8),
               );
             }).toList(),
           ),
-          const SizedBox(height: 16),
+          SizedBox(height: responsive.responsivePadding(vertical: 16).top),
           SwitchListTile(
-            title: const Text('Sadece Çevrimiçi'),
+            title: Text(
+              'Sadece Çevrimiçi',
+              style: TextStyle(
+                fontSize: responsive.responsiveValue(
+                  mobile: 16,
+                  tablet: 18,
+                  desktop: 20,
+                ),
+              ),
+            ),
             value: showOnlineOnly,
             onChanged: onOnlineStatusChanged,
             dense: true,

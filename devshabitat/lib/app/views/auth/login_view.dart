@@ -15,11 +15,11 @@ class LoginView extends BaseView<AuthController> {
     final responsive = Get.find<ResponsiveController>();
 
     if (responsive.isSmallPhone) {
-      return const SmallPhoneLogin();
+      return SmallPhoneLogin();
     } else if (responsive.isLargePhone) {
       return LargePhoneLogin();
     } else {
-      return const TabletLogin();
+      return TabletLogin();
     }
   }
 }

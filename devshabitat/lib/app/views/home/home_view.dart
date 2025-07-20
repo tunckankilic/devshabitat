@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:flutter_screenutil/flutter_screenutil.dart';
 import '../../controllers/home_controller.dart';
 import '../../controllers/responsive_controller.dart';
 import '../base/base_view.dart';
@@ -22,18 +21,18 @@ class HomeView extends BaseView<HomeController> {
           'Ana Sayfa',
           style: TextStyle(
               fontSize: responsive.responsiveValue(
-            mobile: 20.sp,
-            tablet: 24.sp,
+            mobile: 20,
+            tablet: 24,
           )),
         ),
         actions: [
           IconButton(
-            icon: Icon(Icons.notifications_none,
-                size: responsive.minTouchTarget.sp),
+            icon:
+                Icon(Icons.notifications_none, size: responsive.minTouchTarget),
             onPressed: () => Get.toNamed('/notifications'),
           ),
           IconButton(
-            icon: Icon(Icons.search, size: responsive.minTouchTarget.sp),
+            icon: Icon(Icons.search, size: responsive.minTouchTarget),
             onPressed: () => Get.toNamed('/search'),
           ),
         ],
@@ -68,19 +67,26 @@ class HomeView extends BaseView<HomeController> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(Icons.error_outline, size: 48.sp, color: Colors.red),
-            SizedBox(height: 16.h),
+            Icon(Icons.error_outline,
+                size: responsive.responsiveValue(mobile: 48, tablet: 56),
+                color: Colors.red),
+            SizedBox(
+                height: responsive.responsiveValue(mobile: 16, tablet: 20)),
             Text(
               controller.errorMessage.value,
-              style: TextStyle(fontSize: 16.sp),
+              style: TextStyle(
+                  fontSize: responsive.responsiveValue(mobile: 16, tablet: 18)),
               textAlign: TextAlign.center,
             ),
-            SizedBox(height: 16.h),
+            SizedBox(
+                height: responsive.responsiveValue(mobile: 16, tablet: 20)),
             ElevatedButton(
               onPressed: controller.loadData,
               child: Text(
                 'Tekrar Dene',
-                style: TextStyle(fontSize: 16.sp),
+                style: TextStyle(
+                    fontSize:
+                        responsive.responsiveValue(mobile: 16, tablet: 18)),
               ),
             ),
           ],
@@ -108,14 +114,16 @@ class HomeView extends BaseView<HomeController> {
             child: Column(
               children: [
                 const ProfileSummaryCard(),
-                SizedBox(height: 16.h),
+                SizedBox(
+                    height: responsive.responsiveValue(mobile: 16, tablet: 20)),
                 const QuickActionsCard(),
-                SizedBox(height: 16.h),
+                SizedBox(
+                    height: responsive.responsiveValue(mobile: 16, tablet: 20)),
                 const ConnectionsOverviewCard(),
               ],
             ),
           ),
-          SizedBox(width: 24.w),
+          SizedBox(width: responsive.responsiveValue(mobile: 24, tablet: 32)),
           // Right Column - Main Content
           Expanded(
             flex: 3,
@@ -133,7 +141,8 @@ class HomeView extends BaseView<HomeController> {
                     onShare: () => controller.onShare(controller.items.first),
                   );
                 }),
-                SizedBox(height: 16.h),
+                SizedBox(
+                    height: responsive.responsiveValue(mobile: 16, tablet: 20)),
                 const GithubStatsCard(),
               ],
             ),
@@ -148,13 +157,13 @@ class HomeView extends BaseView<HomeController> {
       child: Column(
         children: [
           const ProfileSummaryCard(),
-          SizedBox(height: 16.h),
+          SizedBox(height: responsive.responsiveValue(mobile: 16, tablet: 20)),
           const QuickActionsCard(),
-          SizedBox(height: 16.h),
+          SizedBox(height: responsive.responsiveValue(mobile: 16, tablet: 20)),
           const ConnectionsOverviewCard(),
-          SizedBox(height: 16.h),
+          SizedBox(height: responsive.responsiveValue(mobile: 16, tablet: 20)),
           const GithubStatsCard(),
-          SizedBox(height: 16.h),
+          SizedBox(height: responsive.responsiveValue(mobile: 16, tablet: 20)),
           Obx(() {
             if (controller.items.isEmpty) {
               return _buildEmptyState();
@@ -169,8 +178,8 @@ class HomeView extends BaseView<HomeController> {
           // Add bottom padding for navigation
           SizedBox(
               height: responsive.responsiveValue(
-            mobile: 100.h,
-            tablet: 20.h,
+            mobile: 100,
+            tablet: 20,
           )),
         ],
       ),
@@ -179,21 +188,21 @@ class HomeView extends BaseView<HomeController> {
 
   Widget _buildEmptyState() {
     return Container(
-      padding: EdgeInsets.all(24.r),
+      padding: responsive.responsivePadding(all: 24),
       child: Column(
         children: [
           Icon(
             Icons.explore_outlined,
-            size: 48.sp,
+            size: responsive.responsiveValue(mobile: 48, tablet: 56),
             color: Theme.of(Get.context!).colorScheme.onSurfaceVariant,
           ),
-          SizedBox(height: 16.h),
+          SizedBox(height: responsive.responsiveValue(mobile: 16, tablet: 20)),
           Text(
             'Henüz içerik yok',
             style: Theme.of(Get.context!).textTheme.titleMedium,
             textAlign: TextAlign.center,
           ),
-          SizedBox(height: 8.h),
+          SizedBox(height: responsive.responsiveValue(mobile: 8, tablet: 12)),
           Text(
             'Topluluklar ve etkinlikler keşfetmeye başlayın',
             style: Theme.of(Get.context!).textTheme.bodyMedium,

@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:flutter_screenutil/flutter_screenutil.dart';
 import '../controllers/navigation_controller.dart';
 import '../controllers/responsive_controller.dart';
 import 'home/home_view.dart';
@@ -41,33 +40,43 @@ class MainWrapper extends StatelessWidget {
                   destinations: [
                     NavigationRailDestination(
                       icon: Icon(Icons.home_outlined,
-                          size: responsiveController.minTouchTarget.w),
+                          size: responsiveController.minTouchTarget),
                       selectedIcon: Icon(Icons.home,
-                          size: responsiveController.minTouchTarget.w),
-                      label:
-                          Text('Ana Sayfa', style: TextStyle(fontSize: 12.sp)),
+                          size: responsiveController.minTouchTarget),
+                      label: Text('Ana Sayfa',
+                          style: TextStyle(
+                              fontSize: responsiveController.responsiveValue(
+                                  mobile: 12, tablet: 14))),
                     ),
                     NavigationRailDestination(
                       icon: Icon(Icons.explore_outlined,
-                          size: responsiveController.minTouchTarget.w),
+                          size: responsiveController.minTouchTarget),
                       selectedIcon: Icon(Icons.explore,
-                          size: responsiveController.minTouchTarget.w),
-                      label: Text('Keşfet', style: TextStyle(fontSize: 12.sp)),
+                          size: responsiveController.minTouchTarget),
+                      label: Text('Keşfet',
+                          style: TextStyle(
+                              fontSize: responsiveController.responsiveValue(
+                                  mobile: 12, tablet: 14))),
                     ),
                     NavigationRailDestination(
                       icon: Icon(Icons.message_outlined,
-                          size: responsiveController.minTouchTarget.w),
+                          size: responsiveController.minTouchTarget),
                       selectedIcon: Icon(Icons.message,
-                          size: responsiveController.minTouchTarget.w),
-                      label:
-                          Text('Mesajlar', style: TextStyle(fontSize: 12.sp)),
+                          size: responsiveController.minTouchTarget),
+                      label: Text('Mesajlar',
+                          style: TextStyle(
+                              fontSize: responsiveController.responsiveValue(
+                                  mobile: 12, tablet: 14))),
                     ),
                     NavigationRailDestination(
                       icon: Icon(Icons.person_outline,
-                          size: responsiveController.minTouchTarget.w),
+                          size: responsiveController.minTouchTarget),
                       selectedIcon: Icon(Icons.person,
-                          size: responsiveController.minTouchTarget.w),
-                      label: Text('Profil', style: TextStyle(fontSize: 12.sp)),
+                          size: responsiveController.minTouchTarget),
+                      label: Text('Profil',
+                          style: TextStyle(
+                              fontSize: responsiveController.responsiveValue(
+                                  mobile: 12, tablet: 14))),
                     ),
                   ],
                 )),
@@ -88,28 +97,44 @@ class MainWrapper extends StatelessWidget {
             selectedIndex: navigationController.currentIndex.value,
             onDestinationSelected: navigationController.changePage,
             height: responsiveController.responsiveValue(
-              mobile: 80.h,
-              tablet: 90.h,
+              mobile: 80,
+              tablet: 90,
             ),
             destinations: [
               NavigationDestination(
-                icon: Icon(Icons.home_outlined, size: 24.sp),
-                selectedIcon: Icon(Icons.home, size: 24.sp),
+                icon: Icon(Icons.home_outlined,
+                    size: responsiveController.responsiveValue(
+                        mobile: 24, tablet: 28)),
+                selectedIcon: Icon(Icons.home,
+                    size: responsiveController.responsiveValue(
+                        mobile: 24, tablet: 28)),
                 label: 'Ana Sayfa',
               ),
               NavigationDestination(
-                icon: Icon(Icons.explore_outlined, size: 24.sp),
-                selectedIcon: Icon(Icons.explore, size: 24.sp),
+                icon: Icon(Icons.explore_outlined,
+                    size: responsiveController.responsiveValue(
+                        mobile: 24, tablet: 28)),
+                selectedIcon: Icon(Icons.explore,
+                    size: responsiveController.responsiveValue(
+                        mobile: 24, tablet: 28)),
                 label: 'Keşfet',
               ),
               NavigationDestination(
-                icon: Icon(Icons.message_outlined, size: 24.sp),
-                selectedIcon: Icon(Icons.message, size: 24.sp),
+                icon: Icon(Icons.message_outlined,
+                    size: responsiveController.responsiveValue(
+                        mobile: 24, tablet: 28)),
+                selectedIcon: Icon(Icons.message,
+                    size: responsiveController.responsiveValue(
+                        mobile: 24, tablet: 28)),
                 label: 'Mesajlar',
               ),
               NavigationDestination(
-                icon: Icon(Icons.person_outline, size: 24.sp),
-                selectedIcon: Icon(Icons.person, size: 24.sp),
+                icon: Icon(Icons.person_outline,
+                    size: responsiveController.responsiveValue(
+                        mobile: 24, tablet: 28)),
+                selectedIcon: Icon(Icons.person,
+                    size: responsiveController.responsiveValue(
+                        mobile: 24, tablet: 28)),
                 label: 'Profil',
               ),
             ],

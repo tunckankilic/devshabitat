@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:get/get.dart';
 import '../constants/app_strings.dart';
+import '../controllers/responsive_controller.dart';
 
 class ErrorStateWidget extends StatelessWidget {
   final String? message;
@@ -22,42 +23,51 @@ class ErrorStateWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final responsive = Get.find<ResponsiveController>();
+
     return Center(
       child: Padding(
-        padding: padding ?? EdgeInsets.all(16.w),
+        padding: padding ??
+            EdgeInsets.all(responsive.responsiveValue(mobile: 16, tablet: 20)),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
             Icon(
               icon ?? Icons.error_outline,
-              size: iconSize ?? 48.w,
+              size: iconSize ??
+                  responsive.responsiveValue(mobile: 48, tablet: 56),
               color: Theme.of(context).colorScheme.error,
             ),
-            SizedBox(height: 16.h),
+            SizedBox(
+                height: responsive.responsiveValue(mobile: 16, tablet: 20)),
             Text(
               message ?? AppStrings.errorGeneric,
               style: Theme.of(context).textTheme.bodyLarge?.copyWith(
                     color: Theme.of(context).colorScheme.error,
-                    fontSize: 14.sp,
+                    fontSize:
+                        responsive.responsiveValue(mobile: 14, tablet: 16),
                   ),
               textAlign: TextAlign.center,
             ),
             if (onRetry != null) ...[
-              SizedBox(height: 16.h),
+              SizedBox(
+                  height: responsive.responsiveValue(mobile: 16, tablet: 20)),
               ElevatedButton(
                 onPressed: onRetry,
                 style: ElevatedButton.styleFrom(
                   backgroundColor: Theme.of(context).colorScheme.error,
                   foregroundColor: Colors.white,
                   padding: EdgeInsets.symmetric(
-                    horizontal: 16.w,
-                    vertical: 8.h,
+                    horizontal:
+                        responsive.responsiveValue(mobile: 16, tablet: 20),
+                    vertical: responsive.responsiveValue(mobile: 8, tablet: 12),
                   ),
                 ),
                 child: Text(
                   retryText ?? AppStrings.retry,
                   style: TextStyle(
-                    fontSize: 14.sp,
+                    fontSize:
+                        responsive.responsiveValue(mobile: 14, tablet: 16),
                   ),
                 ),
               ),

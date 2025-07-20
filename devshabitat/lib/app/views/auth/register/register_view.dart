@@ -1,36 +1,51 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:flutter_screenutil/flutter_screenutil.dart';
 import '../../../controllers/registration_controller.dart';
 import '../../../controllers/responsive_controller.dart';
-import '../../base/base_view.dart';
 import 'steps/basic_info_step.dart';
 import 'steps/personal_info_step.dart';
 import 'steps/professional_info_step.dart';
 import 'steps/skills_info_step.dart';
 
-class RegisterView extends BaseView<RegistrationController> {
-  const RegisterView({Key? key}) : super(key: key);
+class RegisterView extends GetView<RegistrationController> {
+  final _responsiveController = Get.find<ResponsiveController>();
+
+  RegisterView({Key? key}) : super(key: key);
 
   @override
-  Widget buildView(BuildContext context) {
-    final ResponsiveController responsive = Get.find<ResponsiveController>();
-
+  Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         title: Text(
           'Kayıt Ol',
-          style: TextStyle(fontSize: 20.sp),
+          style: TextStyle(
+            fontSize: _responsiveController.responsiveValue(
+              mobile: 20.0,
+              tablet: 24.0,
+            ),
+          ),
         ),
         leading: Obx(() {
           if (controller.currentStep == RegistrationStep.basicInfo) {
             return IconButton(
-              icon: Icon(Icons.close, size: 24.sp),
+              icon: Icon(
+                Icons.close,
+                size: _responsiveController.responsiveValue(
+                  mobile: 24.0,
+                  tablet: 32.0,
+                ),
+              ),
               onPressed: () => Get.back(),
             );
           }
           return IconButton(
-            icon: Icon(Icons.arrow_back, size: 24.sp),
+            icon: Icon(
+              Icons.arrow_back,
+              size: _responsiveController.responsiveValue(
+                mobile: 24.0,
+                tablet: 32.0,
+              ),
+            ),
             onPressed: () => controller.goBack(),
           );
         }),
@@ -50,26 +65,39 @@ class RegisterView extends BaseView<RegistrationController> {
                 Theme.of(context).primaryColor,
               ),
             ),
-            SizedBox(height: 16.h),
+            SizedBox(
+                height: _responsiveController.responsiveValue(
+              mobile: 16.0,
+              tablet: 24.0,
+            )),
 
             // Step Title
             Padding(
-              padding: EdgeInsets.symmetric(horizontal: 16.w),
+              padding: _responsiveController.responsivePadding(
+                horizontal: 16.0,
+              ),
               child: Text(
                 _getStepTitle(controller.currentStep),
                 style: TextStyle(
-                  fontSize: 24.sp,
+                  fontSize: _responsiveController.responsiveValue(
+                    mobile: 24.0,
+                    tablet: 32.0,
+                  ),
                   fontWeight: FontWeight.bold,
                 ),
               ),
             ),
-            SizedBox(height: 24.h),
+            SizedBox(
+                height: _responsiveController.responsiveValue(
+              mobile: 24.0,
+              tablet: 32.0,
+            )),
 
             // Step Content
             Expanded(
               child: SingleChildScrollView(
-                padding: EdgeInsets.all(16.w),
-                child: responsive.isTablet
+                padding: _responsiveController.responsivePadding(all: 16.0),
+                child: _responsiveController.isTablet
                     ? _buildTabletLayout(controller.currentStep)
                     : _buildCurrentStep(controller.currentStep),
               ),
@@ -78,7 +106,7 @@ class RegisterView extends BaseView<RegistrationController> {
             // Bottom Buttons
             if (controller.currentStep != RegistrationStep.completed)
               Padding(
-                padding: EdgeInsets.all(16.w),
+                padding: _responsiveController.responsivePadding(all: 16.0),
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   children: [
@@ -87,15 +115,26 @@ class RegisterView extends BaseView<RegistrationController> {
                         onPressed: () => controller.skipCurrentStep(),
                         child: Text(
                           'Bu Adımı Atla',
-                          style: TextStyle(fontSize: 16.sp),
+                          style: TextStyle(
+                            fontSize: _responsiveController.responsiveValue(
+                              mobile: 16.0,
+                              tablet: 18.0,
+                            ),
+                          ),
                         ),
                       ),
-                    SizedBox(height: 8.h),
+                    SizedBox(
+                        height: _responsiveController.responsiveValue(
+                      mobile: 8.0,
+                      tablet: 12.0,
+                    )),
                     SizedBox(
                       width: double.infinity,
                       child: ElevatedButton(
                         style: ElevatedButton.styleFrom(
-                          padding: EdgeInsets.symmetric(vertical: 16.h),
+                          padding: _responsiveController.responsivePadding(
+                            vertical: 16.0,
+                          ),
                         ),
                         onPressed: controller.canProceedToNextStep
                             ? () => controller.proceedToNextStep()
@@ -104,7 +143,12 @@ class RegisterView extends BaseView<RegistrationController> {
                           controller.currentStep == RegistrationStep.skillsInfo
                               ? 'Kaydı Tamamla'
                               : 'Devam Et',
-                          style: TextStyle(fontSize: 18.sp),
+                          style: TextStyle(
+                            fontSize: _responsiveController.responsiveValue(
+                              mobile: 18.0,
+                              tablet: 20.0,
+                            ),
+                          ),
                         ),
                       ),
                     ),
@@ -124,20 +168,32 @@ class RegisterView extends BaseView<RegistrationController> {
         Expanded(
           flex: 1,
           child: Card(
-            margin: EdgeInsets.only(right: 16.w),
+            margin: EdgeInsets.only(
+              right: _responsiveController.responsiveValue(
+                mobile: 16.0,
+                tablet: 24.0,
+              ),
+            ),
             child: Padding(
-              padding: EdgeInsets.all(16.w),
+              padding: _responsiveController.responsivePadding(all: 16.0),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
                     'Kayıt Adımları',
                     style: TextStyle(
-                      fontSize: 20.sp,
+                      fontSize: _responsiveController.responsiveValue(
+                        mobile: 20.0,
+                        tablet: 24.0,
+                      ),
                       fontWeight: FontWeight.bold,
                     ),
                   ),
-                  SizedBox(height: 16.h),
+                  SizedBox(
+                      height: _responsiveController.responsiveValue(
+                    mobile: 16.0,
+                    tablet: 24.0,
+                  )),
                   _buildStepIndicator(
                     'Temel Bilgiler',
                     RegistrationStep.basicInfo,
@@ -180,13 +236,23 @@ class RegisterView extends BaseView<RegistrationController> {
     final bool isCurrent = stepEnum == currentStep;
 
     return Container(
-      margin: EdgeInsets.symmetric(vertical: 8.h),
-      padding: EdgeInsets.all(12.w),
+      margin: EdgeInsets.symmetric(
+        vertical: _responsiveController.responsiveValue(
+          mobile: 8.0,
+          tablet: 12.0,
+        ),
+      ),
+      padding: _responsiveController.responsivePadding(all: 12.0),
       decoration: BoxDecoration(
         color: isCurrent
             ? Theme.of(Get.context!).primaryColor.withOpacity(0.1)
             : null,
-        borderRadius: BorderRadius.circular(8.r),
+        borderRadius: BorderRadius.circular(
+          _responsiveController.responsiveValue(
+            mobile: 8.0,
+            tablet: 12.0,
+          ),
+        ),
         border: Border.all(
           color: isCompleted
               ? Theme.of(Get.context!).primaryColor
@@ -200,14 +266,24 @@ class RegisterView extends BaseView<RegistrationController> {
             color: isCompleted
                 ? Theme.of(Get.context!).primaryColor
                 : Colors.grey[600],
-            size: 20.sp,
+            size: _responsiveController.responsiveValue(
+              mobile: 20.0,
+              tablet: 24.0,
+            ),
           ),
-          SizedBox(width: 12.w),
+          SizedBox(
+              width: _responsiveController.responsiveValue(
+            mobile: 12.0,
+            tablet: 16.0,
+          )),
           Expanded(
             child: Text(
               title,
               style: TextStyle(
-                fontSize: 16.sp,
+                fontSize: _responsiveController.responsiveValue(
+                  mobile: 16.0,
+                  tablet: 18.0,
+                ),
                 fontWeight: isCurrent ? FontWeight.bold : FontWeight.normal,
                 color: isCurrent ? Theme.of(Get.context!).primaryColor : null,
               ),
@@ -221,7 +297,7 @@ class RegisterView extends BaseView<RegistrationController> {
   Widget _buildCurrentStep(RegistrationStep step) {
     switch (step) {
       case RegistrationStep.basicInfo:
-        return const BasicInfoStep();
+        return BasicInfoStep();
       case RegistrationStep.personalInfo:
         return PersonalInfoStep();
       case RegistrationStep.professionalInfo:

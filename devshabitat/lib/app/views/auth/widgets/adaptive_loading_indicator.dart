@@ -1,30 +1,63 @@
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
+import '../../../controllers/responsive_controller.dart';
+import '../../../services/responsive_performance_service.dart';
 
 class AdaptiveLoadingIndicator extends StatelessWidget {
+  final _responsiveController = Get.find<ResponsiveController>();
   final Color? color;
-  final double size;
-  final double strokeWidth;
+  final String? message;
+  final bool isSmall;
 
-  const AdaptiveLoadingIndicator({
-    super.key,
+  AdaptiveLoadingIndicator({
+    Key? key,
     this.color,
-    this.size = 24.0,
-    this.strokeWidth = 2.0,
-  });
+    this.message,
+    this.isSmall = false,
+  }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
-    return Center(
-      child: SizedBox(
-        height: size,
-        width: size,
-        child: CircularProgressIndicator(
-          strokeWidth: strokeWidth,
-          valueColor: AlwaysStoppedAnimation<Color>(
-            color ?? Theme.of(context).primaryColor,
+    return Column(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        SizedBox(
+          width: _responsiveController.responsiveValue(
+            mobile: isSmall ? 16.0 : 24.0,
+            tablet: isSmall ? 20.0 : 32.0,
+          ),
+          height: _responsiveController.responsiveValue(
+            mobile: isSmall ? 16.0 : 24.0,
+            tablet: isSmall ? 20.0 : 32.0,
+          ),
+          child: CircularProgressIndicator(
+            strokeWidth: _responsiveController.responsiveValue(
+              mobile: isSmall ? 2.0 : 3.0,
+              tablet: isSmall ? 2.5 : 3.5,
+            ),
+            valueColor: AlwaysStoppedAnimation<Color>(
+              color ?? Theme.of(context).primaryColor,
+            ),
           ),
         ),
-      ),
+        if (message != null) ...[
+          SizedBox(
+              height: _responsiveController.responsiveValue(
+            mobile: 16.0,
+            tablet: 20.0,
+          )),
+          Text(
+            message!,
+            style: TextStyle(
+              fontSize: _responsiveController.responsiveValue(
+                mobile: 16.0,
+                tablet: 18.0,
+              ),
+              color: color ?? Theme.of(context).primaryColor,
+            ),
+          ),
+        ],
+      ],
     );
   }
 }
@@ -45,6 +78,8 @@ class AdaptiveLoadingOverlay extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final responsive = Get.find<ResponsiveController>();
+    final performanceService = Get.find<ResponsivePerformanceService>();
     return Stack(
       children: [
         child,
@@ -53,19 +88,38 @@ class AdaptiveLoadingOverlay extends StatelessWidget {
             color: Colors.black.withOpacity(0.3),
             child: Center(
               child: Card(
-                margin: const EdgeInsets.all(16),
+                margin: EdgeInsets.all(
+                  responsive.responsiveValue(
+                    mobile: 16,
+                    tablet: 20,
+                  ),
+                ),
                 child: Padding(
-                  padding: const EdgeInsets.all(16),
+                  padding: EdgeInsets.all(
+                    responsive.responsiveValue(
+                      mobile: 16,
+                      tablet: 20,
+                    ),
+                  ),
                   child: Column(
                     mainAxisSize: MainAxisSize.min,
                     children: [
                       AdaptiveLoadingIndicator(color: color),
                       if (message != null) ...[
-                        const SizedBox(height: 16),
+                        SizedBox(
+                          height: responsive.responsiveValue(
+                            mobile: 16,
+                            tablet: 20,
+                          ),
+                        ),
                         Text(
                           message!,
-                          style: const TextStyle(
-                            fontSize: 16,
+                          style: TextStyle(
+                            fontSize: performanceService.getOptimizedTextSize(
+                              cacheKey: 'loading_message',
+                              mobileSize: 16,
+                              tabletSize: 18,
+                            ),
                             fontWeight: FontWeight.w500,
                           ),
                         ),

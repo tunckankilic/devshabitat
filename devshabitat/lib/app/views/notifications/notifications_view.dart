@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:flutter_screenutil/flutter_screenutil.dart';
 import '../../controllers/home_controller.dart';
 import '../base/base_view.dart';
 import '../../widgets/adaptive_touch_target.dart';
@@ -21,8 +20,8 @@ class NotificationsView extends BaseView<HomeController> {
           'Bildirimler',
           style: TextStyle(
             fontSize: responsive.responsiveValue(
-              mobile: 18.sp,
-              tablet: 22.sp,
+              mobile: 18,
+              tablet: 22,
             ),
           ),
         ),
@@ -31,7 +30,7 @@ class NotificationsView extends BaseView<HomeController> {
             onTap: () => controller.markAllNotificationsAsRead(),
             child: Icon(
               Icons.check_circle_outline,
-              size: responsive.minTouchTarget.sp,
+              size: responsive.minTouchTarget,
             ),
           ),
         ],
@@ -65,7 +64,8 @@ class NotificationsView extends BaseView<HomeController> {
     return Obx(
       () => Center(
         child: Container(
-          constraints: BoxConstraints(maxWidth: 800.w),
+          constraints: BoxConstraints(
+              maxWidth: responsive.responsiveValue(mobile: 800, tablet: 1000)),
           padding: responsive.responsivePadding(all: 24),
           child: ListView.builder(
             itemCount: controller.notifications.length,
@@ -91,14 +91,14 @@ class NotificationsView extends BaseView<HomeController> {
         contentPadding: responsive.responsivePadding(all: 16),
         leading: CircleAvatar(
           radius: responsive.responsiveValue(
-            mobile: 24.r,
-            tablet: 32.r,
+            mobile: 24,
+            tablet: 32,
           ),
           child: Icon(
             Icons.notifications,
             size: responsive.responsiveValue(
-              mobile: 24.sp,
-              tablet: 28.sp,
+              mobile: 24,
+              tablet: 28,
             ),
           ),
         ),
@@ -106,8 +106,8 @@ class NotificationsView extends BaseView<HomeController> {
           notification.title,
           style: TextStyle(
             fontSize: responsive.responsiveValue(
-              mobile: 16.sp,
-              tablet: 18.sp,
+              mobile: 16,
+              tablet: 18,
             ),
             fontWeight: FontWeight.w600,
           ),
@@ -116,8 +116,8 @@ class NotificationsView extends BaseView<HomeController> {
           notification.body,
           style: TextStyle(
             fontSize: responsive.responsiveValue(
-              mobile: 14.sp,
-              tablet: 16.sp,
+              mobile: 14,
+              tablet: 16,
             ),
           ),
           maxLines: 2,
@@ -127,8 +127,8 @@ class NotificationsView extends BaseView<HomeController> {
           '${notification.createdAt.difference(DateTime.now()).inHours.abs()} saat önce',
           style: TextStyle(
             fontSize: responsive.responsiveValue(
-              mobile: 12.sp,
-              tablet: 14.sp,
+              mobile: 12,
+              tablet: 14,
             ),
             color: Colors.grey[600],
           ),

@@ -1,30 +1,60 @@
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
+import '../../../controllers/responsive_controller.dart';
 
 class AuthHeader extends StatelessWidget {
-  final bool isLogin;
+  final String title;
+  final String subtitle;
+  final String? logoPath;
 
   const AuthHeader({
     super.key,
-    required this.isLogin,
+    required this.title,
+    required this.subtitle,
+    this.logoPath,
   });
 
   @override
   Widget build(BuildContext context) {
+    final responsive = Get.find<ResponsiveController>();
+
     return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
+        if (logoPath != null)
+          Image.asset(
+            logoPath!,
+            width: responsive.responsiveValue(
+              mobile: 80,
+              tablet: 100,
+            ),
+            height: responsive.responsiveValue(
+              mobile: 80,
+              tablet: 100,
+            ),
+          ),
+        SizedBox(height: responsive.responsiveValue(mobile: 24, tablet: 32)),
         Text(
-          isLogin ? 'Hoş Geldiniz!' : 'Hesap Oluşturun',
-          style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-                fontWeight: FontWeight.bold,
-              ),
+          title,
+          style: TextStyle(
+            fontSize: responsive.responsiveValue(
+              mobile: 24,
+              tablet: 28,
+            ),
+            fontWeight: FontWeight.bold,
+          ),
+          textAlign: TextAlign.center,
         ),
-        const SizedBox(height: 8),
+        SizedBox(height: responsive.responsiveValue(mobile: 8, tablet: 12)),
         Text(
-          isLogin ? 'Hesabınıza giriş yapın' : 'Yeni bir hesap oluşturun',
-          style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                color: Theme.of(context).textTheme.bodySmall?.color,
-              ),
+          subtitle,
+          style: TextStyle(
+            fontSize: responsive.responsiveValue(
+              mobile: 16,
+              tablet: 18,
+            ),
+            color: Colors.grey[600],
+          ),
+          textAlign: TextAlign.center,
         ),
       ],
     );

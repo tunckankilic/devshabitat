@@ -2,22 +2,49 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../../controllers/message_search_controller.dart';
 import '../../models/message_model.dart';
+import '../../controllers/responsive_controller.dart';
+import '../../services/responsive_performance_service.dart';
+import '../../widgets/responsive/responsive_text.dart';
+import '../../widgets/responsive/animated_responsive_wrapper.dart';
 
 class SearchView extends GetView<MessageSearchController> {
   const SearchView({super.key});
 
   @override
   Widget build(BuildContext context) {
+    final responsive = Get.find<ResponsiveController>();
+    final performanceService = Get.find<ResponsivePerformanceService>();
+
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Arama'),
+        title: ResponsiveText(
+          'Arama',
+          style: TextStyle(
+            fontSize: responsive.responsiveValue(
+              mobile: 18,
+              tablet: 22,
+            ),
+          ),
+        ),
         actions: [
           IconButton(
-            icon: const Icon(Icons.analytics_outlined),
+            icon: Icon(
+              Icons.analytics_outlined,
+              size: responsive.responsiveValue(
+                mobile: 24,
+                tablet: 28,
+              ),
+            ),
             onPressed: () => _showSearchAnalytics(context),
           ),
           IconButton(
-            icon: const Icon(Icons.filter_list),
+            icon: Icon(
+              Icons.filter_list,
+              size: responsive.responsiveValue(
+                mobile: 24,
+                tablet: 28,
+              ),
+            ),
             onPressed: () => _showFilterDialog(context),
           ),
         ],
@@ -35,22 +62,64 @@ class SearchView extends GetView<MessageSearchController> {
   }
 
   Widget _buildSearchBar() {
+    final responsive = Get.find<ResponsiveController>();
+    final performanceService = Get.find<ResponsivePerformanceService>();
+
+    final searchBarPadding = performanceService.getOptimizedPadding(
+      cacheKey: 'search_bar_padding',
+      horizontal: responsive.responsiveValue(mobile: 12.0, tablet: 16.0),
+      vertical: responsive.responsiveValue(mobile: 8.0, tablet: 12.0),
+    );
+
+    final searchIconSize = responsive.responsiveValue(
+      mobile: 24.0,
+      tablet: 28.0,
+    );
+
+    final searchBarBorderRadius = responsive.responsiveValue(
+      mobile: 12.0,
+      tablet: 16.0,
+    );
+
     return Padding(
-      padding: const EdgeInsets.all(16.0),
+      padding: searchBarPadding,
       child: TextField(
         controller: controller.searchController,
         onChanged: controller.onSearchChanged,
+        style: TextStyle(
+          fontSize: responsive.responsiveValue(
+            mobile: 16.0,
+            tablet: 18.0,
+          ),
+        ),
         decoration: InputDecoration(
           hintText: 'Mesajlarda ara...',
-          prefixIcon: const Icon(Icons.search),
+          hintStyle: TextStyle(
+            fontSize: responsive.responsiveValue(
+              mobile: 16.0,
+              tablet: 18.0,
+            ),
+          ),
+          prefixIcon: Icon(
+            Icons.search,
+            size: searchIconSize,
+          ),
           suffixIcon: Obx(() => controller.searchQuery.isNotEmpty
               ? IconButton(
-                  icon: const Icon(Icons.clear),
+                  icon: Icon(
+                    Icons.clear,
+                    size: searchIconSize,
+                  ),
                   onPressed: controller.clearSearch,
                 )
               : const SizedBox()),
           border: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(12),
+            borderRadius: BorderRadius.circular(searchBarBorderRadius),
+          ),
+          contentPadding: performanceService.getOptimizedPadding(
+            cacheKey: 'search_field_padding',
+            horizontal: responsive.responsiveValue(mobile: 12.0, tablet: 16.0),
+            vertical: responsive.responsiveValue(mobile: 8.0, tablet: 12.0),
           ),
         ),
       ),
@@ -58,6 +127,8 @@ class SearchView extends GetView<MessageSearchController> {
   }
 
   Widget _buildSearchSuggestions() {
+    final responsive = Get.find<ResponsiveController>();
+
     return Obx(() {
       if (!controller.showSuggestions.value ||
           controller.searchSuggestions.isEmpty) {
@@ -76,8 +147,22 @@ class SearchView extends GetView<MessageSearchController> {
               itemBuilder: (context, index) {
                 final suggestion = controller.searchSuggestions[index];
                 return ListTile(
-                  leading: const Icon(Icons.search),
-                  title: Text(suggestion),
+                  leading: Icon(
+                    Icons.search,
+                    size: responsive.responsiveValue(
+                      mobile: 20,
+                      tablet: 24,
+                    ),
+                  ),
+                  title: ResponsiveText(
+                    suggestion,
+                    style: TextStyle(
+                      fontSize: responsive.responsiveValue(
+                        mobile: 14,
+                        tablet: 16,
+                      ),
+                    ),
+                  ),
                   onTap: () {
                     controller.searchController.text = suggestion;
                     controller.performSearch(suggestion);
@@ -92,6 +177,9 @@ class SearchView extends GetView<MessageSearchController> {
   }
 
   Widget _buildRecentSearches() {
+    final responsive = Get.find<ResponsiveController>();
+    final performanceService = Get.find<ResponsivePerformanceService>();
+
     return Obx(() {
       if (controller.recentSearches.isEmpty || controller.hasSearched.value) {
         return const SizedBox();
@@ -101,20 +189,34 @@ class SearchView extends GetView<MessageSearchController> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16.0),
+            padding: performanceService.getOptimizedPadding(
+              cacheKey: 'recent_searches_header_padding',
+              horizontal: 16,
+            ),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                const Text(
+                ResponsiveText(
                   'Son Aramalar',
                   style: TextStyle(
-                    fontSize: 16,
+                    fontSize: responsive.responsiveValue(
+                      mobile: 16,
+                      tablet: 18,
+                    ),
                     fontWeight: FontWeight.bold,
                   ),
                 ),
                 TextButton(
                   onPressed: controller.clearRecentSearches,
-                  child: const Text('Temizle'),
+                  child: ResponsiveText(
+                    'Temizle',
+                    style: TextStyle(
+                      fontSize: responsive.responsiveValue(
+                        mobile: 14,
+                        tablet: 16,
+                      ),
+                    ),
+                  ),
                 ),
               ],
             ),
@@ -126,10 +228,30 @@ class SearchView extends GetView<MessageSearchController> {
             itemBuilder: (context, index) {
               final search = controller.recentSearches[index];
               return ListTile(
-                leading: const Icon(Icons.history),
-                title: Text(search),
+                leading: Icon(
+                  Icons.history,
+                  size: responsive.responsiveValue(
+                    mobile: 20,
+                    tablet: 24,
+                  ),
+                ),
+                title: ResponsiveText(
+                  search,
+                  style: TextStyle(
+                    fontSize: responsive.responsiveValue(
+                      mobile: 14,
+                      tablet: 16,
+                    ),
+                  ),
+                ),
                 trailing: IconButton(
-                  icon: const Icon(Icons.close),
+                  icon: Icon(
+                    Icons.close,
+                    size: responsive.responsiveValue(
+                      mobile: 20,
+                      tablet: 24,
+                    ),
+                  ),
                   onPressed: () => controller.removeRecentSearch(search),
                 ),
                 onTap: () => controller.performSearch(search),
@@ -142,6 +264,20 @@ class SearchView extends GetView<MessageSearchController> {
   }
 
   Widget _buildCategoryTabs() {
+    final responsive = Get.find<ResponsiveController>();
+    final performanceService = Get.find<ResponsivePerformanceService>();
+
+    final tabsPadding = performanceService.getOptimizedPadding(
+      cacheKey: 'category_tabs_padding',
+      horizontal: responsive.responsiveValue(mobile: 12.0, tablet: 16.0),
+      vertical: responsive.responsiveValue(mobile: 4.0, tablet: 8.0),
+    );
+
+    final chipSpacing = responsive.responsiveValue(
+      mobile: 8.0,
+      tablet: 12.0,
+    );
+
     return Obx(() {
       if (!controller.hasSearched.value) return const SizedBox();
 
@@ -149,18 +285,34 @@ class SearchView extends GetView<MessageSearchController> {
         children: [
           SingleChildScrollView(
             scrollDirection: Axis.horizontal,
-            padding: const EdgeInsets.symmetric(horizontal: 16.0),
+            padding: tabsPadding,
             child: Row(
               children: SearchCategory.values.map((category) {
                 final isSelected =
                     controller.selectedCategory.value == category.toString();
                 return Padding(
-                  padding: const EdgeInsets.only(right: 8.0),
+                  padding: EdgeInsets.only(right: chipSpacing),
                   child: FilterChip(
-                    label: Text(_getCategoryLabel(category)),
+                    label: ResponsiveText(
+                      _getCategoryLabel(category),
+                      style: TextStyle(
+                        fontSize: responsive.responsiveValue(
+                          mobile: 12.0,
+                          tablet: 14.0,
+                        ),
+                      ),
+                    ),
                     selected: isSelected,
                     onSelected: (_) =>
                         controller.setSelectedCategory(category.toString()),
+                    padding: performanceService.getOptimizedPadding(
+                      cacheKey: 'filter_chip_padding',
+                      horizontal:
+                          responsive.responsiveValue(mobile: 8.0, tablet: 12.0),
+                      vertical:
+                          responsive.responsiveValue(mobile: 6.0, tablet: 8.0),
+                    ),
+                    materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
                   ),
                 );
               }).toList(),
@@ -188,21 +340,94 @@ class SearchView extends GetView<MessageSearchController> {
   }
 
   Widget _buildSearchResults() {
+    final responsive = Get.find<ResponsiveController>();
+    final performanceService = Get.find<ResponsivePerformanceService>();
+
+    final loadingIndicatorSize = responsive.responsiveValue(
+      mobile: 24.0,
+      tablet: 32.0,
+    );
+
+    final loadingStrokeWidth = responsive.responsiveValue(
+      mobile: 2.0,
+      tablet: 3.0,
+    );
+
+    final emptyStateSpacing = responsive.responsiveValue(
+      mobile: 16.0,
+      tablet: 24.0,
+    );
+
+    final emptyStateIconSize = responsive.responsiveValue(
+      mobile: 48.0,
+      tablet: 64.0,
+    );
+
     return Expanded(
       child: Obx(() {
         if (controller.isLoading.value) {
-          return const Center(child: CircularProgressIndicator());
+          return Center(
+            child: SizedBox(
+              width: loadingIndicatorSize,
+              height: loadingIndicatorSize,
+              child: CircularProgressIndicator(
+                strokeWidth: loadingStrokeWidth,
+              ),
+            ),
+          );
         }
 
         if (!controller.hasSearched.value) {
-          return const Center(
-            child: Text('Arama yapmak için yukarıdaki alanı kullanın'),
+          return Center(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Icon(
+                  Icons.search,
+                  size: emptyStateIconSize,
+                  color: Colors.grey[400],
+                ),
+                SizedBox(height: emptyStateSpacing),
+                ResponsiveText(
+                  'Arama yapmak için yukarıdaki alanı kullanın',
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    fontSize: responsive.responsiveValue(
+                      mobile: 16.0,
+                      tablet: 18.0,
+                    ),
+                    color: Colors.grey[600],
+                  ),
+                ),
+              ],
+            ),
           );
         }
 
         if (controller.searchResults.isEmpty) {
-          return const Center(
-            child: Text('Sonuç bulunamadı'),
+          return Center(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Icon(
+                  Icons.search_off,
+                  size: emptyStateIconSize,
+                  color: Colors.grey[400],
+                ),
+                SizedBox(height: emptyStateSpacing),
+                ResponsiveText(
+                  'Sonuç bulunamadı',
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    fontSize: responsive.responsiveValue(
+                      mobile: 16.0,
+                      tablet: 18.0,
+                    ),
+                    color: Colors.grey[600],
+                  ),
+                ),
+              ],
+            ),
           );
         }
 
@@ -220,10 +445,20 @@ class SearchView extends GetView<MessageSearchController> {
               if (index == controller.searchResults.length) {
                 return Obx(() {
                   if (controller.hasMore.value) {
-                    return const Center(
+                    return Center(
                       child: Padding(
-                        padding: EdgeInsets.all(8.0),
-                        child: CircularProgressIndicator(),
+                        padding: performanceService.getOptimizedPadding(
+                          cacheKey: 'load_more_padding',
+                          all: responsive.responsiveValue(
+                              mobile: 8.0, tablet: 12.0),
+                        ),
+                        child: SizedBox(
+                          width: loadingIndicatorSize,
+                          height: loadingIndicatorSize,
+                          child: CircularProgressIndicator(
+                            strokeWidth: loadingStrokeWidth,
+                          ),
+                        ),
                       ),
                     );
                   }
@@ -241,32 +476,100 @@ class SearchView extends GetView<MessageSearchController> {
   }
 
   Widget _buildMessageCard(MessageModel message) {
+    final responsive = Get.find<ResponsiveController>();
+    final performanceService = Get.find<ResponsivePerformanceService>();
+
+    final cardMargin = performanceService.getOptimizedPadding(
+      cacheKey: 'message_card_margin',
+      horizontal: responsive.responsiveValue(mobile: 12.0, tablet: 16.0),
+      vertical: responsive.responsiveValue(mobile: 6.0, tablet: 8.0),
+    );
+
+    final contentPadding = performanceService.getOptimizedPadding(
+      cacheKey: 'message_content_padding',
+      horizontal: responsive.responsiveValue(mobile: 12.0, tablet: 16.0),
+      vertical: responsive.responsiveValue(mobile: 8.0, tablet: 12.0),
+    );
+
+    final iconSize = responsive.responsiveValue(
+      mobile: 18.0,
+      tablet: 20.0,
+    );
+
     return Card(
-      margin: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+      margin: cardMargin,
       child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          ListTile(
-            title: Text(
-              message.content,
-              maxLines: 2,
-              overflow: TextOverflow.ellipsis,
+          Padding(
+            padding: contentPadding,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                ResponsiveText(
+                  message.content,
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                  style: TextStyle(
+                    fontSize: responsive.responsiveValue(
+                      mobile: 14.0,
+                      tablet: 16.0,
+                    ),
+                  ),
+                ),
+                SizedBox(
+                    height:
+                        responsive.responsiveValue(mobile: 4.0, tablet: 6.0)),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Expanded(
+                      child: ResponsiveText(
+                        'Gönderen: ${message.senderName}',
+                        style: TextStyle(
+                          fontSize: responsive.responsiveValue(
+                            mobile: 12.0,
+                            tablet: 14.0,
+                          ),
+                          color: Colors.grey[600],
+                        ),
+                      ),
+                    ),
+                    ResponsiveText(
+                      _formatDate(message.timestamp),
+                      style: TextStyle(
+                        fontSize: responsive.responsiveValue(
+                          mobile: 12.0,
+                          tablet: 14.0,
+                        ),
+                        color: Colors.grey[600],
+                      ),
+                    ),
+                  ],
+                ),
+              ],
             ),
-            subtitle: Text(
-              'Gönderen: ${message.senderName}',
-              style: const TextStyle(fontSize: 12),
-            ),
-            trailing: Text(
-              _formatDate(message.timestamp),
-              style: const TextStyle(fontSize: 12),
-            ),
-            onTap: () => controller.navigateToMessage(message),
           ),
           ButtonBar(
             alignment: MainAxisAlignment.end,
+            buttonPadding: EdgeInsets.symmetric(
+              horizontal: responsive.responsiveValue(mobile: 8.0, tablet: 12.0),
+            ),
             children: [
               TextButton.icon(
-                icon: const Icon(Icons.share, size: 18),
-                label: const Text('Paylaş'),
+                icon: Icon(
+                  Icons.share,
+                  size: iconSize,
+                ),
+                label: ResponsiveText(
+                  'Paylaş',
+                  style: TextStyle(
+                    fontSize: responsive.responsiveValue(
+                      mobile: 14.0,
+                      tablet: 16.0,
+                    ),
+                  ),
+                ),
                 onPressed: () => controller.shareSearchResults([message]),
               ),
             ],
@@ -281,154 +584,333 @@ class SearchView extends GetView<MessageSearchController> {
   }
 
   void _showSearchAnalytics(BuildContext context) {
+    final responsive = Get.find<ResponsiveController>();
+    final performanceService = Get.find<ResponsivePerformanceService>();
     final analytics = controller.getSearchAnalytics();
+
+    final dialogPadding = performanceService.getOptimizedPadding(
+      cacheKey: 'analytics_dialog_padding',
+      horizontal: responsive.responsiveValue(mobile: 16.0, tablet: 24.0),
+      vertical: responsive.responsiveValue(mobile: 12.0, tablet: 16.0),
+    );
+
+    final sectionSpacing = responsive.responsiveValue(
+      mobile: 16.0,
+      tablet: 24.0,
+    );
+
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Arama İstatistikleri'),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text('Toplam Arama: ${analytics['totalSearches']}'),
-            const SizedBox(height: 16),
-            const Text(
-              'En Çok Aranan:',
-              style: TextStyle(fontWeight: FontWeight.bold),
+        title: ResponsiveText(
+          'Arama İstatistikleri',
+          style: TextStyle(
+            fontSize: responsive.responsiveValue(
+              mobile: 18.0,
+              tablet: 22.0,
             ),
-            Text(
-              '${analytics['mostSearched'].term} (${analytics['mostSearched'].count} kez)',
-            ),
-            const SizedBox(height: 16),
-            const Text(
-              'Son Aramalar:',
-              style: TextStyle(fontWeight: FontWeight.bold),
-            ),
-            ...analytics['recentSearches'].map<Widget>((stat) => Text(
-                  '${stat.term} - ${_formatDate(stat.lastSearched)}',
-                )),
-          ],
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+        contentPadding: dialogPadding,
+        content: SingleChildScrollView(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              _buildAnalyticsSection(
+                'Genel İstatistikler',
+                [
+                  ResponsiveText(
+                    'Toplam Arama: ${analytics['totalSearches']}',
+                    style: TextStyle(
+                      fontSize: responsive.responsiveValue(
+                        mobile: 14.0,
+                        tablet: 16.0,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+              SizedBox(height: sectionSpacing),
+              _buildAnalyticsSection(
+                'En Çok Aranan',
+                [
+                  ResponsiveText(
+                    '${analytics['mostSearched'].term} (${analytics['mostSearched'].count} kez)',
+                    style: TextStyle(
+                      fontSize: responsive.responsiveValue(
+                        mobile: 14.0,
+                        tablet: 16.0,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+              SizedBox(height: sectionSpacing),
+              _buildAnalyticsSection(
+                'Son Aramalar',
+                analytics['recentSearches']
+                    .map<Widget>((stat) => ResponsiveText(
+                          '${stat.term} - ${_formatDate(stat.lastSearched)}',
+                          style: TextStyle(
+                            fontSize: responsive.responsiveValue(
+                              mobile: 14.0,
+                              tablet: 16.0,
+                            ),
+                          ),
+                        ))
+                    .toList(),
+              ),
+            ],
+          ),
         ),
         actions: [
           TextButton(
             onPressed: () => Get.back(),
-            child: const Text('Kapat'),
+            child: ResponsiveText(
+              'Kapat',
+              style: TextStyle(
+                fontSize: responsive.responsiveValue(
+                  mobile: 16.0,
+                  tablet: 18.0,
+                ),
+              ),
+            ),
           ),
         ],
       ),
     );
   }
 
+  Widget _buildAnalyticsSection(String title, List<Widget> children) {
+    final responsive = Get.find<ResponsiveController>();
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        ResponsiveText(
+          title,
+          style: TextStyle(
+            fontSize: responsive.responsiveValue(
+              mobile: 16.0,
+              tablet: 18.0,
+            ),
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+        SizedBox(height: responsive.responsiveValue(mobile: 8.0, tablet: 12.0)),
+        ...children,
+      ],
+    );
+  }
+
   void _showFilterDialog(BuildContext context) {
+    final responsive = Get.find<ResponsiveController>();
+    final performanceService = Get.find<ResponsivePerformanceService>();
+
+    final dialogPadding = performanceService.getOptimizedPadding(
+      cacheKey: 'filter_dialog_padding',
+      horizontal: responsive.responsiveValue(mobile: 16.0, tablet: 24.0),
+      vertical: responsive.responsiveValue(mobile: 12.0, tablet: 16.0),
+    );
+
+    final sectionSpacing = responsive.responsiveValue(
+      mobile: 16.0,
+      tablet: 24.0,
+    );
+
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Filtreler'),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            _buildFilterSwitch(
-              'Metin Mesajları',
-              controller.filterText,
-              controller.toggleTextFilter,
+        title: ResponsiveText(
+          'Filtreler',
+          style: TextStyle(
+            fontSize: responsive.responsiveValue(
+              mobile: 18.0,
+              tablet: 22.0,
             ),
-            _buildFilterSwitch(
-              'Medya',
-              controller.filterMedia,
-              controller.toggleMediaFilter,
-            ),
-            _buildFilterSwitch(
-              'Dokümanlar',
-              controller.filterDocuments,
-              controller.toggleDocumentsFilter,
-            ),
-            _buildFilterSwitch(
-              'Linkler',
-              controller.filterLinks,
-              controller.toggleLinksFilter,
-            ),
-            const Divider(),
-            ListTile(
-              title: const Text('Sıralama'),
-              trailing: Obx(
-                () => IconButton(
-                  icon: Icon(
-                    controller.sortOrder.value == SortOrder.ascending
-                        ? Icons.arrow_upward
-                        : Icons.arrow_downward,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+        contentPadding: dialogPadding,
+        content: SingleChildScrollView(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              _buildFilterSection(
+                'Mesaj Türleri',
+                [
+                  _buildFilterSwitch(
+                    'Metin Mesajları',
+                    controller.filterText,
+                    controller.toggleTextFilter,
                   ),
-                  onPressed: controller.toggleSortOrder,
-                ),
+                  _buildFilterSwitch(
+                    'Medya',
+                    controller.filterMedia,
+                    controller.toggleMediaFilter,
+                  ),
+                  _buildFilterSwitch(
+                    'Dokümanlar',
+                    controller.filterDocuments,
+                    controller.toggleDocumentsFilter,
+                  ),
+                  _buildFilterSwitch(
+                    'Linkler',
+                    controller.filterLinks,
+                    controller.toggleLinksFilter,
+                  ),
+                ],
               ),
-            ),
-            _buildFilterSwitch(
-              'Öncelikli Mesajlar',
-              controller.showPriority,
-              (value) {
-                controller.showPriority.value = value;
-                if (value) {
-                  _showPrioritySlider(context);
-                }
-              },
-            ),
-            const Divider(),
-            ListTile(
-              title: const Text('Tarih Aralığı'),
-              subtitle: Obx(() {
-                final start = controller.startDate.value;
-                final end = controller.endDate.value;
-                if (start == null || end == null) {
-                  return const Text('Seçilmedi');
-                }
-                return Text('$start - $end');
-              }),
-              trailing: const Icon(Icons.date_range),
-              onTap: () async {
-                await controller.selectStartDate();
-                await controller.selectEndDate();
-              },
-            ),
-          ],
+              SizedBox(height: sectionSpacing),
+              _buildFilterSection(
+                'Sıralama ve Öncelik',
+                [
+                  ListTile(
+                    title: ResponsiveText(
+                      'Sıralama',
+                      style: TextStyle(
+                        fontSize: responsive.responsiveValue(
+                          mobile: 16.0,
+                          tablet: 18.0,
+                        ),
+                      ),
+                    ),
+                    trailing: Obx(
+                      () => IconButton(
+                        icon: Icon(
+                          controller.sortOrder.value == SortOrder.ascending
+                              ? Icons.arrow_upward
+                              : Icons.arrow_downward,
+                          size: responsive.responsiveValue(
+                            mobile: 24.0,
+                            tablet: 28.0,
+                          ),
+                        ),
+                        onPressed: controller.toggleSortOrder,
+                      ),
+                    ),
+                  ),
+                  _buildFilterSwitch(
+                    'Öncelikli Mesajlar',
+                    controller.showPriority,
+                    (value) {
+                      controller.showPriority.value = value;
+                      if (value) {
+                        _showPrioritySlider(context);
+                      }
+                    },
+                  ),
+                ],
+              ),
+              SizedBox(height: sectionSpacing),
+              _buildFilterSection(
+                'Tarih Aralığı',
+                [
+                  ListTile(
+                    title: ResponsiveText(
+                      'Tarih Seç',
+                      style: TextStyle(
+                        fontSize: responsive.responsiveValue(
+                          mobile: 16.0,
+                          tablet: 18.0,
+                        ),
+                      ),
+                    ),
+                    subtitle: Obx(() {
+                      final start = controller.startDate.value;
+                      final end = controller.endDate.value;
+                      if (start == null || end == null) {
+                        return ResponsiveText(
+                          'Seçilmedi',
+                          style: TextStyle(
+                            fontSize: responsive.responsiveValue(
+                              mobile: 14.0,
+                              tablet: 16.0,
+                            ),
+                          ),
+                        );
+                      }
+                      return ResponsiveText(
+                        '$start - $end',
+                        style: TextStyle(
+                          fontSize: responsive.responsiveValue(
+                            mobile: 14.0,
+                            tablet: 16.0,
+                          ),
+                        ),
+                      );
+                    }),
+                    trailing: Icon(
+                      Icons.date_range,
+                      size: responsive.responsiveValue(
+                        mobile: 24.0,
+                        tablet: 28.0,
+                      ),
+                    ),
+                    onTap: () async {
+                      await controller.selectStartDate();
+                      await controller.selectEndDate();
+                    },
+                  ),
+                ],
+              ),
+            ],
+          ),
         ),
         actions: [
           TextButton(
             onPressed: () => Get.back(),
-            child: const Text('İptal'),
+            child: ResponsiveText(
+              'İptal',
+              style: TextStyle(
+                fontSize: responsive.responsiveValue(
+                  mobile: 16.0,
+                  tablet: 18.0,
+                ),
+              ),
+            ),
           ),
           ElevatedButton(
             onPressed: () {
               controller.applyFilters();
               Get.back();
             },
-            child: const Text('Uygula'),
+            child: ResponsiveText(
+              'Uygula',
+              style: TextStyle(
+                fontSize: responsive.responsiveValue(
+                  mobile: 16.0,
+                  tablet: 18.0,
+                ),
+              ),
+            ),
           ),
         ],
       ),
     );
   }
 
-  void _showPrioritySlider(BuildContext context) {
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Minimum Öncelik'),
-        content: Obx(
-          () => Slider(
-            value: controller.minPriority.value.toDouble(),
-            min: 0,
-            max: 5,
-            divisions: 5,
-            label: controller.minPriority.value.toString(),
-            onChanged: (value) => controller.setMinPriority(value.toInt()),
+  Widget _buildFilterSection(String title, List<Widget> children) {
+    final responsive = Get.find<ResponsiveController>();
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        ResponsiveText(
+          title,
+          style: TextStyle(
+            fontSize: responsive.responsiveValue(
+              mobile: 16.0,
+              tablet: 18.0,
+            ),
+            fontWeight: FontWeight.bold,
           ),
         ),
-        actions: [
-          TextButton(
-            onPressed: () => Get.back(),
-            child: const Text('Tamam'),
-          ),
-        ],
-      ),
+        ...children,
+      ],
     );
   }
 
@@ -437,11 +919,93 @@ class SearchView extends GetView<MessageSearchController> {
     RxBool value,
     void Function(bool) onChanged,
   ) {
+    final responsive = Get.find<ResponsiveController>();
+
     return Obx(
       () => SwitchListTile(
-        title: Text(title),
+        title: ResponsiveText(
+          title,
+          style: TextStyle(
+            fontSize: responsive.responsiveValue(
+              mobile: 14.0,
+              tablet: 16.0,
+            ),
+          ),
+        ),
         value: value.value,
         onChanged: onChanged,
+      ),
+    );
+  }
+
+  void _showPrioritySlider(BuildContext context) {
+    final responsive = Get.find<ResponsiveController>();
+    final performanceService = Get.find<ResponsivePerformanceService>();
+
+    final dialogPadding = performanceService.getOptimizedPadding(
+      cacheKey: 'priority_dialog_padding',
+      horizontal: responsive.responsiveValue(mobile: 16.0, tablet: 24.0),
+      vertical: responsive.responsiveValue(mobile: 12.0, tablet: 16.0),
+    );
+
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: ResponsiveText(
+          'Minimum Öncelik',
+          style: TextStyle(
+            fontSize: responsive.responsiveValue(
+              mobile: 18.0,
+              tablet: 22.0,
+            ),
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+        contentPadding: dialogPadding,
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Obx(
+              () => Slider(
+                value: controller.minPriority.value.toDouble(),
+                min: 0,
+                max: 5,
+                divisions: 5,
+                label: controller.minPriority.value.toString(),
+                onChanged: (value) => controller.setMinPriority(value.toInt()),
+              ),
+            ),
+            SizedBox(
+              height: responsive.responsiveValue(
+                mobile: 16.0,
+                tablet: 24.0,
+              ),
+            ),
+            ResponsiveText(
+              'Seçilen değer: ${controller.minPriority.value}',
+              style: TextStyle(
+                fontSize: responsive.responsiveValue(
+                  mobile: 14.0,
+                  tablet: 16.0,
+                ),
+              ),
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Get.back(),
+            child: ResponsiveText(
+              'Tamam',
+              style: TextStyle(
+                fontSize: responsive.responsiveValue(
+                  mobile: 16.0,
+                  tablet: 18.0,
+                ),
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }

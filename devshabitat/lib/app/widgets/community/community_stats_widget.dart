@@ -1,116 +1,156 @@
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
+import '../../controllers/responsive_controller.dart';
 import '../../models/community/community_model.dart';
 
 class CommunityStatsWidget extends StatelessWidget {
   final CommunityModel community;
 
   const CommunityStatsWidget({
-    Key? key,
+    super.key,
     required this.community,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
+    final responsive = Get.find<ResponsiveController>();
 
-    return Card(
-      child: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              'Topluluk İstatistikleri',
-              style: theme.textTheme.titleLarge,
+    return Container(
+      padding: responsive.responsivePadding(all: 16),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(12),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.grey.withOpacity(0.1),
+            spreadRadius: 1,
+            blurRadius: 5,
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            'Topluluk İstatistikleri',
+            style: TextStyle(
+              fontSize: responsive.responsiveValue(mobile: 18, tablet: 22),
+              fontWeight: FontWeight.bold,
             ),
-            const SizedBox(height: 16),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceAround,
-              children: [
-                _buildStatItem(
-                  context,
-                  Icons.people,
+          ),
+          SizedBox(height: responsive.responsiveValue(mobile: 16, tablet: 20)),
+          Row(
+            children: [
+              Expanded(
+                child: _buildStatItem(
+                  responsive,
                   'Üyeler',
-                  community.memberCount.toString(),
+                  '${community.memberCount}',
+                  Icons.people,
                 ),
-                _buildStatItem(
-                  context,
-                  Icons.event,
+              ),
+              SizedBox(
+                  width: responsive.responsiveValue(mobile: 16, tablet: 20)),
+              Expanded(
+                child: _buildStatItem(
+                  responsive,
                   'Etkinlikler',
-                  community.eventCount.toString(),
+                  '${community.eventCount ?? 0}',
+                  Icons.event,
                 ),
-                _buildStatItem(
-                  context,
-                  Icons.message,
-                  'Gönderiler',
-                  community.postCount.toString(),
+              ),
+            ],
+          ),
+          SizedBox(height: responsive.responsiveValue(mobile: 16, tablet: 20)),
+          Row(
+            children: [
+              Expanded(
+                child: _buildStatItem(
+                  responsive,
+                  'Aktiflik',
+                  _getActivityLevel(75),
+                  Icons.trending_up,
                 ),
-              ],
+              ),
+              SizedBox(
+                  width: responsive.responsiveValue(mobile: 16, tablet: 20)),
+              Expanded(
+                child: _buildStatItem(
+                  responsive,
+                  'Derecelendirme',
+                  '4.5',
+                  Icons.star,
+                ),
+              ),
+            ],
+          ),
+          SizedBox(height: responsive.responsiveValue(mobile: 8, tablet: 12)),
+          LinearProgressIndicator(
+            value: 75 / 100,
+            backgroundColor: Colors.grey[300],
+            valueColor: AlwaysStoppedAnimation<Color>(
+              _getActivityColor(75),
             ),
-            const SizedBox(height: 16),
-            const Divider(),
-            const SizedBox(height: 16),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceAround,
-              children: [
-                _buildStatItem(
-                  context,
-                  Icons.admin_panel_settings,
-                  'Moderatörler',
-                  community.moderatorIds.length.toString(),
-                ),
-                _buildStatItem(
-                  context,
-                  Icons.person_add,
-                  'Bekleyen İstekler',
-                  community.pendingMemberIds.length.toString(),
-                ),
-                _buildStatItem(
-                  context,
-                  Icons.calendar_today,
-                  'Kuruluş',
-                  _formatDate(community.createdAt),
-                ),
-              ],
+          ),
+          SizedBox(height: responsive.responsiveValue(mobile: 4, tablet: 6)),
+          Text(
+            'Aktiflik Seviyesi: ${_getActivityLevel(75)}',
+            style: TextStyle(
+              fontSize: responsive.responsiveValue(mobile: 12, tablet: 14),
+              color: Colors.grey[600],
             ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }
 
   Widget _buildStatItem(
-    BuildContext context,
-    IconData icon,
+    ResponsiveController responsive,
     String label,
     String value,
+    IconData icon,
   ) {
-    final theme = Theme.of(context);
-
     return Column(
       children: [
         Icon(
           icon,
-          color: theme.colorScheme.primary,
-          size: 28,
+          size: responsive.responsiveValue(mobile: 24, tablet: 28),
+          color: Colors.blue,
         ),
-        const SizedBox(height: 8),
-        Text(
-          label,
-          style: theme.textTheme.bodyMedium,
-        ),
-        const SizedBox(height: 4),
+        SizedBox(height: responsive.responsiveValue(mobile: 8, tablet: 12)),
         Text(
           value,
-          style: theme.textTheme.titleMedium?.copyWith(
+          style: TextStyle(
+            fontSize: responsive.responsiveValue(mobile: 20, tablet: 24),
             fontWeight: FontWeight.bold,
+            color: Colors.black87,
+          ),
+        ),
+        Text(
+          label,
+          style: TextStyle(
+            fontSize: responsive.responsiveValue(mobile: 12, tablet: 14),
+            color: Colors.grey[600],
           ),
         ),
       ],
     );
   }
 
-  String _formatDate(DateTime date) {
-    return '${date.day}/${date.month}/${date.year}';
+  String _getActivityLevel(int level) {
+    if (level >= 80) return 'Çok Yüksek';
+    if (level >= 60) return 'Yüksek';
+    if (level >= 40) return 'Orta';
+    if (level >= 20) return 'Düşük';
+    return 'Çok Düşük';
+  }
+
+  Color _getActivityColor(int level) {
+    if (level >= 80) return Colors.green;
+    if (level >= 60) return Colors.lightGreen;
+    if (level >= 40) return Colors.orange;
+    if (level >= 20) return Colors.orange[300]!;
+    return Colors.red;
   }
 }

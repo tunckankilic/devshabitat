@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:flutter_screenutil/flutter_screenutil.dart';
 import '../../controllers/message/message_search_controller.dart';
 import '../../models/message_model.dart';
 import '../base/base_view.dart';
+import '../../controllers/responsive_controller.dart';
 
 class MessageSearchView extends BaseView<MessageSearchController> {
   final String? conversationId = Get.parameters['id'];
@@ -12,14 +12,18 @@ class MessageSearchView extends BaseView<MessageSearchController> {
 
   @override
   Widget buildView(BuildContext context) {
+    final responsive = Get.find<ResponsiveController>();
+
     return Scaffold(
       appBar: AppBar(
         title: TextField(
           autofocus: true,
-          style: TextStyle(fontSize: 16.sp),
+          style: TextStyle(
+              fontSize: responsive.responsiveValue(mobile: 16, tablet: 18)),
           decoration: InputDecoration(
             hintText: 'Mesajlarda ara...',
-            hintStyle: TextStyle(fontSize: 16.sp),
+            hintStyle: TextStyle(
+                fontSize: responsive.responsiveValue(mobile: 16, tablet: 18)),
             border: InputBorder.none,
           ),
           onChanged: controller.setSearchQuery,
@@ -28,12 +32,14 @@ class MessageSearchView extends BaseView<MessageSearchController> {
           Obx(() {
             if (!controller.isAdvancedSearch.value) {
               return IconButton(
-                icon: Icon(Icons.filter_list, size: 24.sp),
+                icon: Icon(Icons.filter_list,
+                    size: responsive.responsiveValue(mobile: 24, tablet: 28)),
                 onPressed: controller.toggleAdvancedSearch,
               );
             }
             return IconButton(
-              icon: Icon(Icons.filter_list_off, size: 24.sp),
+              icon: Icon(Icons.filter_list_off,
+                  size: responsive.responsiveValue(mobile: 24, tablet: 28)),
               onPressed: controller.toggleAdvancedSearch,
             );
           }),
@@ -48,14 +54,17 @@ class MessageSearchView extends BaseView<MessageSearchController> {
             }
 
             return Container(
-              padding: EdgeInsets.all(16.r),
+              padding: EdgeInsets.all(
+                  responsive.responsiveValue(mobile: 16, tablet: 20)),
               decoration: BoxDecoration(
                 color: Theme.of(context).cardColor,
                 boxShadow: [
                   BoxShadow(
                     color: Colors.black12,
-                    blurRadius: 4.r,
-                    offset: Offset(0, 2.h),
+                    blurRadius:
+                        responsive.responsiveValue(mobile: 4, tablet: 6),
+                    offset: Offset(
+                        0, responsive.responsiveValue(mobile: 2, tablet: 3)),
                   ),
                 ],
               ),
@@ -65,11 +74,14 @@ class MessageSearchView extends BaseView<MessageSearchController> {
                   Text(
                     'Filtreler',
                     style: TextStyle(
-                      fontSize: 18.sp,
+                      fontSize:
+                          responsive.responsiveValue(mobile: 18, tablet: 20),
                       fontWeight: FontWeight.bold,
                     ),
                   ),
-                  SizedBox(height: 16.h),
+                  SizedBox(
+                      height:
+                          responsive.responsiveValue(mobile: 16, tablet: 20)),
                   // Konuşma seçimi
                   if (conversationId == null)
                     DropdownButtonFormField<String>(
@@ -78,24 +90,34 @@ class MessageSearchView extends BaseView<MessageSearchController> {
                           : controller.selectedConversation.value,
                       decoration: InputDecoration(
                         labelText: 'Konuşma',
-                        labelStyle: TextStyle(fontSize: 14.sp),
+                        labelStyle: TextStyle(
+                            fontSize: responsive.responsiveValue(
+                                mobile: 14, tablet: 16)),
                         border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(8.r),
+                          borderRadius: BorderRadius.circular(responsive
+                              .responsiveValue(mobile: 8, tablet: 12)),
                         ),
                       ),
                       items: const [], // Konuşma listesi buraya gelecek
                       onChanged: controller.setConversationFilter,
                     ),
-                  SizedBox(height: 16.h),
+                  SizedBox(
+                      height:
+                          responsive.responsiveValue(mobile: 16, tablet: 20)),
                   // Tarih seçimi
                   TextFormField(
                     decoration: InputDecoration(
                       labelText: 'Tarih',
-                      labelStyle: TextStyle(fontSize: 14.sp),
+                      labelStyle: TextStyle(
+                          fontSize: responsive.responsiveValue(
+                              mobile: 14, tablet: 16)),
                       border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(8.r),
+                        borderRadius: BorderRadius.circular(
+                            responsive.responsiveValue(mobile: 8, tablet: 12)),
                       ),
-                      suffixIcon: Icon(Icons.calendar_today, size: 24.sp),
+                      suffixIcon: Icon(Icons.calendar_today,
+                          size: responsive.responsiveValue(
+                              mobile: 24, tablet: 28)),
                     ),
                     readOnly: true,
                     onTap: () async {
@@ -110,7 +132,9 @@ class MessageSearchView extends BaseView<MessageSearchController> {
                       }
                     },
                   ),
-                  SizedBox(height: 16.h),
+                  SizedBox(
+                      height:
+                          responsive.responsiveValue(mobile: 16, tablet: 20)),
                   // Mesaj tipi seçimi
                   DropdownButtonFormField<String>(
                     value: controller.selectedType.value.isEmpty
@@ -118,9 +142,12 @@ class MessageSearchView extends BaseView<MessageSearchController> {
                         : controller.selectedType.value,
                     decoration: InputDecoration(
                       labelText: 'Mesaj Tipi',
-                      labelStyle: TextStyle(fontSize: 14.sp),
+                      labelStyle: TextStyle(
+                          fontSize: responsive.responsiveValue(
+                              mobile: 14, tablet: 16)),
                       border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(8.r),
+                        borderRadius: BorderRadius.circular(
+                            responsive.responsiveValue(mobile: 8, tablet: 12)),
                       ),
                     ),
                     items: const [
@@ -139,14 +166,20 @@ class MessageSearchView extends BaseView<MessageSearchController> {
                     ],
                     onChanged: controller.setTypeFilter,
                   ),
-                  SizedBox(height: 16.h),
+                  SizedBox(
+                      height:
+                          responsive.responsiveValue(mobile: 16, tablet: 20)),
                   // Filtreleri temizle
                   Center(
                     child: TextButton.icon(
-                      icon: Icon(Icons.clear_all, size: 24.sp),
+                      icon: Icon(Icons.clear_all,
+                          size: responsive.responsiveValue(
+                              mobile: 24, tablet: 28)),
                       label: Text(
                         'Filtreleri Temizle',
-                        style: TextStyle(fontSize: 14.sp),
+                        style: TextStyle(
+                            fontSize: responsive.responsiveValue(
+                                mobile: 14, tablet: 16)),
                       ),
                       onPressed: controller.clearFilters,
                     ),
@@ -167,7 +200,9 @@ class MessageSearchView extends BaseView<MessageSearchController> {
                 return Center(
                   child: Text(
                     'Aramak istediğiniz mesajı yazın',
-                    style: TextStyle(fontSize: 16.sp),
+                    style: TextStyle(
+                        fontSize:
+                            responsive.responsiveValue(mobile: 16, tablet: 18)),
                   ),
                 );
               }
@@ -176,7 +211,9 @@ class MessageSearchView extends BaseView<MessageSearchController> {
                 return Center(
                   child: Text(
                     'Sonuç bulunamadı',
-                    style: TextStyle(fontSize: 16.sp),
+                    style: TextStyle(
+                        fontSize:
+                            responsive.responsiveValue(mobile: 16, tablet: 18)),
                   ),
                 );
               }
@@ -196,23 +233,28 @@ class MessageSearchView extends BaseView<MessageSearchController> {
   }
 
   Widget _buildSearchResultTile(MessageModel message) {
+    final responsive = Get.find<ResponsiveController>();
+
     return ListTile(
       leading: CircleAvatar(
-        radius: 20.r,
+        radius: responsive.responsiveValue(mobile: 20, tablet: 24),
         child: Text(
           message.senderId[0].toUpperCase(),
-          style: TextStyle(fontSize: 14.sp),
+          style: TextStyle(
+              fontSize: responsive.responsiveValue(mobile: 14, tablet: 16)),
         ),
       ),
       title: Text(
         message.content,
-        style: TextStyle(fontSize: 16.sp),
+        style: TextStyle(
+            fontSize: responsive.responsiveValue(mobile: 16, tablet: 18)),
         maxLines: 2,
         overflow: TextOverflow.ellipsis,
       ),
       subtitle: Text(
         _formatTime(message.timestamp),
-        style: TextStyle(fontSize: 12.sp),
+        style: TextStyle(
+            fontSize: responsive.responsiveValue(mobile: 12, tablet: 14)),
       ),
       onTap: () {
         // Mesaja git

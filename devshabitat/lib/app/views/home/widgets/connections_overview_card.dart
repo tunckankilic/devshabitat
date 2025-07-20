@@ -1,20 +1,29 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:flutter_screenutil/flutter_screenutil.dart';
 import '../../../controllers/home_controller.dart';
+import '../../../controllers/responsive_controller.dart';
 
 class ConnectionsOverviewCard extends GetView<HomeController> {
   const ConnectionsOverviewCard({super.key});
 
   @override
   Widget build(BuildContext context) {
+    final responsive = Get.find<ResponsiveController>();
+
     return Card(
       elevation: 2,
       shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(16.r),
+        borderRadius: BorderRadius.circular(
+          responsive.responsiveValue(
+            mobile: 16,
+            tablet: 20,
+          ),
+        ),
       ),
       child: Padding(
-        padding: EdgeInsets.all(16.w),
+        padding: responsive.responsivePadding(
+          all: 16,
+        ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -24,7 +33,10 @@ class ConnectionsOverviewCard extends GetView<HomeController> {
                 Text(
                   'Bağlantılarım',
                   style: TextStyle(
-                    fontSize: 18.sp,
+                    fontSize: responsive.responsiveValue(
+                      mobile: 18,
+                      tablet: 22,
+                    ),
                     fontWeight: FontWeight.bold,
                   ),
                 ),
@@ -32,12 +44,18 @@ class ConnectionsOverviewCard extends GetView<HomeController> {
                   onPressed: () => Get.toNamed('/connections'),
                   child: Text(
                     'Tümünü Gör',
-                    style: TextStyle(fontSize: 14.sp),
+                    style: TextStyle(
+                      fontSize: responsive.responsiveValue(
+                        mobile: 14,
+                        tablet: 16,
+                      ),
+                    ),
                   ),
                 ),
               ],
             ),
-            SizedBox(height: 16.h),
+            SizedBox(
+                height: responsive.responsiveValue(mobile: 16, tablet: 20)),
             Obx(() {
               if (controller.isLoading.value) {
                 return const Center(child: CircularProgressIndicator());
@@ -49,13 +67,17 @@ class ConnectionsOverviewCard extends GetView<HomeController> {
                     value: controller.connectionCount.value.toString(),
                     icon: Icons.people,
                   ),
-                  SizedBox(height: 12.h),
+                  SizedBox(
+                      height:
+                          responsive.responsiveValue(mobile: 12, tablet: 16)),
                   _buildConnectionStat(
                     label: 'Yeni Mesajlar',
                     value: '3',
                     icon: Icons.message,
                   ),
-                  SizedBox(height: 12.h),
+                  SizedBox(
+                      height:
+                          responsive.responsiveValue(mobile: 12, tablet: 16)),
                   _buildConnectionStat(
                     label: 'Bekleyen İstekler',
                     value: '5',
@@ -75,30 +97,51 @@ class ConnectionsOverviewCard extends GetView<HomeController> {
     required String value,
     required IconData icon,
   }) {
+    final responsive = Get.find<ResponsiveController>();
+
     return Container(
-      padding: EdgeInsets.all(12.w),
+      padding: responsive.responsivePadding(
+        all: 12,
+      ),
       decoration: BoxDecoration(
         border: Border.all(color: Colors.grey[300]!),
-        borderRadius: BorderRadius.circular(8.r),
+        borderRadius: BorderRadius.circular(
+          responsive.responsiveValue(
+            mobile: 8,
+            tablet: 12,
+          ),
+        ),
       ),
       child: Row(
         children: [
-          Icon(icon, size: 24.r),
-          SizedBox(width: 12.w),
+          Icon(
+            icon,
+            size: responsive.responsiveValue(
+              mobile: 24,
+              tablet: 28,
+            ),
+          ),
+          SizedBox(width: responsive.responsiveValue(mobile: 12, tablet: 16)),
           Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
                 label,
                 style: TextStyle(
-                  fontSize: 14.sp,
+                  fontSize: responsive.responsiveValue(
+                    mobile: 14,
+                    tablet: 16,
+                  ),
                   color: Colors.grey[600],
                 ),
               ),
               Text(
                 value,
                 style: TextStyle(
-                  fontSize: 18.sp,
+                  fontSize: responsive.responsiveValue(
+                    mobile: 18,
+                    tablet: 22,
+                  ),
                   fontWeight: FontWeight.bold,
                 ),
               ),

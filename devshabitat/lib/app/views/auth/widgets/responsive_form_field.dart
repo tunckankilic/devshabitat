@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:get/get.dart';
+import '../../../controllers/responsive_controller.dart';
+import '../../../services/responsive_performance_service.dart';
 
 class ResponsiveFormField extends StatelessWidget {
   final String label;
@@ -38,6 +40,9 @@ class ResponsiveFormField extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final responsive = Get.find<ResponsiveController>();
+    final performanceService = Get.find<ResponsivePerformanceService>();
+
     return LayoutBuilder(
       builder: (context, constraints) {
         return Column(
@@ -47,12 +52,21 @@ class ResponsiveFormField extends StatelessWidget {
             Text(
               label,
               style: TextStyle(
-                fontSize: 14.sp,
+                fontSize: performanceService.getOptimizedTextSize(
+                  cacheKey: 'form_field_label_$label',
+                  mobileSize: 14,
+                  tabletSize: 16,
+                ),
                 fontWeight: FontWeight.w500,
                 color: Colors.black87,
               ),
             ),
-            SizedBox(height: 8.h),
+            SizedBox(
+              height: responsive.responsiveValue(
+                mobile: 8,
+                tablet: 12,
+              ),
+            ),
             Flexible(
               child: TextFormField(
                 controller: controller,
@@ -67,31 +81,69 @@ class ResponsiveFormField extends StatelessWidget {
                 focusNode: focusNode,
                 textInputAction: textInputAction,
                 onFieldSubmitted: onFieldSubmitted,
-                style: TextStyle(fontSize: 16.sp),
+                style: TextStyle(
+                  fontSize: performanceService.getOptimizedTextSize(
+                    cacheKey: 'form_field_text_$label',
+                    mobileSize: 16,
+                    tabletSize: 18,
+                  ),
+                ),
                 decoration: InputDecoration(
                   hintText: hint,
-                  hintStyle: TextStyle(fontSize: 16.sp),
+                  hintStyle: TextStyle(
+                    fontSize: performanceService.getOptimizedTextSize(
+                      cacheKey: 'form_field_hint_$label',
+                      mobileSize: 16,
+                      tabletSize: 18,
+                    ),
+                  ),
                   filled: true,
                   fillColor: Colors.grey.shade50,
                   border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(8.r),
+                    borderRadius: BorderRadius.circular(
+                      responsive.responsiveValue(
+                        mobile: 8,
+                        tablet: 12,
+                      ),
+                    ),
                     borderSide: BorderSide(color: Colors.grey.shade300),
                   ),
                   enabledBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(8.r),
+                    borderRadius: BorderRadius.circular(
+                      responsive.responsiveValue(
+                        mobile: 8,
+                        tablet: 12,
+                      ),
+                    ),
                     borderSide: BorderSide(color: Colors.grey.shade300),
                   ),
                   focusedBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(8.r),
+                    borderRadius: BorderRadius.circular(
+                      responsive.responsiveValue(
+                        mobile: 8,
+                        tablet: 12,
+                      ),
+                    ),
                     borderSide: const BorderSide(color: Colors.blue),
                   ),
                   errorBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(8.r),
+                    borderRadius: BorderRadius.circular(
+                      responsive.responsiveValue(
+                        mobile: 8,
+                        tablet: 12,
+                      ),
+                    ),
                     borderSide: const BorderSide(color: Colors.red),
                   ),
                   contentPadding: EdgeInsets.symmetric(
-                    horizontal: 16.w,
-                    vertical: 12.h,
+                    horizontal: responsive.responsiveValue(
+                      mobile: 16,
+                      tablet: 20,
+                    ),
+                    vertical: responsive.responsiveValue(
+                      mobile: 12,
+                      tablet: 16,
+                    ),
                   ),
                   isDense: true,
                 ),

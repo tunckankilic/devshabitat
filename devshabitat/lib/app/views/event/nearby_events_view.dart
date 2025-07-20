@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:flutter_screenutil/flutter_screenutil.dart';
 import '../../controllers/event/event_discovery_controller.dart';
 import '../../widgets/event/event_card.dart';
 import '../base/base_view.dart';
@@ -22,8 +21,8 @@ class NearbyEventsView extends BaseView<EventDiscoveryController> {
           'Yakındaki Etkinlikler',
           style: TextStyle(
             fontSize: responsive.responsiveValue(
-              mobile: 18.sp,
-              tablet: 22.sp,
+              mobile: 18,
+              tablet: 22,
             ),
           ),
         ),
@@ -32,14 +31,14 @@ class NearbyEventsView extends BaseView<EventDiscoveryController> {
             onTap: () => controller.refreshEvents(),
             child: Icon(
               Icons.refresh,
-              size: responsive.minTouchTarget.sp,
+              size: responsive.minTouchTarget,
             ),
           ),
           AdaptiveTouchTarget(
             onTap: () => controller.toggleFilters(),
             child: Icon(
               Icons.filter_list,
-              size: responsive.minTouchTarget.sp,
+              size: responsive.minTouchTarget,
             ),
           ),
         ],
@@ -55,8 +54,8 @@ class NearbyEventsView extends BaseView<EventDiscoveryController> {
                     return Center(
                       child: CircularProgressIndicator(
                         strokeWidth: responsive.responsiveValue(
-                          mobile: 2.w,
-                          tablet: 3.w,
+                          mobile: 2,
+                          tablet: 3,
                         ),
                       ),
                     );
@@ -68,8 +67,8 @@ class NearbyEventsView extends BaseView<EventDiscoveryController> {
                         'Yakında etkinlik bulunamadı',
                         style: TextStyle(
                           fontSize: responsive.responsiveValue(
-                            mobile: 16.sp,
-                            tablet: 18.sp,
+                            mobile: 16,
+                            tablet: 18,
                           ),
                         ),
                       ),
@@ -95,8 +94,8 @@ class NearbyEventsView extends BaseView<EventDiscoveryController> {
         child: Icon(
           Icons.my_location,
           size: responsive.responsiveValue(
-            mobile: 24.sp,
-            tablet: 28.sp,
+            mobile: 24,
+            tablet: 28,
           ),
         ),
       ),
@@ -106,7 +105,12 @@ class NearbyEventsView extends BaseView<EventDiscoveryController> {
   Widget _buildFilters() {
     return Obx(() => AnimatedContainer(
           duration: const Duration(milliseconds: 300),
-          height: controller.showFilters.value ? 120.h : 0,
+          height: controller.showFilters.value
+              ? responsive.responsiveValue(
+                  mobile: 120,
+                  tablet: 140,
+                )
+              : 0,
           child: SingleChildScrollView(
             child: Column(
               children: [
@@ -118,8 +122,8 @@ class NearbyEventsView extends BaseView<EventDiscoveryController> {
                         'Online',
                         style: TextStyle(
                           fontSize: responsive.responsiveValue(
-                            mobile: 14.sp,
-                            tablet: 16.sp,
+                            mobile: 14,
+                            tablet: 16,
                           ),
                         ),
                       ),
@@ -131,8 +135,8 @@ class NearbyEventsView extends BaseView<EventDiscoveryController> {
                         'Yüz Yüze',
                         style: TextStyle(
                           fontSize: responsive.responsiveValue(
-                            mobile: 14.sp,
-                            tablet: 16.sp,
+                            mobile: 14,
+                            tablet: 16,
                           ),
                         ),
                       ),
@@ -149,8 +153,8 @@ class NearbyEventsView extends BaseView<EventDiscoveryController> {
                         'Arama Yarıçapı: ',
                         style: TextStyle(
                           fontSize: responsive.responsiveValue(
-                            mobile: 14.sp,
-                            tablet: 16.sp,
+                            mobile: 14,
+                            tablet: 16,
                           ),
                         ),
                       ),
@@ -186,8 +190,8 @@ class NearbyEventsView extends BaseView<EventDiscoveryController> {
                 padding: responsive.responsivePadding(all: 8),
                 child: CircularProgressIndicator(
                   strokeWidth: responsive.responsiveValue(
-                    mobile: 2.w,
-                    tablet: 3.w,
+                    mobile: 2,
+                    tablet: 3,
                   ),
                 ),
               ),
@@ -207,9 +211,18 @@ class NearbyEventsView extends BaseView<EventDiscoveryController> {
       padding: responsive.responsivePadding(all: 24),
       gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
         crossAxisCount: 2,
-        childAspectRatio: 1.5.w,
-        crossAxisSpacing: 24.w,
-        mainAxisSpacing: 24.h,
+        childAspectRatio: responsive.responsiveValue(
+          mobile: 1.5,
+          tablet: 1.5,
+        ),
+        crossAxisSpacing: responsive.responsiveValue(
+          mobile: 24,
+          tablet: 24,
+        ),
+        mainAxisSpacing: responsive.responsiveValue(
+          mobile: 24,
+          tablet: 24,
+        ),
       ),
       itemCount: controller.events.length + 1,
       itemBuilder: (context, index) {
@@ -221,8 +234,8 @@ class NearbyEventsView extends BaseView<EventDiscoveryController> {
                 padding: responsive.responsivePadding(all: 8),
                 child: CircularProgressIndicator(
                   strokeWidth: responsive.responsiveValue(
-                    mobile: 2.w,
-                    tablet: 3.w,
+                    mobile: 2,
+                    tablet: 3,
                   ),
                 ),
               ),

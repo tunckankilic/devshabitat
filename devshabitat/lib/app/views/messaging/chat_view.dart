@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:flutter_screenutil/flutter_screenutil.dart';
 import '../../controllers/message/message_chat_controller.dart';
 import '../../controllers/message/message_interaction_controller.dart';
 import '../../models/message_model.dart';
@@ -24,16 +23,21 @@ class ChatView extends BaseView<MessageChatController>
           title: Obx(() {
             final conversation = controller.currentConversation.value;
             if (conversation == null) {
-              return Text('Yükleniyor...', style: TextStyle(fontSize: 18.sp));
+              return Text('Yükleniyor...',
+                  style: TextStyle(
+                      fontSize:
+                          responsive.responsiveValue(mobile: 18, tablet: 20)));
             }
             return Text(
               conversation.participantName,
-              style: TextStyle(fontSize: 18.sp),
+              style: TextStyle(
+                  fontSize: responsive.responsiveValue(mobile: 18, tablet: 20)),
             );
           }),
           actions: [
             IconButton(
-              icon: Icon(Icons.more_vert, size: 24.sp),
+              icon: Icon(Icons.more_vert,
+                  size: responsive.responsiveValue(mobile: 24, tablet: 28)),
               onPressed: () {
                 _showChatOptions();
               },
@@ -53,7 +57,9 @@ class ChatView extends BaseView<MessageChatController>
                   return Center(
                     child: Text(
                       'Henüz mesaj yok',
-                      style: TextStyle(fontSize: 16.sp),
+                      style: TextStyle(
+                          fontSize: responsive.responsiveValue(
+                              mobile: 16, tablet: 18)),
                     ),
                   );
                 }
@@ -72,14 +78,17 @@ class ChatView extends BaseView<MessageChatController>
 
             // Mesaj yazma alanı
             Container(
-              padding: EdgeInsets.all(8.r),
+              padding: EdgeInsets.all(
+                  responsive.responsiveValue(mobile: 8, tablet: 12)),
               decoration: BoxDecoration(
                 color: Theme.of(context).scaffoldBackgroundColor,
                 boxShadow: [
                   BoxShadow(
                     color: Colors.black12,
-                    blurRadius: 4.r,
-                    offset: Offset(0, -2.h),
+                    blurRadius:
+                        responsive.responsiveValue(mobile: 4, tablet: 6),
+                    offset: Offset(
+                        0, responsive.responsiveValue(mobile: -2, tablet: -3)),
                   ),
                 ],
               ),
@@ -87,7 +96,9 @@ class ChatView extends BaseView<MessageChatController>
                 child: Row(
                   children: [
                     IconButton(
-                      icon: Icon(Icons.attach_file, size: 24.sp),
+                      icon: Icon(Icons.attach_file,
+                          size: responsive.responsiveValue(
+                              mobile: 24, tablet: 28)),
                       onPressed: () {
                         // Dosya ekleme
                       },
@@ -95,19 +106,26 @@ class ChatView extends BaseView<MessageChatController>
                     Expanded(
                       child: TextField(
                         controller: controller.messageController,
-                        style: TextStyle(fontSize: 16.sp),
+                        style: TextStyle(
+                            fontSize: responsive.responsiveValue(
+                                mobile: 16, tablet: 18)),
                         maxLines: null,
                         decoration: InputDecoration(
                           hintText: 'Mesaj yazın...',
-                          hintStyle: TextStyle(fontSize: 16.sp),
+                          hintStyle: TextStyle(
+                              fontSize: responsive.responsiveValue(
+                                  mobile: 16, tablet: 18)),
                           border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(24.r),
+                            borderRadius: BorderRadius.circular(responsive
+                                .responsiveValue(mobile: 24, tablet: 28)),
                             borderSide: BorderSide.none,
                           ),
                           filled: true,
                           contentPadding: EdgeInsets.symmetric(
-                            horizontal: 16.w,
-                            vertical: 8.h,
+                            horizontal: responsive.responsiveValue(
+                                mobile: 16, tablet: 20),
+                            vertical: responsive.responsiveValue(
+                                mobile: 8, tablet: 12),
                           ),
                         ),
                         onChanged: (value) {
@@ -116,7 +134,9 @@ class ChatView extends BaseView<MessageChatController>
                       ),
                     ),
                     IconButton(
-                      icon: Icon(Icons.send, size: 24.sp),
+                      icon: Icon(Icons.send,
+                          size: responsive.responsiveValue(
+                              mobile: 24, tablet: 28)),
                       onPressed: () {
                         controller.sendMessage();
                       },
@@ -138,8 +158,8 @@ class ChatView extends BaseView<MessageChatController>
     return wrapWithRepaintBoundary(
       Padding(
         padding: EdgeInsets.symmetric(
-          horizontal: 8.w,
-          vertical: 4.h,
+          horizontal: responsive.responsiveValue(mobile: 8, tablet: 12),
+          vertical: responsive.responsiveValue(mobile: 4, tablet: 6),
         ),
         child: Row(
           mainAxisAlignment:
@@ -147,13 +167,15 @@ class ChatView extends BaseView<MessageChatController>
           children: [
             if (!isMe)
               CircleAvatar(
-                radius: 16.r,
+                radius: responsive.responsiveValue(mobile: 16, tablet: 20),
                 child: Text(
                   message.senderId[0].toUpperCase(),
-                  style: TextStyle(fontSize: 12.sp),
+                  style: TextStyle(
+                      fontSize:
+                          responsive.responsiveValue(mobile: 12, tablet: 14)),
                 ),
               ),
-            SizedBox(width: 8.w),
+            SizedBox(width: responsive.responsiveValue(mobile: 8, tablet: 12)),
             Flexible(
               child: GestureDetector(
                 onLongPress: () {
@@ -161,18 +183,25 @@ class ChatView extends BaseView<MessageChatController>
                 },
                 child: Container(
                   padding: EdgeInsets.symmetric(
-                    horizontal: 12.w,
-                    vertical: 8.h,
+                    horizontal:
+                        responsive.responsiveValue(mobile: 12, tablet: 16),
+                    vertical: responsive.responsiveValue(mobile: 8, tablet: 12),
                   ),
                   decoration: BoxDecoration(
                     color: isMe
                         ? Theme.of(Get.context!).primaryColor
                         : Colors.grey[300],
                     borderRadius: BorderRadius.only(
-                      topLeft: Radius.circular(16.r),
-                      topRight: Radius.circular(16.r),
-                      bottomLeft: Radius.circular(isMe ? 16.r : 0),
-                      bottomRight: Radius.circular(isMe ? 0 : 16.r),
+                      topLeft: Radius.circular(
+                          responsive.responsiveValue(mobile: 16, tablet: 20)),
+                      topRight: Radius.circular(
+                          responsive.responsiveValue(mobile: 16, tablet: 20)),
+                      bottomLeft: Radius.circular(isMe
+                          ? responsive.responsiveValue(mobile: 16, tablet: 20)
+                          : 0),
+                      bottomRight: Radius.circular(isMe
+                          ? 0
+                          : responsive.responsiveValue(mobile: 16, tablet: 20)),
                     ),
                   ),
                   child: Column(
@@ -180,16 +209,21 @@ class ChatView extends BaseView<MessageChatController>
                     children: [
                       if (message.replyToId != null)
                         Container(
-                          padding: EdgeInsets.all(8.r),
-                          margin: EdgeInsets.only(bottom: 8.h),
+                          padding: EdgeInsets.all(responsive.responsiveValue(
+                              mobile: 8, tablet: 12)),
+                          margin: EdgeInsets.only(
+                              bottom: responsive.responsiveValue(
+                                  mobile: 8, tablet: 12)),
                           decoration: BoxDecoration(
                             color: Colors.black12,
-                            borderRadius: BorderRadius.circular(8.r),
+                            borderRadius: BorderRadius.circular(responsive
+                                .responsiveValue(mobile: 8, tablet: 12)),
                           ),
                           child: Text(
                             'Yanıtlanan mesaj',
                             style: TextStyle(
-                              fontSize: 12.sp,
+                              fontSize: responsive.responsiveValue(
+                                  mobile: 12, tablet: 14),
                               fontStyle: FontStyle.italic,
                             ),
                           ),
@@ -197,18 +231,22 @@ class ChatView extends BaseView<MessageChatController>
                       Text(
                         message.content,
                         style: TextStyle(
-                          fontSize: 16.sp,
+                          fontSize: responsive.responsiveValue(
+                              mobile: 16, tablet: 18),
                           color: isMe ? Colors.white : Colors.black,
                         ),
                       ),
-                      SizedBox(height: 4.h),
+                      SizedBox(
+                          height:
+                              responsive.responsiveValue(mobile: 4, tablet: 6)),
                       Row(
                         mainAxisSize: MainAxisSize.min,
                         children: [
                           Text(
                             _formatTime(message.timestamp),
                             style: TextStyle(
-                              fontSize: 12.sp,
+                              fontSize: responsive.responsiveValue(
+                                  mobile: 12, tablet: 14),
                               color: isMe ? Colors.white70 : Colors.black54,
                             ),
                           ),
@@ -216,7 +254,8 @@ class ChatView extends BaseView<MessageChatController>
                             Text(
                               ' • düzenlendi',
                               style: TextStyle(
-                                fontSize: 12.sp,
+                                fontSize: responsive.responsiveValue(
+                                    mobile: 12, tablet: 14),
                                 color: isMe ? Colors.white70 : Colors.black54,
                                 fontStyle: FontStyle.italic,
                               ),
@@ -224,7 +263,8 @@ class ChatView extends BaseView<MessageChatController>
                           if (isMe)
                             Icon(
                               message.isRead ? Icons.done_all : Icons.done,
-                              size: 16.sp,
+                              size: responsive.responsiveValue(
+                                  mobile: 16, tablet: 18),
                               color: Colors.white70,
                             ),
                         ],
@@ -234,13 +274,15 @@ class ChatView extends BaseView<MessageChatController>
                 ),
               ),
             ),
-            SizedBox(width: 8.w),
+            SizedBox(width: responsive.responsiveValue(mobile: 8, tablet: 12)),
             if (isMe)
               CircleAvatar(
-                radius: 16.r,
+                radius: responsive.responsiveValue(mobile: 16, tablet: 20),
                 child: Text(
                   message.senderId[0].toUpperCase(),
-                  style: TextStyle(fontSize: 12.sp),
+                  style: TextStyle(
+                      fontSize:
+                          responsive.responsiveValue(mobile: 12, tablet: 14)),
                 ),
               ),
           ],
@@ -255,11 +297,13 @@ class ChatView extends BaseView<MessageChatController>
 
     Get.bottomSheet(
       Container(
-        padding: EdgeInsets.all(16.r),
+        padding:
+            EdgeInsets.all(responsive.responsiveValue(mobile: 16, tablet: 20)),
         decoration: BoxDecoration(
           color: Theme.of(Get.context!).scaffoldBackgroundColor,
           borderRadius: BorderRadius.vertical(
-            top: Radius.circular(16.r),
+            top: Radius.circular(
+                responsive.responsiveValue(mobile: 16, tablet: 20)),
           ),
         ),
         child: Column(
@@ -267,10 +311,13 @@ class ChatView extends BaseView<MessageChatController>
           children: [
             if (isMe) ...[
               ListTile(
-                leading: Icon(Icons.edit, size: 24.sp),
+                leading: Icon(Icons.edit,
+                    size: responsive.responsiveValue(mobile: 24, tablet: 28)),
                 title: Text(
                   'Düzenle',
-                  style: TextStyle(fontSize: 16.sp),
+                  style: TextStyle(
+                      fontSize:
+                          responsive.responsiveValue(mobile: 16, tablet: 18)),
                 ),
                 onTap: () {
                   Get.back();
@@ -278,10 +325,13 @@ class ChatView extends BaseView<MessageChatController>
                 },
               ),
               ListTile(
-                leading: Icon(Icons.delete, size: 24.sp),
+                leading: Icon(Icons.delete,
+                    size: responsive.responsiveValue(mobile: 24, tablet: 28)),
                 title: Text(
                   'Sil',
-                  style: TextStyle(fontSize: 16.sp),
+                  style: TextStyle(
+                      fontSize:
+                          responsive.responsiveValue(mobile: 16, tablet: 18)),
                 ),
                 onTap: () {
                   Get.back();
@@ -290,10 +340,13 @@ class ChatView extends BaseView<MessageChatController>
               ),
             ],
             ListTile(
-              leading: Icon(Icons.reply, size: 24.sp),
+              leading: Icon(Icons.reply,
+                  size: responsive.responsiveValue(mobile: 24, tablet: 28)),
               title: Text(
                 'Yanıtla',
-                style: TextStyle(fontSize: 16.sp),
+                style: TextStyle(
+                    fontSize:
+                        responsive.responsiveValue(mobile: 16, tablet: 18)),
               ),
               onTap: () {
                 Get.back();
@@ -301,10 +354,13 @@ class ChatView extends BaseView<MessageChatController>
               },
             ),
             ListTile(
-              leading: Icon(Icons.forward, size: 24.sp),
+              leading: Icon(Icons.forward,
+                  size: responsive.responsiveValue(mobile: 24, tablet: 28)),
               title: Text(
                 'İlet',
-                style: TextStyle(fontSize: 16.sp),
+                style: TextStyle(
+                    fontSize:
+                        responsive.responsiveValue(mobile: 16, tablet: 18)),
               ),
               onTap: () {
                 Get.back();
@@ -312,10 +368,13 @@ class ChatView extends BaseView<MessageChatController>
               },
             ),
             ListTile(
-              leading: Icon(Icons.content_copy, size: 24.sp),
+              leading: Icon(Icons.content_copy,
+                  size: responsive.responsiveValue(mobile: 24, tablet: 28)),
               title: Text(
                 'Kopyala',
-                style: TextStyle(fontSize: 16.sp),
+                style: TextStyle(
+                    fontSize:
+                        responsive.responsiveValue(mobile: 16, tablet: 18)),
               ),
               onTap: () {
                 Get.back();
@@ -331,21 +390,26 @@ class ChatView extends BaseView<MessageChatController>
   void _showChatOptions() {
     Get.bottomSheet(
       Container(
-        padding: EdgeInsets.all(16.r),
+        padding:
+            EdgeInsets.all(responsive.responsiveValue(mobile: 16, tablet: 20)),
         decoration: BoxDecoration(
           color: Theme.of(Get.context!).scaffoldBackgroundColor,
           borderRadius: BorderRadius.vertical(
-            top: Radius.circular(16.r),
+            top: Radius.circular(
+                responsive.responsiveValue(mobile: 16, tablet: 20)),
           ),
         ),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
             ListTile(
-              leading: Icon(Icons.search, size: 24.sp),
+              leading: Icon(Icons.search,
+                  size: responsive.responsiveValue(mobile: 24, tablet: 28)),
               title: Text(
                 'Mesajlarda Ara',
-                style: TextStyle(fontSize: 16.sp),
+                style: TextStyle(
+                    fontSize:
+                        responsive.responsiveValue(mobile: 16, tablet: 18)),
               ),
               onTap: () {
                 Get.back();
@@ -353,10 +417,13 @@ class ChatView extends BaseView<MessageChatController>
               },
             ),
             ListTile(
-              leading: Icon(Icons.notifications_off, size: 24.sp),
+              leading: Icon(Icons.notifications_off,
+                  size: responsive.responsiveValue(mobile: 24, tablet: 28)),
               title: Text(
                 'Bildirimleri Sustur',
-                style: TextStyle(fontSize: 16.sp),
+                style: TextStyle(
+                    fontSize:
+                        responsive.responsiveValue(mobile: 16, tablet: 18)),
               ),
               onTap: () {
                 Get.back();
@@ -364,10 +431,13 @@ class ChatView extends BaseView<MessageChatController>
               },
             ),
             ListTile(
-              leading: Icon(Icons.block, size: 24.sp),
+              leading: Icon(Icons.block,
+                  size: responsive.responsiveValue(mobile: 24, tablet: 28)),
               title: Text(
                 'Engelle',
-                style: TextStyle(fontSize: 16.sp),
+                style: TextStyle(
+                    fontSize:
+                        responsive.responsiveValue(mobile: 16, tablet: 18)),
               ),
               onTap: () {
                 Get.back();
@@ -375,10 +445,13 @@ class ChatView extends BaseView<MessageChatController>
               },
             ),
             ListTile(
-              leading: Icon(Icons.delete, size: 24.sp),
+              leading: Icon(Icons.delete,
+                  size: responsive.responsiveValue(mobile: 24, tablet: 28)),
               title: Text(
                 'Konuşmayı Sil',
-                style: TextStyle(fontSize: 16.sp),
+                style: TextStyle(
+                    fontSize:
+                        responsive.responsiveValue(mobile: 16, tablet: 18)),
               ),
               onTap: () {
                 Get.back();
@@ -396,18 +469,21 @@ class ChatView extends BaseView<MessageChatController>
       AlertDialog(
         title: Text(
           'Mesajı Sil',
-          style: TextStyle(fontSize: 18.sp),
+          style: TextStyle(
+              fontSize: responsive.responsiveValue(mobile: 18, tablet: 20)),
         ),
         content: Text(
           'Bu mesajı silmek istediğinize emin misiniz?',
-          style: TextStyle(fontSize: 16.sp),
+          style: TextStyle(
+              fontSize: responsive.responsiveValue(mobile: 16, tablet: 18)),
         ),
         actions: [
           TextButton(
             onPressed: () => Get.back(),
             child: Text(
               'İptal',
-              style: TextStyle(fontSize: 14.sp),
+              style: TextStyle(
+                  fontSize: responsive.responsiveValue(mobile: 14, tablet: 16)),
             ),
           ),
           TextButton(
@@ -418,7 +494,7 @@ class ChatView extends BaseView<MessageChatController>
             child: Text(
               'Sil',
               style: TextStyle(
-                fontSize: 14.sp,
+                fontSize: responsive.responsiveValue(mobile: 14, tablet: 16),
                 color: Colors.red,
               ),
             ),
@@ -433,18 +509,21 @@ class ChatView extends BaseView<MessageChatController>
       AlertDialog(
         title: Text(
           'Konuşmayı Sil',
-          style: TextStyle(fontSize: 18.sp),
+          style: TextStyle(
+              fontSize: responsive.responsiveValue(mobile: 18, tablet: 20)),
         ),
         content: Text(
           'Bu konuşmayı silmek istediğinize emin misiniz?',
-          style: TextStyle(fontSize: 16.sp),
+          style: TextStyle(
+              fontSize: responsive.responsiveValue(mobile: 16, tablet: 18)),
         ),
         actions: [
           TextButton(
             onPressed: () => Get.back(),
             child: Text(
               'İptal',
-              style: TextStyle(fontSize: 14.sp),
+              style: TextStyle(
+                  fontSize: responsive.responsiveValue(mobile: 14, tablet: 16)),
             ),
           ),
           TextButton(
@@ -456,7 +535,7 @@ class ChatView extends BaseView<MessageChatController>
             child: Text(
               'Sil',
               style: TextStyle(
-                fontSize: 14.sp,
+                fontSize: responsive.responsiveValue(mobile: 14, tablet: 16),
                 color: Colors.red,
               ),
             ),

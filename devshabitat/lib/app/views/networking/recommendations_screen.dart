@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../../services/simple_recommendation_service.dart';
 import '../../models/enhanced_user_model.dart';
+import '../../controllers/responsive_controller.dart';
 
 class RecommendationsScreen extends StatelessWidget {
   final SimpleRecommendationService _recommendationService = Get.find();
@@ -33,9 +34,15 @@ class RecommendationsScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final responsive = Get.find<ResponsiveController>();
+
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Tanıyor Olabileceğiniz Kişiler'),
+        title: Text(
+          'Tanıyor Olabileceğiniz Kişiler',
+          style: TextStyle(
+              fontSize: responsive.responsiveValue(mobile: 18, tablet: 20)),
+        ),
         centerTitle: true,
       ),
       body: RefreshIndicator(
@@ -52,40 +59,55 @@ class RecommendationsScreen extends StatelessWidget {
   }
 
   Widget _buildEmptyState() {
+    final responsive = Get.find<ResponsiveController>();
+
     return Center(
       child: SingleChildScrollView(
         physics: const AlwaysScrollableScrollPhysics(),
         child: Padding(
-          padding: const EdgeInsets.all(24.0),
+          padding: responsive.responsivePadding(all: 24),
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               Icon(
                 Icons.people_outline,
-                size: 64,
+                size: responsive.responsiveValue(mobile: 64, tablet: 80),
                 color: Get.theme.colorScheme.primary,
               ),
-              const SizedBox(height: 16),
+              SizedBox(
+                  height: responsive.responsiveValue(mobile: 16, tablet: 24)),
               Text(
                 'Henüz Öneri Yok',
-                style: Get.textTheme.headlineSmall,
+                style: Get.textTheme.headlineSmall?.copyWith(
+                  fontSize: responsive.responsiveValue(mobile: 20, tablet: 24),
+                ),
                 textAlign: TextAlign.center,
               ),
-              const SizedBox(height: 8),
+              SizedBox(
+                  height: responsive.responsiveValue(mobile: 8, tablet: 12)),
               Text(
                 'Daha fazla öneri almak için profilinizi güncelleyin:\n\n'
                 '• Yeteneklerinizi ekleyin\n'
                 '• İş deneyimlerinizi paylaşın\n'
                 '• Lokasyon bilginizi güncelleyin\n'
                 '• Şirket bilgilerinizi ekleyin',
-                style: Get.textTheme.bodyLarge,
+                style: Get.textTheme.bodyLarge?.copyWith(
+                  fontSize: responsive.responsiveValue(mobile: 16, tablet: 18),
+                ),
                 textAlign: TextAlign.center,
               ),
-              const SizedBox(height: 24),
+              SizedBox(
+                  height: responsive.responsiveValue(mobile: 24, tablet: 32)),
               FilledButton.icon(
                 onPressed: () => Get.toNamed('/profile/edit'),
-                icon: const Icon(Icons.edit),
-                label: const Text('Profili Düzenle'),
+                icon: Icon(Icons.edit,
+                    size: responsive.responsiveValue(mobile: 20, tablet: 24)),
+                label: Text(
+                  'Profili Düzenle',
+                  style: TextStyle(
+                      fontSize:
+                          responsive.responsiveValue(mobile: 16, tablet: 18)),
+                ),
               ),
             ],
           ),
@@ -95,35 +117,45 @@ class RecommendationsScreen extends StatelessWidget {
   }
 
   Widget _buildRecommendationsList() {
+    final responsive = Get.find<ResponsiveController>();
+
     return CustomScrollView(
       slivers: [
         SliverPadding(
-          padding: const EdgeInsets.all(16.0),
+          padding: responsive.responsivePadding(all: 16),
           sliver: SliverToBoxAdapter(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
                   'Önerilen Bağlantılar',
-                  style: Get.textTheme.titleLarge,
+                  style: Get.textTheme.titleLarge?.copyWith(
+                    fontSize:
+                        responsive.responsiveValue(mobile: 20, tablet: 24),
+                  ),
                 ),
-                const SizedBox(height: 8),
+                SizedBox(
+                    height: responsive.responsiveValue(mobile: 8, tablet: 12)),
                 Text(
                   'Yetenekler, deneyimler ve ortak noktalar baz alınarak önerilir',
-                  style: Get.textTheme.bodyMedium,
+                  style: Get.textTheme.bodyMedium?.copyWith(
+                    fontSize:
+                        responsive.responsiveValue(mobile: 14, tablet: 16),
+                  ),
                 ),
               ],
             ),
           ),
         ),
         SliverPadding(
-          padding: const EdgeInsets.symmetric(horizontal: 16.0),
+          padding: responsive.responsivePadding(horizontal: 16),
           sliver: SliverGrid(
-            gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-              crossAxisCount: 2,
-              mainAxisSpacing: 16.0,
-              crossAxisSpacing: 16.0,
-              childAspectRatio: 0.75,
+            gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+              crossAxisCount: responsive.gridColumns,
+              mainAxisSpacing: responsive.gridSpacing,
+              crossAxisSpacing: responsive.gridSpacing,
+              childAspectRatio: responsive.responsiveValue(
+                  mobile: 0.75, tablet: 0.85, desktop: 1.0),
             ),
             delegate: SliverChildBuilderDelegate(
               (context, index) {
@@ -139,47 +171,61 @@ class RecommendationsScreen extends StatelessWidget {
   }
 
   Widget _buildRecommendationCard(EnhancedUserModel user) {
+    final responsive = Get.find<ResponsiveController>();
+
     return Card(
       elevation: 2,
       child: InkWell(
         onTap: () => Get.toNamed('/profile/${user.id}'),
         child: Padding(
-          padding: const EdgeInsets.all(12.0),
+          padding: responsive.responsivePadding(all: 12),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Center(
                 child: CircleAvatar(
-                  radius: 40,
+                  radius: responsive.responsiveValue(mobile: 40, tablet: 50),
                   backgroundImage: user.photoURL != null
                       ? NetworkImage(user.photoURL!)
                       : null,
                   child: user.photoURL == null
                       ? Text(
                           user.displayName?[0].toUpperCase() ?? 'A',
-                          style: const TextStyle(fontSize: 24),
+                          style: TextStyle(
+                              fontSize: responsive.responsiveValue(
+                                  mobile: 24, tablet: 28)),
                         )
                       : null,
                 ),
               ),
-              const SizedBox(height: 12),
+              SizedBox(
+                  height: responsive.responsiveValue(mobile: 12, tablet: 16)),
               Text(
                 user.displayName ?? 'İsimsiz Kullanıcı',
-                style: Get.textTheme.titleMedium,
+                style: Get.textTheme.titleMedium?.copyWith(
+                  fontSize: responsive.responsiveValue(mobile: 16, tablet: 18),
+                ),
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
               ),
               if (user.experience?.isNotEmpty ?? false) ...[
-                const SizedBox(height: 4),
+                SizedBox(
+                    height: responsive.responsiveValue(mobile: 4, tablet: 6)),
                 Text(
                   user.experience!.first['role'] ?? '',
-                  style: Get.textTheme.bodyMedium,
+                  style: Get.textTheme.bodyMedium?.copyWith(
+                    fontSize:
+                        responsive.responsiveValue(mobile: 14, tablet: 16),
+                  ),
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                 ),
                 Text(
                   user.experience!.first['company'] ?? '',
-                  style: Get.textTheme.bodySmall,
+                  style: Get.textTheme.bodySmall?.copyWith(
+                    fontSize:
+                        responsive.responsiveValue(mobile: 12, tablet: 14),
+                  ),
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                 ),
@@ -187,10 +233,17 @@ class RecommendationsScreen extends StatelessWidget {
               const Spacer(),
               FilledButton.icon(
                 onPressed: () => _sendConnectionRequest(user),
-                icon: const Icon(Icons.person_add),
-                label: const Text('Bağlan'),
+                icon: Icon(Icons.person_add,
+                    size: responsive.responsiveValue(mobile: 18, tablet: 20)),
+                label: Text(
+                  'Bağlan',
+                  style: TextStyle(
+                      fontSize:
+                          responsive.responsiveValue(mobile: 14, tablet: 16)),
+                ),
                 style: FilledButton.styleFrom(
-                  minimumSize: const Size(double.infinity, 36),
+                  minimumSize: Size(double.infinity,
+                      responsive.responsiveValue(mobile: 36, tablet: 44)),
                 ),
               ),
             ],

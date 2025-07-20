@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import '../../../controllers/responsive_controller.dart';
+import '../../../services/responsive_performance_service.dart';
 
 class AuthForm extends StatefulWidget {
   final bool isLogin;
@@ -30,37 +32,66 @@ class _AuthFormState extends State<AuthForm> {
 
   @override
   Widget build(BuildContext context) {
+    final responsive = Get.find<ResponsiveController>();
+    final performanceService = Get.find<ResponsivePerformanceService>();
+
     return Form(
       key: _formKey,
       child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
+          // Email Field
           TextFormField(
             controller: _emailController,
-            decoration: const InputDecoration(
-              labelText: 'E-posta',
-              prefixIcon: Icon(Icons.email),
-            ),
             keyboardType: TextInputType.emailAddress,
+            style: TextStyle(
+              fontSize: performanceService.getOptimizedTextSize(
+                cacheKey: 'auth_form_email',
+                mobileSize: 16,
+                tabletSize: 18,
+              ),
+            ),
+            decoration: InputDecoration(
+              labelText: 'E-posta',
+              hintText: 'ornek@email.com',
+              prefixIcon: Icon(
+                Icons.email_outlined,
+                size: responsive.responsiveValue(mobile: 20, tablet: 24),
+              ),
+            ),
             validator: (value) {
               if (value == null || value.isEmpty) {
-                return 'E-posta adresi gerekli';
+                return 'E-posta gerekli';
               }
               if (!GetUtils.isEmail(value)) {
-                return 'Geçerli bir e-posta adresi girin';
+                return 'Geçerli bir e-posta girin';
               }
               return null;
             },
           ),
-          const SizedBox(height: 16),
+
+          SizedBox(height: responsive.responsiveValue(mobile: 16, tablet: 20)),
+
+          // Password Field
           TextFormField(
             controller: _passwordController,
+            obscureText: !_isPasswordVisible,
+            style: TextStyle(
+              fontSize: performanceService.getOptimizedTextSize(
+                cacheKey: 'auth_form_password',
+                mobileSize: 16,
+                tabletSize: 18,
+              ),
+            ),
             decoration: InputDecoration(
               labelText: 'Şifre',
-              prefixIcon: const Icon(Icons.lock),
+              prefixIcon: Icon(
+                Icons.lock_outlined,
+                size: responsive.responsiveValue(mobile: 20, tablet: 24),
+              ),
               suffixIcon: IconButton(
                 icon: Icon(
                   _isPasswordVisible ? Icons.visibility_off : Icons.visibility,
+                  size: responsive.responsiveValue(mobile: 20, tablet: 24),
                 ),
                 onPressed: () {
                   setState(() {
@@ -69,7 +100,6 @@ class _AuthFormState extends State<AuthForm> {
                 },
               ),
             ),
-            obscureText: !_isPasswordVisible,
             validator: (value) {
               if (value == null || value.isEmpty) {
                 return 'Şifre gerekli';
@@ -80,17 +110,34 @@ class _AuthFormState extends State<AuthForm> {
               return null;
             },
           ),
-          const SizedBox(height: 24),
-          ElevatedButton(
-            onPressed: () {
-              if (_formKey.currentState!.validate()) {
-                widget.onSubmit(
-                  _emailController.text,
-                  _passwordController.text,
-                );
-              }
-            },
-            child: Text(widget.isLogin ? 'Giriş Yap' : 'Kayıt Ol'),
+
+          SizedBox(height: responsive.responsiveValue(mobile: 24, tablet: 32)),
+
+          // Submit Button
+          SizedBox(
+            width: double.infinity,
+            height: responsive.responsiveValue(mobile: 48, tablet: 56),
+            child: ElevatedButton(
+              onPressed: () {
+                if (_formKey.currentState!.validate()) {
+                  widget.onSubmit(
+                    _emailController.text.trim(),
+                    _passwordController.text,
+                  );
+                }
+              },
+              child: Text(
+                widget.isLogin ? 'Giriş Yap' : 'Kayıt Ol',
+                style: TextStyle(
+                  fontSize: performanceService.getOptimizedTextSize(
+                    cacheKey: 'auth_form_button',
+                    mobileSize: 16,
+                    tabletSize: 18,
+                  ),
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+            ),
           ),
         ],
       ),

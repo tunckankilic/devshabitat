@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:flutter_screenutil/flutter_screenutil.dart';
 import '../../controllers/message/message_chat_controller.dart';
 import '../../controllers/message/message_list_controller.dart';
 import '../../controllers/message/message_search_controller.dart';
@@ -29,8 +28,8 @@ class MessageView extends BaseView<MessageChatController> {
           'Mesajlar',
           style: TextStyle(
             fontSize: responsive.responsiveValue(
-              mobile: 18.sp,
-              tablet: 22.sp,
+              mobile: 18,
+              tablet: 22,
             ),
           ),
         ),
@@ -39,7 +38,7 @@ class MessageView extends BaseView<MessageChatController> {
             onTap: () => Get.toNamed('/message-search'),
             child: Icon(
               Icons.search,
-              size: responsive.minTouchTarget.sp,
+              size: responsive.responsiveValue(mobile: 24, tablet: 32),
             ),
           ),
         ],
@@ -54,8 +53,8 @@ class MessageView extends BaseView<MessageChatController> {
                     return Center(
                       child: CircularProgressIndicator(
                         strokeWidth: responsive.responsiveValue(
-                          mobile: 2.w,
-                          tablet: 3.w,
+                          mobile: 2,
+                          tablet: 3,
                         ),
                       ),
                     );
@@ -67,8 +66,8 @@ class MessageView extends BaseView<MessageChatController> {
                         'Henüz bir konuşma yok',
                         style: TextStyle(
                           fontSize: responsive.responsiveValue(
-                            mobile: 16.sp,
-                            tablet: 18.sp,
+                            mobile: 16,
+                            tablet: 18,
                           ),
                         ),
                       ),
@@ -90,7 +89,7 @@ class MessageView extends BaseView<MessageChatController> {
         onTap: () => Get.toNamed('/new-conversation'),
         child: Icon(
           Icons.message,
-          size: responsive.minTouchTarget.sp,
+          size: responsive.responsiveValue(mobile: 24, tablet: 32),
         ),
       ),
     );
@@ -112,9 +111,9 @@ class MessageView extends BaseView<MessageChatController> {
       padding: responsive.responsivePadding(all: 24),
       gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
         crossAxisCount: 2,
-        childAspectRatio: 4.w,
-        crossAxisSpacing: 24.w,
-        mainAxisSpacing: 24.h,
+        childAspectRatio: responsive.responsiveValue(mobile: 4, tablet: 4),
+        crossAxisSpacing: responsive.responsiveValue(mobile: 24, tablet: 32),
+        mainAxisSpacing: responsive.responsiveValue(mobile: 24, tablet: 32),
       ),
       itemCount: listController.conversations.length,
       itemBuilder: (context, index) {
@@ -135,15 +134,15 @@ class MessageView extends BaseView<MessageChatController> {
       child: ListTile(
         leading: CircleAvatar(
           radius: responsive.responsiveValue(
-            mobile: 24.r,
-            tablet: 32.r,
+            mobile: 24,
+            tablet: 32,
           ),
           child: ResponsiveText(
             (conversation.participantName)[0].toUpperCase(),
             style: TextStyle(
               fontSize: responsive.responsiveValue(
-                mobile: 16.sp,
-                tablet: 20.sp,
+                mobile: 16,
+                tablet: 20,
               ),
             ),
           ),
@@ -152,8 +151,8 @@ class MessageView extends BaseView<MessageChatController> {
           conversation.participantName,
           style: TextStyle(
             fontSize: responsive.responsiveValue(
-              mobile: 16.sp,
-              tablet: 18.sp,
+              mobile: 16,
+              tablet: 18,
             ),
           ),
         ),
@@ -161,8 +160,8 @@ class MessageView extends BaseView<MessageChatController> {
           conversation.lastMessage ?? 'Mesaj yok',
           style: TextStyle(
             fontSize: responsive.responsiveValue(
-              mobile: 14.sp,
-              tablet: 16.sp,
+              mobile: 14,
+              tablet: 16,
             ),
           ),
           maxLines: 1,
@@ -176,8 +175,8 @@ class MessageView extends BaseView<MessageChatController> {
               _formatTime(conversation.lastMessageTime),
               style: TextStyle(
                 fontSize: responsive.responsiveValue(
-                  mobile: 12.sp,
-                  tablet: 14.sp,
+                  mobile: 12,
+                  tablet: 14,
                 ),
               ),
             ),
@@ -189,15 +188,17 @@ class MessageView extends BaseView<MessageChatController> {
                 ),
                 decoration: BoxDecoration(
                   color: Theme.of(Get.context!).primaryColor,
-                  borderRadius: BorderRadius.circular(12.r),
+                  borderRadius: BorderRadius.circular(
+                    responsive.responsiveValue(mobile: 12, tablet: 16),
+                  ),
                 ),
                 child: ResponsiveText(
                   'Yeni',
                   style: TextStyle(
                     color: Colors.white,
                     fontSize: responsive.responsiveValue(
-                      mobile: 12.sp,
-                      tablet: 14.sp,
+                      mobile: 12,
+                      tablet: 14,
                     ),
                   ),
                 ),
@@ -217,7 +218,9 @@ class MessageView extends BaseView<MessageChatController> {
         decoration: BoxDecoration(
           color: Theme.of(Get.context!).scaffoldBackgroundColor,
           borderRadius: BorderRadius.vertical(
-            top: Radius.circular(16.r),
+            top: Radius.circular(
+              responsive.responsiveValue(mobile: 16, tablet: 20),
+            ),
           ),
         ),
         child: Column(
@@ -226,14 +229,14 @@ class MessageView extends BaseView<MessageChatController> {
             ListTile(
               leading: Icon(
                 Icons.delete,
-                size: responsive.minTouchTarget.sp,
+                size: responsive.responsiveValue(mobile: 24, tablet: 32),
               ),
               title: ResponsiveText(
                 'Konuşmayı Sil',
                 style: TextStyle(
                   fontSize: responsive.responsiveValue(
-                    mobile: 16.sp,
-                    tablet: 18.sp,
+                    mobile: 16,
+                    tablet: 18,
                   ),
                 ),
               ),
@@ -245,14 +248,14 @@ class MessageView extends BaseView<MessageChatController> {
             ListTile(
               leading: Icon(
                 Icons.archive,
-                size: responsive.minTouchTarget.sp,
+                size: responsive.responsiveValue(mobile: 24, tablet: 32),
               ),
               title: ResponsiveText(
                 'Arşivle',
                 style: TextStyle(
                   fontSize: responsive.responsiveValue(
-                    mobile: 16.sp,
-                    tablet: 18.sp,
+                    mobile: 16,
+                    tablet: 18,
                   ),
                 ),
               ),
@@ -264,14 +267,14 @@ class MessageView extends BaseView<MessageChatController> {
             ListTile(
               leading: Icon(
                 Icons.block,
-                size: responsive.minTouchTarget.sp,
+                size: responsive.responsiveValue(mobile: 24, tablet: 32),
               ),
               title: ResponsiveText(
                 'Engelle',
                 style: TextStyle(
                   fontSize: responsive.responsiveValue(
-                    mobile: 16.sp,
-                    tablet: 18.sp,
+                    mobile: 16,
+                    tablet: 18,
                   ),
                 ),
               ),
@@ -293,8 +296,8 @@ class MessageView extends BaseView<MessageChatController> {
           'Konuşmayı Sil',
           style: TextStyle(
             fontSize: responsive.responsiveValue(
-              mobile: 18.sp,
-              tablet: 20.sp,
+              mobile: 18,
+              tablet: 20,
             ),
           ),
         ),
@@ -302,8 +305,8 @@ class MessageView extends BaseView<MessageChatController> {
           'Bu konuşmayı silmek istediğinize emin misiniz?',
           style: TextStyle(
             fontSize: responsive.responsiveValue(
-              mobile: 16.sp,
-              tablet: 18.sp,
+              mobile: 16,
+              tablet: 18,
             ),
           ),
         ),
@@ -314,8 +317,8 @@ class MessageView extends BaseView<MessageChatController> {
               'İptal',
               style: TextStyle(
                 fontSize: responsive.responsiveValue(
-                  mobile: 14.sp,
-                  tablet: 16.sp,
+                  mobile: 14,
+                  tablet: 16,
                 ),
               ),
             ),
@@ -329,8 +332,8 @@ class MessageView extends BaseView<MessageChatController> {
               'Sil',
               style: TextStyle(
                 fontSize: responsive.responsiveValue(
-                  mobile: 14.sp,
-                  tablet: 16.sp,
+                  mobile: 14,
+                  tablet: 16,
                 ),
                 color: Colors.red,
               ),

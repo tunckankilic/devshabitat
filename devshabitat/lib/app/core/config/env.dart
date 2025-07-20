@@ -65,13 +65,6 @@ abstract class Env {
   @EnviedField(varName: 'GOOGLE_MAPS_API_KEY', obfuscate: true)
   static final String googleMapsApiKey = _Env.googleMapsApiKey;
 
-  // Security Configuration
-  @EnviedField(varName: 'JWT_SECRET_KEY', obfuscate: true)
-  static final String jwtSecretKey = _Env.jwtSecretKey;
-
-  @EnviedField(varName: 'ENCRYPTION_KEY', obfuscate: true)
-  static final String encryptionKey = _Env.encryptionKey;
-
   // API Rate Limiting
   @EnviedField(varName: 'MAX_LOGIN_ATTEMPTS')
   static final int maxLoginAttempts = _Env.maxLoginAttempts;

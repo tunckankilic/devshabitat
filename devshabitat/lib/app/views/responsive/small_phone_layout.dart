@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:get/get.dart';
+import '../../controllers/responsive_controller.dart';
 
 class SmallPhoneLayout extends StatelessWidget {
   final Widget child;
@@ -19,11 +20,14 @@ class SmallPhoneLayout extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final responsive = Get.find<ResponsiveController>();
+
     return Scaffold(
       appBar: appBar,
       body: SafeArea(
         child: Padding(
-          padding: EdgeInsets.all(16.w),
+          padding: EdgeInsets.all(
+              responsive.responsiveValue(mobile: 16, tablet: 20)),
           child: child,
         ),
       ),

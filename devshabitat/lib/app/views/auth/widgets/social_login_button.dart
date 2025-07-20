@@ -1,138 +1,124 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'dart:io' show Platform;
+import '../../../controllers/responsive_controller.dart';
 import '../../../controllers/auth_controller.dart';
+import '../../../services/responsive_performance_service.dart';
 
 class SocialLoginButton extends StatelessWidget {
+  late final _responsiveController = Get.find<ResponsiveController>();
   final String text;
-  final String iconPath;
+  final String imagePath;
   final VoidCallback onPressed;
-  final Color backgroundColor;
-  final Color textColor;
+  final bool isLoading;
+  final bool isOutlined;
+  final Color? backgroundColor;
+  final Color? textColor;
 
-  const SocialLoginButton({
-    super.key,
+  SocialLoginButton({
+    Key? key,
     required this.text,
-    required this.iconPath,
+    required this.imagePath,
     required this.onPressed,
-    required this.backgroundColor,
-    required this.textColor,
-  });
+    this.isLoading = false,
+    this.isOutlined = false,
+    this.backgroundColor,
+    this.textColor,
+  }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
-    // iOS'ta Apple Sign In'i göster, Android'de Google'ı göster
-    if ((Platform.isIOS && text.contains('Google')) ||
-        (Platform.isAndroid && text.contains('Apple'))) {
-      return const SizedBox.shrink();
-    }
-
-    // iOS'ta Apple Sign In'i en üstte göster
-    if (Platform.isIOS && text.contains('Apple')) {
-      return _buildPrimaryButton();
-    }
-
-    return _buildSecondaryButton();
-  }
-
-  Widget _buildPrimaryButton() {
-    return Obx(() {
-      final isLoading = Get.find<AuthController>().isLoading;
-
-      return ElevatedButton(
-        onPressed: isLoading ? null : onPressed,
-        style: ElevatedButton.styleFrom(
-          backgroundColor: backgroundColor,
-          foregroundColor: textColor,
-          padding: EdgeInsets.symmetric(vertical: 16.h),
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(12.r),
-          ),
-          elevation: 2,
-        ),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Image.asset(
-              iconPath,
-              width: 24.w,
-              height: 24.w,
-            ),
-            SizedBox(width: 12.w),
-            Text(
-              text,
-              style: TextStyle(
-                fontSize: 16.sp,
-                fontWeight: FontWeight.w600,
-              ),
-            ),
-            if (isLoading) ...[
-              const SizedBox(width: 12),
-              SizedBox(
-                height: 20,
-                width: 20,
-                child: CircularProgressIndicator(
-                  strokeWidth: 2,
-                  valueColor: AlwaysStoppedAnimation<Color>(textColor),
-                ),
-              ),
-            ],
-          ],
-        ),
-      );
-    });
-  }
-
-  Widget _buildSecondaryButton() {
-    return Obx(() {
-      final isLoading = Get.find<AuthController>().isLoading;
-
-      return OutlinedButton(
-        onPressed: isLoading ? null : onPressed,
-        style: OutlinedButton.styleFrom(
-          backgroundColor: backgroundColor,
-          foregroundColor: textColor,
-          padding: EdgeInsets.symmetric(vertical: 12.h),
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(8.r),
-          ),
-          side: BorderSide(
-            color: backgroundColor == Colors.white
-                ? Colors.grey[300]!
-                : backgroundColor,
+    return Container(
+      height: _responsiveController.responsiveValue(
+        mobile: 48.0,
+        tablet: 56.0,
+      ),
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(
+          _responsiveController.responsiveValue(
+            mobile: 8.0,
+            tablet: 12.0,
           ),
         ),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Image.asset(
-              iconPath,
-              width: 24.w,
-              height: 24.w,
+        border: isOutlined ? Border.all(color: Colors.grey[300]!) : null,
+        color: backgroundColor ?? (isOutlined ? Colors.white : Colors.blue),
+      ),
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          onTap: isLoading ? null : onPressed,
+          borderRadius: BorderRadius.circular(
+            _responsiveController.responsiveValue(
+              mobile: 8.0,
+              tablet: 12.0,
             ),
-            SizedBox(width: 12.w),
-            Text(
-              text,
-              style: TextStyle(
-                fontSize: 16.sp,
-                fontWeight: FontWeight.w500,
+          ),
+          child: Padding(
+            padding: EdgeInsets.symmetric(
+              horizontal: _responsiveController.responsiveValue(
+                mobile: 16.0,
+                tablet: 24.0,
               ),
             ),
-            if (isLoading) ...[
-              const SizedBox(width: 12),
-              SizedBox(
-                height: 20,
-                width: 20,
-                child: CircularProgressIndicator(
-                  strokeWidth: 2,
-                  valueColor: AlwaysStoppedAnimation<Color>(textColor),
-                ),
-              ),
-            ],
-          ],
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                if (isLoading)
+                  SizedBox(
+                    width: _responsiveController.responsiveValue(
+                      mobile: 24.0,
+                      tablet: 32.0,
+                    ),
+                    height: _responsiveController.responsiveValue(
+                      mobile: 24.0,
+                      tablet: 32.0,
+                    ),
+                    child: CircularProgressIndicator(
+                      valueColor: AlwaysStoppedAnimation<Color>(
+                        textColor ?? Colors.white,
+                      ),
+                    ),
+                  )
+                else ...[
+                  SizedBox(
+                    width: _responsiveController.responsiveValue(
+                      mobile: 8.0,
+                      tablet: 12.0,
+                    ),
+                  ),
+                  Image.asset(
+                    imagePath,
+                    height: _responsiveController.responsiveValue(
+                      mobile: 24.0,
+                      tablet: 32.0,
+                    ),
+                    width: _responsiveController.responsiveValue(
+                      mobile: 24.0,
+                      tablet: 32.0,
+                    ),
+                  ),
+                  SizedBox(
+                    width: _responsiveController.responsiveValue(
+                      mobile: 8.0,
+                      tablet: 12.0,
+                    ),
+                  ),
+                  Text(
+                    text,
+                    style: TextStyle(
+                      fontSize: _responsiveController.responsiveValue(
+                        mobile: 16.0,
+                        tablet: 18.0,
+                      ),
+                      color: textColor ?? Colors.white,
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+                ],
+              ],
+            ),
+          ),
         ),
-      );
-    });
+      ),
+    );
   }
 }

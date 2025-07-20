@@ -1,50 +1,119 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../../controllers/filter_controller.dart';
+import '../../controllers/responsive_controller.dart';
+import '../../services/responsive_performance_service.dart';
+import '../../widgets/responsive/responsive_text.dart';
+import '../../widgets/responsive/animated_responsive_wrapper.dart';
 
 class AdvancedFiltersScreen extends GetView<FilterController> {
   const AdvancedFiltersScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
+    final responsive = Get.find<ResponsiveController>();
+    final performanceService = Get.find<ResponsivePerformanceService>();
+
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Gelişmiş Filtreler'),
+        title: ResponsiveText(
+          'Gelişmiş Filtreler',
+          style: TextStyle(
+            fontSize: responsive.responsiveValue(
+              mobile: 18,
+              tablet: 22,
+            ),
+          ),
+        ),
         actions: [
           TextButton(
             onPressed: controller.resetFilters,
-            child: const Text('Sıfırla'),
+            child: ResponsiveText(
+              'Sıfırla',
+              style: TextStyle(
+                fontSize: responsive.responsiveValue(
+                  mobile: 16,
+                  tablet: 18,
+                ),
+              ),
+            ),
           ),
         ],
       ),
       body: SingleChildScrollView(
-        padding: const EdgeInsets.all(16),
+        padding: performanceService.getOptimizedPadding(
+          cacheKey: 'advanced_filters_body_padding',
+          all: 16,
+        ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             _buildSkillsSection(),
-            const SizedBox(height: 24),
+            SizedBox(
+              height: responsive.responsiveValue(
+                mobile: 24,
+                tablet: 32,
+              ),
+            ),
             _buildLocationSection(),
-            const SizedBox(height: 24),
+            SizedBox(
+              height: responsive.responsiveValue(
+                mobile: 24,
+                tablet: 32,
+              ),
+            ),
             _buildExperienceSection(),
-            const SizedBox(height: 24),
+            SizedBox(
+              height: responsive.responsiveValue(
+                mobile: 24,
+                tablet: 32,
+              ),
+            ),
             _buildCompanySection(),
-            const SizedBox(height: 24),
+            SizedBox(
+              height: responsive.responsiveValue(
+                mobile: 24,
+                tablet: 32,
+              ),
+            ),
             _buildOnlineStatusSection(),
-            const SizedBox(height: 24),
+            SizedBox(
+              height: responsive.responsiveValue(
+                mobile: 24,
+                tablet: 32,
+              ),
+            ),
             _buildSavedFiltersSection(context),
           ],
         ),
       ),
       bottomNavigationBar: SafeArea(
         child: Padding(
-          padding: const EdgeInsets.all(16),
+          padding: performanceService.getOptimizedPadding(
+            cacheKey: 'bottom_button_padding',
+            all: 16,
+          ),
           child: ElevatedButton(
             onPressed: () {
               controller.applyFilters();
               Get.back();
             },
-            child: const Text('Filtreleri Uygula'),
+            style: ElevatedButton.styleFrom(
+              padding: performanceService.getOptimizedPadding(
+                cacheKey: 'apply_button_padding',
+                horizontal: 24,
+                vertical: 16,
+              ),
+            ),
+            child: ResponsiveText(
+              'Filtreleri Uygula',
+              style: TextStyle(
+                fontSize: responsive.responsiveValue(
+                  mobile: 16,
+                  tablet: 18,
+                ),
+              ),
+            ),
           ),
         ),
       ),
@@ -52,25 +121,63 @@ class AdvancedFiltersScreen extends GetView<FilterController> {
   }
 
   Widget _buildSkillsSection() {
+    final responsive = Get.find<ResponsiveController>();
+    final performanceService = Get.find<ResponsivePerformanceService>();
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(
+        ResponsiveText(
           'Yetenekler',
-          style: Get.textTheme.titleMedium,
+          style: TextStyle(
+            fontSize: responsive.responsiveValue(
+              mobile: 18,
+              tablet: 20,
+            ),
+            fontWeight: FontWeight.bold,
+          ),
         ),
-        const SizedBox(height: 8),
+        SizedBox(
+          height: responsive.responsiveValue(
+            mobile: 8,
+            tablet: 12,
+          ),
+        ),
         Obx(() => Wrap(
-              spacing: 8,
-              runSpacing: 8,
+              spacing: responsive.responsiveValue(
+                mobile: 8,
+                tablet: 12,
+              ),
+              runSpacing: responsive.responsiveValue(
+                mobile: 8,
+                tablet: 12,
+              ),
               children: controller.selectedSkills
                   .map((skill) => Chip(
-                        label: Text(skill),
+                        label: ResponsiveText(
+                          skill,
+                          style: TextStyle(
+                            fontSize: responsive.responsiveValue(
+                              mobile: 12,
+                              tablet: 14,
+                            ),
+                          ),
+                        ),
                         onDeleted: () => controller.removeSkill(skill),
+                        padding: performanceService.getOptimizedPadding(
+                          cacheKey: 'skill_chip_padding',
+                          horizontal: 8,
+                          vertical: 4,
+                        ),
                       ))
                   .toList(),
             )),
-        const SizedBox(height: 8),
+        SizedBox(
+          height: responsive.responsiveValue(
+            mobile: 8,
+            tablet: 12,
+          ),
+        ),
         Autocomplete<String>(
           optionsBuilder: (TextEditingValue textEditingValue) {
             return controller.availableSkills
@@ -85,10 +192,40 @@ class AdvancedFiltersScreen extends GetView<FilterController> {
             return TextField(
               controller: textEditingController,
               focusNode: focusNode,
-              decoration: const InputDecoration(
+              style: TextStyle(
+                fontSize: responsive.responsiveValue(
+                  mobile: 16,
+                  tablet: 18,
+                ),
+              ),
+              decoration: InputDecoration(
                 hintText: 'Yetenek ara...',
-                prefixIcon: Icon(Icons.search),
-                border: OutlineInputBorder(),
+                hintStyle: TextStyle(
+                  fontSize: responsive.responsiveValue(
+                    mobile: 16,
+                    tablet: 18,
+                  ),
+                ),
+                prefixIcon: Icon(
+                  Icons.search,
+                  size: responsive.responsiveValue(
+                    mobile: 24,
+                    tablet: 28,
+                  ),
+                ),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(
+                    responsive.responsiveValue(
+                      mobile: 8,
+                      tablet: 12,
+                    ),
+                  ),
+                ),
+                contentPadding: performanceService.getOptimizedPadding(
+                  cacheKey: 'skill_search_padding',
+                  horizontal: 16,
+                  vertical: 12,
+                ),
               ),
             );
           },
@@ -98,28 +235,82 @@ class AdvancedFiltersScreen extends GetView<FilterController> {
   }
 
   Widget _buildLocationSection() {
+    final responsive = Get.find<ResponsiveController>();
+    final performanceService = Get.find<ResponsivePerformanceService>();
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(
+        ResponsiveText(
           'Konum',
-          style: Get.textTheme.titleMedium,
-        ),
-        const SizedBox(height: 8),
-        TextField(
-          controller: controller.locationController,
-          decoration: const InputDecoration(
-            hintText: 'Şehir veya ülke girin',
-            prefixIcon: Icon(Icons.location_on),
-            border: OutlineInputBorder(),
+          style: TextStyle(
+            fontSize: responsive.responsiveValue(
+              mobile: 18,
+              tablet: 20,
+            ),
+            fontWeight: FontWeight.bold,
           ),
         ),
-        const SizedBox(height: 16),
+        SizedBox(
+          height: responsive.responsiveValue(
+            mobile: 8,
+            tablet: 12,
+          ),
+        ),
+        TextField(
+          controller: controller.locationController,
+          style: TextStyle(
+            fontSize: responsive.responsiveValue(
+              mobile: 16,
+              tablet: 18,
+            ),
+          ),
+          decoration: InputDecoration(
+            hintText: 'Şehir veya ülke girin',
+            hintStyle: TextStyle(
+              fontSize: responsive.responsiveValue(
+                mobile: 16,
+                tablet: 18,
+              ),
+            ),
+            prefixIcon: Icon(
+              Icons.location_on,
+              size: responsive.responsiveValue(
+                mobile: 24,
+                tablet: 28,
+              ),
+            ),
+            border: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(
+                responsive.responsiveValue(
+                  mobile: 8,
+                  tablet: 12,
+                ),
+              ),
+            ),
+            contentPadding: performanceService.getOptimizedPadding(
+              cacheKey: 'location_field_padding',
+              horizontal: 16,
+              vertical: 12,
+            ),
+          ),
+        ),
+        SizedBox(
+          height: responsive.responsiveValue(
+            mobile: 16,
+            tablet: 24,
+          ),
+        ),
         Column(
           children: [
-            Text(
+            ResponsiveText(
               'Mesafe: ${controller.radius.value.toInt()} km',
-              style: Get.textTheme.bodyMedium,
+              style: TextStyle(
+                fontSize: responsive.responsiveValue(
+                  mobile: 14,
+                  tablet: 16,
+                ),
+              ),
             ),
             Obx(() => Slider(
                   value: controller.radius.value,
@@ -128,6 +319,9 @@ class AdvancedFiltersScreen extends GetView<FilterController> {
                   divisions: 50,
                   label: '${controller.radius.value.toInt()} km',
                   onChanged: controller.updateRadius,
+                  activeColor: Theme.of(Get.context!).primaryColor,
+                  inactiveColor:
+                      Theme.of(Get.context!).primaryColor.withOpacity(0.3),
                 )),
           ],
         ),
@@ -136,14 +330,28 @@ class AdvancedFiltersScreen extends GetView<FilterController> {
   }
 
   Widget _buildExperienceSection() {
+    final responsive = Get.find<ResponsiveController>();
+    final performanceService = Get.find<ResponsivePerformanceService>();
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(
+        ResponsiveText(
           'Deneyim',
-          style: Get.textTheme.titleMedium,
+          style: TextStyle(
+            fontSize: responsive.responsiveValue(
+              mobile: 18,
+              tablet: 20,
+            ),
+            fontWeight: FontWeight.bold,
+          ),
         ),
-        const SizedBox(height: 16),
+        SizedBox(
+          height: responsive.responsiveValue(
+            mobile: 16,
+            tablet: 24,
+          ),
+        ),
         Obx(() => RangeSlider(
               values: controller.experienceRange.value,
               min: 0,
@@ -154,26 +362,73 @@ class AdvancedFiltersScreen extends GetView<FilterController> {
                 '${controller.experienceRange.value.end.toInt()}+ yıl',
               ),
               onChanged: controller.updateExperienceRange,
+              activeColor: Theme.of(Get.context!).primaryColor,
+              inactiveColor:
+                  Theme.of(Get.context!).primaryColor.withOpacity(0.3),
             )),
       ],
     );
   }
 
   Widget _buildCompanySection() {
+    final responsive = Get.find<ResponsiveController>();
+    final performanceService = Get.find<ResponsivePerformanceService>();
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(
+        ResponsiveText(
           'Şirket',
-          style: Get.textTheme.titleMedium,
+          style: TextStyle(
+            fontSize: responsive.responsiveValue(
+              mobile: 18,
+              tablet: 20,
+            ),
+            fontWeight: FontWeight.bold,
+          ),
         ),
-        const SizedBox(height: 8),
+        SizedBox(
+          height: responsive.responsiveValue(
+            mobile: 8,
+            tablet: 12,
+          ),
+        ),
         TextField(
           controller: controller.companyController,
-          decoration: const InputDecoration(
+          style: TextStyle(
+            fontSize: responsive.responsiveValue(
+              mobile: 16,
+              tablet: 18,
+            ),
+          ),
+          decoration: InputDecoration(
             hintText: 'Şirket adı girin',
-            prefixIcon: Icon(Icons.business),
-            border: OutlineInputBorder(),
+            hintStyle: TextStyle(
+              fontSize: responsive.responsiveValue(
+                mobile: 16,
+                tablet: 18,
+              ),
+            ),
+            prefixIcon: Icon(
+              Icons.business,
+              size: responsive.responsiveValue(
+                mobile: 24,
+                tablet: 28,
+              ),
+            ),
+            border: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(
+                responsive.responsiveValue(
+                  mobile: 8,
+                  tablet: 12,
+                ),
+              ),
+            ),
+            contentPadding: performanceService.getOptimizedPadding(
+              cacheKey: 'company_field_padding',
+              horizontal: 16,
+              vertical: 12,
+            ),
           ),
         ),
       ],
@@ -181,41 +436,88 @@ class AdvancedFiltersScreen extends GetView<FilterController> {
   }
 
   Widget _buildOnlineStatusSection() {
+    final responsive = Get.find<ResponsiveController>();
+    final performanceService = Get.find<ResponsivePerformanceService>();
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(
+        ResponsiveText(
           'Çevrimiçi Durumu',
-          style: Get.textTheme.titleMedium,
+          style: TextStyle(
+            fontSize: responsive.responsiveValue(
+              mobile: 18,
+              tablet: 20,
+            ),
+            fontWeight: FontWeight.bold,
+          ),
         ),
-        const SizedBox(height: 8),
+        SizedBox(
+          height: responsive.responsiveValue(
+            mobile: 8,
+            tablet: 12,
+          ),
+        ),
         Obx(() => SwitchListTile(
-              title: const Text('Sadece çevrimiçi kullanıcıları göster'),
+              title: ResponsiveText(
+                'Sadece çevrimiçi kullanıcıları göster',
+                style: TextStyle(
+                  fontSize: responsive.responsiveValue(
+                    mobile: 14,
+                    tablet: 16,
+                  ),
+                ),
+              ),
               value: controller.onlineOnly.value,
               onChanged: controller.updateOnlineOnly,
+              contentPadding: performanceService.getOptimizedPadding(
+                cacheKey: 'online_status_padding',
+                horizontal: 0,
+                vertical: 8,
+              ),
             )),
       ],
     );
   }
 
   Widget _buildSavedFiltersSection(BuildContext context) {
+    final responsive = Get.find<ResponsiveController>();
+    final performanceService = Get.find<ResponsivePerformanceService>();
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            Text(
+            ResponsiveText(
               'Kayıtlı Filtreler',
-              style: Get.textTheme.titleMedium,
+              style: TextStyle(
+                fontSize: responsive.responsiveValue(
+                  mobile: 18,
+                  tablet: 20,
+                ),
+                fontWeight: FontWeight.bold,
+              ),
             ),
             IconButton(
-              icon: const Icon(Icons.add),
+              icon: Icon(
+                Icons.add,
+                size: responsive.responsiveValue(
+                  mobile: 24,
+                  tablet: 28,
+                ),
+              ),
               onPressed: () => _showSaveFilterDialog(context),
             ),
           ],
         ),
-        const SizedBox(height: 8),
+        SizedBox(
+          height: responsive.responsiveValue(
+            mobile: 8,
+            tablet: 12,
+          ),
+        ),
         Obx(() => ListView.builder(
               shrinkWrap: true,
               physics: const NeverScrollableScrollPhysics(),
@@ -223,16 +525,36 @@ class AdvancedFiltersScreen extends GetView<FilterController> {
               itemBuilder: (context, index) {
                 final filter = controller.savedFilters[index];
                 return ListTile(
-                  title: Text(filter.name),
+                  title: ResponsiveText(
+                    filter.name,
+                    style: TextStyle(
+                      fontSize: responsive.responsiveValue(
+                        mobile: 14,
+                        tablet: 16,
+                      ),
+                    ),
+                  ),
                   trailing: Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
                       IconButton(
-                        icon: const Icon(Icons.delete_outline),
+                        icon: Icon(
+                          Icons.delete_outline,
+                          size: responsive.responsiveValue(
+                            mobile: 20,
+                            tablet: 24,
+                          ),
+                        ),
                         onPressed: () => controller.deleteFilter(filter),
                       ),
                       IconButton(
-                        icon: const Icon(Icons.check),
+                        icon: Icon(
+                          Icons.check,
+                          size: responsive.responsiveValue(
+                            mobile: 20,
+                            tablet: 24,
+                          ),
+                        ),
                         onPressed: () => controller.loadFilter(filter),
                       ),
                     ],
@@ -245,22 +567,65 @@ class AdvancedFiltersScreen extends GetView<FilterController> {
   }
 
   Future<void> _showSaveFilterDialog(BuildContext context) async {
+    final responsive = Get.find<ResponsiveController>();
+    final performanceService = Get.find<ResponsivePerformanceService>();
     final nameController = TextEditingController();
+
     return showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Filtreyi Kaydet'),
+        title: ResponsiveText(
+          'Filtreyi Kaydet',
+          style: TextStyle(
+            fontSize: responsive.responsiveValue(
+              mobile: 18,
+              tablet: 22,
+            ),
+          ),
+        ),
         content: TextField(
           controller: nameController,
-          decoration: const InputDecoration(
+          style: TextStyle(
+            fontSize: responsive.responsiveValue(
+              mobile: 16,
+              tablet: 18,
+            ),
+          ),
+          decoration: InputDecoration(
             hintText: 'Filtre adı',
-            border: OutlineInputBorder(),
+            hintStyle: TextStyle(
+              fontSize: responsive.responsiveValue(
+                mobile: 16,
+                tablet: 18,
+              ),
+            ),
+            border: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(
+                responsive.responsiveValue(
+                  mobile: 8,
+                  tablet: 12,
+                ),
+              ),
+            ),
+            contentPadding: performanceService.getOptimizedPadding(
+              cacheKey: 'save_filter_field_padding',
+              horizontal: 16,
+              vertical: 12,
+            ),
           ),
         ),
         actions: [
           TextButton(
             onPressed: () => Get.back(),
-            child: const Text('İptal'),
+            child: ResponsiveText(
+              'İptal',
+              style: TextStyle(
+                fontSize: responsive.responsiveValue(
+                  mobile: 16,
+                  tablet: 18,
+                ),
+              ),
+            ),
           ),
           ElevatedButton(
             onPressed: () {
@@ -269,7 +634,15 @@ class AdvancedFiltersScreen extends GetView<FilterController> {
                 Get.back();
               }
             },
-            child: const Text('Kaydet'),
+            child: ResponsiveText(
+              'Kaydet',
+              style: TextStyle(
+                fontSize: responsive.responsiveValue(
+                  mobile: 16,
+                  tablet: 18,
+                ),
+              ),
+            ),
           ),
         ],
       ),
