@@ -1,45 +1,63 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:flutter_screenutil/flutter_screenutil.dart';
 import '../../../controllers/responsive_controller.dart';
 import '../../../services/responsive_performance_service.dart';
 
 class AdaptiveLoadingIndicator extends StatelessWidget {
+  final _responsiveController = Get.find<ResponsiveController>();
   final Color? color;
-  final double size;
-  final double strokeWidth;
+  final String? message;
+  final bool isSmall;
 
-  const AdaptiveLoadingIndicator({
-    super.key,
+  AdaptiveLoadingIndicator({
+    Key? key,
     this.color,
-    this.size = 24.0,
-    this.strokeWidth = 2.0,
-  });
+    this.message,
+    this.isSmall = false,
+  }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
-    final responsive = Get.find<ResponsiveController>();
-
-    return Center(
-      child: SizedBox(
-        height: responsive.responsiveValue(
-          mobile: size,
-          tablet: size * 1.2,
-        ),
-        width: responsive.responsiveValue(
-          mobile: size,
-          tablet: size * 1.2,
-        ),
-        child: CircularProgressIndicator(
-          strokeWidth: responsive.responsiveValue(
-            mobile: strokeWidth,
-            tablet: strokeWidth * 1.2,
+    return Column(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        SizedBox(
+          width: _responsiveController.responsiveValue(
+            mobile: isSmall ? 16.0 : 24.0,
+            tablet: isSmall ? 20.0 : 32.0,
           ),
-          valueColor: AlwaysStoppedAnimation<Color>(
-            color ?? Theme.of(context).primaryColor,
+          height: _responsiveController.responsiveValue(
+            mobile: isSmall ? 16.0 : 24.0,
+            tablet: isSmall ? 20.0 : 32.0,
+          ),
+          child: CircularProgressIndicator(
+            strokeWidth: _responsiveController.responsiveValue(
+              mobile: isSmall ? 2.0 : 3.0,
+              tablet: isSmall ? 2.5 : 3.5,
+            ),
+            valueColor: AlwaysStoppedAnimation<Color>(
+              color ?? Theme.of(context).primaryColor,
+            ),
           ),
         ),
-      ),
+        if (message != null) ...[
+          SizedBox(
+              height: _responsiveController.responsiveValue(
+            mobile: 16.0,
+            tablet: 20.0,
+          )),
+          Text(
+            message!,
+            style: TextStyle(
+              fontSize: _responsiveController.responsiveValue(
+                mobile: 16.0,
+                tablet: 18.0,
+              ),
+              color: color ?? Theme.of(context).primaryColor,
+            ),
+          ),
+        ],
+      ],
     );
   }
 }
@@ -62,7 +80,6 @@ class AdaptiveLoadingOverlay extends StatelessWidget {
   Widget build(BuildContext context) {
     final responsive = Get.find<ResponsiveController>();
     final performanceService = Get.find<ResponsivePerformanceService>();
-
     return Stack(
       children: [
         child,
@@ -73,15 +90,15 @@ class AdaptiveLoadingOverlay extends StatelessWidget {
               child: Card(
                 margin: EdgeInsets.all(
                   responsive.responsiveValue(
-                    mobile: 16.w,
-                    tablet: 20.w,
+                    mobile: 16,
+                    tablet: 20,
                   ),
                 ),
                 child: Padding(
                   padding: EdgeInsets.all(
                     responsive.responsiveValue(
-                      mobile: 16.w,
-                      tablet: 20.w,
+                      mobile: 16,
+                      tablet: 20,
                     ),
                   ),
                   child: Column(
@@ -91,8 +108,8 @@ class AdaptiveLoadingOverlay extends StatelessWidget {
                       if (message != null) ...[
                         SizedBox(
                           height: responsive.responsiveValue(
-                            mobile: 16.h,
-                            tablet: 20.h,
+                            mobile: 16,
+                            tablet: 20,
                           ),
                         ),
                         Text(
@@ -100,8 +117,8 @@ class AdaptiveLoadingOverlay extends StatelessWidget {
                           style: TextStyle(
                             fontSize: performanceService.getOptimizedTextSize(
                               cacheKey: 'loading_message',
-                              mobileSize: 16.sp,
-                              tabletSize: 18.sp,
+                              mobileSize: 16,
+                              tabletSize: 18,
                             ),
                             fontWeight: FontWeight.w500,
                           ),

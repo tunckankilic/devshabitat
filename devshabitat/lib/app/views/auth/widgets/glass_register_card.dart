@@ -1,48 +1,40 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:flutter_screenutil/flutter_screenutil.dart';
 import '../../../controllers/auth_controller.dart';
 import '../../../controllers/form_validation_controller.dart';
 import '../../../controllers/github_validation_controller.dart';
 import '../../../controllers/responsive_controller.dart';
-import '../../../services/responsive_performance_service.dart';
 
 class GlassRegisterCard extends StatelessWidget {
   final VoidCallback onRegister;
   final Function(String) onGitHubValidation;
+  final _responsiveController = Get.find<ResponsiveController>();
 
-  const GlassRegisterCard({
-    super.key,
+  GlassRegisterCard({
+    Key? key,
     required this.onRegister,
     required this.onGitHubValidation,
-  });
+  }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
     final authController = Get.find<AuthController>();
     final formController = Get.find<FormValidationController>();
     final githubController = Get.find<GitHubValidationController>();
-    final responsive = Get.find<ResponsiveController>();
-    final performanceService = Get.find<ResponsivePerformanceService>();
 
     return Container(
-      padding: EdgeInsets.all(
-        responsive.responsiveValue(
-          mobile: 24.w,
-          tablet: 32.w,
-        ),
-      ),
+      padding: _responsiveController.responsivePadding(all: 24.0),
       decoration: BoxDecoration(
         color: Colors.white.withOpacity(0.1),
         borderRadius: BorderRadius.circular(
-          responsive.responsiveValue(
-            mobile: 16.r,
-            tablet: 20.r,
+          _responsiveController.responsiveValue(
+            mobile: 16.0,
+            tablet: 20.0,
           ),
         ),
         border: Border.all(
           color: Colors.white.withOpacity(0.2),
-          width: responsive.responsiveValue(
+          width: _responsiveController.responsiveValue(
             mobile: 1.5,
             tablet: 2.0,
           ),
@@ -55,10 +47,9 @@ class GlassRegisterCard extends StatelessWidget {
           Text(
             'Kayıt Ol',
             style: TextStyle(
-              fontSize: performanceService.getOptimizedTextSize(
-                cacheKey: 'glass_register_title',
-                mobileSize: 24.sp,
-                tabletSize: 28.sp,
+              fontSize: _responsiveController.responsiveValue(
+                mobile: 24.0,
+                tablet: 28.0,
               ),
               fontWeight: FontWeight.bold,
               color: Colors.white,
@@ -66,257 +57,208 @@ class GlassRegisterCard extends StatelessWidget {
             textAlign: TextAlign.center,
           ),
           SizedBox(
-            height: responsive.responsiveValue(
-              mobile: 24.h,
-              tablet: 32.h,
-            ),
-          ),
+              height: _responsiveController.responsiveValue(
+            mobile: 24.0,
+            tablet: 32.0,
+          )),
           TextField(
             controller: authController.emailController,
             onChanged: formController.validateEmail,
             style: TextStyle(
-              fontSize: performanceService.getOptimizedTextSize(
-                cacheKey: 'glass_register_text',
-                mobileSize: 16.sp,
-                tabletSize: 18.sp,
+              fontSize: _responsiveController.responsiveValue(
+                mobile: 16.0,
+                tablet: 18.0,
               ),
             ),
             decoration: InputDecoration(
               labelText: 'E-posta',
               labelStyle: TextStyle(
-                fontSize: performanceService.getOptimizedTextSize(
-                  cacheKey: 'glass_register_label',
-                  mobileSize: 14.sp,
-                  tabletSize: 16.sp,
+                fontSize: _responsiveController.responsiveValue(
+                  mobile: 14.0,
+                  tablet: 16.0,
                 ),
               ),
               errorText: formController.emailError.value,
               border: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(
-                  responsive.responsiveValue(
-                    mobile: 8.r,
-                    tablet: 12.r,
+                  _responsiveController.responsiveValue(
+                    mobile: 8.0,
+                    tablet: 12.0,
                   ),
                 ),
               ),
-              contentPadding: EdgeInsets.symmetric(
-                horizontal: responsive.responsiveValue(
-                  mobile: 16.w,
-                  tablet: 20.w,
-                ),
-                vertical: responsive.responsiveValue(
-                  mobile: 12.h,
-                  tablet: 16.h,
-                ),
+              contentPadding: _responsiveController.responsivePadding(
+                horizontal: 16.0,
+                vertical: 12.0,
               ),
             ),
           ),
           SizedBox(
-            height: responsive.responsiveValue(
-              mobile: 16.h,
-              tablet: 20.h,
-            ),
-          ),
+              height: _responsiveController.responsiveValue(
+            mobile: 16.0,
+            tablet: 20.0,
+          )),
           TextField(
             controller: authController.passwordController,
             onChanged: formController.validatePassword,
             obscureText: true,
             style: TextStyle(
-              fontSize: performanceService.getOptimizedTextSize(
-                cacheKey: 'glass_register_text',
-                mobileSize: 16.sp,
-                tabletSize: 18.sp,
+              fontSize: _responsiveController.responsiveValue(
+                mobile: 16.0,
+                tablet: 18.0,
               ),
             ),
             decoration: InputDecoration(
               labelText: 'Şifre',
               labelStyle: TextStyle(
-                fontSize: performanceService.getOptimizedTextSize(
-                  cacheKey: 'glass_register_label',
-                  mobileSize: 14.sp,
-                  tabletSize: 16.sp,
+                fontSize: _responsiveController.responsiveValue(
+                  mobile: 14.0,
+                  tablet: 16.0,
                 ),
               ),
               errorText: formController.passwordError.value,
               border: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(
-                  responsive.responsiveValue(
-                    mobile: 8.r,
-                    tablet: 12.r,
+                  _responsiveController.responsiveValue(
+                    mobile: 8.0,
+                    tablet: 12.0,
                   ),
                 ),
               ),
-              contentPadding: EdgeInsets.symmetric(
-                horizontal: responsive.responsiveValue(
-                  mobile: 16.w,
-                  tablet: 20.w,
-                ),
-                vertical: responsive.responsiveValue(
-                  mobile: 12.h,
-                  tablet: 16.h,
-                ),
+              contentPadding: _responsiveController.responsivePadding(
+                horizontal: 16.0,
+                vertical: 12.0,
               ),
             ),
           ),
           SizedBox(
-            height: responsive.responsiveValue(
-              mobile: 16.h,
-              tablet: 20.h,
-            ),
-          ),
+              height: _responsiveController.responsiveValue(
+            mobile: 16.0,
+            tablet: 20.0,
+          )),
           TextField(
             controller: authController.confirmPasswordController,
             onChanged: formController.validateConfirmPassword,
             obscureText: true,
             style: TextStyle(
-              fontSize: performanceService.getOptimizedTextSize(
-                cacheKey: 'glass_register_text',
-                mobileSize: 16.sp,
-                tabletSize: 18.sp,
+              fontSize: _responsiveController.responsiveValue(
+                mobile: 16.0,
+                tablet: 18.0,
               ),
             ),
             decoration: InputDecoration(
               labelText: 'Şifre Tekrarı',
               labelStyle: TextStyle(
-                fontSize: performanceService.getOptimizedTextSize(
-                  cacheKey: 'glass_register_label',
-                  mobileSize: 14.sp,
-                  tabletSize: 16.sp,
+                fontSize: _responsiveController.responsiveValue(
+                  mobile: 14.0,
+                  tablet: 16.0,
                 ),
               ),
               errorText: formController.confirmPasswordError.value,
               border: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(
-                  responsive.responsiveValue(
-                    mobile: 8.r,
-                    tablet: 12.r,
+                  _responsiveController.responsiveValue(
+                    mobile: 8.0,
+                    tablet: 12.0,
                   ),
                 ),
               ),
-              contentPadding: EdgeInsets.symmetric(
-                horizontal: responsive.responsiveValue(
-                  mobile: 16.w,
-                  tablet: 20.w,
-                ),
-                vertical: responsive.responsiveValue(
-                  mobile: 12.h,
-                  tablet: 16.h,
-                ),
+              contentPadding: _responsiveController.responsivePadding(
+                horizontal: 16.0,
+                vertical: 12.0,
               ),
             ),
           ),
           SizedBox(
-            height: responsive.responsiveValue(
-              mobile: 16.h,
-              tablet: 20.h,
-            ),
-          ),
+              height: _responsiveController.responsiveValue(
+            mobile: 16.0,
+            tablet: 20.0,
+          )),
           TextField(
             controller: authController.usernameController,
             onChanged: formController.validateUsername,
             style: TextStyle(
-              fontSize: performanceService.getOptimizedTextSize(
-                cacheKey: 'glass_register_text',
-                mobileSize: 16.sp,
-                tabletSize: 18.sp,
+              fontSize: _responsiveController.responsiveValue(
+                mobile: 16.0,
+                tablet: 18.0,
               ),
             ),
             decoration: InputDecoration(
               labelText: 'Kullanıcı Adı',
               labelStyle: TextStyle(
-                fontSize: performanceService.getOptimizedTextSize(
-                  cacheKey: 'glass_register_label',
-                  mobileSize: 14.sp,
-                  tabletSize: 16.sp,
+                fontSize: _responsiveController.responsiveValue(
+                  mobile: 14.0,
+                  tablet: 16.0,
                 ),
               ),
               errorText: formController.usernameError.value,
               border: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(
-                  responsive.responsiveValue(
-                    mobile: 8.r,
-                    tablet: 12.r,
+                  _responsiveController.responsiveValue(
+                    mobile: 8.0,
+                    tablet: 12.0,
                   ),
                 ),
               ),
-              contentPadding: EdgeInsets.symmetric(
-                horizontal: responsive.responsiveValue(
-                  mobile: 16.w,
-                  tablet: 20.w,
-                ),
-                vertical: responsive.responsiveValue(
-                  mobile: 12.h,
-                  tablet: 16.h,
-                ),
+              contentPadding: _responsiveController.responsivePadding(
+                horizontal: 16.0,
+                vertical: 12.0,
               ),
             ),
           ),
           SizedBox(
-            height: responsive.responsiveValue(
-              mobile: 16.h,
-              tablet: 20.h,
-            ),
-          ),
+              height: _responsiveController.responsiveValue(
+            mobile: 16.0,
+            tablet: 20.0,
+          )),
           TextField(
             controller: authController.githubUsernameController,
             onChanged: onGitHubValidation,
             style: TextStyle(
-              fontSize: performanceService.getOptimizedTextSize(
-                cacheKey: 'glass_register_text',
-                mobileSize: 16.sp,
-                tabletSize: 18.sp,
+              fontSize: _responsiveController.responsiveValue(
+                mobile: 16.0,
+                tablet: 18.0,
               ),
             ),
             decoration: InputDecoration(
               labelText: 'GitHub Kullanıcı Adı',
               labelStyle: TextStyle(
-                fontSize: performanceService.getOptimizedTextSize(
-                  cacheKey: 'glass_register_label',
-                  mobileSize: 14.sp,
-                  tabletSize: 16.sp,
+                fontSize: _responsiveController.responsiveValue(
+                  mobile: 14.0,
+                  tablet: 16.0,
                 ),
               ),
               errorText: githubController.error.value,
               border: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(
-                  responsive.responsiveValue(
-                    mobile: 8.r,
-                    tablet: 12.r,
+                  _responsiveController.responsiveValue(
+                    mobile: 8.0,
+                    tablet: 12.0,
                   ),
                 ),
               ),
-              contentPadding: EdgeInsets.symmetric(
-                horizontal: responsive.responsiveValue(
-                  mobile: 16.w,
-                  tablet: 20.w,
-                ),
-                vertical: responsive.responsiveValue(
-                  mobile: 12.h,
-                  tablet: 16.h,
-                ),
+              contentPadding: _responsiveController.responsivePadding(
+                horizontal: 16.0,
+                vertical: 12.0,
               ),
             ),
           ),
           SizedBox(
-            height: responsive.responsiveValue(
-              mobile: 24.h,
-              tablet: 32.h,
-            ),
-          ),
+              height: _responsiveController.responsiveValue(
+            mobile: 24.0,
+            tablet: 32.0,
+          )),
           Obx(() => ElevatedButton(
                 onPressed: formController.isFormValid ? onRegister : null,
                 style: ElevatedButton.styleFrom(
-                  padding: EdgeInsets.symmetric(
-                    vertical: responsive.responsiveValue(
-                      mobile: 16.h,
-                      tablet: 20.h,
-                    ),
+                  padding: _responsiveController.responsivePadding(
+                    vertical: 16.0,
                   ),
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(
-                      responsive.responsiveValue(
-                        mobile: 8.r,
-                        tablet: 12.r,
+                      _responsiveController.responsiveValue(
+                        mobile: 8.0,
+                        tablet: 12.0,
                       ),
                     ),
                   ),
@@ -324,29 +266,26 @@ class GlassRegisterCard extends StatelessWidget {
                 child: Text(
                   'Kayıt Ol',
                   style: TextStyle(
-                    fontSize: performanceService.getOptimizedTextSize(
-                      cacheKey: 'glass_register_button',
-                      mobileSize: 16.sp,
-                      tabletSize: 18.sp,
+                    fontSize: _responsiveController.responsiveValue(
+                      mobile: 16.0,
+                      tablet: 18.0,
                     ),
                   ),
                 ),
               )),
           SizedBox(
-            height: responsive.responsiveValue(
-              mobile: 16.h,
-              tablet: 20.h,
-            ),
-          ),
+              height: _responsiveController.responsiveValue(
+            mobile: 16.0,
+            tablet: 20.0,
+          )),
           TextButton(
             onPressed: () => Get.back(),
             child: Text(
               'Zaten hesabın var mı? Giriş yap',
               style: TextStyle(
-                fontSize: performanceService.getOptimizedTextSize(
-                  cacheKey: 'glass_register_link',
-                  mobileSize: 14.sp,
-                  tabletSize: 16.sp,
+                fontSize: _responsiveController.responsiveValue(
+                  mobile: 14.0,
+                  tablet: 16.0,
                 ),
               ),
             ),

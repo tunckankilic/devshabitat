@@ -1,9 +1,7 @@
-import 'package:devshabitat/app/controllers/auth_controller.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:flutter_screenutil/flutter_screenutil.dart';
+import '../../controllers/auth_controller.dart';
 import '../../controllers/responsive_controller.dart';
-import '../../services/responsive_performance_service.dart';
 import 'widgets/auth_form.dart';
 import 'widgets/auth_header.dart';
 import 'widgets/social_auth_buttons.dart';
@@ -12,31 +10,23 @@ import 'widgets/auth_footer.dart';
 class ResponsiveAuthWrapper extends StatelessWidget {
   final AuthController authController;
   final bool isLogin;
+  final _responsiveController = Get.find<ResponsiveController>();
 
-  const ResponsiveAuthWrapper({
-    super.key,
+  ResponsiveAuthWrapper({
+    Key? key,
     required this.authController,
     this.isLogin = true,
-  });
+  }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
-    final responsive = Get.find<ResponsiveController>();
-    final performanceService = Get.find<ResponsivePerformanceService>();
-
     return Scaffold(
       body: SafeArea(
         child: Center(
           child: SingleChildScrollView(
             child: Padding(
-              padding: performanceService.getOptimizedPadding(
-                cacheKey: 'auth_wrapper_padding',
-                left: 24,
-                right: 24,
-                top: 24,
-                bottom: 24,
-              ),
-              child: Obx(() => _buildResponsiveLayout(responsive)),
+              padding: _responsiveController.responsivePadding(all: 24.0),
+              child: Obx(() => _buildResponsiveLayout()),
             ),
           ),
         ),
@@ -44,116 +34,111 @@ class ResponsiveAuthWrapper extends StatelessWidget {
     );
   }
 
-  Widget _buildResponsiveLayout(ResponsiveController responsive) {
-    if (responsive.isTablet) {
-      return _buildTabletLayout(responsive);
+  Widget _buildResponsiveLayout() {
+    if (_responsiveController.isTablet) {
+      return _buildTabletLayout();
     } else {
-      return _buildMobileLayout(responsive);
+      return _buildMobileLayout();
     }
   }
 
-  Widget _buildTabletLayout(ResponsiveController responsive) {
+  Widget _buildTabletLayout() {
     return ConstrainedBox(
       constraints: BoxConstraints(
-        maxWidth: responsive.responsiveValue(
-          mobile: 600.w,
-          tablet: 1000.w,
+        maxWidth: _responsiveController.responsiveValue(
+          mobile: 600.0,
+          tablet: 1000.0,
         ),
       ),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           Expanded(
-            flex: responsive.responsiveValue(
+            flex: _responsiveController.responsiveValue(
               mobile: 1,
               tablet: 2,
             ),
-            child: _buildLeftColumn(responsive),
+            child: _buildLeftColumn(),
           ),
           SizedBox(
-            width: responsive.responsiveValue(
-              mobile: 32.w,
-              tablet: 48.w,
-            ),
-          ),
+              width: _responsiveController.responsiveValue(
+            mobile: 32.0,
+            tablet: 48.0,
+          )),
           Expanded(
-            flex: responsive.responsiveValue(
+            flex: _responsiveController.responsiveValue(
               mobile: 1,
               tablet: 3,
             ),
-            child: _buildRightColumn(responsive),
+            child: _buildRightColumn(),
           ),
         ],
       ),
     );
   }
 
-  Widget _buildMobileLayout(ResponsiveController responsive) {
+  Widget _buildMobileLayout() {
     return Column(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
-        _buildLeftColumn(responsive),
+        _buildLeftColumn(),
         SizedBox(
-          height: responsive.responsiveValue(
-            mobile: 32.h,
-            tablet: 40.h,
-          ),
-        ),
-        _buildRightColumn(responsive),
+            height: _responsiveController.responsiveValue(
+          mobile: 32.0,
+          tablet: 40.0,
+        )),
+        _buildRightColumn(),
       ],
     );
   }
 
-  Widget _buildLeftColumn(ResponsiveController responsive) {
+  Widget _buildLeftColumn() {
     return Column(
       mainAxisAlignment: MainAxisAlignment.center,
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        AuthHeader(isLogin: isLogin),
-        SizedBox(
-          height: responsive.responsiveValue(
-            mobile: 24.h,
-            tablet: 32.h,
-          ),
+        AuthHeader(
+          title: isLogin ? 'Hoş Geldiniz' : 'Kayıt Ol',
+          subtitle: isLogin
+              ? 'Devam etmek için giriş yapın'
+              : 'Yeni bir hesap oluşturun',
+          logoPath: 'assets/images/logo.svg',
         ),
+        SizedBox(
+            height: _responsiveController.responsiveValue(
+          mobile: 24.0,
+          tablet: 32.0,
+        )),
         SocialAuthButtons(
-          onGoogleSignIn: () => authController.signInWithGoogle(),
-          onGithubSignIn: () => authController.signInWithGithub(),
-          onAppleSignIn: () => authController.signInWithApple(),
+          isLogin: isLogin,
+          onGoogleAuth: () => authController.signInWithGoogle(),
+          onAppleAuth: () => authController.signInWithApple(),
         ),
       ],
     );
   }
 
-  Widget _buildRightColumn(ResponsiveController responsive) {
-    final performanceService = Get.find<ResponsivePerformanceService>();
-
+  Widget _buildRightColumn() {
     return Card(
-      elevation: responsive.responsiveValue(
-        mobile: 2,
-        tablet: 4,
+      elevation: _responsiveController.responsiveValue(
+        mobile: 2.0,
+        tablet: 4.0,
       ),
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(
-          responsive.responsiveValue(
-            mobile: 16.r,
-            tablet: 20.r,
+          _responsiveController.responsiveValue(
+            mobile: 16.0,
+            tablet: 20.0,
           ),
         ),
       ),
       child: Padding(
-        padding: performanceService.getOptimizedPadding(
-          cacheKey: 'auth_form_card_padding',
-          left: 24,
-          right: 24,
-          top: 24,
-          bottom: 24,
-        ),
+        padding: _responsiveController.responsivePadding(all: 24.0),
         child: ConstrainedBox(
           constraints: BoxConstraints(
-            maxWidth: responsive.responsiveValue(
+            maxWidth: _responsiveController.responsiveValue(
               mobile: double.infinity,
-              tablet: 400.w,
+              tablet: 400.0,
             ),
           ),
           child: Column(
@@ -171,12 +156,15 @@ class ResponsiveAuthWrapper extends StatelessWidget {
                 },
               ),
               SizedBox(
-                height: responsive.responsiveValue(
-                  mobile: 24.h,
-                  tablet: 32.h,
-                ),
+                  height: _responsiveController.responsiveValue(
+                mobile: 24.0,
+                tablet: 32.0,
+              )),
+              AuthFooter(
+                isLogin: isLogin,
+                onToggleAuth: () =>
+                    Get.toNamed(isLogin ? '/register' : '/login'),
               ),
-              AuthFooter(isLogin: isLogin),
             ],
           ),
         ),

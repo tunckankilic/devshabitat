@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:flutter_screenutil/flutter_screenutil.dart';
+import '../../../../controllers/responsive_controller.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:image_cropper/image_cropper.dart';
 import '../../../../controllers/registration_controller.dart';
@@ -8,6 +8,7 @@ import '../../../../services/storage_service.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
 class PersonalInfoStep extends GetView<RegistrationController> {
+  final _responsiveController = Get.find<ResponsiveController>();
   final StorageService _storageService = Get.find<StorageService>();
 
   PersonalInfoStep({Key? key}) : super(key: key);
@@ -137,24 +138,25 @@ class PersonalInfoStep extends GetView<RegistrationController> {
   @override
   Widget build(BuildContext context) {
     return SingleChildScrollView(
-      padding: EdgeInsets.all(16.w),
+      padding: _responsiveController.responsivePadding(all: 16.0),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Profil Fotoğrafı
           Center(
             child: Stack(
               children: [
                 Container(
-                  width: 120.w,
-                  height: 120.w,
+                  width: _responsiveController.responsiveValue(
+                    mobile: 120.0,
+                    tablet: 160.0,
+                  ),
+                  height: _responsiveController.responsiveValue(
+                    mobile: 120.0,
+                    tablet: 160.0,
+                  ),
                   decoration: BoxDecoration(
                     color: Colors.grey[200],
                     shape: BoxShape.circle,
-                    border: Border.all(
-                      color: Theme.of(context).primaryColor,
-                      width: 2,
-                    ),
                   ),
                   child: Obx(() {
                     final photoUrl = controller.photoUrlController.text;
@@ -162,7 +164,10 @@ class PersonalInfoStep extends GetView<RegistrationController> {
                       child: photoUrl.isEmpty
                           ? Icon(
                               Icons.person,
-                              size: 60.sp,
+                              size: _responsiveController.responsiveValue(
+                                mobile: 60.0,
+                                tablet: 80.0,
+                              ),
                               color: Colors.grey,
                             )
                           : Image.network(
@@ -171,7 +176,10 @@ class PersonalInfoStep extends GetView<RegistrationController> {
                               errorBuilder: (context, error, stackTrace) =>
                                   Icon(
                                 Icons.error,
-                                size: 60.sp,
+                                size: _responsiveController.responsiveValue(
+                                  mobile: 60.0,
+                                  tablet: 80.0,
+                                ),
                                 color: Colors.red,
                               ),
                             ),
@@ -183,43 +191,69 @@ class PersonalInfoStep extends GetView<RegistrationController> {
                   right: 0,
                   child: CircleAvatar(
                     backgroundColor: Theme.of(context).primaryColor,
-                    radius: 18.r,
+                    radius: _responsiveController.responsiveValue(
+                      mobile: 18.0,
+                      tablet: 24.0,
+                    ),
                     child: IconButton(
                       icon: Icon(
                         Icons.camera_alt,
-                        size: 18.sp,
+                        size: _responsiveController.responsiveValue(
+                          mobile: 18.0,
+                          tablet: 24.0,
+                        ),
                         color: Colors.white,
                       ),
-                      onPressed: _pickImage,
+                      onPressed: () => _pickImage(),
                     ),
                   ),
                 ),
               ],
             ),
           ),
-          SizedBox(height: 24.h),
-
-          // Bio
+          SizedBox(
+              height: _responsiveController.responsiveValue(
+            mobile: 24.0,
+            tablet: 32.0,
+          )),
           TextFormField(
             controller: controller.bioController,
             maxLines: 3,
             decoration: InputDecoration(
               labelText: 'Hakkımda',
               hintText: 'Kendinizi kısaca tanıtın',
-              prefixIcon: Icon(Icons.description, size: 24.sp),
-              border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(8.r),
+              prefixIcon: Icon(
+                Icons.description,
+                size: _responsiveController.responsiveValue(
+                  mobile: 24.0,
+                  tablet: 32.0,
+                ),
               ),
-              contentPadding: EdgeInsets.symmetric(
-                horizontal: 16.w,
-                vertical: 16.h,
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(
+                  _responsiveController.responsiveValue(
+                    mobile: 8.0,
+                    tablet: 12.0,
+                  ),
+                ),
+              ),
+              contentPadding: _responsiveController.responsivePadding(
+                horizontal: 16.0,
+                vertical: 16.0,
               ),
             ),
-            style: TextStyle(fontSize: 16.sp),
+            style: TextStyle(
+              fontSize: _responsiveController.responsiveValue(
+                mobile: 16.0,
+                tablet: 18.0,
+              ),
+            ),
           ),
-          SizedBox(height: 16.h),
-
-          // Konum
+          SizedBox(
+              height: _responsiveController.responsiveValue(
+            mobile: 16.0,
+            tablet: 24.0,
+          )),
           Obx(() {
             final locationText = controller.locationController.text;
             final isValidLocation = _isValidLocationFormat(locationText);
@@ -230,76 +264,104 @@ class PersonalInfoStep extends GetView<RegistrationController> {
               decoration: InputDecoration(
                 labelText: 'Konum Koordinatları',
                 hintText: 'Örn: 41.0082, 28.9784',
-                prefixIcon: Icon(Icons.location_on, size: 24.sp),
+                prefixIcon: Icon(
+                  Icons.location_on,
+                  size: _responsiveController.responsiveValue(
+                    mobile: 24.0,
+                    tablet: 32.0,
+                  ),
+                ),
                 suffixIcon: locationText.isNotEmpty
                     ? Icon(
                         isValidLocation ? Icons.check_circle : Icons.error,
                         color: isValidLocation ? Colors.green : Colors.red,
-                        size: 20.sp,
+                        size: _responsiveController.responsiveValue(
+                          mobile: 20.0,
+                          tablet: 28.0,
+                        ),
                       )
                     : null,
                 border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(8.r),
-                  borderSide: BorderSide(
-                    color: locationText.isEmpty
-                        ? Colors.grey
-                        : isValidLocation
-                            ? Colors.green
-                            : Colors.red,
+                  borderRadius: BorderRadius.circular(
+                    _responsiveController.responsiveValue(
+                      mobile: 8.0,
+                      tablet: 12.0,
+                    ),
                   ),
                 ),
-                focusedBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(8.r),
-                  borderSide: BorderSide(
-                    color: locationText.isEmpty
-                        ? Theme.of(context).primaryColor
-                        : isValidLocation
-                            ? Colors.green
-                            : Colors.red,
-                  ),
-                ),
-                contentPadding: EdgeInsets.symmetric(
-                  horizontal: 16.w,
-                  vertical: 16.h,
+                contentPadding: _responsiveController.responsivePadding(
+                  horizontal: 16.0,
+                  vertical: 16.0,
                 ),
                 helperText: locationText.isNotEmpty && !isValidLocation
                     ? 'Geçerli koordinat formatı: enlem, boylam'
                     : null,
                 helperStyle: TextStyle(
                   color: Colors.red,
-                  fontSize: 12.sp,
+                  fontSize: _responsiveController.responsiveValue(
+                    mobile: 12.0,
+                    tablet: 14.0,
+                  ),
                 ),
               ),
-              style: TextStyle(fontSize: 16.sp),
+              style: TextStyle(
+                fontSize: _responsiveController.responsiveValue(
+                  mobile: 16.0,
+                  tablet: 18.0,
+                ),
+              ),
             );
           }),
-          SizedBox(height: 16.h),
-
-          // Konum Adı
+          SizedBox(
+              height: _responsiveController.responsiveValue(
+            mobile: 16.0,
+            tablet: 24.0,
+          )),
           TextFormField(
             controller: controller.locationNameController,
             decoration: InputDecoration(
               labelText: 'Konum Adı',
               hintText: 'Şehir, Ülke',
-              prefixIcon: Icon(Icons.place, size: 24.sp),
-              border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(8.r),
+              prefixIcon: Icon(
+                Icons.place,
+                size: _responsiveController.responsiveValue(
+                  mobile: 24.0,
+                  tablet: 32.0,
+                ),
               ),
-              contentPadding: EdgeInsets.symmetric(
-                horizontal: 16.w,
-                vertical: 16.h,
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(
+                  _responsiveController.responsiveValue(
+                    mobile: 8.0,
+                    tablet: 12.0,
+                  ),
+                ),
+              ),
+              contentPadding: _responsiveController.responsivePadding(
+                horizontal: 16.0,
+                vertical: 16.0,
               ),
             ),
-            style: TextStyle(fontSize: 16.sp),
+            style: TextStyle(
+              fontSize: _responsiveController.responsiveValue(
+                mobile: 16.0,
+                tablet: 18.0,
+              ),
+            ),
           ),
-          SizedBox(height: 24.h),
-
-          // Bilgilendirme Metni
+          SizedBox(
+              height: _responsiveController.responsiveValue(
+            mobile: 24.0,
+            tablet: 32.0,
+          )),
           Text(
-            'Bu bilgileri daha sonra profilinizden güncelleyebilirsiniz.',
+            'Minimum 3 yetenek ekleyin',
             style: TextStyle(
               color: Colors.grey,
-              fontSize: 12.sp,
+              fontSize: _responsiveController.responsiveValue(
+                mobile: 12.0,
+                tablet: 14.0,
+              ),
             ),
           ),
         ],

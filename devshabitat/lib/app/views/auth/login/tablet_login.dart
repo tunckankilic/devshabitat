@@ -1,20 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:flutter_screenutil/flutter_screenutil.dart';
+import '../../../controllers/responsive_controller.dart';
 import '../../../controllers/auth_controller.dart';
-import '../../../constants/app_assets.dart';
-import '../../base/base_view.dart';
-import '../widgets/responsive_form_field.dart';
 import '../widgets/social_login_button.dart';
-import '../widgets/adaptive_loading_indicator.dart';
 
-class TabletLogin extends BaseView<AuthController> {
-  const TabletLogin({super.key});
+class TabletLogin extends GetView<AuthController> {
+  final _responsiveController = Get.find<ResponsiveController>();
+
+  TabletLogin({Key? key}) : super(key: key);
 
   @override
-  Widget buildView(BuildContext context) {
-    final formKey = GlobalKey<FormState>();
-
+  Widget build(BuildContext context) {
     return Scaffold(
       body: SafeArea(
         child: Row(
@@ -29,27 +25,45 @@ class TabletLogin extends BaseView<AuthController> {
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
                       Image.asset(
-                        AppAssets.logo,
-                        height: 120.h,
-                        color: Colors.white,
+                        'assets/images/logo.svg',
+                        height: _responsiveController.responsiveValue(
+                          mobile: 120.0,
+                          tablet: 160.0,
+                        ),
                       ),
-                      SizedBox(height: 40.h),
+                      SizedBox(
+                          height: _responsiveController.responsiveValue(
+                        mobile: 40.0,
+                        tablet: 56.0,
+                      )),
                       Text(
                         'DevHabitat\'a Hoş Geldiniz',
                         style: TextStyle(
-                          fontSize: 32.sp,
+                          fontSize: _responsiveController.responsiveValue(
+                            mobile: 32.0,
+                            tablet: 40.0,
+                          ),
                           fontWeight: FontWeight.bold,
                           color: Colors.white,
                         ),
                         textAlign: TextAlign.center,
                       ),
-                      SizedBox(height: 16.h),
+                      SizedBox(
+                          height: _responsiveController.responsiveValue(
+                        mobile: 16.0,
+                        tablet: 24.0,
+                      )),
                       Padding(
-                        padding: EdgeInsets.symmetric(horizontal: 48.w),
+                        padding: _responsiveController.responsivePadding(
+                          horizontal: 48.0,
+                        ),
                         child: Text(
                           'Yazılım geliştiriciler için özel bir platform. Projelerinizi paylaşın, işbirliği yapın ve birlikte büyüyün.',
                           style: TextStyle(
-                            fontSize: 18.sp,
+                            fontSize: _responsiveController.responsiveValue(
+                              mobile: 18.0,
+                              tablet: 22.0,
+                            ),
                             color: Colors.white70,
                           ),
                           textAlign: TextAlign.center,
@@ -64,41 +78,115 @@ class TabletLogin extends BaseView<AuthController> {
             Expanded(
               flex: 1,
               child: SingleChildScrollView(
-                padding: EdgeInsets.all(48.w),
+                padding: _responsiveController.responsivePadding(all: 48.0),
                 child: ConstrainedBox(
-                  constraints: BoxConstraints(maxWidth: 480.w),
+                  constraints: BoxConstraints(
+                    maxWidth: _responsiveController.responsiveValue(
+                      mobile: 480.0,
+                      tablet: 600.0,
+                    ),
+                  ),
                   child: Form(
-                    key: formKey,
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.stretch,
                       children: [
                         Text(
                           'Giriş Yap',
-                          style: Theme.of(context).textTheme.headlineLarge,
+                          style: TextStyle(
+                            fontSize: _responsiveController.responsiveValue(
+                              mobile: 32.0,
+                              tablet: 40.0,
+                            ),
+                            fontWeight: FontWeight.bold,
+                          ),
                           textAlign: TextAlign.center,
                         ),
-                        SizedBox(height: 40.h),
-                        ResponsiveFormField(
-                          label: 'Email',
-                          hint: 'ornek@email.com',
+                        SizedBox(
+                            height: _responsiveController.responsiveValue(
+                          mobile: 40.0,
+                          tablet: 56.0,
+                        )),
+                        TextFormField(
                           controller: controller.emailController,
                           keyboardType: TextInputType.emailAddress,
+                          decoration: InputDecoration(
+                            labelText: 'E-posta',
+                            hintText: 'ornek@email.com',
+                            prefixIcon: Icon(
+                              Icons.email,
+                              size: _responsiveController.responsiveValue(
+                                mobile: 24.0,
+                                tablet: 32.0,
+                              ),
+                            ),
+                            contentPadding:
+                                _responsiveController.responsivePadding(
+                              horizontal: 16.0,
+                              vertical: 16.0,
+                            ),
+                            border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(
+                                _responsiveController.responsiveValue(
+                                  mobile: 12.0,
+                                  tablet: 16.0,
+                                ),
+                              ),
+                            ),
+                          ),
+                          style: TextStyle(
+                            fontSize: _responsiveController.responsiveValue(
+                              mobile: 16.0,
+                              tablet: 18.0,
+                            ),
+                          ),
                           validator: (value) {
                             if (value == null || value.isEmpty) {
-                              return 'Email adresi gerekli';
+                              return 'E-posta adresi gerekli';
                             }
                             if (!GetUtils.isEmail(value)) {
-                              return 'Geçerli bir email adresi girin';
+                              return 'Geçerli bir e-posta adresi girin';
                             }
                             return null;
                           },
                         ),
-                        SizedBox(height: 24.h),
-                        ResponsiveFormField(
-                          label: 'Şifre',
-                          hint: '••••••••',
+                        SizedBox(
+                            height: _responsiveController.responsiveValue(
+                          mobile: 24.0,
+                          tablet: 32.0,
+                        )),
+                        TextFormField(
                           controller: controller.passwordController,
-                          isPassword: true,
+                          obscureText: true,
+                          decoration: InputDecoration(
+                            labelText: 'Şifre',
+                            hintText: '••••••••',
+                            prefixIcon: Icon(
+                              Icons.lock,
+                              size: _responsiveController.responsiveValue(
+                                mobile: 24.0,
+                                tablet: 32.0,
+                              ),
+                            ),
+                            contentPadding:
+                                _responsiveController.responsivePadding(
+                              horizontal: 16.0,
+                              vertical: 16.0,
+                            ),
+                            border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(
+                                _responsiveController.responsiveValue(
+                                  mobile: 12.0,
+                                  tablet: 16.0,
+                                ),
+                              ),
+                            ),
+                          ),
+                          style: TextStyle(
+                            fontSize: _responsiveController.responsiveValue(
+                              mobile: 16.0,
+                              tablet: 18.0,
+                            ),
+                          ),
                           validator: (value) {
                             if (value == null || value.isEmpty) {
                               return 'Şifre gerekli';
@@ -109,128 +197,167 @@ class TabletLogin extends BaseView<AuthController> {
                             return null;
                           },
                         ),
-                        SizedBox(height: 16.h),
+                        SizedBox(
+                            height: _responsiveController.responsiveValue(
+                          mobile: 16.0,
+                          tablet: 24.0,
+                        )),
                         Align(
                           alignment: Alignment.centerRight,
                           child: TextButton(
-                            onPressed: () {
-                              Get.toNamed('/forgot-password');
-                            },
+                            onPressed: () => Get.toNamed('/forgot-password'),
                             child: Text(
                               'Şifremi Unuttum',
-                              style: TextStyle(fontSize: 14.sp),
+                              style: TextStyle(
+                                fontSize: _responsiveController.responsiveValue(
+                                  mobile: 14.0,
+                                  tablet: 16.0,
+                                ),
+                              ),
                             ),
                           ),
                         ),
-                        SizedBox(height: 32.h),
+                        SizedBox(
+                            height: _responsiveController.responsiveValue(
+                          mobile: 32.0,
+                          tablet: 40.0,
+                        )),
                         Obx(() {
-                          final isLoading = controller.isLoading;
                           return ElevatedButton(
-                            onPressed: isLoading
+                            onPressed: controller.isLoading
                                 ? null
-                                : () {
-                                    if (formKey.currentState!.validate()) {
-                                      controller.signInWithEmailAndPassword();
-                                    }
-                                  },
+                                : () => controller.signInWithEmailAndPassword(),
                             style: ElevatedButton.styleFrom(
-                              padding: EdgeInsets.symmetric(vertical: 20.h),
+                              padding: _responsiveController.responsivePadding(
+                                vertical: 20.0,
+                              ),
                               shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(12.r),
+                                borderRadius: BorderRadius.circular(
+                                  _responsiveController.responsiveValue(
+                                    mobile: 12.0,
+                                    tablet: 16.0,
+                                  ),
+                                ),
                               ),
                             ),
-                            child: isLoading
-                                ? const AdaptiveLoadingIndicator(
-                                    color: Colors.white,
+                            child: controller.isLoading
+                                ? SizedBox(
+                                    width:
+                                        _responsiveController.responsiveValue(
+                                      mobile: 24.0,
+                                      tablet: 32.0,
+                                    ),
+                                    height:
+                                        _responsiveController.responsiveValue(
+                                      mobile: 24.0,
+                                      tablet: 32.0,
+                                    ),
+                                    child: CircularProgressIndicator(
+                                      valueColor: AlwaysStoppedAnimation<Color>(
+                                          Colors.white),
+                                    ),
                                   )
                                 : Text(
                                     'Giriş Yap',
-                                    style: TextStyle(fontSize: 16.sp),
+                                    style: TextStyle(
+                                      fontSize:
+                                          _responsiveController.responsiveValue(
+                                        mobile: 16.0,
+                                        tablet: 18.0,
+                                      ),
+                                    ),
                                   ),
                           );
                         }),
-                        SizedBox(height: 32.h),
+                        SizedBox(
+                            height: _responsiveController.responsiveValue(
+                          mobile: 32.0,
+                          tablet: 40.0,
+                        )),
                         Row(
                           children: [
-                            const Expanded(child: Divider()),
+                            Expanded(child: Divider()),
                             Padding(
-                              padding: EdgeInsets.symmetric(horizontal: 24.w),
+                              padding: _responsiveController.responsivePadding(
+                                horizontal: 24.0,
+                              ),
                               child: Text(
                                 'veya',
                                 style: TextStyle(
-                                  fontSize: 16.sp,
+                                  fontSize:
+                                      _responsiveController.responsiveValue(
+                                    mobile: 16.0,
+                                    tablet: 18.0,
+                                  ),
                                   color: Colors.grey,
                                 ),
                               ),
                             ),
-                            const Expanded(child: Divider()),
+                            Expanded(child: Divider()),
                           ],
                         ),
-                        SizedBox(height: 32.h),
+                        SizedBox(
+                            height: _responsiveController.responsiveValue(
+                          mobile: 32.0,
+                          tablet: 40.0,
+                        )),
                         Row(
                           children: [
                             Expanded(
                               child: SocialLoginButton(
-                                text: 'Google',
-                                iconPath: 'assets/icons/google.png',
-                                onPressed: controller.signInWithGoogle,
+                                text: 'Google ile Devam Et',
+                                imagePath: 'assets/icons/google.png',
+                                onPressed: () => controller.signInWithGoogle(),
                                 backgroundColor: Colors.white,
                                 textColor: Colors.black87,
+                                isOutlined: true,
                               ),
                             ),
-                            SizedBox(width: 16.w),
-                            /*
+                            SizedBox(
+                                width: _responsiveController.responsiveValue(
+                              mobile: 16.0,
+                              tablet: 24.0,
+                            )),
                             Expanded(
                               child: SocialLoginButton(
-                                text: 'Facebook',
-                                iconPath: 'assets/icons/facebook.png',
-                                backgroundColor: const Color(0xFF1877F2),
-                                textColor: Colors.white,
-                                onPressed: controller.signInWithFacebook,
-                              ),
-                            ),
-                            */
-                          ],
-                        ),
-                        SizedBox(height: 16.h),
-                        Row(
-                          children: [
-                            Expanded(
-                              child: SocialLoginButton(
-                                text: 'GitHub',
-                                iconPath: 'assets/icons/github.png',
+                                text: 'Apple ile Devam Et',
+                                imagePath: 'assets/icons/apple.png',
+                                onPressed: () => controller.signInWithApple(),
                                 backgroundColor: Colors.black,
                                 textColor: Colors.white,
-                                onPressed: controller.signInWithGithub,
-                              ),
-                            ),
-                            SizedBox(width: 16.w),
-                            Expanded(
-                              child: SocialLoginButton(
-                                text: 'Apple',
-                                iconPath: 'assets/icons/apple.png',
-                                backgroundColor: Colors.black,
-                                textColor: Colors.white,
-                                onPressed: controller.signInWithApple,
                               ),
                             ),
                           ],
                         ),
-                        SizedBox(height: 32.h),
+                        SizedBox(
+                            height: _responsiveController.responsiveValue(
+                          mobile: 32.0,
+                          tablet: 40.0,
+                        )),
                         Row(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
                             Text(
                               'Hesabınız yok mu?',
-                              style: TextStyle(fontSize: 16.sp),
+                              style: TextStyle(
+                                fontSize: _responsiveController.responsiveValue(
+                                  mobile: 16.0,
+                                  tablet: 18.0,
+                                ),
+                              ),
                             ),
                             TextButton(
-                              onPressed: () {
-                                Get.toNamed('/signup');
-                              },
+                              onPressed: () => Get.toNamed('/register'),
                               child: Text(
                                 'Kayıt Ol',
-                                style: TextStyle(fontSize: 16.sp),
+                                style: TextStyle(
+                                  fontSize:
+                                      _responsiveController.responsiveValue(
+                                    mobile: 16.0,
+                                    tablet: 18.0,
+                                  ),
+                                  fontWeight: FontWeight.bold,
+                                ),
                               ),
                             ),
                           ],
