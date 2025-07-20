@@ -1,7 +1,6 @@
 import 'package:devshabitat/app/widgets/user_card.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'advanced_filters_screen.dart';
 import '../../controllers/discovery_controller.dart';
 import '../../views/base/base_view.dart';
@@ -25,8 +24,8 @@ class DiscoveryScreen extends BaseView<DiscoveryController> {
             'Keşfet',
             style: TextStyle(
               fontSize: responsive.responsiveValue(
-                mobile: 18.sp,
-                tablet: 22.sp,
+                mobile: 18,
+                tablet: 22,
               ),
             ),
           ),
@@ -36,8 +35,8 @@ class DiscoveryScreen extends BaseView<DiscoveryController> {
                 icon: Icon(
                   Icons.search,
                   size: responsive.responsiveValue(
-                    mobile: 24.sp,
-                    tablet: 28.sp,
+                    mobile: 24,
+                    tablet: 28,
                   ),
                 ),
                 text: 'Arama',
@@ -46,8 +45,8 @@ class DiscoveryScreen extends BaseView<DiscoveryController> {
                 icon: Icon(
                   Icons.recommend,
                   size: responsive.responsiveValue(
-                    mobile: 24.sp,
-                    tablet: 28.sp,
+                    mobile: 24,
+                    tablet: 28,
                   ),
                 ),
                 text: 'Öneriler',
@@ -56,8 +55,8 @@ class DiscoveryScreen extends BaseView<DiscoveryController> {
                 icon: Icon(
                   Icons.people,
                   size: responsive.responsiveValue(
-                    mobile: 24.sp,
-                    tablet: 28.sp,
+                    mobile: 24,
+                    tablet: 28,
                   ),
                 ),
                 text: 'Bağlantılar',
@@ -66,8 +65,8 @@ class DiscoveryScreen extends BaseView<DiscoveryController> {
                 icon: Icon(
                   Icons.person_add,
                   size: responsive.responsiveValue(
-                    mobile: 24.sp,
-                    tablet: 28.sp,
+                    mobile: 24,
+                    tablet: 28,
                   ),
                 ),
                 text: 'İstekler',
@@ -75,8 +74,8 @@ class DiscoveryScreen extends BaseView<DiscoveryController> {
             ],
             labelStyle: TextStyle(
               fontSize: responsive.responsiveValue(
-                mobile: 14.sp,
-                tablet: 16.sp,
+                mobile: 14,
+                tablet: 16,
               ),
             ),
           ),
@@ -97,7 +96,10 @@ class DiscoveryScreen extends BaseView<DiscoveryController> {
           onTap: () => Get.to(() => const AdvancedFiltersScreen()),
           child: Icon(
             Icons.filter_list,
-            size: responsive.minTouchTarget.sp,
+            size: responsive.responsiveValue(
+              mobile: 24,
+              tablet: 28,
+            ),
           ),
         ),
       ),
@@ -113,24 +115,27 @@ class DiscoveryScreen extends BaseView<DiscoveryController> {
             onChanged: controller.onSearchQueryChanged,
             style: TextStyle(
               fontSize: responsive.responsiveValue(
-                mobile: 16.sp,
-                tablet: 18.sp,
+                mobile: 16,
+                tablet: 18,
               ),
             ),
             decoration: InputDecoration(
               hintText: 'Kullanıcı ara...',
               hintStyle: TextStyle(
                 fontSize: responsive.responsiveValue(
-                  mobile: 16.sp,
-                  tablet: 18.sp,
+                  mobile: 16,
+                  tablet: 18,
                 ),
               ),
               prefixIcon: Icon(
                 Icons.search,
-                size: responsive.minTouchTarget.sp,
+                size: responsive.responsiveValue(
+                  mobile: 24,
+                  tablet: 28,
+                ),
               ),
               border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(12.r),
+                borderRadius: BorderRadius.circular(12),
               ),
             ),
           ),
@@ -153,9 +158,18 @@ class DiscoveryScreen extends BaseView<DiscoveryController> {
       padding: responsive.responsivePadding(all: 16),
       gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
         crossAxisCount: 2,
-        childAspectRatio: 0.75.w,
-        crossAxisSpacing: 16.w,
-        mainAxisSpacing: 16.h,
+        childAspectRatio: responsive.responsiveValue(
+          mobile: 0.75,
+          tablet: 0.75,
+        ),
+        crossAxisSpacing: responsive.responsiveValue(
+          mobile: 16,
+          tablet: 16,
+        ),
+        mainAxisSpacing: responsive.responsiveValue(
+          mobile: 16,
+          tablet: 16,
+        ),
       ),
       itemCount: controller.searchResults.length,
       itemBuilder: (context, index) {
@@ -173,9 +187,18 @@ class DiscoveryScreen extends BaseView<DiscoveryController> {
       padding: responsive.responsivePadding(all: 24),
       gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
         crossAxisCount: 3,
-        childAspectRatio: 0.8.w,
-        crossAxisSpacing: 24.w,
-        mainAxisSpacing: 24.h,
+        childAspectRatio: responsive.responsiveValue(
+          mobile: 0.8,
+          tablet: 0.8,
+        ),
+        crossAxisSpacing: responsive.responsiveValue(
+          mobile: 24,
+          tablet: 24,
+        ),
+        mainAxisSpacing: responsive.responsiveValue(
+          mobile: 24,
+          tablet: 24,
+        ),
       ),
       itemCount: controller.searchResults.length,
       itemBuilder: (context, index) {
@@ -194,8 +217,8 @@ class DiscoveryScreen extends BaseView<DiscoveryController> {
         return Center(
           child: CircularProgressIndicator(
             strokeWidth: responsive.responsiveValue(
-              mobile: 2.w,
-              tablet: 3.w,
+              mobile: 2,
+              tablet: 3,
             ),
           ),
         );
@@ -216,9 +239,18 @@ class DiscoveryScreen extends BaseView<DiscoveryController> {
       padding: responsive.responsivePadding(all: 16),
       gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
         crossAxisCount: 2,
-        childAspectRatio: 0.75.w,
-        crossAxisSpacing: 16.w,
-        mainAxisSpacing: 16.h,
+        childAspectRatio: responsive.responsiveValue(
+          mobile: 0.75,
+          tablet: 0.75,
+        ),
+        crossAxisSpacing: responsive.responsiveValue(
+          mobile: 16,
+          tablet: 16,
+        ),
+        mainAxisSpacing: responsive.responsiveValue(
+          mobile: 16,
+          tablet: 16,
+        ),
       ),
       itemCount: controller.recommendedUsers.length,
       itemBuilder: (context, index) {
@@ -237,9 +269,18 @@ class DiscoveryScreen extends BaseView<DiscoveryController> {
       padding: responsive.responsivePadding(all: 24),
       gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
         crossAxisCount: 3,
-        childAspectRatio: 0.8.w,
-        crossAxisSpacing: 24.w,
-        mainAxisSpacing: 24.h,
+        childAspectRatio: responsive.responsiveValue(
+          mobile: 0.8,
+          tablet: 0.8,
+        ),
+        crossAxisSpacing: responsive.responsiveValue(
+          mobile: 24,
+          tablet: 24,
+        ),
+        mainAxisSpacing: responsive.responsiveValue(
+          mobile: 24,
+          tablet: 24,
+        ),
       ),
       itemCount: controller.recommendedUsers.length,
       itemBuilder: (context, index) {
@@ -259,8 +300,8 @@ class DiscoveryScreen extends BaseView<DiscoveryController> {
         return Center(
           child: CircularProgressIndicator(
             strokeWidth: responsive.responsiveValue(
-              mobile: 2.w,
-              tablet: 3.w,
+              mobile: 2,
+              tablet: 3,
             ),
           ),
         );
@@ -289,9 +330,18 @@ class DiscoveryScreen extends BaseView<DiscoveryController> {
       padding: responsive.responsivePadding(all: 24),
       gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
         crossAxisCount: 2,
-        childAspectRatio: 3.w,
-        crossAxisSpacing: 24.w,
-        mainAxisSpacing: 24.h,
+        childAspectRatio: responsive.responsiveValue(
+          mobile: 3,
+          tablet: 3,
+        ),
+        crossAxisSpacing: responsive.responsiveValue(
+          mobile: 24,
+          tablet: 24,
+        ),
+        mainAxisSpacing: responsive.responsiveValue(
+          mobile: 24,
+          tablet: 24,
+        ),
       ),
       itemCount: controller.connections.length,
       itemBuilder: (context, index) {
@@ -305,16 +355,16 @@ class DiscoveryScreen extends BaseView<DiscoveryController> {
     return Card(
       margin: EdgeInsets.only(
         bottom: responsive.responsiveValue(
-          mobile: 8.h,
-          tablet: 12.h,
+          mobile: 8,
+          tablet: 12,
         ),
       ),
       child: ListTile(
         contentPadding: responsive.responsivePadding(all: 12),
         leading: CircleAvatar(
           radius: responsive.responsiveValue(
-            mobile: 24.r,
-            tablet: 32.r,
+            mobile: 24,
+            tablet: 32,
           ),
           backgroundImage: NetworkImage(
             connection.photoUrl ?? 'https://via.placeholder.com/150',
@@ -324,8 +374,8 @@ class DiscoveryScreen extends BaseView<DiscoveryController> {
           connection.fullName,
           style: TextStyle(
             fontSize: responsive.responsiveValue(
-              mobile: 16.sp,
-              tablet: 18.sp,
+              mobile: 16,
+              tablet: 18,
             ),
             fontWeight: FontWeight.w600,
           ),
@@ -334,8 +384,8 @@ class DiscoveryScreen extends BaseView<DiscoveryController> {
           connection.title ?? 'Başlık belirtilmemiş',
           style: TextStyle(
             fontSize: responsive.responsiveValue(
-              mobile: 14.sp,
-              tablet: 16.sp,
+              mobile: 14,
+              tablet: 16,
             ),
           ),
         ),
@@ -346,14 +396,20 @@ class DiscoveryScreen extends BaseView<DiscoveryController> {
               onTap: () => controller.onMessageTap(connection),
               child: Icon(
                 Icons.message,
-                size: responsive.minTouchTarget.sp,
+                size: responsive.responsiveValue(
+                  mobile: 24,
+                  tablet: 28,
+                ),
               ),
             ),
             AdaptiveTouchTarget(
               onTap: () => _showConnectionOptions(connection),
               child: Icon(
                 Icons.more_vert,
-                size: responsive.minTouchTarget.sp,
+                size: responsive.responsiveValue(
+                  mobile: 24,
+                  tablet: 28,
+                ),
               ),
             ),
           ],
@@ -371,8 +427,8 @@ class DiscoveryScreen extends BaseView<DiscoveryController> {
           TabBar(
             labelStyle: TextStyle(
               fontSize: responsive.responsiveValue(
-                mobile: 14.sp,
-                tablet: 16.sp,
+                mobile: 14,
+                tablet: 16,
               ),
             ),
             tabs: [
@@ -399,8 +455,8 @@ class DiscoveryScreen extends BaseView<DiscoveryController> {
         return Center(
           child: CircularProgressIndicator(
             strokeWidth: responsive.responsiveValue(
-              mobile: 2.w,
-              tablet: 3.w,
+              mobile: 2,
+              tablet: 3,
             ),
           ),
         );
@@ -429,9 +485,18 @@ class DiscoveryScreen extends BaseView<DiscoveryController> {
       padding: responsive.responsivePadding(all: 24),
       gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
         crossAxisCount: 2,
-        childAspectRatio: 3.w,
-        crossAxisSpacing: 24.w,
-        mainAxisSpacing: 24.h,
+        childAspectRatio: responsive.responsiveValue(
+          mobile: 3,
+          tablet: 3,
+        ),
+        crossAxisSpacing: responsive.responsiveValue(
+          mobile: 24,
+          tablet: 24,
+        ),
+        mainAxisSpacing: responsive.responsiveValue(
+          mobile: 24,
+          tablet: 24,
+        ),
       ),
       itemCount: requests.length,
       itemBuilder: (context, index) {
@@ -445,16 +510,16 @@ class DiscoveryScreen extends BaseView<DiscoveryController> {
     return Card(
       margin: EdgeInsets.only(
         bottom: responsive.responsiveValue(
-          mobile: 8.h,
-          tablet: 12.h,
+          mobile: 8,
+          tablet: 12,
         ),
       ),
       child: ListTile(
         contentPadding: responsive.responsivePadding(all: 12),
         leading: CircleAvatar(
           radius: responsive.responsiveValue(
-            mobile: 24.r,
-            tablet: 32.r,
+            mobile: 24,
+            tablet: 32,
           ),
           backgroundImage: NetworkImage(request.profileImage),
         ),
@@ -462,8 +527,8 @@ class DiscoveryScreen extends BaseView<DiscoveryController> {
           request.fullName,
           style: TextStyle(
             fontSize: responsive.responsiveValue(
-              mobile: 16.sp,
-              tablet: 18.sp,
+              mobile: 16,
+              tablet: 18,
             ),
             fontWeight: FontWeight.w600,
           ),
@@ -475,8 +540,8 @@ class DiscoveryScreen extends BaseView<DiscoveryController> {
               request.title,
               style: TextStyle(
                 fontSize: responsive.responsiveValue(
-                  mobile: 14.sp,
-                  tablet: 16.sp,
+                  mobile: 14,
+                  tablet: 16,
                 ),
               ),
             ),
@@ -485,8 +550,8 @@ class DiscoveryScreen extends BaseView<DiscoveryController> {
                 '${request.mutualConnections} ortak bağlantı',
                 style: TextStyle(
                   fontSize: responsive.responsiveValue(
-                    mobile: 12.sp,
-                    tablet: 14.sp,
+                    mobile: 12,
+                    tablet: 14,
                   ),
                   color: Colors.grey[600],
                 ),
@@ -501,7 +566,10 @@ class DiscoveryScreen extends BaseView<DiscoveryController> {
                 onTap: () => controller.acceptRequest(request),
                 child: Icon(
                   Icons.check,
-                  size: responsive.minTouchTarget.sp,
+                  size: responsive.responsiveValue(
+                    mobile: 24,
+                    tablet: 28,
+                  ),
                   color: Colors.green,
                 ),
               ),
@@ -509,7 +577,10 @@ class DiscoveryScreen extends BaseView<DiscoveryController> {
               onTap: () => _showRequestActionDialog(request, isIncoming),
               child: Icon(
                 isIncoming ? Icons.close : Icons.delete,
-                size: responsive.minTouchTarget.sp,
+                size: responsive.responsiveValue(
+                  mobile: 24,
+                  tablet: 28,
+                ),
                 color: Colors.red,
               ),
             ),
@@ -527,7 +598,10 @@ class DiscoveryScreen extends BaseView<DiscoveryController> {
         decoration: BoxDecoration(
           color: Theme.of(Get.context!).scaffoldBackgroundColor,
           borderRadius: BorderRadius.vertical(
-            top: Radius.circular(16.r),
+            top: Radius.circular(responsive.responsiveValue(
+              mobile: 16,
+              tablet: 16,
+            )),
           ),
         ),
         child: Column(
@@ -536,14 +610,17 @@ class DiscoveryScreen extends BaseView<DiscoveryController> {
             ListTile(
               leading: Icon(
                 Icons.person,
-                size: responsive.minTouchTarget.sp,
+                size: responsive.responsiveValue(
+                  mobile: 24,
+                  tablet: 28,
+                ),
               ),
               title: ResponsiveText(
                 'Profili Görüntüle',
                 style: TextStyle(
                   fontSize: responsive.responsiveValue(
-                    mobile: 16.sp,
-                    tablet: 18.sp,
+                    mobile: 16,
+                    tablet: 18,
                   ),
                 ),
               ),
@@ -555,14 +632,17 @@ class DiscoveryScreen extends BaseView<DiscoveryController> {
             ListTile(
               leading: Icon(
                 Icons.message,
-                size: responsive.minTouchTarget.sp,
+                size: responsive.responsiveValue(
+                  mobile: 24,
+                  tablet: 28,
+                ),
               ),
               title: ResponsiveText(
                 'Mesaj Gönder',
                 style: TextStyle(
                   fontSize: responsive.responsiveValue(
-                    mobile: 16.sp,
-                    tablet: 18.sp,
+                    mobile: 16,
+                    tablet: 18,
                   ),
                 ),
               ),
@@ -574,15 +654,18 @@ class DiscoveryScreen extends BaseView<DiscoveryController> {
             ListTile(
               leading: Icon(
                 Icons.person_remove,
-                size: responsive.minTouchTarget.sp,
+                size: responsive.responsiveValue(
+                  mobile: 24,
+                  tablet: 28,
+                ),
                 color: Colors.red,
               ),
               title: ResponsiveText(
                 'Bağlantıyı Kaldır',
                 style: TextStyle(
                   fontSize: responsive.responsiveValue(
-                    mobile: 16.sp,
-                    tablet: 18.sp,
+                    mobile: 16,
+                    tablet: 18,
                   ),
                   color: Colors.red,
                 ),
@@ -605,8 +688,8 @@ class DiscoveryScreen extends BaseView<DiscoveryController> {
           isIncoming ? 'İsteği Reddet' : 'İsteği Geri Çek',
           style: TextStyle(
             fontSize: responsive.responsiveValue(
-              mobile: 18.sp,
-              tablet: 20.sp,
+              mobile: 18,
+              tablet: 20,
             ),
           ),
         ),
@@ -616,8 +699,8 @@ class DiscoveryScreen extends BaseView<DiscoveryController> {
               : 'Bu bağlantı isteğini geri çekmek istediğinize emin misiniz?',
           style: TextStyle(
             fontSize: responsive.responsiveValue(
-              mobile: 16.sp,
-              tablet: 18.sp,
+              mobile: 16,
+              tablet: 18,
             ),
           ),
         ),
@@ -628,8 +711,8 @@ class DiscoveryScreen extends BaseView<DiscoveryController> {
               'İptal',
               style: TextStyle(
                 fontSize: responsive.responsiveValue(
-                  mobile: 14.sp,
-                  tablet: 16.sp,
+                  mobile: 14,
+                  tablet: 16,
                 ),
               ),
             ),
@@ -647,8 +730,8 @@ class DiscoveryScreen extends BaseView<DiscoveryController> {
               isIncoming ? 'Reddet' : 'Geri Çek',
               style: TextStyle(
                 fontSize: responsive.responsiveValue(
-                  mobile: 14.sp,
-                  tablet: 16.sp,
+                  mobile: 14,
+                  tablet: 16,
                 ),
                 color: Colors.red,
               ),
@@ -666,8 +749,8 @@ class DiscoveryScreen extends BaseView<DiscoveryController> {
           'Bağlantıyı Kaldır',
           style: TextStyle(
             fontSize: responsive.responsiveValue(
-              mobile: 18.sp,
-              tablet: 20.sp,
+              mobile: 18,
+              tablet: 20,
             ),
           ),
         ),
@@ -675,8 +758,8 @@ class DiscoveryScreen extends BaseView<DiscoveryController> {
           'Bu kişiyi bağlantılarınızdan kaldırmak istediğinize emin misiniz?',
           style: TextStyle(
             fontSize: responsive.responsiveValue(
-              mobile: 16.sp,
-              tablet: 18.sp,
+              mobile: 16,
+              tablet: 18,
             ),
           ),
         ),
@@ -687,8 +770,8 @@ class DiscoveryScreen extends BaseView<DiscoveryController> {
               'İptal',
               style: TextStyle(
                 fontSize: responsive.responsiveValue(
-                  mobile: 14.sp,
-                  tablet: 16.sp,
+                  mobile: 14,
+                  tablet: 16,
                 ),
               ),
             ),
@@ -702,8 +785,8 @@ class DiscoveryScreen extends BaseView<DiscoveryController> {
               'Kaldır',
               style: TextStyle(
                 fontSize: responsive.responsiveValue(
-                  mobile: 14.sp,
-                  tablet: 16.sp,
+                  mobile: 14,
+                  tablet: 16,
                 ),
                 color: Colors.red,
               ),

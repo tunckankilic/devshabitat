@@ -23,8 +23,8 @@ class ProfileView extends BaseView<ProfileController> {
           'Profil',
           style: TextStyle(
             fontSize: responsive.responsiveValue(
-              mobile: 18.sp,
-              tablet: 22.sp,
+              mobile: 18,
+              tablet: 22,
             ),
           ),
         ),
@@ -33,7 +33,7 @@ class ProfileView extends BaseView<ProfileController> {
             onTap: () => Get.toNamed('/edit-profile'),
             child: Icon(
               Icons.edit,
-              size: responsive.minTouchTarget.sp,
+              size: responsive.minTouchTarget,
             ),
           ),
         ],
@@ -44,8 +44,8 @@ class ProfileView extends BaseView<ProfileController> {
             return Center(
               child: CircularProgressIndicator(
                 strokeWidth: responsive.responsiveValue(
-                  mobile: 2.w,
-                  tablet: 3.w,
+                  mobile: 2,
+                  tablet: 3,
                 ),
               ),
             );
@@ -58,8 +58,8 @@ class ProfileView extends BaseView<ProfileController> {
                 'Profil bulunamadı',
                 style: TextStyle(
                   fontSize: responsive.responsiveValue(
-                    mobile: 16.sp,
-                    tablet: 18.sp,
+                    mobile: 16,
+                    tablet: 18,
                   ),
                 ),
               ),
@@ -83,17 +83,19 @@ class ProfileView extends BaseView<ProfileController> {
 
   Widget _buildMobileProfile(dynamic user) {
     return SingleChildScrollView(
-      padding: responsive.responsivePadding(all: 16),
+      padding: responsive.responsivePadding(
+          all: responsive.responsiveValue(mobile: 16, tablet: 24)),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           _buildProfileHeader(user),
-          SizedBox(height: 24.h),
+          SizedBox(height: responsive.responsiveValue(mobile: 24, tablet: 32)),
           if (user.bio != null) ...[
             _buildSectionTitle('Hakkımda'),
-            SizedBox(height: 8.h),
+            SizedBox(height: responsive.responsiveValue(mobile: 8, tablet: 12)),
             _buildBioSection(user.bio!),
-            SizedBox(height: 24.h),
+            SizedBox(
+                height: responsive.responsiveValue(mobile: 24, tablet: 32)),
           ],
           _buildSkillsSection(user),
           _buildLanguagesSection(user),
@@ -108,11 +110,12 @@ class ProfileView extends BaseView<ProfileController> {
 
   Widget _buildTabletProfile(dynamic user) {
     return SingleChildScrollView(
-      padding: responsive.responsivePadding(all: 24),
+      padding: responsive.responsivePadding(
+          all: responsive.responsiveValue(mobile: 24, tablet: 32)),
       child: Column(
         children: [
           _buildProfileHeader(user),
-          SizedBox(height: 32.h),
+          SizedBox(height: responsive.responsiveValue(mobile: 32, tablet: 40)),
           Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -123,9 +126,13 @@ class ProfileView extends BaseView<ProfileController> {
                   children: [
                     if (user.bio != null) ...[
                       _buildSectionTitle('Hakkımda'),
-                      SizedBox(height: 8.h),
+                      SizedBox(
+                          height: responsive.responsiveValue(
+                              mobile: 8, tablet: 12)),
                       _buildBioSection(user.bio!),
-                      SizedBox(height: 24.h),
+                      SizedBox(
+                          height: responsive.responsiveValue(
+                              mobile: 24, tablet: 32)),
                     ],
                     _buildSkillsSection(user),
                     _buildLanguagesSection(user),
@@ -133,7 +140,8 @@ class ProfileView extends BaseView<ProfileController> {
                   ],
                 ),
               ),
-              SizedBox(width: 32.w),
+              SizedBox(
+                  width: responsive.responsiveValue(mobile: 24, tablet: 32)),
               Expanded(
                 flex: 3,
                 child: Column(
@@ -153,14 +161,16 @@ class ProfileView extends BaseView<ProfileController> {
   }
 
   Widget _buildProfileHeader(dynamic user) {
+    final avatarSize = responsive.responsiveValue(
+      mobile: 60.0,
+      tablet: 80.0,
+    );
+
     return Center(
       child: Column(
         children: [
           CircleAvatar(
-            radius: responsive.responsiveValue(
-              mobile: 60.r,
-              tablet: 80.r,
-            ),
+            radius: avatarSize,
             backgroundColor: Colors.grey[200],
             backgroundImage: user.photoURL != null
                 ? CachedNetworkImageProvider(user.photoURL!)
@@ -168,44 +178,41 @@ class ProfileView extends BaseView<ProfileController> {
             child: user.photoURL == null
                 ? Icon(
                     Icons.person,
-                    size: responsive.responsiveValue(
-                      mobile: 60.r,
-                      tablet: 80.r,
-                    ),
+                    size: avatarSize,
                   )
                 : null,
           ),
-          SizedBox(height: 16.h),
+          SizedBox(height: responsive.responsiveValue(mobile: 16, tablet: 24)),
           ResponsiveText(
             user.displayName ?? "",
             style: TextStyle(
               fontSize: responsive.responsiveValue(
-                mobile: 24.sp,
-                tablet: 28.sp,
+                mobile: 24,
+                tablet: 28,
               ),
               fontWeight: FontWeight.bold,
             ),
           ),
           if (user.title != null) ...[
-            SizedBox(height: 4.h),
+            SizedBox(height: responsive.responsiveValue(mobile: 4, tablet: 6)),
             ResponsiveText(
               user.title!,
               style: TextStyle(
                 fontSize: responsive.responsiveValue(
-                  mobile: 16.sp,
-                  tablet: 18.sp,
+                  mobile: 16,
+                  tablet: 18,
                 ),
               ),
             ),
           ],
           if (user.company != null) ...[
-            SizedBox(height: 4.h),
+            SizedBox(height: responsive.responsiveValue(mobile: 4, tablet: 6)),
             ResponsiveText(
               user.company!,
               style: TextStyle(
                 fontSize: responsive.responsiveValue(
-                  mobile: 16.sp,
-                  tablet: 18.sp,
+                  mobile: 16,
+                  tablet: 18,
                 ),
                 color: Colors.grey[600],
               ),
@@ -221,8 +228,8 @@ class ProfileView extends BaseView<ProfileController> {
       title,
       style: TextStyle(
         fontSize: responsive.responsiveValue(
-          mobile: 18.sp,
-          tablet: 20.sp,
+          mobile: 18,
+          tablet: 20,
         ),
         fontWeight: FontWeight.w600,
       ),
@@ -234,8 +241,8 @@ class ProfileView extends BaseView<ProfileController> {
       bio,
       style: TextStyle(
         fontSize: responsive.responsiveValue(
-          mobile: 14.sp,
-          tablet: 16.sp,
+          mobile: 14,
+          tablet: 16,
         ),
       ),
     );
@@ -248,25 +255,32 @@ class ProfileView extends BaseView<ProfileController> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         _buildSectionTitle('Yetenekler'),
-        SizedBox(height: 8.h),
+        SizedBox(height: responsive.responsiveValue(mobile: 8, tablet: 12)),
         Wrap(
-          spacing: 8.w,
-          runSpacing: 8.h,
+          spacing: responsive.responsiveValue(mobile: 8, tablet: 12),
+          runSpacing: responsive.responsiveValue(mobile: 8, tablet: 12),
           children: user.skills!
-              .map<Widget>((skill) => Chip(
-                    label: ResponsiveText(
+              .map<Widget>((skill) => Container(
+                    padding: responsive.responsivePadding(
+                        horizontal: 8, vertical: 4),
+                    decoration: BoxDecoration(
+                      color: Theme.of(Get.context!).chipTheme.backgroundColor,
+                      borderRadius: BorderRadius.circular(
+                          responsive.responsiveValue(mobile: 16, tablet: 20)),
+                    ),
+                    child: ResponsiveText(
                       skill,
                       style: TextStyle(
                         fontSize: responsive.responsiveValue(
-                          mobile: 12.sp,
-                          tablet: 14.sp,
+                          mobile: 12,
+                          tablet: 14,
                         ),
                       ),
                     ),
                   ))
               .toList(),
         ),
-        SizedBox(height: 24.h),
+        SizedBox(height: responsive.responsiveValue(mobile: 24, tablet: 32)),
       ],
     );
   }
@@ -278,25 +292,32 @@ class ProfileView extends BaseView<ProfileController> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         _buildSectionTitle('Programlama Dilleri'),
-        SizedBox(height: 8.h),
+        SizedBox(height: responsive.responsiveValue(mobile: 8, tablet: 12)),
         Wrap(
-          spacing: 8.w,
-          runSpacing: 8.h,
+          spacing: responsive.responsiveValue(mobile: 8, tablet: 12),
+          runSpacing: responsive.responsiveValue(mobile: 8, tablet: 12),
           children: user.languages!
-              .map<Widget>((lang) => Chip(
-                    label: ResponsiveText(
+              .map<Widget>((lang) => Container(
+                    padding: responsive.responsivePadding(
+                        horizontal: 8, vertical: 4),
+                    decoration: BoxDecoration(
+                      color: Theme.of(Get.context!).chipTheme.backgroundColor,
+                      borderRadius: BorderRadius.circular(
+                          responsive.responsiveValue(mobile: 16, tablet: 20)),
+                    ),
+                    child: ResponsiveText(
                       lang,
                       style: TextStyle(
                         fontSize: responsive.responsiveValue(
-                          mobile: 12.sp,
-                          tablet: 14.sp,
+                          mobile: 12,
+                          tablet: 14,
                         ),
                       ),
                     ),
                   ))
               .toList(),
         ),
-        SizedBox(height: 24.h),
+        SizedBox(height: responsive.responsiveValue(mobile: 24, tablet: 32)),
       ],
     );
   }
@@ -308,25 +329,32 @@ class ProfileView extends BaseView<ProfileController> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         _buildSectionTitle('Frameworks'),
-        SizedBox(height: 8.h),
+        SizedBox(height: responsive.responsiveValue(mobile: 8, tablet: 12)),
         Wrap(
-          spacing: 8.w,
-          runSpacing: 8.h,
+          spacing: responsive.responsiveValue(mobile: 8, tablet: 12),
+          runSpacing: responsive.responsiveValue(mobile: 8, tablet: 12),
           children: user.frameworks!
-              .map<Widget>((framework) => Chip(
-                    label: ResponsiveText(
+              .map<Widget>((framework) => Container(
+                    padding: responsive.responsivePadding(
+                        horizontal: 8, vertical: 4),
+                    decoration: BoxDecoration(
+                      color: Theme.of(Get.context!).chipTheme.backgroundColor,
+                      borderRadius: BorderRadius.circular(
+                          responsive.responsiveValue(mobile: 16, tablet: 20)),
+                    ),
+                    child: ResponsiveText(
                       framework,
                       style: TextStyle(
                         fontSize: responsive.responsiveValue(
-                          mobile: 12.sp,
-                          tablet: 14.sp,
+                          mobile: 12,
+                          tablet: 14,
                         ),
                       ),
                     ),
                   ))
               .toList(),
         ),
-        SizedBox(height: 24.h),
+        SizedBox(height: responsive.responsiveValue(mobile: 24, tablet: 32)),
       ],
     );
   }
@@ -338,7 +366,7 @@ class ProfileView extends BaseView<ProfileController> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         _buildSectionTitle('GitHub'),
-        SizedBox(height: 8.h),
+        SizedBox(height: responsive.responsiveValue(mobile: 8, tablet: 12)),
         FutureBuilder<Map<String, dynamic>>(
           future: controller.fetchGithubRepoData(user.githubUsername!),
           builder: (context, snapshot) {
@@ -346,8 +374,8 @@ class ProfileView extends BaseView<ProfileController> {
               return Center(
                 child: CircularProgressIndicator(
                   strokeWidth: responsive.responsiveValue(
-                    mobile: 2.w,
-                    tablet: 3.w,
+                    mobile: 2,
+                    tablet: 3,
                   ),
                 ),
               );
@@ -357,8 +385,8 @@ class ProfileView extends BaseView<ProfileController> {
                 'GitHub verisi yüklenemedi: ${snapshot.error}',
                 style: TextStyle(
                   fontSize: responsive.responsiveValue(
-                    mobile: 14.sp,
-                    tablet: 16.sp,
+                    mobile: 14,
+                    tablet: 16,
                   ),
                 ),
               );
@@ -368,8 +396,8 @@ class ProfileView extends BaseView<ProfileController> {
                 'GitHub verisi bulunamadı',
                 style: TextStyle(
                   fontSize: responsive.responsiveValue(
-                    mobile: 14.sp,
-                    tablet: 16.sp,
+                    mobile: 14,
+                    tablet: 16,
                   ),
                 ),
               );
@@ -377,7 +405,7 @@ class ProfileView extends BaseView<ProfileController> {
             return GithubRepoCard(repo: snapshot.data!);
           },
         ),
-        SizedBox(height: 24.h),
+        SizedBox(height: responsive.responsiveValue(mobile: 24, tablet: 32)),
       ],
     );
   }
@@ -389,45 +417,60 @@ class ProfileView extends BaseView<ProfileController> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         _buildSectionTitle('İş Deneyimi'),
-        SizedBox(height: 8.h),
+        SizedBox(height: responsive.responsiveValue(mobile: 8, tablet: 12)),
         ListView.builder(
           shrinkWrap: true,
           physics: const NeverScrollableScrollPhysics(),
           itemCount: user.workExperience!.length,
           itemBuilder: (context, index) {
             final experience = user.workExperience![index];
-            return ListTile(
-              title: ResponsiveText(
-                experience.title,
-                style: TextStyle(
-                  fontSize: responsive.responsiveValue(
-                    mobile: 16.sp,
-                    tablet: 18.sp,
+            return Container(
+              padding: responsive.responsivePadding(vertical: 8),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  ResponsiveText(
+                    experience.title,
+                    style: TextStyle(
+                      fontSize: responsive.responsiveValue(
+                        mobile: 16,
+                        tablet: 18,
+                      ),
+                    ),
                   ),
-                ),
-              ),
-              subtitle: ResponsiveText(
-                experience.company,
-                style: TextStyle(
-                  fontSize: responsive.responsiveValue(
-                    mobile: 14.sp,
-                    tablet: 16.sp,
+                  SizedBox(
+                      height: responsive.responsiveValue(mobile: 4, tablet: 6)),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Expanded(
+                        child: ResponsiveText(
+                          experience.company,
+                          style: TextStyle(
+                            fontSize: responsive.responsiveValue(
+                              mobile: 14,
+                              tablet: 16,
+                            ),
+                          ),
+                        ),
+                      ),
+                      ResponsiveText(
+                        experience.isCurrentRole ? 'Şu an' : 'Geçmiş',
+                        style: TextStyle(
+                          fontSize: responsive.responsiveValue(
+                            mobile: 12,
+                            tablet: 14,
+                          ),
+                        ),
+                      ),
+                    ],
                   ),
-                ),
-              ),
-              trailing: ResponsiveText(
-                experience.isCurrentRole ? 'Şu an' : 'Geçmiş',
-                style: TextStyle(
-                  fontSize: responsive.responsiveValue(
-                    mobile: 12.sp,
-                    tablet: 14.sp,
-                  ),
-                ),
+                ],
               ),
             );
           },
         ),
-        SizedBox(height: 24.h),
+        SizedBox(height: responsive.responsiveValue(mobile: 24, tablet: 32)),
       ],
     );
   }
@@ -439,40 +482,57 @@ class ProfileView extends BaseView<ProfileController> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         _buildSectionTitle('Eğitim'),
-        SizedBox(height: 8.h),
+        SizedBox(height: responsive.responsiveValue(mobile: 8, tablet: 12)),
         ListView.builder(
           shrinkWrap: true,
           physics: const NeverScrollableScrollPhysics(),
           itemCount: user.education!.length,
           itemBuilder: (context, index) {
             final education = user.education![index];
-            return ListTile(
-              title: ResponsiveText(
-                education.school,
-                style: TextStyle(
-                  fontSize: responsive.responsiveValue(
-                    mobile: 16.sp,
-                    tablet: 18.sp,
+            return Container(
+              padding: responsive.responsivePadding(vertical: 8),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  ResponsiveText(
+                    education.school,
+                    style: TextStyle(
+                      fontSize: responsive.responsiveValue(
+                        mobile: 16,
+                        tablet: 18,
+                      ),
+                    ),
                   ),
-                ),
-              ),
-              subtitle: ResponsiveText(
-                '${education.degree} - ${education.field}',
-                style: TextStyle(
-                  fontSize: responsive.responsiveValue(
-                    mobile: 14.sp,
-                    tablet: 16.sp,
+                  SizedBox(
+                      height: responsive.responsiveValue(mobile: 4, tablet: 6)),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Expanded(
+                        child: ResponsiveText(
+                          '${education.degree} - ${education.field}',
+                          style: TextStyle(
+                            fontSize: responsive.responsiveValue(
+                              mobile: 14,
+                              tablet: 16,
+                            ),
+                          ),
+                        ),
+                      ),
+                      ResponsiveText(
+                        education.isCurrentlyStudying
+                            ? 'Devam ediyor'
+                            : 'Mezun',
+                        style: TextStyle(
+                          fontSize: responsive.responsiveValue(
+                            mobile: 12,
+                            tablet: 14,
+                          ),
+                        ),
+                      ),
+                    ],
                   ),
-                ),
-              ),
-              trailing: ResponsiveText(
-                education.isCurrentlyStudying ? 'Devam ediyor' : 'Mezun',
-                style: TextStyle(
-                  fontSize: responsive.responsiveValue(
-                    mobile: 12.sp,
-                    tablet: 14.sp,
-                  ),
-                ),
+                ],
               ),
             );
           },

@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:flutter_screenutil/flutter_screenutil.dart';
 import '../../controllers/filter_controller.dart';
 import '../../controllers/responsive_controller.dart';
 import '../../services/responsive_performance_service.dart';

@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:devshabitat/app/controllers/event/event_controller.dart';
 import 'package:devshabitat/app/models/event/event_model.dart';
 import '../base/base_view.dart';
@@ -24,8 +23,8 @@ class EventDetailsView extends BaseView<EventController> {
           event.title,
           style: TextStyle(
             fontSize: responsive.responsiveValue(
-              mobile: 18.sp,
-              tablet: 22.sp,
+              mobile: 18,
+              tablet: 22,
             ),
           ),
         ),
@@ -49,11 +48,23 @@ class EventDetailsView extends BaseView<EventController> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           _buildEventHeader(event),
-          SizedBox(height: 16.h),
+          SizedBox(
+              height: responsive.responsiveValue(
+            mobile: 16,
+            tablet: 24,
+          )),
           _buildEventDescription(event),
-          SizedBox(height: 24.h),
+          SizedBox(
+              height: responsive.responsiveValue(
+            mobile: 24,
+            tablet: 32,
+          )),
           _buildEventInfo(event),
-          SizedBox(height: 24.h),
+          SizedBox(
+              height: responsive.responsiveValue(
+            mobile: 24,
+            tablet: 32,
+          )),
           _buildParticipationButton(event),
         ],
       ),
@@ -72,17 +83,29 @@ class EventDetailsView extends BaseView<EventController> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 _buildEventHeader(event),
-                SizedBox(height: 24.h),
+                SizedBox(
+                    height: responsive.responsiveValue(
+                  mobile: 24,
+                  tablet: 32,
+                )),
                 _buildEventDescription(event),
               ],
             ),
           ),
-          SizedBox(width: 32.w),
+          SizedBox(
+              width: responsive.responsiveValue(
+            mobile: 32,
+            tablet: 48,
+          )),
           Expanded(
             child: Column(
               children: [
                 _buildEventInfo(event),
-                SizedBox(height: 24.h),
+                SizedBox(
+                    height: responsive.responsiveValue(
+                  mobile: 24,
+                  tablet: 32,
+                )),
                 _buildParticipationButton(event),
               ],
             ),
@@ -97,8 +120,8 @@ class EventDetailsView extends BaseView<EventController> {
       event.title,
       style: TextStyle(
         fontSize: responsive.responsiveValue(
-          mobile: 24.sp,
-          tablet: 28.sp,
+          mobile: 24,
+          tablet: 28,
         ),
         fontWeight: FontWeight.bold,
       ),
@@ -110,8 +133,8 @@ class EventDetailsView extends BaseView<EventController> {
       event.description,
       style: TextStyle(
         fontSize: responsive.responsiveValue(
-          mobile: 16.sp,
-          tablet: 18.sp,
+          mobile: 16,
+          tablet: 18,
         ),
       ),
     );
@@ -125,7 +148,11 @@ class EventDetailsView extends BaseView<EventController> {
           _getEventTypeText(event.type),
           _getEventTypeIcon(event.type),
         ),
-        SizedBox(height: 16.h),
+        SizedBox(
+            height: responsive.responsiveValue(
+          mobile: 16,
+          tablet: 24,
+        )),
         _buildInfoSection(
           'Lokasyon',
           event.location == EventLocation.online
@@ -137,26 +164,38 @@ class EventDetailsView extends BaseView<EventController> {
         ),
         if (event.location == EventLocation.online &&
             event.onlineMeetingUrl != null) ...[
-          SizedBox(height: 8.h),
+          SizedBox(
+              height: responsive.responsiveValue(
+            mobile: 8,
+            tablet: 12,
+          )),
           ResponsiveText(
             'Toplantı Linki: ${event.onlineMeetingUrl}',
             style: TextStyle(
               fontSize: responsive.responsiveValue(
-                mobile: 14.sp,
-                tablet: 16.sp,
+                mobile: 14,
+                tablet: 16,
               ),
               color: Colors.blue,
               decoration: TextDecoration.underline,
             ),
           ),
         ],
-        SizedBox(height: 16.h),
+        SizedBox(
+            height: responsive.responsiveValue(
+          mobile: 16,
+          tablet: 24,
+        )),
         _buildInfoSection(
           'Tarih ve Saat',
           '${_formatDate(event.startDate)} - ${_formatDate(event.endDate)}',
           Icons.calendar_today,
         ),
-        SizedBox(height: 16.h),
+        SizedBox(
+            height: responsive.responsiveValue(
+          mobile: 16,
+          tablet: 24,
+        )),
         _buildInfoSection(
           'Katılımcı Sayısı',
           '${event.currentParticipants}/${event.participantLimit}',
@@ -172,11 +211,15 @@ class EventDetailsView extends BaseView<EventController> {
         Icon(
           icon,
           size: responsive.responsiveValue(
-            mobile: 24.sp,
-            tablet: 28.sp,
+            mobile: 24,
+            tablet: 28,
           ),
         ),
-        SizedBox(width: 8.w),
+        SizedBox(
+            width: responsive.responsiveValue(
+          mobile: 8,
+          tablet: 12,
+        )),
         Expanded(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -185,8 +228,8 @@ class EventDetailsView extends BaseView<EventController> {
                 title,
                 style: TextStyle(
                   fontSize: responsive.responsiveValue(
-                    mobile: 14.sp,
-                    tablet: 16.sp,
+                    mobile: 14,
+                    tablet: 16,
                   ),
                   color: Colors.grey,
                 ),
@@ -195,8 +238,8 @@ class EventDetailsView extends BaseView<EventController> {
                 content,
                 style: TextStyle(
                   fontSize: responsive.responsiveValue(
-                    mobile: 16.sp,
-                    tablet: 18.sp,
+                    mobile: 16,
+                    tablet: 18,
                   ),
                   fontWeight: FontWeight.w500,
                 ),
@@ -225,8 +268,8 @@ class EventDetailsView extends BaseView<EventController> {
           'Katıl',
           style: TextStyle(
             fontSize: responsive.responsiveValue(
-              mobile: 16.sp,
-              tablet: 18.sp,
+              mobile: 16,
+              tablet: 18,
             ),
           ),
         ),
