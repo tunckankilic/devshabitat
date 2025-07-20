@@ -1,7 +1,6 @@
 import 'package:devshabitat/app/repositories/auth_repository.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:flutter_screenutil/flutter_screenutil.dart';
 import '../../services/simple_recommendation_service.dart';
 import '../../models/enhanced_user_model.dart';
 import '../../controllers/responsive_controller.dart';
@@ -42,8 +41,7 @@ class RecommendationsScreen extends StatelessWidget {
         title: Text(
           'Tanıyor Olabileceğiniz Kişiler',
           style: TextStyle(
-              fontSize:
-                  responsive.responsiveValue(mobile: 18.sp, tablet: 20.sp)),
+              fontSize: responsive.responsiveValue(mobile: 18, tablet: 20)),
         ),
         centerTitle: true,
       ),
@@ -81,8 +79,7 @@ class RecommendationsScreen extends StatelessWidget {
               Text(
                 'Henüz Öneri Yok',
                 style: Get.textTheme.headlineSmall?.copyWith(
-                  fontSize:
-                      responsive.responsiveValue(mobile: 20.sp, tablet: 24.sp),
+                  fontSize: responsive.responsiveValue(mobile: 20, tablet: 24),
                 ),
                 textAlign: TextAlign.center,
               ),
@@ -95,8 +92,7 @@ class RecommendationsScreen extends StatelessWidget {
                 '• Lokasyon bilginizi güncelleyin\n'
                 '• Şirket bilgilerinizi ekleyin',
                 style: Get.textTheme.bodyLarge?.copyWith(
-                  fontSize:
-                      responsive.responsiveValue(mobile: 16.sp, tablet: 18.sp),
+                  fontSize: responsive.responsiveValue(mobile: 16, tablet: 18),
                 ),
                 textAlign: TextAlign.center,
               ),
@@ -105,13 +101,12 @@ class RecommendationsScreen extends StatelessWidget {
               FilledButton.icon(
                 onPressed: () => Get.toNamed('/profile/edit'),
                 icon: Icon(Icons.edit,
-                    size: responsive.responsiveValue(
-                        mobile: 20.sp, tablet: 24.sp)),
+                    size: responsive.responsiveValue(mobile: 20, tablet: 24)),
                 label: Text(
                   'Profili Düzenle',
                   style: TextStyle(
-                      fontSize: responsive.responsiveValue(
-                          mobile: 16.sp, tablet: 18.sp)),
+                      fontSize:
+                          responsive.responsiveValue(mobile: 16, tablet: 18)),
                 ),
               ),
             ],
@@ -135,8 +130,8 @@ class RecommendationsScreen extends StatelessWidget {
                 Text(
                   'Önerilen Bağlantılar',
                   style: Get.textTheme.titleLarge?.copyWith(
-                    fontSize: responsive.responsiveValue(
-                        mobile: 20.sp, tablet: 24.sp),
+                    fontSize:
+                        responsive.responsiveValue(mobile: 20, tablet: 24),
                   ),
                 ),
                 SizedBox(
@@ -144,8 +139,8 @@ class RecommendationsScreen extends StatelessWidget {
                 Text(
                   'Yetenekler, deneyimler ve ortak noktalar baz alınarak önerilir',
                   style: Get.textTheme.bodyMedium?.copyWith(
-                    fontSize: responsive.responsiveValue(
-                        mobile: 14.sp, tablet: 16.sp),
+                    fontSize:
+                        responsive.responsiveValue(mobile: 14, tablet: 16),
                   ),
                 ),
               ],
@@ -208,8 +203,7 @@ class RecommendationsScreen extends StatelessWidget {
               Text(
                 user.displayName ?? 'İsimsiz Kullanıcı',
                 style: Get.textTheme.titleMedium?.copyWith(
-                  fontSize:
-                      responsive.responsiveValue(mobile: 16.sp, tablet: 18.sp),
+                  fontSize: responsive.responsiveValue(mobile: 16, tablet: 18),
                 ),
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
@@ -220,8 +214,8 @@ class RecommendationsScreen extends StatelessWidget {
                 Text(
                   user.experience!.first['role'] ?? '',
                   style: Get.textTheme.bodyMedium?.copyWith(
-                    fontSize: responsive.responsiveValue(
-                        mobile: 14.sp, tablet: 16.sp),
+                    fontSize:
+                        responsive.responsiveValue(mobile: 14, tablet: 16),
                   ),
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
@@ -229,8 +223,8 @@ class RecommendationsScreen extends StatelessWidget {
                 Text(
                   user.experience!.first['company'] ?? '',
                   style: Get.textTheme.bodySmall?.copyWith(
-                    fontSize: responsive.responsiveValue(
-                        mobile: 12.sp, tablet: 14.sp),
+                    fontSize:
+                        responsive.responsiveValue(mobile: 12, tablet: 14),
                   ),
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
@@ -240,13 +234,12 @@ class RecommendationsScreen extends StatelessWidget {
               FilledButton.icon(
                 onPressed: () => _sendConnectionRequest(user),
                 icon: Icon(Icons.person_add,
-                    size: responsive.responsiveValue(
-                        mobile: 18.sp, tablet: 20.sp)),
+                    size: responsive.responsiveValue(mobile: 18, tablet: 20)),
                 label: Text(
                   'Bağlan',
                   style: TextStyle(
-                      fontSize: responsive.responsiveValue(
-                          mobile: 14.sp, tablet: 16.sp)),
+                      fontSize:
+                          responsive.responsiveValue(mobile: 14, tablet: 16)),
                 ),
                 style: FilledButton.styleFrom(
                   minimumSize: Size(double.infinity,

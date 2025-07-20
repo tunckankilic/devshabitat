@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../../controllers/networking_controller.dart';
-import 'package:flutter_screenutil/flutter_screenutil.dart';
+import '../../controllers/responsive_controller.dart';
 
 class ProfessionalToolsScreen extends StatelessWidget {
   final NetworkingController controller = Get.find<NetworkingController>();
@@ -10,12 +10,16 @@ class ProfessionalToolsScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final responsive = Get.find<ResponsiveController>();
+
     return Scaffold(
       appBar: AppBar(
-        title: Text('Profesyonel Araçlar', style: TextStyle(fontSize: 18.sp)),
+        title: Text('Profesyonel Araçlar',
+            style: TextStyle(
+                fontSize: responsive.responsiveValue(mobile: 18, tablet: 20))),
       ),
       body: ListView(
-        padding: EdgeInsets.all(16.r),
+        padding: responsive.responsivePadding(all: 16),
         children: [
           _buildSection(
             'Profil Araçları',
@@ -24,25 +28,31 @@ class ProfessionalToolsScreen extends StatelessWidget {
                 'Profil Analizi',
                 'Profilinizin performansını analiz edin',
                 Icons.analytics,
-                () => _showAnalyticsDetails(),
+                () => _showAnalyticsDetails(responsive),
+                responsive,
               ),
-              SizedBox(height: 8.h),
+              SizedBox(
+                  height: responsive.responsiveValue(mobile: 8, tablet: 12)),
               _buildToolCard(
                 'SEO Optimizasyonu',
                 'Profilinizi arama sonuçlarında öne çıkarın',
                 Icons.search,
-                () => _showSkillGapAnalysis(),
+                () => _showSkillGapAnalysis(responsive),
+                responsive,
               ),
-              SizedBox(height: 8.h),
+              SizedBox(
+                  height: responsive.responsiveValue(mobile: 8, tablet: 12)),
               _buildToolCard(
                 'Veri Dışa Aktarma',
                 'Profil verilerinizi farklı formatlarda dışa aktarın',
                 Icons.download,
-                () => _showExportOptions(),
+                () => _showExportOptions(responsive),
+                responsive,
               ),
             ],
+            responsive,
           ),
-          SizedBox(height: 16.h),
+          SizedBox(height: responsive.responsiveValue(mobile: 16, tablet: 20)),
           _buildSection(
             'Bağlantı Araçları',
             [
@@ -51,17 +61,21 @@ class ProfessionalToolsScreen extends StatelessWidget {
                 'Bağlantılarınızı organize edin',
                 Icons.people,
                 () {},
+                responsive,
               ),
-              SizedBox(height: 8.h),
+              SizedBox(
+                  height: responsive.responsiveValue(mobile: 8, tablet: 12)),
               _buildToolCard(
                 'İçerik Paylaşımı',
                 'Bağlantılarınızla içerik paylaşın',
                 Icons.share,
                 () {},
+                responsive,
               ),
             ],
+            responsive,
           ),
-          SizedBox(height: 16.h),
+          SizedBox(height: responsive.responsiveValue(mobile: 16, tablet: 20)),
           _buildSection(
             'İstatistikler',
             [
@@ -70,33 +84,38 @@ class ProfessionalToolsScreen extends StatelessWidget {
                 '1.2K',
                 '+15%',
                 Icons.visibility,
+                responsive,
               ),
-              SizedBox(height: 8.h),
+              SizedBox(
+                  height: responsive.responsiveValue(mobile: 8, tablet: 12)),
               _buildStatCard(
                 'Etkileşim Oranı',
                 '%78',
                 '+5%',
                 Icons.trending_up,
+                responsive,
               ),
             ],
+            responsive,
           ),
         ],
       ),
     );
   }
 
-  Widget _buildSection(String title, List<Widget> children) {
+  Widget _buildSection(
+      String title, List<Widget> children, ResponsiveController responsive) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
           title,
           style: TextStyle(
-            fontSize: 20.sp,
+            fontSize: responsive.responsiveValue(mobile: 20, tablet: 24),
             fontWeight: FontWeight.bold,
           ),
         ),
-        SizedBox(height: 16.h),
+        SizedBox(height: responsive.responsiveValue(mobile: 16, tablet: 20)),
         ...children,
       ],
     );
@@ -107,16 +126,19 @@ class ProfessionalToolsScreen extends StatelessWidget {
     String description,
     IconData icon,
     VoidCallback onTap,
+    ResponsiveController responsive,
   ) {
     return Card(
       child: InkWell(
         onTap: onTap,
         child: Padding(
-          padding: EdgeInsets.all(16.r),
+          padding: responsive.responsivePadding(all: 16),
           child: Row(
             children: [
-              Icon(icon, size: 32.sp),
-              SizedBox(width: 16.w),
+              Icon(icon,
+                  size: responsive.responsiveValue(mobile: 32, tablet: 40)),
+              SizedBox(
+                  width: responsive.responsiveValue(mobile: 16, tablet: 20)),
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -124,22 +146,27 @@ class ProfessionalToolsScreen extends StatelessWidget {
                     Text(
                       title,
                       style: TextStyle(
-                        fontSize: 18.sp,
+                        fontSize:
+                            responsive.responsiveValue(mobile: 18, tablet: 20),
                         fontWeight: FontWeight.bold,
                       ),
                     ),
-                    SizedBox(height: 4.h),
+                    SizedBox(
+                        height:
+                            responsive.responsiveValue(mobile: 4, tablet: 6)),
                     Text(
                       description,
                       style: TextStyle(
-                        fontSize: 14.sp,
+                        fontSize:
+                            responsive.responsiveValue(mobile: 14, tablet: 16),
                         color: Colors.grey[600],
                       ),
                     ),
                   ],
                 ),
               ),
-              Icon(Icons.chevron_right, size: 24.sp),
+              Icon(Icons.chevron_right,
+                  size: responsive.responsiveValue(mobile: 24, tablet: 28)),
             ],
           ),
         ),
@@ -152,15 +179,17 @@ class ProfessionalToolsScreen extends StatelessWidget {
     String value,
     String trend,
     IconData icon,
+    ResponsiveController responsive,
   ) {
     final isPositive = trend.startsWith('+');
     return Card(
       child: Padding(
-        padding: EdgeInsets.all(16.r),
+        padding: responsive.responsivePadding(all: 16),
         child: Row(
           children: [
-            Icon(icon, size: 32.sp),
-            SizedBox(width: 16.w),
+            Icon(icon,
+                size: responsive.responsiveValue(mobile: 32, tablet: 40)),
+            SizedBox(width: responsive.responsiveValue(mobile: 16, tablet: 20)),
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -168,30 +197,37 @@ class ProfessionalToolsScreen extends StatelessWidget {
                   Text(
                     title,
                     style: TextStyle(
-                      fontSize: 16.sp,
+                      fontSize:
+                          responsive.responsiveValue(mobile: 16, tablet: 18),
                       color: Colors.grey[600],
                     ),
                   ),
-                  SizedBox(height: 4.h),
+                  SizedBox(
+                      height: responsive.responsiveValue(mobile: 4, tablet: 6)),
                   Row(
                     children: [
                       Text(
                         value,
                         style: TextStyle(
-                          fontSize: 24.sp,
+                          fontSize: responsive.responsiveValue(
+                              mobile: 24, tablet: 28),
                           fontWeight: FontWeight.bold,
                         ),
                       ),
-                      SizedBox(width: 8.w),
+                      SizedBox(
+                          width: responsive.responsiveValue(
+                              mobile: 8, tablet: 12)),
                       Icon(
                         isPositive ? Icons.arrow_upward : Icons.arrow_downward,
-                        size: 16.sp,
+                        size:
+                            responsive.responsiveValue(mobile: 16, tablet: 20),
                         color: isPositive ? Colors.green : Colors.red,
                       ),
                       Text(
                         trend,
                         style: TextStyle(
-                          fontSize: 14.sp,
+                          fontSize: responsive.responsiveValue(
+                              mobile: 14, tablet: 16),
                           color: isPositive ? Colors.green : Colors.red,
                         ),
                       ),
@@ -206,14 +242,15 @@ class ProfessionalToolsScreen extends StatelessWidget {
     );
   }
 
-  void _showExportOptions() {
+  void _showExportOptions(ResponsiveController responsive) {
     Get.bottomSheet(
       Container(
-        padding: EdgeInsets.all(16.r),
+        padding: responsive.responsivePadding(all: 16),
         decoration: BoxDecoration(
           color: Theme.of(Get.context!).scaffoldBackgroundColor,
           borderRadius: BorderRadius.vertical(
-            top: Radius.circular(16.r),
+            top: Radius.circular(
+                responsive.responsiveValue(mobile: 16, tablet: 20)),
           ),
         ),
         child: Column(
@@ -222,42 +259,52 @@ class ProfessionalToolsScreen extends StatelessWidget {
             Text(
               'Veri Dışa Aktarma',
               style: TextStyle(
-                fontSize: 18.sp,
+                fontSize: responsive.responsiveValue(mobile: 18, tablet: 20),
                 fontWeight: FontWeight.bold,
               ),
             ),
-            SizedBox(height: 16.h),
+            SizedBox(
+                height: responsive.responsiveValue(mobile: 16, tablet: 20)),
             ListTile(
-              leading: Icon(Icons.picture_as_pdf, size: 24.sp),
+              leading: Icon(Icons.picture_as_pdf,
+                  size: responsive.responsiveValue(mobile: 24, tablet: 28)),
               title: Text(
                 'PDF Olarak Dışa Aktar',
-                style: TextStyle(fontSize: 16.sp),
+                style: TextStyle(
+                    fontSize:
+                        responsive.responsiveValue(mobile: 16, tablet: 18)),
               ),
               onTap: () {
                 Get.back();
-                _exportData('pdf');
+                _exportData('pdf', responsive);
               },
             ),
             ListTile(
-              leading: Icon(Icons.table_chart, size: 24.sp),
+              leading: Icon(Icons.table_chart,
+                  size: responsive.responsiveValue(mobile: 24, tablet: 28)),
               title: Text(
                 'CSV Olarak Dışa Aktar',
-                style: TextStyle(fontSize: 16.sp),
+                style: TextStyle(
+                    fontSize:
+                        responsive.responsiveValue(mobile: 16, tablet: 18)),
               ),
               onTap: () {
                 Get.back();
-                _exportData('csv');
+                _exportData('csv', responsive);
               },
             ),
             ListTile(
-              leading: Icon(Icons.code, size: 24.sp),
+              leading: Icon(Icons.code,
+                  size: responsive.responsiveValue(mobile: 24, tablet: 28)),
               title: Text(
                 'JSON Olarak Dışa Aktar',
-                style: TextStyle(fontSize: 16.sp),
+                style: TextStyle(
+                    fontSize:
+                        responsive.responsiveValue(mobile: 16, tablet: 18)),
               ),
               onTap: () {
                 Get.back();
-                _exportData('json');
+                _exportData('json', responsive);
               },
             ),
           ],
@@ -266,25 +313,26 @@ class ProfessionalToolsScreen extends StatelessWidget {
     );
   }
 
-  void _exportData(String format) {
+  void _exportData(String format, ResponsiveController responsive) {
     Get.snackbar(
       'Dışa Aktarma',
       'Veriler $format formatında dışa aktarılıyor...',
       snackPosition: SnackPosition.BOTTOM,
-      margin: EdgeInsets.all(16.r),
-      borderRadius: 8.r,
+      margin: responsive.responsivePadding(all: 16),
+      borderRadius: responsive.responsiveValue(mobile: 8, tablet: 12),
       duration: const Duration(seconds: 2),
     );
   }
 
-  void _showAnalyticsDetails() {
+  void _showAnalyticsDetails(ResponsiveController responsive) {
     Get.bottomSheet(
       Container(
-        padding: EdgeInsets.all(16.r),
+        padding: responsive.responsivePadding(all: 16),
         decoration: BoxDecoration(
           color: Theme.of(Get.context!).scaffoldBackgroundColor,
           borderRadius: BorderRadius.vertical(
-            top: Radius.circular(16.r),
+            top: Radius.circular(
+                responsive.responsiveValue(mobile: 16, tablet: 20)),
           ),
         ),
         child: Column(
@@ -293,30 +341,34 @@ class ProfessionalToolsScreen extends StatelessWidget {
             Text(
               'Detaylı Analiz',
               style: TextStyle(
-                fontSize: 18.sp,
+                fontSize: responsive.responsiveValue(mobile: 18, tablet: 20),
                 fontWeight: FontWeight.bold,
               ),
             ),
-            SizedBox(height: 16.h),
+            SizedBox(
+                height: responsive.responsiveValue(mobile: 16, tablet: 20)),
             _buildAnalyticItem(
               'Profil Görüntülenme',
               '1.2K',
               '+15%',
               Icons.visibility,
+              responsive,
             ),
-            SizedBox(height: 8.h),
+            SizedBox(height: responsive.responsiveValue(mobile: 8, tablet: 12)),
             _buildAnalyticItem(
               'Etkileşim Oranı',
               '%78',
               '+5%',
               Icons.trending_up,
+              responsive,
             ),
-            SizedBox(height: 8.h),
+            SizedBox(height: responsive.responsiveValue(mobile: 8, tablet: 12)),
             _buildAnalyticItem(
               'Bağlantı Artışı',
               '45',
               '+8%',
               Icons.people,
+              responsive,
             ),
           ],
         ),
@@ -329,13 +381,16 @@ class ProfessionalToolsScreen extends StatelessWidget {
     String value,
     String trend,
     IconData icon,
+    ResponsiveController responsive,
   ) {
     final isPositive = trend.startsWith('+');
     return ListTile(
-      leading: Icon(icon, size: 24.sp),
+      leading:
+          Icon(icon, size: responsive.responsiveValue(mobile: 24, tablet: 28)),
       title: Text(
         title,
-        style: TextStyle(fontSize: 16.sp),
+        style: TextStyle(
+            fontSize: responsive.responsiveValue(mobile: 16, tablet: 18)),
       ),
       trailing: Row(
         mainAxisSize: MainAxisSize.min,
@@ -343,20 +398,20 @@ class ProfessionalToolsScreen extends StatelessWidget {
           Text(
             value,
             style: TextStyle(
-              fontSize: 16.sp,
+              fontSize: responsive.responsiveValue(mobile: 16, tablet: 18),
               fontWeight: FontWeight.bold,
             ),
           ),
-          SizedBox(width: 8.w),
+          SizedBox(width: responsive.responsiveValue(mobile: 8, tablet: 12)),
           Icon(
             isPositive ? Icons.arrow_upward : Icons.arrow_downward,
-            size: 16.sp,
+            size: responsive.responsiveValue(mobile: 16, tablet: 20),
             color: isPositive ? Colors.green : Colors.red,
           ),
           Text(
             trend,
             style: TextStyle(
-              fontSize: 14.sp,
+              fontSize: responsive.responsiveValue(mobile: 14, tablet: 16),
               color: isPositive ? Colors.green : Colors.red,
             ),
           ),
@@ -365,14 +420,15 @@ class ProfessionalToolsScreen extends StatelessWidget {
     );
   }
 
-  void _showSkillGapAnalysis() {
+  void _showSkillGapAnalysis(ResponsiveController responsive) {
     Get.bottomSheet(
       Container(
-        padding: EdgeInsets.all(16.r),
+        padding: responsive.responsivePadding(all: 16),
         decoration: BoxDecoration(
           color: Theme.of(Get.context!).scaffoldBackgroundColor,
           borderRadius: BorderRadius.vertical(
-            top: Radius.circular(16.r),
+            top: Radius.circular(
+                responsive.responsiveValue(mobile: 16, tablet: 20)),
           ),
         ),
         child: Column(
@@ -381,25 +437,27 @@ class ProfessionalToolsScreen extends StatelessWidget {
             Text(
               'Yetenek Analizi',
               style: TextStyle(
-                fontSize: 18.sp,
+                fontSize: responsive.responsiveValue(mobile: 18, tablet: 20),
                 fontWeight: FontWeight.bold,
               ),
             ),
-            SizedBox(height: 16.h),
-            _buildSkillBar('Flutter', 85, Colors.blue),
-            SizedBox(height: 8.h),
-            _buildSkillBar('Dart', 80, Colors.green),
-            SizedBox(height: 8.h),
-            _buildSkillBar('Firebase', 75, Colors.orange),
-            SizedBox(height: 8.h),
-            _buildSkillBar('UI/UX', 70, Colors.purple),
+            SizedBox(
+                height: responsive.responsiveValue(mobile: 16, tablet: 20)),
+            _buildSkillBar('Flutter', 85, Colors.blue, responsive),
+            SizedBox(height: responsive.responsiveValue(mobile: 8, tablet: 12)),
+            _buildSkillBar('Dart', 80, Colors.green, responsive),
+            SizedBox(height: responsive.responsiveValue(mobile: 8, tablet: 12)),
+            _buildSkillBar('Firebase', 75, Colors.orange, responsive),
+            SizedBox(height: responsive.responsiveValue(mobile: 8, tablet: 12)),
+            _buildSkillBar('UI/UX', 70, Colors.purple, responsive),
           ],
         ),
       ),
     );
   }
 
-  Widget _buildSkillBar(String skill, double percentage, Color color) {
+  Widget _buildSkillBar(String skill, double percentage, Color color,
+      ResponsiveController responsive) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -408,21 +466,24 @@ class ProfessionalToolsScreen extends StatelessWidget {
           children: [
             Text(
               skill,
-              style: TextStyle(fontSize: 14.sp),
+              style: TextStyle(
+                  fontSize: responsive.responsiveValue(mobile: 14, tablet: 16)),
             ),
             Text(
               '${percentage.toInt()}%',
-              style: TextStyle(fontSize: 14.sp),
+              style: TextStyle(
+                  fontSize: responsive.responsiveValue(mobile: 14, tablet: 16)),
             ),
           ],
         ),
-        SizedBox(height: 4.h),
+        SizedBox(height: responsive.responsiveValue(mobile: 4, tablet: 6)),
         LinearProgressIndicator(
           value: percentage / 100,
           backgroundColor: color.withOpacity(0.2),
           valueColor: AlwaysStoppedAnimation<Color>(color),
-          minHeight: 8.h,
-          borderRadius: BorderRadius.circular(4.r),
+          minHeight: responsive.responsiveValue(mobile: 8, tablet: 10),
+          borderRadius: BorderRadius.circular(
+              responsive.responsiveValue(mobile: 4, tablet: 6)),
         ),
       ],
     );
