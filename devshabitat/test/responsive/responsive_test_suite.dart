@@ -1,3 +1,4 @@
+import 'package:devshabitat/app/services/responsive_performance_service.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:get/get.dart';
@@ -266,7 +267,7 @@ class ResponsiveTestSuite {
           home: Builder(
             builder: (context) {
               Get.put(ResponsiveController());
-              final optimizer = PerformanceOptimizerMixin();
+              final optimizer = ResponsivePerformanceService();
               return Container();
             },
           ),
@@ -295,7 +296,7 @@ class ResponsiveTestSuite {
           home: Builder(
             builder: (context) {
               Get.put(ResponsiveController());
-              final optimizer = PerformanceOptimizerMixin();
+              final optimizer = ResponsivePerformanceService();
               return Container();
             },
           ),
@@ -320,7 +321,7 @@ class ResponsiveTestSuite {
           home: Builder(
             builder: (context) {
               Get.put(ResponsiveController());
-              Get.put(NavigationController());
+              Get.put(NavigationController(Get.find<NavigationService>()));
               return MainWrapper();
             },
           ),

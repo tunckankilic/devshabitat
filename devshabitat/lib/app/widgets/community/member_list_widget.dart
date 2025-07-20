@@ -1,7 +1,6 @@
 import 'package:devshabitat/app/models/user_profile_model.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:flutter_screenutil/flutter_screenutil.dart';
 import '../../controllers/responsive_controller.dart';
 import '../../services/responsive_performance_service.dart';
 
@@ -35,8 +34,8 @@ class MemberListWidget extends StatelessWidget {
         return ListTile(
           leading: CircleAvatar(
             radius: responsive.responsiveValue(
-              mobile: 20.r,
-              tablet: 24.r,
+              mobile: 20.0,
+              tablet: 24.0,
             ),
             backgroundImage:
                 member.photoUrl != null ? NetworkImage(member.photoUrl!) : null,
@@ -46,8 +45,8 @@ class MemberListWidget extends StatelessWidget {
                     style: TextStyle(
                       fontSize: performanceService.getOptimizedTextSize(
                         cacheKey: 'member_list_avatar_text',
-                        mobileSize: 16.sp,
-                        tabletSize: 18.sp,
+                        mobileSize: 16.0,
+                        tabletSize: 18.0,
                       ),
                     ),
                   )
@@ -58,8 +57,8 @@ class MemberListWidget extends StatelessWidget {
             style: TextStyle(
               fontSize: performanceService.getOptimizedTextSize(
                 cacheKey: 'member_list_title',
-                mobileSize: 16.sp,
-                tabletSize: 18.sp,
+                mobileSize: 16.0,
+                tabletSize: 18.0,
               ),
             ),
           ),
@@ -69,8 +68,8 @@ class MemberListWidget extends StatelessWidget {
                   style: TextStyle(
                     fontSize: performanceService.getOptimizedTextSize(
                       cacheKey: 'member_list_subtitle',
-                      mobileSize: 14.sp,
-                      tabletSize: 16.sp,
+                      mobileSize: 14.0,
+                      tabletSize: 16.0,
                     ),
                   ),
                 )
@@ -80,7 +79,7 @@ class MemberListWidget extends StatelessWidget {
               ? PopupMenuButton<String>(
                   icon: Icon(
                     Icons.more_vert,
-                    size: responsive.minTouchTarget.sp,
+                    size: responsive.minTouchTargetSize,
                   ),
                   onSelected: (value) {
                     switch (value) {
@@ -102,22 +101,22 @@ class MemberListWidget extends StatelessWidget {
                           Icon(
                             Icons.admin_panel_settings,
                             size: responsive.responsiveValue(
-                              mobile: 20.sp,
-                              tablet: 24.sp,
+                              mobile: 20.0,
+                              tablet: 24.0,
                             ),
                           ),
                           SizedBox(
                               width: responsive.responsiveValue(
-                            mobile: 8.w,
-                            tablet: 12.w,
+                            mobile: 8.0,
+                            tablet: 12.0,
                           )),
                           Text(
                             'Moderatör Yap',
                             style: TextStyle(
                               fontSize: performanceService.getOptimizedTextSize(
                                 cacheKey: 'member_list_promote_text',
-                                mobileSize: 14.sp,
-                                tabletSize: 16.sp,
+                                mobileSize: 14.0,
+                                tabletSize: 16.0,
                               ),
                             ),
                           ),
@@ -131,22 +130,22 @@ class MemberListWidget extends StatelessWidget {
                           Icon(
                             Icons.person_remove,
                             size: responsive.responsiveValue(
-                              mobile: 20.sp,
-                              tablet: 24.sp,
+                              mobile: 20.0,
+                              tablet: 24.0,
                             ),
                           ),
                           SizedBox(
                               width: responsive.responsiveValue(
-                            mobile: 8.w,
-                            tablet: 12.w,
+                            mobile: 8.0,
+                            tablet: 12.0,
                           )),
                           Text(
                             'Üyelikten Çıkar',
                             style: TextStyle(
                               fontSize: performanceService.getOptimizedTextSize(
                                 cacheKey: 'member_list_remove_text',
-                                mobileSize: 14.sp,
-                                tabletSize: 16.sp,
+                                mobileSize: 14.0,
+                                tabletSize: 16.0,
                               ),
                             ),
                           ),

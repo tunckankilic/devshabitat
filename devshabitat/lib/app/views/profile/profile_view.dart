@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:cached_network_image/cached_network_image.dart';
-import 'package:flutter_screenutil/flutter_screenutil.dart';
 import '../../controllers/profile_controller.dart';
 import '../../controllers/responsive_controller.dart';
 import '../base/base_view.dart';

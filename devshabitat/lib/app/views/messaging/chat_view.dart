@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:flutter_screenutil/flutter_screenutil.dart';
 import '../../controllers/message/message_chat_controller.dart';
 import '../../controllers/message/message_interaction_controller.dart';
 import '../../models/message_model.dart';
@@ -24,11 +23,15 @@ class ChatView extends BaseView<MessageChatController>
           title: Obx(() {
             final conversation = controller.currentConversation.value;
             if (conversation == null) {
-              return Text('Yükleniyor...', style: TextStyle(fontSize: 18.sp));
+              return Text('Yükleniyor...',
+                  style: TextStyle(
+                      fontSize:
+                          responsive.responsiveValue(mobile: 18, tablet: 20)));
             }
             return Text(
               conversation.participantName,
-              style: TextStyle(fontSize: 18.sp),
+              style: TextStyle(
+                  fontSize: responsive.responsiveValue(mobile: 18, tablet: 20)),
             );
           }),
           actions: [

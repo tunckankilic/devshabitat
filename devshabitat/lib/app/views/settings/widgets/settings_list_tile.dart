@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:flutter_screenutil/flutter_screenutil.dart';
 import '../../../controllers/responsive_controller.dart';
 
 class SettingsListTile extends StatelessWidget {
@@ -31,8 +30,8 @@ class SettingsListTile extends StatelessWidget {
       leading: Icon(
         icon,
         size: responsive.responsiveValue(
-          mobile: 24.sp,
-          tablet: 32.sp,
+          mobile: 24,
+          tablet: 32,
         ),
         color: Theme.of(context).primaryColor,
       ),
@@ -40,8 +39,8 @@ class SettingsListTile extends StatelessWidget {
         title,
         style: TextStyle(
           fontSize: responsive.responsiveValue(
-            mobile: 16.sp,
-            tablet: 18.sp,
+            mobile: 16,
+            tablet: 18,
           ),
           fontWeight: FontWeight.w500,
         ),
@@ -51,8 +50,8 @@ class SettingsListTile extends StatelessWidget {
               subtitle!,
               style: TextStyle(
                 fontSize: responsive.responsiveValue(
-                  mobile: 12.sp,
-                  tablet: 14.sp,
+                  mobile: 12,
+                  tablet: 14,
                 ),
               ),
             )

@@ -1,7 +1,6 @@
 import 'package:devshabitat/app/models/user_profile_model.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:flutter_screenutil/flutter_screenutil.dart';
 import '../../controllers/responsive_controller.dart';
 import '../../services/responsive_performance_service.dart';
 
@@ -32,8 +31,8 @@ class MembershipRequestWidget extends StatelessWidget {
               style: TextStyle(
                 fontSize: performanceService.getOptimizedTextSize(
                   cacheKey: 'membership_request_empty',
-                  mobileSize: 14.sp,
-                  tabletSize: 16.sp,
+                  mobileSize: 14.0,
+                  tabletSize: 16.0,
                 ),
               ),
             ),
@@ -53,8 +52,8 @@ class MembershipRequestWidget extends StatelessWidget {
               style: Theme.of(context).textTheme.titleLarge?.copyWith(
                     fontSize: performanceService.getOptimizedTextSize(
                       cacheKey: 'membership_request_title',
-                      mobileSize: 20.sp,
-                      tabletSize: 24.sp,
+                      mobileSize: 20.0,
+                      tabletSize: 24.0,
                     ),
                   ),
             ),
@@ -68,8 +67,8 @@ class MembershipRequestWidget extends StatelessWidget {
               return ListTile(
                 leading: CircleAvatar(
                   radius: responsive.responsiveValue(
-                    mobile: 20.r,
-                    tablet: 24.r,
+                    mobile: 20.0,
+                    tablet: 24.0,
                   ),
                   backgroundImage: member.photoUrl != null
                       ? NetworkImage(member.photoUrl!)
@@ -80,8 +79,8 @@ class MembershipRequestWidget extends StatelessWidget {
                           style: TextStyle(
                             fontSize: performanceService.getOptimizedTextSize(
                               cacheKey: 'membership_request_avatar_text',
-                              mobileSize: 16.sp,
-                              tabletSize: 18.sp,
+                              mobileSize: 16.0,
+                              tabletSize: 18.0,
                             ),
                           ),
                         )
@@ -92,8 +91,8 @@ class MembershipRequestWidget extends StatelessWidget {
                   style: TextStyle(
                     fontSize: performanceService.getOptimizedTextSize(
                       cacheKey: 'membership_request_name',
-                      mobileSize: 16.sp,
-                      tabletSize: 18.sp,
+                      mobileSize: 16.0,
+                      tabletSize: 18.0,
                     ),
                   ),
                 ),
@@ -102,8 +101,8 @@ class MembershipRequestWidget extends StatelessWidget {
                   style: TextStyle(
                     fontSize: performanceService.getOptimizedTextSize(
                       cacheKey: 'membership_request_title_text',
-                      mobileSize: 14.sp,
-                      tabletSize: 16.sp,
+                      mobileSize: 14.0,
+                      tabletSize: 16.0,
                     ),
                   ),
                 ),
@@ -113,7 +112,7 @@ class MembershipRequestWidget extends StatelessWidget {
                     IconButton(
                       icon: Icon(
                         Icons.check_circle,
-                        size: responsive.minTouchTarget.sp,
+                        size: responsive.minTouchTargetSize,
                       ),
                       color: Colors.green,
                       onPressed: () => onAccept(member),
@@ -122,7 +121,7 @@ class MembershipRequestWidget extends StatelessWidget {
                     IconButton(
                       icon: Icon(
                         Icons.cancel,
-                        size: responsive.minTouchTarget.sp,
+                        size: responsive.minTouchTargetSize,
                       ),
                       color: Colors.red,
                       onPressed: () => onReject(member),

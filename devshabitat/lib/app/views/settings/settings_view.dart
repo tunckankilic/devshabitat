@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:flutter_screenutil/flutter_screenutil.dart';
 import '../../controllers/settings_controller.dart';
 import '../../routes/app_pages.dart';
 import 'widgets/settings_list_tile.dart';
@@ -24,8 +23,8 @@ class SettingsView extends BaseView<SettingsController> {
           'Ayarlar',
           style: TextStyle(
             fontSize: responsive.responsiveValue(
-              mobile: 20.sp,
-              tablet: 24.sp,
+              mobile: 20,
+              tablet: 24,
             ),
           ),
         ),
@@ -56,42 +55,33 @@ class SettingsView extends BaseView<SettingsController> {
   }
 
   Widget _buildTabletSettings(BuildContext context) {
-    return Center(
-      child: Container(
-        constraints: BoxConstraints(
-            maxWidth: responsive.responsiveValue(mobile: 600.w, tablet: 800.w)),
-        padding: responsive.responsivePadding(all: 24),
-        child: ListView(
-          children: [
-            SizedBox(
-                height: responsive.responsiveValue(mobile: 16.h, tablet: 20.h)),
-            Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Expanded(
-                  child: Column(
-                    children: [
-                      _buildAppearanceSection(),
-                      _buildNotificationsSection(),
-                    ],
-                  ),
-                ),
-                SizedBox(
-                    width:
-                        responsive.responsiveValue(mobile: 24.w, tablet: 32.w)),
-                Expanded(
-                  child: Column(
-                    children: [
-                      _buildLanguageSection(),
-                      _buildAccountSection(),
-                    ],
-                  ),
-                ),
-              ],
-            ),
-          ],
+    return Row(
+      children: [
+        Expanded(
+          flex: 2,
+          child: ListView(
+            padding: responsive.responsivePadding(all: 24),
+            children: [
+              _buildAppearanceSection(),
+              SizedBox(
+                  height: responsive.responsiveValue(mobile: 16, tablet: 20)),
+              _buildNotificationsSection(),
+            ],
+          ),
         ),
-      ),
+        Expanded(
+          flex: 2,
+          child: ListView(
+            padding: responsive.responsivePadding(all: 24),
+            children: [
+              _buildLanguageSection(),
+              SizedBox(
+                  height: responsive.responsiveValue(mobile: 16, tablet: 20)),
+              _buildAccountSection(),
+            ],
+          ),
+        ),
+      ],
     );
   }
 
@@ -194,8 +184,8 @@ class SettingsView extends BaseView<SettingsController> {
             style: TextStyle(
               fontSize: performanceService.getOptimizedTextSize(
                 cacheKey: 'section_title_$title',
-                mobileSize: 14.sp,
-                tabletSize: 16.sp,
+                mobileSize: 14,
+                tabletSize: 16,
               ),
               fontWeight: FontWeight.bold,
               color: Colors.grey,
@@ -203,9 +193,8 @@ class SettingsView extends BaseView<SettingsController> {
           ),
         ),
         ...children,
-        Divider(height: responsive.responsiveValue(mobile: 1.h, tablet: 2.h)),
-        SizedBox(
-            height: responsive.responsiveValue(mobile: 16.h, tablet: 24.h)),
+        Divider(height: responsive.responsiveValue(mobile: 1, tablet: 2)),
+        SizedBox(height: responsive.responsiveValue(mobile: 16, tablet: 24)),
       ],
     );
   }
@@ -218,8 +207,8 @@ class SettingsView extends BaseView<SettingsController> {
           'Dil Seçin',
           style: TextStyle(
             fontSize: responsive.responsiveValue(
-              mobile: 18.sp,
-              tablet: 20.sp,
+              mobile: 18,
+              tablet: 20,
             ),
           ),
         ),
@@ -232,8 +221,8 @@ class SettingsView extends BaseView<SettingsController> {
                     language,
                     style: TextStyle(
                       fontSize: responsive.responsiveValue(
-                        mobile: 16.sp,
-                        tablet: 18.sp,
+                        mobile: 16,
+                        tablet: 18,
                       ),
                     ),
                   ),

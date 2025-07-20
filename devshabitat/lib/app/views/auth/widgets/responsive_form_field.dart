@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import '../../../controllers/responsive_controller.dart';
 import '../../../services/responsive_performance_service.dart';
@@ -55,8 +54,8 @@ class ResponsiveFormField extends StatelessWidget {
               style: TextStyle(
                 fontSize: performanceService.getOptimizedTextSize(
                   cacheKey: 'form_field_label_$label',
-                  mobileSize: 14.sp,
-                  tabletSize: 16.sp,
+                  mobileSize: 14,
+                  tabletSize: 16,
                 ),
                 fontWeight: FontWeight.w500,
                 color: Colors.black87,
@@ -64,8 +63,8 @@ class ResponsiveFormField extends StatelessWidget {
             ),
             SizedBox(
               height: responsive.responsiveValue(
-                mobile: 8.h,
-                tablet: 12.h,
+                mobile: 8,
+                tablet: 12,
               ),
             ),
             Flexible(
@@ -85,8 +84,8 @@ class ResponsiveFormField extends StatelessWidget {
                 style: TextStyle(
                   fontSize: performanceService.getOptimizedTextSize(
                     cacheKey: 'form_field_text_$label',
-                    mobileSize: 16.sp,
-                    tabletSize: 18.sp,
+                    mobileSize: 16,
+                    tabletSize: 18,
                   ),
                 ),
                 decoration: InputDecoration(
@@ -94,8 +93,8 @@ class ResponsiveFormField extends StatelessWidget {
                   hintStyle: TextStyle(
                     fontSize: performanceService.getOptimizedTextSize(
                       cacheKey: 'form_field_hint_$label',
-                      mobileSize: 16.sp,
-                      tabletSize: 18.sp,
+                      mobileSize: 16,
+                      tabletSize: 18,
                     ),
                   ),
                   filled: true,
@@ -103,8 +102,8 @@ class ResponsiveFormField extends StatelessWidget {
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(
                       responsive.responsiveValue(
-                        mobile: 8.r,
-                        tablet: 12.r,
+                        mobile: 8,
+                        tablet: 12,
                       ),
                     ),
                     borderSide: BorderSide(color: Colors.grey.shade300),
@@ -112,8 +111,8 @@ class ResponsiveFormField extends StatelessWidget {
                   enabledBorder: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(
                       responsive.responsiveValue(
-                        mobile: 8.r,
-                        tablet: 12.r,
+                        mobile: 8,
+                        tablet: 12,
                       ),
                     ),
                     borderSide: BorderSide(color: Colors.grey.shade300),
@@ -121,8 +120,8 @@ class ResponsiveFormField extends StatelessWidget {
                   focusedBorder: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(
                       responsive.responsiveValue(
-                        mobile: 8.r,
-                        tablet: 12.r,
+                        mobile: 8,
+                        tablet: 12,
                       ),
                     ),
                     borderSide: const BorderSide(color: Colors.blue),
@@ -130,20 +129,20 @@ class ResponsiveFormField extends StatelessWidget {
                   errorBorder: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(
                       responsive.responsiveValue(
-                        mobile: 8.r,
-                        tablet: 12.r,
+                        mobile: 8,
+                        tablet: 12,
                       ),
                     ),
                     borderSide: const BorderSide(color: Colors.red),
                   ),
                   contentPadding: EdgeInsets.symmetric(
                     horizontal: responsive.responsiveValue(
-                      mobile: 16.w,
-                      tablet: 20.w,
+                      mobile: 16,
+                      tablet: 20,
                     ),
                     vertical: responsive.responsiveValue(
-                      mobile: 12.h,
-                      tablet: 16.h,
+                      mobile: 12,
+                      tablet: 16,
                     ),
                   ),
                   isDense: true,

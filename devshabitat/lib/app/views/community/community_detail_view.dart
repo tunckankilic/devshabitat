@@ -109,7 +109,6 @@ class CommunityDetailView extends BaseView<CommunityController> {
 
   Widget _buildMobileCommunityDetail(dynamic community, BuildContext context) {
     final responsive = Get.find<ResponsiveController>();
-    final performanceService = Get.find<ResponsivePerformanceService>();
 
     return CustomScrollView(
       slivers: [

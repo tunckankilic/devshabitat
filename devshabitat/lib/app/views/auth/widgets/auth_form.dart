@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:flutter_screenutil/flutter_screenutil.dart';
 import '../../../controllers/responsive_controller.dart';
 import '../../../services/responsive_performance_service.dart';
 
@@ -39,110 +38,66 @@ class _AuthFormState extends State<AuthForm> {
     return Form(
       key: _formKey,
       child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
+          // Email Field
           TextFormField(
             controller: _emailController,
-            decoration: InputDecoration(
-              labelText: 'E-posta',
-              prefixIcon: Icon(
-                Icons.email,
-                size: responsive.responsiveValue(
-                  mobile: 20.w,
-                  tablet: 24.w,
-                ),
-              ),
-              labelStyle: TextStyle(
-                fontSize: performanceService.getOptimizedTextSize(
-                  cacheKey: 'auth_form_label_email',
-                  mobileSize: 14.sp,
-                  tabletSize: 16.sp,
-                ),
-              ),
-              contentPadding: EdgeInsets.symmetric(
-                horizontal: responsive.responsiveValue(
-                  mobile: 16.w,
-                  tablet: 20.w,
-                ),
-                vertical: responsive.responsiveValue(
-                  mobile: 12.h,
-                  tablet: 16.h,
-                ),
-              ),
-            ),
             keyboardType: TextInputType.emailAddress,
             style: TextStyle(
               fontSize: performanceService.getOptimizedTextSize(
-                cacheKey: 'auth_form_text_email',
-                mobileSize: 16.sp,
-                tabletSize: 18.sp,
+                cacheKey: 'auth_form_email',
+                mobileSize: 16,
+                tabletSize: 18,
+              ),
+            ),
+            decoration: InputDecoration(
+              labelText: 'E-posta',
+              hintText: 'ornek@email.com',
+              prefixIcon: Icon(
+                Icons.email_outlined,
+                size: responsive.responsiveValue(mobile: 20, tablet: 24),
               ),
             ),
             validator: (value) {
               if (value == null || value.isEmpty) {
-                return 'E-posta adresi gerekli';
+                return 'E-posta gerekli';
               }
               if (!GetUtils.isEmail(value)) {
-                return 'Geçerli bir e-posta adresi girin';
+                return 'Geçerli bir e-posta girin';
               }
               return null;
             },
           ),
-          SizedBox(
-            height: responsive.responsiveValue(
-              mobile: 16.h,
-              tablet: 20.h,
-            ),
-          ),
+
+          SizedBox(height: responsive.responsiveValue(mobile: 16, tablet: 20)),
+
+          // Password Field
           TextFormField(
             controller: _passwordController,
+            obscureText: !_isPasswordVisible,
+            style: TextStyle(
+              fontSize: performanceService.getOptimizedTextSize(
+                cacheKey: 'auth_form_password',
+                mobileSize: 16,
+                tabletSize: 18,
+              ),
+            ),
             decoration: InputDecoration(
               labelText: 'Şifre',
               prefixIcon: Icon(
-                Icons.lock,
-                size: responsive.responsiveValue(
-                  mobile: 20.w,
-                  tablet: 24.w,
-                ),
+                Icons.lock_outlined,
+                size: responsive.responsiveValue(mobile: 20, tablet: 24),
               ),
               suffixIcon: IconButton(
                 icon: Icon(
                   _isPasswordVisible ? Icons.visibility_off : Icons.visibility,
-                  size: responsive.responsiveValue(
-                    mobile: 20.w,
-                    tablet: 24.w,
-                  ),
+                  size: responsive.responsiveValue(mobile: 20, tablet: 24),
                 ),
                 onPressed: () {
                   setState(() {
                     _isPasswordVisible = !_isPasswordVisible;
                   });
                 },
-              ),
-              labelStyle: TextStyle(
-                fontSize: performanceService.getOptimizedTextSize(
-                  cacheKey: 'auth_form_label_password',
-                  mobileSize: 14.sp,
-                  tabletSize: 16.sp,
-                ),
-              ),
-              contentPadding: EdgeInsets.symmetric(
-                horizontal: responsive.responsiveValue(
-                  mobile: 16.w,
-                  tablet: 20.w,
-                ),
-                vertical: responsive.responsiveValue(
-                  mobile: 12.h,
-                  tablet: 16.h,
-                ),
-              ),
-            ),
-            obscureText: !_isPasswordVisible,
-            style: TextStyle(
-              fontSize: performanceService.getOptimizedTextSize(
-                cacheKey: 'auth_form_text_password',
-                mobileSize: 16.sp,
-                tabletSize: 18.sp,
               ),
             ),
             validator: (value) {
@@ -155,46 +110,32 @@ class _AuthFormState extends State<AuthForm> {
               return null;
             },
           ),
+
+          SizedBox(height: responsive.responsiveValue(mobile: 24, tablet: 32)),
+
+          // Submit Button
           SizedBox(
-            height: responsive.responsiveValue(
-              mobile: 24.h,
-              tablet: 32.h,
-            ),
-          ),
-          ElevatedButton(
-            onPressed: () {
-              if (_formKey.currentState!.validate()) {
-                widget.onSubmit(
-                  _emailController.text,
-                  _passwordController.text,
-                );
-              }
-            },
-            style: ElevatedButton.styleFrom(
-              padding: EdgeInsets.symmetric(
-                vertical: responsive.responsiveValue(
-                  mobile: 12.h,
-                  tablet: 16.h,
-                ),
-              ),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(
-                  responsive.responsiveValue(
-                    mobile: 8.r,
-                    tablet: 12.r,
+            width: double.infinity,
+            height: responsive.responsiveValue(mobile: 48, tablet: 56),
+            child: ElevatedButton(
+              onPressed: () {
+                if (_formKey.currentState!.validate()) {
+                  widget.onSubmit(
+                    _emailController.text.trim(),
+                    _passwordController.text,
+                  );
+                }
+              },
+              child: Text(
+                widget.isLogin ? 'Giriş Yap' : 'Kayıt Ol',
+                style: TextStyle(
+                  fontSize: performanceService.getOptimizedTextSize(
+                    cacheKey: 'auth_form_button',
+                    mobileSize: 16,
+                    tabletSize: 18,
                   ),
+                  fontWeight: FontWeight.w600,
                 ),
-              ),
-            ),
-            child: Text(
-              widget.isLogin ? 'Giriş Yap' : 'Kayıt Ol',
-              style: TextStyle(
-                fontSize: performanceService.getOptimizedTextSize(
-                  cacheKey: 'auth_form_button_text',
-                  mobileSize: 16.sp,
-                  tabletSize: 18.sp,
-                ),
-                fontWeight: FontWeight.w600,
               ),
             ),
           ),

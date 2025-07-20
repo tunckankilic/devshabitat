@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:flutter_screenutil/flutter_screenutil.dart';
 import '../../controllers/responsive_controller.dart';
 import '../../services/responsive_performance_service.dart';
 import '../../models/community/community_model.dart';
@@ -187,8 +186,8 @@ class _CommunityEventViewState extends State<CommunityEventView>
           style: TextStyle(
             fontSize: performanceService.getOptimizedTextSize(
               cacheKey: 'community_event_appbar_title',
-              mobileSize: 18.sp,
-              tabletSize: 20.sp,
+              mobileSize: 18,
+              tabletSize: 20,
             ),
           ),
         ),
@@ -196,7 +195,7 @@ class _CommunityEventViewState extends State<CommunityEventView>
           IconButton(
             icon: Icon(
               Icons.filter_list,
-              size: responsive.minTouchTarget.sp,
+              size: responsive.minTouchTargetSize,
             ),
             onPressed: _showFilterDialog,
             tooltip: 'Filtrele',
@@ -204,7 +203,7 @@ class _CommunityEventViewState extends State<CommunityEventView>
           IconButton(
             icon: Icon(
               Icons.add,
-              size: responsive.minTouchTarget.sp,
+              size: responsive.minTouchTargetSize,
             ),
             onPressed: _createNewEvent,
             tooltip: 'Yeni Etkinlik',
@@ -219,8 +218,8 @@ class _CommunityEventViewState extends State<CommunityEventView>
                 style: TextStyle(
                   fontSize: performanceService.getOptimizedTextSize(
                     cacheKey: 'community_event_tab_all',
-                    mobileSize: 14.sp,
-                    tabletSize: 16.sp,
+                    mobileSize: 14,
+                    tabletSize: 16,
                   ),
                 ),
               ),
@@ -231,8 +230,8 @@ class _CommunityEventViewState extends State<CommunityEventView>
                 style: TextStyle(
                   fontSize: performanceService.getOptimizedTextSize(
                     cacheKey: 'community_event_tab_upcoming',
-                    mobileSize: 14.sp,
-                    tabletSize: 16.sp,
+                    mobileSize: 14,
+                    tabletSize: 16,
                   ),
                 ),
               ),
@@ -243,8 +242,8 @@ class _CommunityEventViewState extends State<CommunityEventView>
                 style: TextStyle(
                   fontSize: performanceService.getOptimizedTextSize(
                     cacheKey: 'community_event_tab_past',
-                    mobileSize: 14.sp,
-                    tabletSize: 16.sp,
+                    mobileSize: 14,
+                    tabletSize: 16,
                   ),
                 ),
               ),
@@ -279,15 +278,15 @@ class _CommunityEventViewState extends State<CommunityEventView>
         onPressed: _createNewEvent,
         icon: Icon(
           Icons.add,
-          size: responsive.minTouchTarget.sp,
+          size: responsive.minTouchTargetSize,
         ),
         label: Text(
           'Yeni Etkinlik',
           style: TextStyle(
             fontSize: performanceService.getOptimizedTextSize(
               cacheKey: 'community_event_fab_text',
-              mobileSize: 14.sp,
-              tabletSize: 16.sp,
+              mobileSize: 14,
+              tabletSize: 16,
             ),
           ),
         ),
@@ -306,8 +305,8 @@ class _CommunityEventViewState extends State<CommunityEventView>
         style: TextStyle(
           fontSize: performanceService.getOptimizedTextSize(
             cacheKey: 'community_event_search_text',
-            mobileSize: 16.sp,
-            tabletSize: 18.sp,
+            mobileSize: 16.0,
+            tabletSize: 18.0,
           ),
         ),
         decoration: InputDecoration(
@@ -315,19 +314,19 @@ class _CommunityEventViewState extends State<CommunityEventView>
           hintStyle: TextStyle(
             fontSize: performanceService.getOptimizedTextSize(
               cacheKey: 'community_event_search_hint',
-              mobileSize: 16.sp,
-              tabletSize: 18.sp,
+              mobileSize: 16,
+              tabletSize: 18,
             ),
           ),
           prefixIcon: Icon(
             Icons.search,
-            size: responsive.minTouchTarget.sp,
+            size: responsive.minTouchTargetSize,
           ),
           suffixIcon: _searchQuery.isNotEmpty
               ? IconButton(
                   icon: Icon(
                     Icons.clear,
-                    size: responsive.minTouchTarget.sp,
+                    size: responsive.minTouchTargetSize,
                   ),
                   onPressed: () => setState(() => _searchQuery = ''),
                 )
@@ -335,8 +334,8 @@ class _CommunityEventViewState extends State<CommunityEventView>
           border: OutlineInputBorder(
             borderRadius: BorderRadius.circular(
               responsive.responsiveValue(
-                mobile: 12.r,
-                tablet: 16.r,
+                mobile: 12.0,
+                tablet: 16.0,
               ),
             ),
           ),
@@ -396,8 +395,8 @@ class _CommunityEventViewState extends State<CommunityEventView>
     return Padding(
       padding: EdgeInsets.only(
         right: responsive.responsiveValue(
-          mobile: 8.w,
-          tablet: 12.w,
+          mobile: 8,
+          tablet: 12,
         ),
       ),
       child: Chip(
@@ -406,16 +405,16 @@ class _CommunityEventViewState extends State<CommunityEventView>
           style: TextStyle(
             fontSize: performanceService.getOptimizedTextSize(
               cacheKey: 'community_event_filter_chip',
-              mobileSize: 12.sp,
-              tabletSize: 14.sp,
+              mobileSize: 12,
+              tabletSize: 14,
             ),
           ),
         ),
         deleteIcon: Icon(
           Icons.close,
           size: responsive.responsiveValue(
-            mobile: 18.sp,
-            tablet: 20.sp,
+            mobile: 18,
+            tablet: 20,
           ),
         ),
         onDeleted: onRemove,
@@ -431,8 +430,8 @@ class _CommunityEventViewState extends State<CommunityEventView>
       return Center(
         child: CircularProgressIndicator(
           strokeWidth: responsive.responsiveValue(
-            mobile: 2.w,
-            tablet: 3.w,
+            mobile: 2,
+            tablet: 3,
           ),
         ),
       );
@@ -446,36 +445,36 @@ class _CommunityEventViewState extends State<CommunityEventView>
             Icon(
               Icons.event_busy,
               size: responsive.responsiveValue(
-                mobile: 64.sp,
-                tablet: 80.sp,
+                mobile: 64,
+                tablet: 80,
               ),
               color: Theme.of(context).colorScheme.secondary,
             ),
             SizedBox(
                 height: responsive.responsiveValue(
-              mobile: 16.h,
-              tablet: 20.h,
+              mobile: 16,
+              tablet: 20,
             )),
             Text(
               'Etkinlik bulunamadı',
               style: Theme.of(context).textTheme.titleMedium?.copyWith(
                     fontSize: responsive.responsiveValue(
-                      mobile: 16.sp,
-                      tablet: 18.sp,
+                      mobile: 16,
+                      tablet: 18,
                     ),
                   ),
             ),
             SizedBox(
                 height: responsive.responsiveValue(
-              mobile: 8.h,
-              tablet: 12.h,
+              mobile: 8,
+              tablet: 12,
             )),
             Text(
               'Filtreleri değiştirmeyi deneyin',
               style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                     fontSize: responsive.responsiveValue(
-                      mobile: 14.sp,
-                      tablet: 16.sp,
+                      mobile: 14,
+                      tablet: 16,
                     ),
                   ),
             ),
@@ -502,16 +501,16 @@ class _CommunityEventViewState extends State<CommunityEventView>
     return Card(
       margin: EdgeInsets.only(
         bottom: responsive.responsiveValue(
-          mobile: 16.h,
-          tablet: 20.h,
+          mobile: 16,
+          tablet: 20,
         ),
       ),
       child: InkWell(
         onTap: () => _openEventDetails(event),
         borderRadius: BorderRadius.circular(
           responsive.responsiveValue(
-            mobile: 12.r,
-            tablet: 16.r,
+            mobile: 12,
+            tablet: 16,
           ),
         ),
         child: Column(
@@ -521,8 +520,8 @@ class _CommunityEventViewState extends State<CommunityEventView>
             if (event.coverImageUrl != null)
               Container(
                 height: responsive.responsiveValue(
-                  mobile: 160.h,
-                  tablet: 200.h,
+                  mobile: 160,
+                  tablet: 200,
                 ),
                 width: double.infinity,
                 decoration: BoxDecoration(
@@ -533,8 +532,8 @@ class _CommunityEventViewState extends State<CommunityEventView>
                   borderRadius: BorderRadius.vertical(
                     top: Radius.circular(
                       responsive.responsiveValue(
-                        mobile: 12.r,
-                        tablet: 16.r,
+                        mobile: 12,
+                        tablet: 16,
                       ),
                     ),
                   ),
@@ -556,8 +555,8 @@ class _CommunityEventViewState extends State<CommunityEventView>
                             fontWeight: FontWeight.bold,
                             fontSize: performanceService.getOptimizedTextSize(
                               cacheKey: 'community_event_card_title',
-                              mobileSize: 18.sp,
-                              tabletSize: 20.sp,
+                              mobileSize: 18,
+                              tabletSize: 20,
                             ),
                           ),
                           maxLines: 2,
@@ -570,8 +569,8 @@ class _CommunityEventViewState extends State<CommunityEventView>
 
                   SizedBox(
                       height: responsive.responsiveValue(
-                    mobile: 8.h,
-                    tablet: 12.h,
+                    mobile: 8,
+                    tablet: 12,
                   )),
 
                   // Etkinlik açıklaması
@@ -580,8 +579,8 @@ class _CommunityEventViewState extends State<CommunityEventView>
                     style: theme.textTheme.bodyMedium?.copyWith(
                       fontSize: performanceService.getOptimizedTextSize(
                         cacheKey: 'community_event_card_description',
-                        mobileSize: 14.sp,
-                        tabletSize: 16.sp,
+                        mobileSize: 14,
+                        tabletSize: 16,
                       ),
                     ),
                     maxLines: 3,
@@ -590,8 +589,8 @@ class _CommunityEventViewState extends State<CommunityEventView>
 
                   SizedBox(
                       height: responsive.responsiveValue(
-                    mobile: 16.h,
-                    tablet: 20.h,
+                    mobile: 16,
+                    tablet: 20,
                   )),
 
                   // Etkinlik bilgileri
@@ -600,23 +599,23 @@ class _CommunityEventViewState extends State<CommunityEventView>
                       Icon(
                         Icons.calendar_today,
                         size: responsive.responsiveValue(
-                          mobile: 16.sp,
-                          tablet: 18.sp,
+                          mobile: 16,
+                          tablet: 18,
                         ),
                         color: theme.colorScheme.secondary,
                       ),
                       SizedBox(
                           width: responsive.responsiveValue(
-                        mobile: 4.w,
-                        tablet: 8.w,
+                        mobile: 4,
+                        tablet: 8,
                       )),
                       Text(
                         _formatEventDate(event.startDate, event.endDate),
                         style: theme.textTheme.bodySmall?.copyWith(
                           fontSize: performanceService.getOptimizedTextSize(
                             cacheKey: 'community_event_card_date',
-                            mobileSize: 12.sp,
-                            tabletSize: 14.sp,
+                            mobileSize: 12,
+                            tabletSize: 14,
                           ),
                         ),
                       ),
@@ -626,15 +625,15 @@ class _CommunityEventViewState extends State<CommunityEventView>
                             ? Icons.video_call
                             : Icons.location_on,
                         size: responsive.responsiveValue(
-                          mobile: 16.sp,
-                          tablet: 18.sp,
+                          mobile: 16,
+                          tablet: 18,
                         ),
                         color: theme.colorScheme.secondary,
                       ),
                       SizedBox(
                           width: responsive.responsiveValue(
-                        mobile: 4.w,
-                        tablet: 8.w,
+                        mobile: 4,
+                        tablet: 8,
                       )),
                       Text(
                         event.location == EventLocation.online
@@ -643,8 +642,8 @@ class _CommunityEventViewState extends State<CommunityEventView>
                         style: theme.textTheme.bodySmall?.copyWith(
                           fontSize: performanceService.getOptimizedTextSize(
                             cacheKey: 'community_event_card_location',
-                            mobileSize: 12.sp,
-                            tabletSize: 14.sp,
+                            mobileSize: 12,
+                            tabletSize: 14,
                           ),
                         ),
                       ),
@@ -653,8 +652,8 @@ class _CommunityEventViewState extends State<CommunityEventView>
 
                   SizedBox(
                       height: responsive.responsiveValue(
-                    mobile: 12.h,
-                    tablet: 16.h,
+                    mobile: 12,
+                    tablet: 16,
                   )),
 
                   // Katılımcı bilgisi
@@ -663,23 +662,23 @@ class _CommunityEventViewState extends State<CommunityEventView>
                       Icon(
                         Icons.people,
                         size: responsive.responsiveValue(
-                          mobile: 16.sp,
-                          tablet: 18.sp,
+                          mobile: 16,
+                          tablet: 18,
                         ),
                         color: theme.colorScheme.secondary,
                       ),
                       SizedBox(
                           width: responsive.responsiveValue(
-                        mobile: 4.w,
-                        tablet: 8.w,
+                        mobile: 4,
+                        tablet: 8,
                       )),
                       Text(
                         '${event.currentParticipants}/${event.participantLimit} katılımcı',
                         style: theme.textTheme.bodySmall?.copyWith(
                           fontSize: performanceService.getOptimizedTextSize(
                             cacheKey: 'community_event_card_participants',
-                            mobileSize: 12.sp,
-                            tabletSize: 14.sp,
+                            mobileSize: 12,
+                            tabletSize: 14,
                           ),
                         ),
                       ),
@@ -690,8 +689,8 @@ class _CommunityEventViewState extends State<CommunityEventView>
 
                   SizedBox(
                       height: responsive.responsiveValue(
-                    mobile: 16.h,
-                    tablet: 20.h,
+                    mobile: 16,
+                    tablet: 20,
                   )),
 
                   // Aksiyon butonları
@@ -702,15 +701,15 @@ class _CommunityEventViewState extends State<CommunityEventView>
                           onPressed: () => _joinEvent(event),
                           icon: Icon(
                             Icons.person_add,
-                            size: responsive.minTouchTarget.sp,
+                            size: responsive.minTouchTargetSize,
                           ),
                           label: Text(
                             'Katıl',
                             style: TextStyle(
                               fontSize: performanceService.getOptimizedTextSize(
                                 cacheKey: 'community_event_card_join_button',
-                                mobileSize: 14.sp,
-                                tabletSize: 16.sp,
+                                mobileSize: 14,
+                                tabletSize: 16,
                               ),
                             ),
                           ),
@@ -718,14 +717,14 @@ class _CommunityEventViewState extends State<CommunityEventView>
                       ),
                       SizedBox(
                           width: responsive.responsiveValue(
-                        mobile: 8.w,
-                        tablet: 12.w,
+                        mobile: 8,
+                        tablet: 12,
                       )),
                       IconButton(
                         onPressed: () => _shareEvent(event),
                         icon: Icon(
                           Icons.share,
-                          size: responsive.minTouchTarget.sp,
+                          size: responsive.minTouchTargetSize,
                         ),
                         tooltip: 'Paylaş',
                       ),
@@ -733,7 +732,7 @@ class _CommunityEventViewState extends State<CommunityEventView>
                         onPressed: () => _showEventOptions(event),
                         icon: Icon(
                           Icons.more_vert,
-                          size: responsive.minTouchTarget.sp,
+                          size: responsive.minTouchTargetSize,
                         ),
                         tooltip: 'Daha fazla',
                       ),
@@ -779,8 +778,8 @@ class _CommunityEventViewState extends State<CommunityEventView>
         color: color.withOpacity(0.1),
         borderRadius: BorderRadius.circular(
           responsive.responsiveValue(
-            mobile: 12.r,
-            tablet: 16.r,
+            mobile: 12,
+            tablet: 16,
           ),
         ),
         border: Border.all(color: color.withOpacity(0.3)),
@@ -791,15 +790,15 @@ class _CommunityEventViewState extends State<CommunityEventView>
           Icon(
             icon,
             size: responsive.responsiveValue(
-              mobile: 12.sp,
-              tablet: 14.sp,
+              mobile: 12,
+              tablet: 14,
             ),
             color: color,
           ),
           SizedBox(
               width: responsive.responsiveValue(
-            mobile: 4.w,
-            tablet: 6.w,
+            mobile: 4,
+            tablet: 6,
           )),
           Text(
             text,
@@ -807,8 +806,8 @@ class _CommunityEventViewState extends State<CommunityEventView>
               color: color,
               fontSize: performanceService.getOptimizedTextSize(
                 cacheKey: 'community_event_status_chip',
-                mobileSize: 10.sp,
-                tabletSize: 12.sp,
+                mobileSize: 10,
+                tabletSize: 12,
               ),
               fontWeight: FontWeight.w500,
             ),
@@ -839,8 +838,8 @@ class _CommunityEventViewState extends State<CommunityEventView>
         color: Theme.of(context).colorScheme.primaryContainer,
         borderRadius: BorderRadius.circular(
           responsive.responsiveValue(
-            mobile: 12.r,
-            tablet: 16.r,
+            mobile: 12,
+            tablet: 16,
           ),
         ),
       ),
@@ -850,8 +849,8 @@ class _CommunityEventViewState extends State<CommunityEventView>
           color: Theme.of(context).colorScheme.onPrimaryContainer,
           fontSize: performanceService.getOptimizedTextSize(
             cacheKey: 'community_event_type_chip',
-            mobileSize: 10.sp,
-            tabletSize: 12.sp,
+            mobileSize: 10,
+            tabletSize: 12,
           ),
           fontWeight: FontWeight.w500,
         ),
@@ -903,8 +902,8 @@ class _CommunityEventViewState extends State<CommunityEventView>
             fontSize:
                 Get.find<ResponsivePerformanceService>().getOptimizedTextSize(
               cacheKey: 'community_event_filter_dialog_title',
-              mobileSize: 18.sp,
-              tabletSize: 20.sp,
+              mobileSize: 18,
+              tabletSize: 20,
             ),
           ),
         ),
@@ -920,8 +919,8 @@ class _CommunityEventViewState extends State<CommunityEventView>
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(
                       Get.find<ResponsiveController>().responsiveValue(
-                        mobile: 12.r,
-                        tablet: 16.r,
+                        mobile: 12,
+                        tablet: 16,
                       ),
                     ),
                   ),
@@ -942,8 +941,8 @@ class _CommunityEventViewState extends State<CommunityEventView>
 
               SizedBox(
                   height: Get.find<ResponsiveController>().responsiveValue(
-                mobile: 16.h,
-                tablet: 20.h,
+                mobile: 16,
+                tablet: 20,
               )),
 
               // Lokasyon filtresi
@@ -954,8 +953,8 @@ class _CommunityEventViewState extends State<CommunityEventView>
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(
                       Get.find<ResponsiveController>().responsiveValue(
-                        mobile: 12.r,
-                        tablet: 16.r,
+                        mobile: 12,
+                        tablet: 16,
                       ),
                     ),
                   ),
@@ -975,8 +974,8 @@ class _CommunityEventViewState extends State<CommunityEventView>
 
               SizedBox(
                   height: Get.find<ResponsiveController>().responsiveValue(
-                mobile: 16.h,
-                tablet: 20.h,
+                mobile: 16,
+                tablet: 20,
               )),
 
               // Kategori filtresi
@@ -987,8 +986,8 @@ class _CommunityEventViewState extends State<CommunityEventView>
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(
                       Get.find<ResponsiveController>().responsiveValue(
-                        mobile: 12.r,
-                        tablet: 16.r,
+                        mobile: 12,
+                        tablet: 16,
                       ),
                     ),
                   ),
@@ -1009,8 +1008,8 @@ class _CommunityEventViewState extends State<CommunityEventView>
 
               SizedBox(
                   height: Get.find<ResponsiveController>().responsiveValue(
-                mobile: 16.h,
-                tablet: 20.h,
+                mobile: 16,
+                tablet: 20,
               )),
 
               // Checkbox filtreleri
@@ -1021,8 +1020,8 @@ class _CommunityEventViewState extends State<CommunityEventView>
                     fontSize: Get.find<ResponsivePerformanceService>()
                         .getOptimizedTextSize(
                       cacheKey: 'community_event_filter_checkbox_title',
-                      mobileSize: 14.sp,
-                      tabletSize: 16.sp,
+                      mobileSize: 14,
+                      tabletSize: 16,
                     ),
                   ),
                 ),
@@ -1037,8 +1036,8 @@ class _CommunityEventViewState extends State<CommunityEventView>
                     fontSize: Get.find<ResponsivePerformanceService>()
                         .getOptimizedTextSize(
                       cacheKey: 'community_event_filter_checkbox_online',
-                      mobileSize: 14.sp,
-                      tabletSize: 16.sp,
+                      mobileSize: 14,
+                      tabletSize: 16,
                     ),
                   ),
                 ),
@@ -1052,8 +1051,8 @@ class _CommunityEventViewState extends State<CommunityEventView>
                     fontSize: Get.find<ResponsivePerformanceService>()
                         .getOptimizedTextSize(
                       cacheKey: 'community_event_filter_checkbox_offline',
-                      mobileSize: 14.sp,
-                      tabletSize: 16.sp,
+                      mobileSize: 14,
+                      tabletSize: 16,
                     ),
                   ),
                 ),
@@ -1082,8 +1081,8 @@ class _CommunityEventViewState extends State<CommunityEventView>
                 fontSize: Get.find<ResponsivePerformanceService>()
                     .getOptimizedTextSize(
                   cacheKey: 'community_event_filter_dialog_reset_button',
-                  mobileSize: 14.sp,
-                  tabletSize: 16.sp,
+                  mobileSize: 14,
+                  tabletSize: 16,
                 ),
               ),
             ),
@@ -1096,8 +1095,8 @@ class _CommunityEventViewState extends State<CommunityEventView>
                 fontSize: Get.find<ResponsivePerformanceService>()
                     .getOptimizedTextSize(
                   cacheKey: 'community_event_filter_dialog_apply_button',
-                  mobileSize: 14.sp,
-                  tabletSize: 16.sp,
+                  mobileSize: 14,
+                  tabletSize: 16,
                 ),
               ),
             ),
@@ -1144,7 +1143,7 @@ class _CommunityEventViewState extends State<CommunityEventView>
           ListTile(
             leading: Icon(
               Icons.edit,
-              size: Get.find<ResponsiveController>().minTouchTarget.sp,
+              size: Get.find<ResponsiveController>().minTouchTarget,
             ),
             title: Text(
               'Düzenle',
@@ -1152,8 +1151,8 @@ class _CommunityEventViewState extends State<CommunityEventView>
                 fontSize: Get.find<ResponsivePerformanceService>()
                     .getOptimizedTextSize(
                   cacheKey: 'community_event_options_edit_title',
-                  mobileSize: 16.sp,
-                  tabletSize: 18.sp,
+                  mobileSize: 16,
+                  tabletSize: 18,
                 ),
               ),
             ),
@@ -1165,7 +1164,7 @@ class _CommunityEventViewState extends State<CommunityEventView>
           ListTile(
             leading: Icon(
               Icons.delete,
-              size: Get.find<ResponsiveController>().minTouchTarget.sp,
+              size: Get.find<ResponsiveController>().minTouchTarget,
             ),
             title: Text(
               'Sil',
@@ -1173,8 +1172,8 @@ class _CommunityEventViewState extends State<CommunityEventView>
                 fontSize: Get.find<ResponsivePerformanceService>()
                     .getOptimizedTextSize(
                   cacheKey: 'community_event_options_delete_title',
-                  mobileSize: 16.sp,
-                  tabletSize: 18.sp,
+                  mobileSize: 16,
+                  tabletSize: 18,
                 ),
               ),
             ),
@@ -1186,7 +1185,7 @@ class _CommunityEventViewState extends State<CommunityEventView>
           ListTile(
             leading: Icon(
               Icons.copy,
-              size: Get.find<ResponsiveController>().minTouchTarget.sp,
+              size: Get.find<ResponsiveController>().minTouchTarget,
             ),
             title: Text(
               'Linki Kopyala',
@@ -1194,8 +1193,8 @@ class _CommunityEventViewState extends State<CommunityEventView>
                 fontSize: Get.find<ResponsivePerformanceService>()
                     .getOptimizedTextSize(
                   cacheKey: 'community_event_options_copy_title',
-                  mobileSize: 16.sp,
-                  tabletSize: 18.sp,
+                  mobileSize: 16,
+                  tabletSize: 18,
                 ),
               ),
             ),
@@ -1219,8 +1218,8 @@ class _CommunityEventViewState extends State<CommunityEventView>
             fontSize:
                 Get.find<ResponsivePerformanceService>().getOptimizedTextSize(
               cacheKey: 'community_event_delete_dialog_title',
-              mobileSize: 18.sp,
-              tabletSize: 20.sp,
+              mobileSize: 18,
+              tabletSize: 20,
             ),
           ),
         ),
@@ -1230,8 +1229,8 @@ class _CommunityEventViewState extends State<CommunityEventView>
             fontSize:
                 Get.find<ResponsivePerformanceService>().getOptimizedTextSize(
               cacheKey: 'community_event_delete_dialog_content',
-              mobileSize: 14.sp,
-              tabletSize: 16.sp,
+              mobileSize: 14,
+              tabletSize: 16,
             ),
           ),
         ),
@@ -1244,8 +1243,8 @@ class _CommunityEventViewState extends State<CommunityEventView>
                 fontSize: Get.find<ResponsivePerformanceService>()
                     .getOptimizedTextSize(
                   cacheKey: 'community_event_delete_dialog_cancel_button',
-                  mobileSize: 14.sp,
-                  tabletSize: 16.sp,
+                  mobileSize: 14,
+                  tabletSize: 16,
                 ),
               ),
             ),
@@ -1269,8 +1268,8 @@ class _CommunityEventViewState extends State<CommunityEventView>
                 fontSize: Get.find<ResponsivePerformanceService>()
                     .getOptimizedTextSize(
                   cacheKey: 'community_event_delete_dialog_delete_button',
-                  mobileSize: 14.sp,
-                  tabletSize: 16.sp,
+                  mobileSize: 14,
+                  tabletSize: 16,
                 ),
               ),
             ),
