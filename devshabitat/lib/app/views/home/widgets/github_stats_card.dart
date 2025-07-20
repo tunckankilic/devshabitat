@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:flutter_screenutil/flutter_screenutil.dart';
 import '../../../controllers/home_controller.dart';
 import '../../../controllers/responsive_controller.dart';
 
@@ -16,8 +15,8 @@ class GithubStatsCard extends GetView<HomeController> {
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(
           responsive.responsiveValue(
-            mobile: 16.r,
-            tablet: 20.r,
+            mobile: 16,
+            tablet: 20,
           ),
         ),
       ),
@@ -35,8 +34,8 @@ class GithubStatsCard extends GetView<HomeController> {
                   'GitHub İstatistikleri',
                   style: TextStyle(
                     fontSize: responsive.responsiveValue(
-                      mobile: 18.sp,
-                      tablet: 22.sp,
+                      mobile: 18,
+                      tablet: 22,
                     ),
                     fontWeight: FontWeight.bold,
                   ),
@@ -45,8 +44,8 @@ class GithubStatsCard extends GetView<HomeController> {
                   icon: Icon(
                     Icons.refresh,
                     size: responsive.responsiveValue(
-                      mobile: 24.r,
-                      tablet: 28.r,
+                      mobile: 24,
+                      tablet: 28,
                     ),
                   ),
                   onPressed: controller.refreshData,
@@ -54,7 +53,7 @@ class GithubStatsCard extends GetView<HomeController> {
               ],
             ),
             SizedBox(
-                height: responsive.responsiveValue(mobile: 16.h, tablet: 20.h)),
+                height: responsive.responsiveValue(mobile: 16, tablet: 20)),
             Obx(() {
               if (controller.isLoading.value) {
                 return const Center(child: CircularProgressIndicator());
@@ -69,24 +68,24 @@ class GithubStatsCard extends GetView<HomeController> {
                     icon: Icons.commit,
                   ),
                   SizedBox(
-                      height: responsive.responsiveValue(
-                          mobile: 12.h, tablet: 16.h)),
+                      height:
+                          responsive.responsiveValue(mobile: 12, tablet: 16)),
                   _buildStatRow(
                     label: 'Açık PR\'lar',
                     value: stats['openPRs']?.toString() ?? '0',
                     icon: Icons.call_merge,
                   ),
                   SizedBox(
-                      height: responsive.responsiveValue(
-                          mobile: 12.h, tablet: 16.h)),
+                      height:
+                          responsive.responsiveValue(mobile: 12, tablet: 16)),
                   _buildStatRow(
                     label: 'Katkı Yapılan Repolar',
                     value: stats['contributedRepos']?.toString() ?? '0',
                     icon: Icons.source,
                   ),
                   SizedBox(
-                      height: responsive.responsiveValue(
-                          mobile: 12.h, tablet: 16.h)),
+                      height:
+                          responsive.responsiveValue(mobile: 12, tablet: 16)),
                   _buildStatRow(
                     label: 'Yıldızlı Repolar',
                     value: stats['starredRepos']?.toString() ?? '0',
@@ -117,8 +116,8 @@ class GithubStatsCard extends GetView<HomeController> {
         color: Colors.grey[100],
         borderRadius: BorderRadius.circular(
           responsive.responsiveValue(
-            mobile: 8.r,
-            tablet: 12.r,
+            mobile: 8,
+            tablet: 12,
           ),
         ),
       ),
@@ -127,19 +126,18 @@ class GithubStatsCard extends GetView<HomeController> {
           Icon(
             icon,
             size: responsive.responsiveValue(
-              mobile: 20.r,
-              tablet: 24.r,
+              mobile: 20,
+              tablet: 24,
             ),
           ),
-          SizedBox(
-              width: responsive.responsiveValue(mobile: 12.w, tablet: 16.w)),
+          SizedBox(width: responsive.responsiveValue(mobile: 12, tablet: 16)),
           Expanded(
             child: Text(
               label,
               style: TextStyle(
                 fontSize: responsive.responsiveValue(
-                  mobile: 14.sp,
-                  tablet: 16.sp,
+                  mobile: 14,
+                  tablet: 16,
                 ),
                 color: Colors.grey[700],
               ),
@@ -149,8 +147,8 @@ class GithubStatsCard extends GetView<HomeController> {
             value,
             style: TextStyle(
               fontSize: responsive.responsiveValue(
-                mobile: 16.sp,
-                tablet: 18.sp,
+                mobile: 16,
+                tablet: 18,
               ),
               fontWeight: FontWeight.bold,
             ),

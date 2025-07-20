@@ -1,7 +1,6 @@
 import 'package:devshabitat/app/controllers/auth_controller.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:flutter_screenutil/flutter_screenutil.dart';
 import '../../../controllers/responsive_controller.dart';
 
 class ProfileSummaryCard extends GetView<AuthController> {
@@ -16,8 +15,8 @@ class ProfileSummaryCard extends GetView<AuthController> {
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(
           responsive.responsiveValue(
-            mobile: 16.r,
-            tablet: 20.r,
+            mobile: 16,
+            tablet: 20,
           ),
         ),
       ),
@@ -34,8 +33,8 @@ class ProfileSummaryCard extends GetView<AuthController> {
                   final user = controller.currentUser;
                   return CircleAvatar(
                     radius: responsive.responsiveValue(
-                      mobile: 30.r,
-                      tablet: 40.r,
+                      mobile: 30,
+                      tablet: 40,
                     ),
                     backgroundImage: user?.photoURL != null
                         ? NetworkImage(user!.photoURL!)
@@ -44,16 +43,15 @@ class ProfileSummaryCard extends GetView<AuthController> {
                         ? Icon(
                             Icons.person,
                             size: responsive.responsiveValue(
-                              mobile: 30.r,
-                              tablet: 40.r,
+                              mobile: 30,
+                              tablet: 40,
                             ),
                           )
                         : null,
                   );
                 }),
                 SizedBox(
-                    width:
-                        responsive.responsiveValue(mobile: 16.w, tablet: 20.w)),
+                    width: responsive.responsiveValue(mobile: 16, tablet: 20)),
                 Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -64,24 +62,24 @@ class ProfileSummaryCard extends GetView<AuthController> {
                           user?.displayName ?? 'İsimsiz Kullanıcı',
                           style: TextStyle(
                             fontSize: responsive.responsiveValue(
-                              mobile: 18.sp,
-                              tablet: 22.sp,
+                              mobile: 18,
+                              tablet: 22,
                             ),
                             fontWeight: FontWeight.bold,
                           ),
                         );
                       }),
                       SizedBox(
-                          height: responsive.responsiveValue(
-                              mobile: 4.h, tablet: 6.h)),
+                          height:
+                              responsive.responsiveValue(mobile: 4, tablet: 6)),
                       Obx(() {
                         final user = controller.currentUser;
                         return Text(
                           user?.email ?? '',
                           style: TextStyle(
                             fontSize: responsive.responsiveValue(
-                              mobile: 14.sp,
-                              tablet: 16.sp,
+                              mobile: 14,
+                              tablet: 16,
                             ),
                             color: Colors.grey[600],
                           ),
@@ -93,21 +91,21 @@ class ProfileSummaryCard extends GetView<AuthController> {
               ],
             ),
             SizedBox(
-                height: responsive.responsiveValue(mobile: 16.h, tablet: 20.h)),
+                height: responsive.responsiveValue(mobile: 16, tablet: 20)),
             Obx(() {
               final profile = controller.userProfile;
               return Text(
                 profile['bio'] ?? 'Henüz bir biyografi eklenmemiş.',
                 style: TextStyle(
                   fontSize: responsive.responsiveValue(
-                    mobile: 14.sp,
-                    tablet: 16.sp,
+                    mobile: 14,
+                    tablet: 16,
                   ),
                 ),
               );
             }),
             SizedBox(
-                height: responsive.responsiveValue(mobile: 16.h, tablet: 20.h)),
+                height: responsive.responsiveValue(mobile: 16, tablet: 20)),
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceAround,
               children: [
@@ -146,17 +144,17 @@ class ProfileSummaryCard extends GetView<AuthController> {
         Icon(
           icon,
           size: responsive.responsiveValue(
-            mobile: 24.r,
-            tablet: 32.r,
+            mobile: 24,
+            tablet: 32,
           ),
         ),
-        SizedBox(height: responsive.responsiveValue(mobile: 4.h, tablet: 6.h)),
+        SizedBox(height: responsive.responsiveValue(mobile: 4, tablet: 6)),
         Text(
           value,
           style: TextStyle(
             fontSize: responsive.responsiveValue(
-              mobile: 16.sp,
-              tablet: 18.sp,
+              mobile: 16,
+              tablet: 18,
             ),
             fontWeight: FontWeight.bold,
           ),
@@ -165,8 +163,8 @@ class ProfileSummaryCard extends GetView<AuthController> {
           label,
           style: TextStyle(
             fontSize: responsive.responsiveValue(
-              mobile: 12.sp,
-              tablet: 14.sp,
+              mobile: 12,
+              tablet: 14,
             ),
             color: Colors.grey[600],
           ),

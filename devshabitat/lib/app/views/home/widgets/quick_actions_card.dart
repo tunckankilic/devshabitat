@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:flutter_screenutil/flutter_screenutil.dart';
 import '../../../controllers/home_controller.dart';
 import '../../../controllers/responsive_controller.dart';
 
@@ -16,8 +15,8 @@ class QuickActionsCard extends GetView<HomeController> {
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(
           responsive.responsiveValue(
-            mobile: 16.r,
-            tablet: 20.r,
+            mobile: 16,
+            tablet: 20,
           ),
         ),
       ),
@@ -32,35 +31,32 @@ class QuickActionsCard extends GetView<HomeController> {
               'Hızlı Eylemler',
               style: TextStyle(
                 fontSize: responsive.responsiveValue(
-                  mobile: 18.sp,
-                  tablet: 22.sp,
+                  mobile: 18,
+                  tablet: 22,
                 ),
                 fontWeight: FontWeight.bold,
               ),
             ),
             SizedBox(
-                height: responsive.responsiveValue(mobile: 16.h, tablet: 20.h)),
+                height: responsive.responsiveValue(mobile: 16, tablet: 20)),
             _buildActionButton(
               icon: Icons.add_circle_outline,
               label: 'Yeni Proje',
               onTap: () => Get.toNamed('/new-project'),
             ),
-            SizedBox(
-                height: responsive.responsiveValue(mobile: 8.h, tablet: 12.h)),
+            SizedBox(height: responsive.responsiveValue(mobile: 8, tablet: 12)),
             _buildActionButton(
               icon: Icons.people_outline,
               label: 'Bağlantı Ekle',
               onTap: () => Get.toNamed('/connections'),
             ),
-            SizedBox(
-                height: responsive.responsiveValue(mobile: 8.h, tablet: 12.h)),
+            SizedBox(height: responsive.responsiveValue(mobile: 8, tablet: 12)),
             _buildActionButton(
               icon: Icons.article_outlined,
               label: 'Blog Yaz',
               onTap: () => Get.toNamed('/new-blog'),
             ),
-            SizedBox(
-                height: responsive.responsiveValue(mobile: 8.h, tablet: 12.h)),
+            SizedBox(height: responsive.responsiveValue(mobile: 8, tablet: 12)),
             _buildActionButton(
               icon: Icons.event_outlined,
               label: 'Etkinlik Oluştur',
@@ -83,8 +79,8 @@ class QuickActionsCard extends GetView<HomeController> {
       onTap: onTap,
       borderRadius: BorderRadius.circular(
         responsive.responsiveValue(
-          mobile: 8.r,
-          tablet: 12.r,
+          mobile: 8,
+          tablet: 12,
         ),
       ),
       child: Container(
@@ -96,8 +92,8 @@ class QuickActionsCard extends GetView<HomeController> {
           border: Border.all(color: Colors.grey[300]!),
           borderRadius: BorderRadius.circular(
             responsive.responsiveValue(
-              mobile: 8.r,
-              tablet: 12.r,
+              mobile: 8,
+              tablet: 12,
             ),
           ),
         ),
@@ -106,18 +102,17 @@ class QuickActionsCard extends GetView<HomeController> {
             Icon(
               icon,
               size: responsive.responsiveValue(
-                mobile: 24.r,
-                tablet: 28.r,
+                mobile: 24,
+                tablet: 28,
               ),
             ),
-            SizedBox(
-                width: responsive.responsiveValue(mobile: 12.w, tablet: 16.w)),
+            SizedBox(width: responsive.responsiveValue(mobile: 12, tablet: 16)),
             Text(
               label,
               style: TextStyle(
                 fontSize: responsive.responsiveValue(
-                  mobile: 16.sp,
-                  tablet: 18.sp,
+                  mobile: 16,
+                  tablet: 18,
                 ),
                 fontWeight: FontWeight.w500,
               ),
@@ -126,8 +121,8 @@ class QuickActionsCard extends GetView<HomeController> {
             Icon(
               Icons.arrow_forward_ios,
               size: responsive.responsiveValue(
-                mobile: 16.r,
-                tablet: 18.r,
+                mobile: 16,
+                tablet: 18,
               ),
               color: Colors.grey[600],
             ),
