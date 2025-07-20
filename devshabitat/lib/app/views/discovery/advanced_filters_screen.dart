@@ -4,7 +4,6 @@ import '../../controllers/filter_controller.dart';
 import '../../controllers/responsive_controller.dart';
 import '../../services/responsive_performance_service.dart';
 import '../../widgets/responsive/responsive_text.dart';
-import '../../widgets/responsive/animated_responsive_wrapper.dart';
 
 class AdvancedFiltersScreen extends GetView<FilterController> {
   const AdvancedFiltersScreen({super.key});
@@ -331,7 +330,6 @@ class AdvancedFiltersScreen extends GetView<FilterController> {
 
   Widget _buildExperienceSection() {
     final responsive = Get.find<ResponsiveController>();
-    final performanceService = Get.find<ResponsivePerformanceService>();
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -482,7 +480,6 @@ class AdvancedFiltersScreen extends GetView<FilterController> {
 
   Widget _buildSavedFiltersSection(BuildContext context) {
     final responsive = Get.find<ResponsiveController>();
-    final performanceService = Get.find<ResponsivePerformanceService>();
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,

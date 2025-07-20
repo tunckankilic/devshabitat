@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:get/get.dart';
 import 'package:devshabitat/app/controllers/responsive_controller.dart';
 
 class LocationFilterWidget extends StatelessWidget {

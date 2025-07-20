@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:devshabitat/app/controllers/responsive_controller.dart';
-import 'package:devshabitat/app/utils/performance_optimizer.dart';
 import 'package:devshabitat/app/services/navigation_service.dart';
 import 'package:devshabitat/app/controllers/navigation_controller.dart';
 import 'package:devshabitat/app/views/main_wrapper.dart';
@@ -89,7 +88,6 @@ class ResponsivePerformanceTester {
       final stopwatch = Stopwatch()..start();
 
       // Build widget and measure render time
-      final widget = widgetBuilder();
       final renderTime = stopwatch.elapsedMilliseconds.toDouble();
 
       // Simulate FPS (60 FPS target)

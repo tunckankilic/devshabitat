@@ -27,7 +27,6 @@ class ResponsiveSafeArea extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final responsive = Get.find<ResponsiveController>();
-    final mediaQuery = MediaQuery.of(context);
 
     EdgeInsets finalMinimum = minimum ?? EdgeInsets.zero;
     if (adaptivePadding) {

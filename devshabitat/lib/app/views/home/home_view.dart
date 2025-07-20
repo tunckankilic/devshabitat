@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../../controllers/home_controller.dart';
-import '../../controllers/responsive_controller.dart';
 import '../base/base_view.dart';
 import 'widgets/profile_summary_card.dart';
 import 'widgets/connections_overview_card.dart';
