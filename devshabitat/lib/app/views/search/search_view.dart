@@ -5,7 +5,6 @@ import '../../models/message_model.dart';
 import '../../controllers/responsive_controller.dart';
 import '../../services/responsive_performance_service.dart';
 import '../../widgets/responsive/responsive_text.dart';
-import '../../widgets/responsive/animated_responsive_wrapper.dart';
 
 class SearchView extends GetView<MessageSearchController> {
   const SearchView({super.key});
@@ -13,7 +12,6 @@ class SearchView extends GetView<MessageSearchController> {
   @override
   Widget build(BuildContext context) {
     final responsive = Get.find<ResponsiveController>();
-    final performanceService = Get.find<ResponsivePerformanceService>();
 
     return Scaffold(
       appBar: AppBar(

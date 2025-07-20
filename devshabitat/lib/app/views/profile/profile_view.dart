@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import '../../controllers/profile_controller.dart';
-import '../../controllers/responsive_controller.dart';
 import '../base/base_view.dart';
 import 'widgets/github_repo_card.dart';
 import '../../widgets/adaptive_touch_target.dart';

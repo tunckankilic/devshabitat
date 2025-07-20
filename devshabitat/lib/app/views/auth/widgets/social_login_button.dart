@@ -1,8 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../../../controllers/responsive_controller.dart';
-import '../../../controllers/auth_controller.dart';
-import '../../../services/responsive_performance_service.dart';
 
 class SocialLoginButton extends StatelessWidget {
   late final _responsiveController = Get.find<ResponsiveController>();

@@ -243,8 +243,6 @@ class ResponsiveImage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final responsive = Get.find<ResponsiveController>();
-
     Widget image = Image.network(
       imageUrl,
       width: width,

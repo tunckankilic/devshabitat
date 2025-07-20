@@ -55,7 +55,7 @@ class CommunityStatsWidget extends StatelessWidget {
                 child: _buildStatItem(
                   responsive,
                   'Etkinlikler',
-                  '${community.eventCount ?? 0}',
+                  '${community.eventCount}',
                   Icons.event,
                 ),
               ),

@@ -3,7 +3,6 @@ import 'package:get/get.dart';
 import 'package:devshabitat/app/controllers/event/event_controller.dart';
 import 'package:devshabitat/app/models/event/event_model.dart';
 import '../base/base_view.dart';
-import '../../widgets/adaptive_touch_target.dart';
 import '../../widgets/responsive/responsive_safe_area.dart';
 import '../../widgets/responsive/responsive_text.dart';
 import '../../widgets/responsive/responsive_overflow_handler.dart'
