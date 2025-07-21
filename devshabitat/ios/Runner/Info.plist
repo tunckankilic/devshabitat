@@ -30,9 +30,21 @@
 				<string>$(PRODUCT_BUNDLE_IDENTIFIER)</string>
 			</array>
 		</dict>
+		<!-- GitHub OAuth için URL scheme -->
+		<dict>
+			<key>CFBundleURLName</key>
+			<string>GitHub OAuth</string>
+			<key>CFBundleURLSchemes</key>
+			<array>
+				<string>com.tunckankilic.github</string>
+			</array>
+		</dict>
 	</array>
 	<key>CFBundleVersion</key>
 	<string>$(FLUTTER_BUILD_NUMBER)</string>
+	<!-- Google Maps API Key -->
+	<key>GoogleMapsAPIKey</key>
+	<string>AIzaSyBpvPVP-DSCBjIIjzjP_h71QxPXXZPe7Bc</string>
 	<key>ITSAppUsesNonExemptEncryption</key>
 	<false/>
 	<key>LSRequiresIPhoneOS</key>

@@ -90,7 +90,6 @@ dependencies:
   shimmer: ^3.0.0
   sign_in_with_apple: ^7.0.1
   table_calendar: ^3.0.9
-  tflite_flutter: ^0.11.0
   timeago: ^3.6.0
   timezone: ^0.10.1
   url_launcher: ^6.2.2
