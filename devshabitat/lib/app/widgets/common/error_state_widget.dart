@@ -1,3 +1,4 @@
+import 'package:devshabitat/app/constants/app_strings.dart';
 import 'package:flutter/material.dart';
 import 'package:lottie/lottie.dart';
 import '../../constants/app_assets.dart';
@@ -48,7 +49,7 @@ class ErrorStateWidget extends StatelessWidget {
               FilledButton.icon(
                 onPressed: onRetry,
                 icon: const Icon(Icons.refresh),
-                label: const Text('Tekrar Dene'),
+                label: const Text(AppStrings.retry),
                 style: FilledButton.styleFrom(
                   backgroundColor: theme.colorScheme.errorContainer,
                   foregroundColor: theme.colorScheme.onErrorContainer,
@@ -73,7 +74,7 @@ class NetworkErrorWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ErrorStateWidget(
-      message: 'İnternet bağlantısı hatası. Lütfen bağlantınızı kontrol edin.',
+      message: AppStrings.networkError,
       onRetry: onRetry,
       lottieAsset: AppAssets.noConnectionAnimation,
     );
@@ -91,7 +92,7 @@ class ServerErrorWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ErrorStateWidget(
-      message: 'Sunucu hatası. Lütfen daha sonra tekrar deneyin.',
+      message: AppStrings.serverError,
       onRetry: onRetry,
       lottieAsset: AppAssets.serverErrorAnimation,
     );

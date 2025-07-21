@@ -1,5 +1,6 @@
 // ignore_for_file: must_be_immutable
 
+import 'package:devshabitat/app/constants/app_strings.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../../controllers/feed_controller.dart';
@@ -38,17 +39,17 @@ class FeedView extends StatelessWidget with PerformanceOptimizer {
       loadingWidget: const Center(
         child: CircularProgressIndicator(),
       ),
-      emptyWidget: const Center(
-        child: Text('Henüz gönderi yok'),
+      emptyWidget: Center(
+        child: Text(AppStrings.noPosts),
       ),
       errorWidget: Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            const Text('Feed yüklenirken bir hata oluştu'),
+            Text(AppStrings.errorLoadingFeed),
             ElevatedButton(
               onPressed: () => controller.refreshFeed(),
-              child: const Text('Tekrar Dene'),
+              child: Text(AppStrings.tryAgain),
             ),
           ],
         ),

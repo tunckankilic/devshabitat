@@ -1,3 +1,4 @@
+import 'package:devshabitat/app/constants/app_strings.dart';
 import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 
@@ -29,32 +30,32 @@ class MapControlsWidget extends StatelessWidget {
           _buildControlButton(
             icon: Icons.add,
             onPressed: onZoomIn,
-            tooltip: 'Yakınlaştır',
+            tooltip: AppStrings.zoomIn,
           ),
           const SizedBox(height: 8),
           _buildControlButton(
             icon: Icons.remove,
             onPressed: onZoomOut,
-            tooltip: 'Uzaklaştır',
+            tooltip: AppStrings.zoomOut,
           ),
           const SizedBox(height: 8),
           _buildControlButton(
             icon: Icons.my_location,
             onPressed: onLocateMe,
-            tooltip: 'Konumumu Bul',
+            tooltip: AppStrings.locateMe,
           ),
           const SizedBox(height: 8),
           _buildControlButton(
             icon:
                 currentMapType == MapType.normal ? Icons.map : Icons.satellite,
             onPressed: onToggleMapType,
-            tooltip: 'Harita Tipini Değiştir',
+            tooltip: AppStrings.changeMapType,
           ),
           const SizedBox(height: 8),
           _buildControlButton(
             icon: Icons.filter_list,
             onPressed: onToggleFilters,
-            tooltip: 'Filtreleri Göster',
+            tooltip: AppStrings.showFilters,
           ),
         ],
       ),

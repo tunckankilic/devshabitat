@@ -1,3 +1,4 @@
+import 'package:devshabitat/app/constants/app_strings.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../../controllers/filter_controller.dart';
@@ -16,7 +17,7 @@ class AdvancedFiltersScreen extends GetView<FilterController> {
     return Scaffold(
       appBar: AppBar(
         title: ResponsiveText(
-          'Gelişmiş Filtreler',
+          AppStrings.advancedFilters,
           style: TextStyle(
             fontSize: responsive.responsiveValue(
               mobile: 18,
@@ -28,7 +29,7 @@ class AdvancedFiltersScreen extends GetView<FilterController> {
           TextButton(
             onPressed: controller.resetFilters,
             child: ResponsiveText(
-              'Sıfırla',
+              AppStrings.reset,
               style: TextStyle(
                 fontSize: responsive.responsiveValue(
                   mobile: 16,
@@ -105,7 +106,7 @@ class AdvancedFiltersScreen extends GetView<FilterController> {
               ),
             ),
             child: ResponsiveText(
-              'Filtreleri Uygula',
+              AppStrings.applyFilters,
               style: TextStyle(
                 fontSize: responsive.responsiveValue(
                   mobile: 16,
@@ -127,7 +128,7 @@ class AdvancedFiltersScreen extends GetView<FilterController> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         ResponsiveText(
-          'Yetenekler',
+          AppStrings.skills,
           style: TextStyle(
             fontSize: responsive.responsiveValue(
               mobile: 18,
@@ -198,7 +199,7 @@ class AdvancedFiltersScreen extends GetView<FilterController> {
                 ),
               ),
               decoration: InputDecoration(
-                hintText: 'Yetenek ara...',
+                hintText: AppStrings.searchSkills,
                 hintStyle: TextStyle(
                   fontSize: responsive.responsiveValue(
                     mobile: 16,
@@ -241,7 +242,7 @@ class AdvancedFiltersScreen extends GetView<FilterController> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         ResponsiveText(
-          'Konum',
+          AppStrings.location,
           style: TextStyle(
             fontSize: responsive.responsiveValue(
               mobile: 18,
@@ -265,7 +266,7 @@ class AdvancedFiltersScreen extends GetView<FilterController> {
             ),
           ),
           decoration: InputDecoration(
-            hintText: 'Şehir veya ülke girin',
+            hintText: AppStrings.enterCityOrCountry,
             hintStyle: TextStyle(
               fontSize: responsive.responsiveValue(
                 mobile: 16,
@@ -335,7 +336,7 @@ class AdvancedFiltersScreen extends GetView<FilterController> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         ResponsiveText(
-          'Deneyim',
+          AppStrings.experience,
           style: TextStyle(
             fontSize: responsive.responsiveValue(
               mobile: 18,
@@ -376,7 +377,7 @@ class AdvancedFiltersScreen extends GetView<FilterController> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         ResponsiveText(
-          'Şirket',
+          AppStrings.company,
           style: TextStyle(
             fontSize: responsive.responsiveValue(
               mobile: 18,
@@ -400,7 +401,7 @@ class AdvancedFiltersScreen extends GetView<FilterController> {
             ),
           ),
           decoration: InputDecoration(
-            hintText: 'Şirket adı girin',
+            hintText: AppStrings.enterCompanyName,
             hintStyle: TextStyle(
               fontSize: responsive.responsiveValue(
                 mobile: 16,
@@ -441,7 +442,7 @@ class AdvancedFiltersScreen extends GetView<FilterController> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         ResponsiveText(
-          'Çevrimiçi Durumu',
+          AppStrings.onlineStatus,
           style: TextStyle(
             fontSize: responsive.responsiveValue(
               mobile: 18,
@@ -458,7 +459,7 @@ class AdvancedFiltersScreen extends GetView<FilterController> {
         ),
         Obx(() => SwitchListTile(
               title: ResponsiveText(
-                'Sadece çevrimiçi kullanıcıları göster',
+                AppStrings.showOnlyOnlineUsers,
                 style: TextStyle(
                   fontSize: responsive.responsiveValue(
                     mobile: 14,
@@ -488,7 +489,7 @@ class AdvancedFiltersScreen extends GetView<FilterController> {
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
             ResponsiveText(
-              'Kayıtlı Filtreler',
+              AppStrings.savedFilters,
               style: TextStyle(
                 fontSize: responsive.responsiveValue(
                   mobile: 18,
@@ -572,7 +573,7 @@ class AdvancedFiltersScreen extends GetView<FilterController> {
       context: context,
       builder: (context) => AlertDialog(
         title: ResponsiveText(
-          'Filtreyi Kaydet',
+          AppStrings.saveFilter,
           style: TextStyle(
             fontSize: responsive.responsiveValue(
               mobile: 18,
@@ -589,7 +590,7 @@ class AdvancedFiltersScreen extends GetView<FilterController> {
             ),
           ),
           decoration: InputDecoration(
-            hintText: 'Filtre adı',
+            hintText: AppStrings.filterName,
             hintStyle: TextStyle(
               fontSize: responsive.responsiveValue(
                 mobile: 16,
@@ -615,7 +616,7 @@ class AdvancedFiltersScreen extends GetView<FilterController> {
           TextButton(
             onPressed: () => Get.back(),
             child: ResponsiveText(
-              'İptal',
+              AppStrings.cancel,
               style: TextStyle(
                 fontSize: responsive.responsiveValue(
                   mobile: 16,
@@ -632,7 +633,7 @@ class AdvancedFiltersScreen extends GetView<FilterController> {
               }
             },
             child: ResponsiveText(
-              'Kaydet',
+              AppStrings.save,
               style: TextStyle(
                 fontSize: responsive.responsiveValue(
                   mobile: 16,

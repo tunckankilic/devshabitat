@@ -1,3 +1,4 @@
+import 'package:devshabitat/app/constants/app_strings.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../../../controllers/home_controller.dart';
@@ -31,7 +32,7 @@ class GithubStatsCard extends GetView<HomeController> {
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Text(
-                  'GitHub İstatistikleri',
+                  AppStrings.githubStats,
                   style: TextStyle(
                     fontSize: responsive.responsiveValue(
                       mobile: 18,
@@ -63,7 +64,7 @@ class GithubStatsCard extends GetView<HomeController> {
               return Column(
                 children: [
                   _buildStatRow(
-                    label: 'Toplam Commit',
+                    label: AppStrings.totalCommits,
                     value: stats['totalCommits']?.toString() ?? '0',
                     icon: Icons.commit,
                   ),
@@ -71,7 +72,7 @@ class GithubStatsCard extends GetView<HomeController> {
                       height:
                           responsive.responsiveValue(mobile: 12, tablet: 16)),
                   _buildStatRow(
-                    label: 'Açık PR\'lar',
+                    label: AppStrings.openPRs,
                     value: stats['openPRs']?.toString() ?? '0',
                     icon: Icons.call_merge,
                   ),
@@ -79,7 +80,7 @@ class GithubStatsCard extends GetView<HomeController> {
                       height:
                           responsive.responsiveValue(mobile: 12, tablet: 16)),
                   _buildStatRow(
-                    label: 'Katkı Yapılan Repolar',
+                    label: AppStrings.contributedRepos,
                     value: stats['contributedRepos']?.toString() ?? '0',
                     icon: Icons.source,
                   ),
@@ -87,7 +88,7 @@ class GithubStatsCard extends GetView<HomeController> {
                       height:
                           responsive.responsiveValue(mobile: 12, tablet: 16)),
                   _buildStatRow(
-                    label: 'Yıldızlı Repolar',
+                    label: AppStrings.starredRepos,
                     value: stats['starredRepos']?.toString() ?? '0',
                     icon: Icons.star_border,
                   ),

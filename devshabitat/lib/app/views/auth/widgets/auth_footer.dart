@@ -1,3 +1,4 @@
+import 'package:devshabitat/app/constants/app_strings.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../../../controllers/responsive_controller.dart';
@@ -25,7 +26,7 @@ class AuthFooter extends StatelessWidget {
               // Şifremi unuttum işlevi
             },
             child: Text(
-              'Şifremi Unuttum',
+              AppStrings.forgotPassword,
               style: TextStyle(
                 fontSize: responsive.responsiveValue(mobile: 14, tablet: 16),
                 color: Theme.of(context).primaryColor,
@@ -37,7 +38,7 @@ class AuthFooter extends StatelessWidget {
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Text(
-              isLogin ? 'Hesabınız yok mu?' : 'Zaten hesabınız var mı?',
+              isLogin ? AppStrings.noAccount : AppStrings.alreadyHaveAccount,
               style: TextStyle(
                 fontSize: responsive.responsiveValue(mobile: 14, tablet: 16),
                 color: Colors.grey[600],
@@ -46,7 +47,7 @@ class AuthFooter extends StatelessWidget {
             TextButton(
               onPressed: onToggleAuth,
               child: Text(
-                isLogin ? 'Kayıt Ol' : 'Giriş Yap',
+                isLogin ? AppStrings.register : AppStrings.login,
                 style: TextStyle(
                   fontSize: responsive.responsiveValue(mobile: 14, tablet: 16),
                   fontWeight: FontWeight.w600,
@@ -57,7 +58,7 @@ class AuthFooter extends StatelessWidget {
         ),
         SizedBox(height: responsive.responsiveValue(mobile: 16, tablet: 24)),
         Text(
-          '© 2024 DevHabitat. Tüm hakları saklıdır.',
+          '© 2024 DevHabitat. All rights reserved.',
           style: TextStyle(
             fontSize: responsive.responsiveValue(mobile: 12, tablet: 14),
             color: Colors.grey[500],

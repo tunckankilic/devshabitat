@@ -1,5 +1,6 @@
 // ignore_for_file: deprecated_member_use
 
+import 'package:devshabitat/app/constants/app_strings.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:cached_network_image/cached_network_image.dart';
@@ -30,7 +31,7 @@ class PostCard extends StatelessWidget {
         children: [
           ListTile(
             leading: const Icon(Icons.report),
-            title: const Text('Gönderiyi Şikayet Et'),
+            title: const Text(AppStrings.reportPost),
             onTap: () {
               Get.back();
               feedController.reportPost(post.id);
@@ -39,7 +40,7 @@ class PostCard extends StatelessWidget {
           if (post.userId == feedController.currentUserId)
             ListTile(
               leading: const Icon(Icons.delete),
-              title: const Text('Gönderiyi Sil'),
+              title: const Text(AppStrings.deletePost),
               onTap: () {
                 Get.back();
                 feedController.deletePost(post.id);
@@ -70,11 +71,10 @@ class PostCard extends StatelessWidget {
                 return ListTile(
                   leading: CircleAvatar(
                     backgroundImage: CachedNetworkImageProvider(
-                      userData?['photoURL'] ??
-                          'https://via.placeholder.com/150',
+                      userData?['photoURL'] ?? AppStrings.defaultPicUrl,
                     ),
                   ),
-                  title: Text(userData?['displayName'] ?? 'Kullanıcı'),
+                  title: Text(userData?['displayName'] ?? AppStrings.noName),
                   subtitle: Text(
                     timeago.format(post.createdAt, locale: 'tr'),
                     style: TextStyle(color: Colors.grey[600]),
@@ -143,7 +143,7 @@ class PostCard extends StatelessWidget {
                         const Icon(Icons.code, size: 20),
                         const SizedBox(width: 8),
                         Text(
-                          'GitHub Repository',
+                          AppStrings.githubRepo,
                           style: Theme.of(context).textTheme.titleMedium,
                         ),
                       ],
@@ -226,8 +226,9 @@ class PostCard extends StatelessWidget {
                     icon: const Icon(Icons.share_outlined),
                     onPressed: () {
                       Share.share(
-                        'DevShabitat\'ta bir gönderi: ${post.content}\n\nGönderiyi görüntüle: https://devshabitat.com/posts/${post.id}',
-                        subject: 'DevShabitat Gönderi Paylaşımı',
+                        AppStrings.postSharingmessage(
+                            content: post.content, postId: post.id),
+                        subject: AppStrings.postSharing,
                       );
                     },
                   ),

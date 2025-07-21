@@ -1,10 +1,12 @@
+import 'package:devshabitat/app/constants/app_strings.dart';
+import 'package:devshabitat/app/views/auth/widgets/adaptive_loading_indicator.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../../controllers/community/moderation_controller.dart';
 import '../../models/community/moderation_model.dart';
 
 class ModerationView extends GetView<ModerationController> {
-  const ModerationView({Key? key}) : super(key: key);
+  const ModerationView({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -12,11 +14,11 @@ class ModerationView extends GetView<ModerationController> {
       length: 2,
       child: Scaffold(
         appBar: AppBar(
-          title: const Text('Moderasyon'),
+          title: const Text(AppStrings.moderation),
           bottom: const TabBar(
             tabs: [
-              Tab(text: 'Bekleyen'),
-              Tab(text: 'Tamamlanan'),
+              Tab(text: AppStrings.pending),
+              Tab(text: AppStrings.completed),
             ],
           ),
         ),
@@ -33,7 +35,7 @@ class ModerationView extends GetView<ModerationController> {
   Widget _buildPendingModerations() {
     return Obx(
       () => controller.isLoading.value
-          ? const Center(child: CircularProgressIndicator())
+          ? Center(child: AdaptiveLoadingIndicator())
           : ListView.builder(
               itemCount: controller.pendingModerations.length,
               itemBuilder: (context, index) {
@@ -47,7 +49,7 @@ class ModerationView extends GetView<ModerationController> {
   Widget _buildResolvedModerations() {
     return Obx(
       () => controller.isLoading.value
-          ? const Center(child: CircularProgressIndicator())
+          ? Center(child: AdaptiveLoadingIndicator())
           : ListView.builder(
               itemCount: controller.resolvedModerations.length,
               itemBuilder: (context, index) {
@@ -78,25 +80,25 @@ class ModerationView extends GetView<ModerationController> {
             ),
             const SizedBox(height: 8),
             Text(
-              'İçerik Türü: ${_getContentTypeText(moderation.contentType)}',
+              '${AppStrings.contentType}: ${_getContentTypeText(moderation.contentType)}',
               style: Get.textTheme.bodyMedium,
             ),
             const SizedBox(height: 4),
             Text(
-              'Neden: ${controller.getModerationReasonText(moderation.reason)}',
+              '${AppStrings.reason}: ${controller.getModerationReasonText(moderation.reason)}',
               style: Get.textTheme.bodyMedium,
             ),
             if (moderation.customReason != null) ...[
               const SizedBox(height: 4),
               Text(
-                'Açıklama: ${moderation.customReason}',
+                '${AppStrings.description}: ${moderation.customReason}',
                 style: Get.textTheme.bodyMedium,
               ),
             ],
             if (moderation.note != null) ...[
               const SizedBox(height: 4),
               Text(
-                'Not: ${moderation.note}',
+                '${AppStrings.note}: ${moderation.note}',
                 style: Get.textTheme.bodyMedium,
               ),
             ],
@@ -107,7 +109,7 @@ class ModerationView extends GetView<ModerationController> {
                 children: [
                   TextButton(
                     onPressed: () => _showModerationDialog(moderation),
-                    child: const Text('İşlem Yap'),
+                    child: Text(AppStrings.process),
                   ),
                 ],
               ),
@@ -155,7 +157,7 @@ class ModerationView extends GetView<ModerationController> {
             mainAxisSize: MainAxisSize.min,
             children: [
               const Text(
-                'Moderasyon İşlemi',
+                AppStrings.moderationProcess,
                 style: TextStyle(
                   fontSize: 20,
                   fontWeight: FontWeight.bold,
@@ -165,7 +167,7 @@ class ModerationView extends GetView<ModerationController> {
               TextField(
                 controller: noteController,
                 decoration: const InputDecoration(
-                  labelText: 'Not',
+                  labelText: AppStrings.note,
                   border: OutlineInputBorder(),
                 ),
                 maxLines: 3,
@@ -175,7 +177,7 @@ class ModerationView extends GetView<ModerationController> {
                 mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                 children: [
                   _buildActionButton(
-                    label: 'Uyar',
+                    label: AppStrings.warn,
                     icon: Icons.warning,
                     color: Colors.orange,
                     onPressed: () => _handleModeration(
@@ -185,7 +187,7 @@ class ModerationView extends GetView<ModerationController> {
                     ),
                   ),
                   _buildActionButton(
-                    label: 'Sil',
+                    label: AppStrings.delete,
                     icon: Icons.delete,
                     color: Colors.red,
                     onPressed: () => _handleModeration(
@@ -195,7 +197,7 @@ class ModerationView extends GetView<ModerationController> {
                     ),
                   ),
                   _buildActionButton(
-                    label: 'Yasakla',
+                    label: AppStrings.ban,
                     icon: Icons.block,
                     color: Colors.purple,
                     onPressed: () => _handleModeration(
@@ -211,7 +213,7 @@ class ModerationView extends GetView<ModerationController> {
                 mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                 children: [
                   _buildActionButton(
-                    label: 'Sustur',
+                    label: AppStrings.mute,
                     icon: Icons.volume_off,
                     color: Colors.blue,
                     onPressed: () => _handleModeration(
@@ -221,7 +223,7 @@ class ModerationView extends GetView<ModerationController> {
                     ),
                   ),
                   _buildActionButton(
-                    label: 'Onayla',
+                    label: AppStrings.approve,
                     icon: Icons.check_circle,
                     color: Colors.green,
                     onPressed: () => _handleModeration(
@@ -231,7 +233,7 @@ class ModerationView extends GetView<ModerationController> {
                     ),
                   ),
                   _buildActionButton(
-                    label: 'Reddet',
+                    label: AppStrings.reject,
                     icon: Icons.cancel,
                     color: Colors.red,
                     onPressed: () => _handleModeration(
@@ -290,15 +292,15 @@ class ModerationView extends GetView<ModerationController> {
   String _getContentTypeText(ContentType type) {
     switch (type) {
       case ContentType.post:
-        return 'Gönderi';
+        return AppStrings.post;
       case ContentType.comment:
-        return 'Yorum';
+        return AppStrings.comment;
       case ContentType.event:
-        return 'Etkinlik';
+        return AppStrings.event;
       case ContentType.resource:
-        return 'Kaynak';
+        return AppStrings.resource;
       case ContentType.profile:
-        return 'Profil';
+        return AppStrings.profile;
     }
   }
 }

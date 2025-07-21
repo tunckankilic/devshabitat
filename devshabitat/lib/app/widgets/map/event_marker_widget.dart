@@ -1,3 +1,4 @@
+import 'package:devshabitat/app/constants/app_strings.dart';
 import 'package:flutter/material.dart';
 
 class EventMarkerWidget extends StatelessWidget {
@@ -9,24 +10,24 @@ class EventMarkerWidget extends StatelessWidget {
   final VoidCallback? onTap;
 
   const EventMarkerWidget({
-    Key? key,
+    super.key,
     required this.eventId,
     required this.title,
     required this.dateTime,
     required this.attendeeCount,
     required this.eventType,
     this.onTap,
-  }) : super(key: key);
+  });
 
   Color _getEventTypeColor() {
     switch (eventType.toLowerCase()) {
-      case 'workshop':
+      case AppStrings.workshop:
         return Colors.blue;
-      case 'meetup':
+      case AppStrings.meetup:
         return Colors.green;
-      case 'conference':
+      case AppStrings.conference:
         return Colors.purple;
-      case 'hackathon':
+      case AppStrings.hackathon:
         return Colors.orange;
       default:
         return Colors.grey;

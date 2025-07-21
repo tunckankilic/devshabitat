@@ -1,3 +1,4 @@
+import 'package:devshabitat/app/constants/app_strings.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:devshabitat/app/models/event/event_model.dart';
@@ -79,8 +80,8 @@ class EventCard extends StatelessWidget {
                         ? Icons.computer
                         : Icons.location_on,
                     text: event.location == EventLocation.online
-                        ? 'Online'
-                        : event.venueAddress ?? 'Konum belirtilmemiş',
+                        ? AppStrings.online
+                        : event.venueAddress ?? AppStrings.locationNotSet,
                   ),
                   const SizedBox(height: 8),
                   _buildInfoRow(
@@ -91,7 +92,7 @@ class EventCard extends StatelessWidget {
                   _buildInfoRow(
                     icon: Icons.person,
                     text:
-                        '${event.currentParticipants}/${event.participantLimit} katılımcı',
+                        '${event.currentParticipants}/${event.participantLimit} ${AppStrings.participants}',
                   ),
                 ],
               ),

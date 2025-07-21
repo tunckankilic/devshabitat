@@ -1,4 +1,7 @@
+// ignore_for_file: use_build_context_synchronously
+
 import 'dart:io';
+import 'package:devshabitat/app/constants/app_strings.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:image/image.dart' as img;
@@ -13,14 +16,14 @@ class ImageUploadWidget extends StatelessWidget {
   final String label;
 
   const ImageUploadWidget({
-    Key? key,
+    super.key,
     required this.onImageSelected,
     this.imageUrl,
     this.aspectRatio = 1.0,
     this.maxWidth = 1024,
     this.maxHeight = 1024,
     required this.label,
-  }) : super(key: key);
+  });
 
   Future<void> _pickImage(BuildContext context) async {
     try {
@@ -136,7 +139,7 @@ class ImageUploadWidget extends StatelessWidget {
         ),
         const SizedBox(height: 8),
         Text(
-          'Resim Seç',
+          AppStrings.selectImage,
           style: TextStyle(
             color: Colors.grey[600],
             fontSize: 16,

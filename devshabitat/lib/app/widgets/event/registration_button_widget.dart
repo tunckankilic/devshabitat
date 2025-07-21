@@ -1,3 +1,4 @@
+import 'package:devshabitat/app/constants/app_strings.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:devshabitat/app/models/event/event_model.dart';
@@ -10,13 +11,13 @@ class RegistrationButtonWidget extends StatelessWidget {
   final VoidCallback onUnregister;
 
   const RegistrationButtonWidget({
-    Key? key,
+    super.key,
     required this.event,
     required this.isRegistered,
     required this.isLoading,
     required this.onRegister,
     required this.onUnregister,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -24,11 +25,11 @@ class RegistrationButtonWidget extends StatelessWidget {
     final bool isPast = event.endDate.isBefore(DateTime.now());
 
     if (isPast) {
-      return _buildDisabledButton('Etkinlik sona erdi');
+      return _buildDisabledButton(AppStrings.eventEnded);
     }
 
     if (isFull && !isRegistered) {
-      return _buildDisabledButton('Kontenjan dolu');
+      return _buildDisabledButton(AppStrings.quotaFull);
     }
 
     return Container(
@@ -62,7 +63,7 @@ class RegistrationButtonWidget extends StatelessWidget {
         const Icon(Icons.people_outline, size: 20),
         const SizedBox(width: 8),
         Text(
-          '${event.currentParticipants}/${event.participantLimit} katılımcı',
+          '${event.currentParticipants}/${event.participantLimit} ${AppStrings.participants}',
           style: const TextStyle(
             fontSize: 16,
             fontWeight: FontWeight.w500,
@@ -100,7 +101,7 @@ class RegistrationButtonWidget extends StatelessWidget {
               : Icons.check_circle_outline),
           const SizedBox(width: 8),
           Text(
-            isRegistered ? 'Kaydı İptal Et' : 'Kayıt Ol',
+            isRegistered ? AppStrings.cancelRegistration : AppStrings.register,
             style: const TextStyle(
               fontSize: 16,
               fontWeight: FontWeight.bold,

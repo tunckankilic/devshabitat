@@ -1,3 +1,4 @@
+import 'package:devshabitat/app/constants/app_strings.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../../../controllers/home_controller.dart';
@@ -28,7 +29,7 @@ class QuickActionsCard extends GetView<HomeController> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              'Hızlı Eylemler',
+              AppStrings.quickActions,
               style: TextStyle(
                 fontSize: responsive.responsiveValue(
                   mobile: 18,
@@ -41,25 +42,25 @@ class QuickActionsCard extends GetView<HomeController> {
                 height: responsive.responsiveValue(mobile: 16, tablet: 20)),
             _buildActionButton(
               icon: Icons.add_circle_outline,
-              label: 'Yeni Proje',
+              label: AppStrings.newProject,
               onTap: () => Get.toNamed('/new-project'),
             ),
             SizedBox(height: responsive.responsiveValue(mobile: 8, tablet: 12)),
             _buildActionButton(
               icon: Icons.people_outline,
-              label: 'Bağlantı Ekle',
+              label: AppStrings.addConnection,
               onTap: () => Get.toNamed('/connections'),
             ),
             SizedBox(height: responsive.responsiveValue(mobile: 8, tablet: 12)),
             _buildActionButton(
               icon: Icons.article_outlined,
-              label: 'Blog Yaz',
+              label: AppStrings.writeBlog,
               onTap: () => Get.toNamed('/new-blog'),
             ),
             SizedBox(height: responsive.responsiveValue(mobile: 8, tablet: 12)),
             _buildActionButton(
               icon: Icons.event_outlined,
-              label: 'Etkinlik Oluştur',
+              label: AppStrings.createEvent,
               onTap: () => Get.toNamed('/new-event'),
             ),
           ],

@@ -1,3 +1,5 @@
+// ignore_for_file: constant_identifier_names
+
 import 'package:get/get.dart';
 import '../event/event_service.dart';
 import '../../models/event/event_model.dart';

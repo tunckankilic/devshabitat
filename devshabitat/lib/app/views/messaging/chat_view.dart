@@ -1,5 +1,6 @@
 // ignore_for_file: must_be_immutable
 
+import 'package:devshabitat/app/constants/app_strings.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../../controllers/message/message_chat_controller.dart';
@@ -25,7 +26,7 @@ class ChatView extends BaseView<MessageChatController>
           title: Obx(() {
             final conversation = controller.currentConversation.value;
             if (conversation == null) {
-              return Text('Yükleniyor...',
+              return Text(AppStrings.loading,
                   style: TextStyle(
                       fontSize:
                           responsive.responsiveValue(mobile: 18, tablet: 20)));
@@ -58,7 +59,7 @@ class ChatView extends BaseView<MessageChatController>
                 if (controller.messages.isEmpty) {
                   return Center(
                     child: Text(
-                      'Henüz mesaj yok',
+                      AppStrings.noMessages,
                       style: TextStyle(
                           fontSize: responsive.responsiveValue(
                               mobile: 16, tablet: 18)),
@@ -113,7 +114,7 @@ class ChatView extends BaseView<MessageChatController>
                                 mobile: 16, tablet: 18)),
                         maxLines: null,
                         decoration: InputDecoration(
-                          hintText: 'Mesaj yazın...',
+                          hintText: AppStrings.writeYourMessage,
                           hintStyle: TextStyle(
                               fontSize: responsive.responsiveValue(
                                   mobile: 16, tablet: 18)),
@@ -222,7 +223,7 @@ class ChatView extends BaseView<MessageChatController>
                                 .responsiveValue(mobile: 8, tablet: 12)),
                           ),
                           child: Text(
-                            'Yanıtlanan mesaj',
+                            AppStrings.repliedMessage,
                             style: TextStyle(
                               fontSize: responsive.responsiveValue(
                                   mobile: 12, tablet: 14),
@@ -254,7 +255,7 @@ class ChatView extends BaseView<MessageChatController>
                           ),
                           if (message.isEdited)
                             Text(
-                              ' • düzenlendi',
+                              ' • ${AppStrings.edited}',
                               style: TextStyle(
                                 fontSize: responsive.responsiveValue(
                                     mobile: 12, tablet: 14),
@@ -316,7 +317,7 @@ class ChatView extends BaseView<MessageChatController>
                 leading: Icon(Icons.edit,
                     size: responsive.responsiveValue(mobile: 24, tablet: 28)),
                 title: Text(
-                  'Düzenle',
+                  AppStrings.edit,
                   style: TextStyle(
                       fontSize:
                           responsive.responsiveValue(mobile: 16, tablet: 18)),
@@ -330,7 +331,7 @@ class ChatView extends BaseView<MessageChatController>
                 leading: Icon(Icons.delete,
                     size: responsive.responsiveValue(mobile: 24, tablet: 28)),
                 title: Text(
-                  'Sil',
+                  AppStrings.delete,
                   style: TextStyle(
                       fontSize:
                           responsive.responsiveValue(mobile: 16, tablet: 18)),
@@ -345,7 +346,7 @@ class ChatView extends BaseView<MessageChatController>
               leading: Icon(Icons.reply,
                   size: responsive.responsiveValue(mobile: 24, tablet: 28)),
               title: Text(
-                'Yanıtla',
+                AppStrings.reply,
                 style: TextStyle(
                     fontSize:
                         responsive.responsiveValue(mobile: 16, tablet: 18)),
@@ -359,7 +360,7 @@ class ChatView extends BaseView<MessageChatController>
               leading: Icon(Icons.forward,
                   size: responsive.responsiveValue(mobile: 24, tablet: 28)),
               title: Text(
-                'İlet',
+                AppStrings.forward,
                 style: TextStyle(
                     fontSize:
                         responsive.responsiveValue(mobile: 16, tablet: 18)),
@@ -373,7 +374,7 @@ class ChatView extends BaseView<MessageChatController>
               leading: Icon(Icons.content_copy,
                   size: responsive.responsiveValue(mobile: 24, tablet: 28)),
               title: Text(
-                'Kopyala',
+                AppStrings.copy,
                 style: TextStyle(
                     fontSize:
                         responsive.responsiveValue(mobile: 16, tablet: 18)),
@@ -408,7 +409,7 @@ class ChatView extends BaseView<MessageChatController>
               leading: Icon(Icons.search,
                   size: responsive.responsiveValue(mobile: 24, tablet: 28)),
               title: Text(
-                'Mesajlarda Ara',
+                AppStrings.searchMessages,
                 style: TextStyle(
                     fontSize:
                         responsive.responsiveValue(mobile: 16, tablet: 18)),
@@ -422,7 +423,7 @@ class ChatView extends BaseView<MessageChatController>
               leading: Icon(Icons.notifications_off,
                   size: responsive.responsiveValue(mobile: 24, tablet: 28)),
               title: Text(
-                'Bildirimleri Sustur',
+                AppStrings.muteNotifications,
                 style: TextStyle(
                     fontSize:
                         responsive.responsiveValue(mobile: 16, tablet: 18)),
@@ -436,7 +437,7 @@ class ChatView extends BaseView<MessageChatController>
               leading: Icon(Icons.block,
                   size: responsive.responsiveValue(mobile: 24, tablet: 28)),
               title: Text(
-                'Engelle',
+                AppStrings.block,
                 style: TextStyle(
                     fontSize:
                         responsive.responsiveValue(mobile: 16, tablet: 18)),
@@ -450,7 +451,7 @@ class ChatView extends BaseView<MessageChatController>
               leading: Icon(Icons.delete,
                   size: responsive.responsiveValue(mobile: 24, tablet: 28)),
               title: Text(
-                'Konuşmayı Sil',
+                AppStrings.deleteConversation,
                 style: TextStyle(
                     fontSize:
                         responsive.responsiveValue(mobile: 16, tablet: 18)),
@@ -470,12 +471,12 @@ class ChatView extends BaseView<MessageChatController>
     Get.dialog(
       AlertDialog(
         title: Text(
-          'Mesajı Sil',
+          AppStrings.deleteMessage,
           style: TextStyle(
               fontSize: responsive.responsiveValue(mobile: 18, tablet: 20)),
         ),
         content: Text(
-          'Bu mesajı silmek istediğinize emin misiniz?',
+          AppStrings.confirmDeleteMessage,
           style: TextStyle(
               fontSize: responsive.responsiveValue(mobile: 16, tablet: 18)),
         ),
@@ -483,7 +484,7 @@ class ChatView extends BaseView<MessageChatController>
           TextButton(
             onPressed: () => Get.back(),
             child: Text(
-              'İptal',
+              AppStrings.cancel,
               style: TextStyle(
                   fontSize: responsive.responsiveValue(mobile: 14, tablet: 16)),
             ),
@@ -494,7 +495,7 @@ class ChatView extends BaseView<MessageChatController>
               controller.deleteMessage(message.id);
             },
             child: Text(
-              'Sil',
+              AppStrings.delete,
               style: TextStyle(
                 fontSize: responsive.responsiveValue(mobile: 14, tablet: 16),
                 color: Colors.red,
@@ -510,12 +511,12 @@ class ChatView extends BaseView<MessageChatController>
     Get.dialog(
       AlertDialog(
         title: Text(
-          'Konuşmayı Sil',
+          AppStrings.deleteConversation,
           style: TextStyle(
               fontSize: responsive.responsiveValue(mobile: 18, tablet: 20)),
         ),
         content: Text(
-          'Bu konuşmayı silmek istediğinize emin misiniz?',
+          AppStrings.confirmDeleteConversation,
           style: TextStyle(
               fontSize: responsive.responsiveValue(mobile: 16, tablet: 18)),
         ),
@@ -523,7 +524,7 @@ class ChatView extends BaseView<MessageChatController>
           TextButton(
             onPressed: () => Get.back(),
             child: Text(
-              'İptal',
+              AppStrings.cancel,
               style: TextStyle(
                   fontSize: responsive.responsiveValue(mobile: 14, tablet: 16)),
             ),
@@ -535,7 +536,7 @@ class ChatView extends BaseView<MessageChatController>
               controller.deleteConversation(conversationId);
             },
             child: Text(
-              'Sil',
+              AppStrings.delete,
               style: TextStyle(
                 fontSize: responsive.responsiveValue(mobile: 14, tablet: 16),
                 color: Colors.red,
@@ -554,13 +555,13 @@ class ChatView extends BaseView<MessageChatController>
     if (difference.inDays > 7) {
       return '${time.day}/${time.month}/${time.year}';
     } else if (difference.inDays > 0) {
-      return '${difference.inDays} gün önce';
+      return '${difference.inDays} days ago';
     } else if (difference.inHours > 0) {
-      return '${difference.inHours} saat önce';
+      return '${difference.inHours} hours ago';
     } else if (difference.inMinutes > 0) {
-      return '${difference.inMinutes} dk önce';
+      return '${difference.inMinutes} mins ago';
     } else {
-      return 'Şimdi';
+      return AppStrings.now;
     }
   }
 }

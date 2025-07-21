@@ -1,3 +1,4 @@
+import 'package:devshabitat/app/constants/app_strings.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../../controllers/community/community_manage_controller.dart';
@@ -6,18 +7,18 @@ import '../../widgets/community/membership_request_widget.dart';
 import '../../widgets/image_upload_widget.dart';
 
 class CommunityManageView extends GetView<CommunityManageController> {
-  const CommunityManageView({Key? key}) : super(key: key);
+  const CommunityManageView({super.key});
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Topluluk Yönetimi'),
+        title: Text(AppStrings.communityManagement),
         actions: [
           IconButton(
             icon: const Icon(Icons.delete),
             onPressed: () => _showDeleteConfirmation(context),
-            tooltip: 'Topluluğu Sil',
+            tooltip: AppStrings.deleteCommunity,
           ),
         ],
       ),
@@ -33,13 +34,13 @@ class CommunityManageView extends GetView<CommunityManageController> {
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   Text(
-                    'Hata: ${controller.error.value}',
+                    'Error: ${controller.error.value}',
                     textAlign: TextAlign.center,
                   ),
                   const SizedBox(height: 16),
                   ElevatedButton(
                     onPressed: controller.loadCommunity,
-                    child: const Text('Tekrar Dene'),
+                    child: Text(AppStrings.retry),
                   ),
                 ],
               ),
@@ -60,7 +61,7 @@ class CommunityManageView extends GetView<CommunityManageController> {
                     aspectRatio: 16 / 9,
                     maxWidth: 1920,
                     maxHeight: 1080,
-                    label: 'Kapak Fotoğrafı',
+                    label: AppStrings.coverPhoto,
                   ),
                   const SizedBox(height: 24),
 
@@ -68,12 +69,12 @@ class CommunityManageView extends GetView<CommunityManageController> {
                   TextFormField(
                     controller: controller.nameController,
                     decoration: const InputDecoration(
-                      labelText: 'Topluluk Adı',
+                      labelText: AppStrings.communityName,
                       border: OutlineInputBorder(),
                     ),
                     validator: (value) {
                       if (value == null || value.isEmpty) {
-                        return 'Topluluk adı gereklidir';
+                        return AppStrings.communityNameRequired;
                       }
                       return null;
                     },
@@ -84,13 +85,13 @@ class CommunityManageView extends GetView<CommunityManageController> {
                   TextFormField(
                     controller: controller.descriptionController,
                     decoration: const InputDecoration(
-                      labelText: 'Topluluk Açıklaması',
+                      labelText: AppStrings.communityDescription,
                       border: OutlineInputBorder(),
                     ),
                     maxLines: 3,
                     validator: (value) {
                       if (value == null || value.isEmpty) {
-                        return 'Topluluk açıklaması gereklidir';
+                        return AppStrings.communityDescriptionRequired;
                       }
                       return null;
                     },
@@ -99,7 +100,7 @@ class CommunityManageView extends GetView<CommunityManageController> {
 
                   // Kategori Seçimi
                   Text(
-                    'Kategoriler',
+                    AppStrings.categories,
                     style: Theme.of(context).textTheme.titleMedium,
                   ),
                   const SizedBox(height: 8),
@@ -128,15 +129,15 @@ class CommunityManageView extends GetView<CommunityManageController> {
 
                   // Topluluk Ayarları
                   Text(
-                    'Topluluk Ayarları',
+                    AppStrings.communitySettings,
                     style: Theme.of(context).textTheme.titleMedium,
                   ),
                   const SizedBox(height: 16),
                   Obx(
                     () => SwitchListTile(
-                      title: const Text('Üyelik Onayı Gerekli'),
-                      subtitle: const Text(
-                        'Etkinleştirilirse, yeni üyelerin katılım talepleri moderatörler tarafından onaylanmalıdır',
+                      title: Text(AppStrings.membershipApprovalRequired),
+                      subtitle: Text(
+                        AppStrings.membershipApprovalRequiredDescription,
                       ),
                       value: controller.requiresApproval.value,
                       onChanged: (value) =>
@@ -146,9 +147,9 @@ class CommunityManageView extends GetView<CommunityManageController> {
                   const SizedBox(height: 8),
                   Obx(
                     () => SwitchListTile(
-                      title: const Text('Sadece Üyeler Görebilir'),
-                      subtitle: const Text(
-                        'Etkinleştirilirse, topluluk içeriği sadece üyeler tarafından görüntülenebilir',
+                      title: Text(AppStrings.onlyMembersCanView),
+                      subtitle: Text(
+                        AppStrings.onlyMembersCanViewDescription,
                       ),
                       value: controller.isPrivate.value,
                       onChanged: (value) => controller.isPrivate.value = value,
@@ -172,7 +173,7 @@ class CommunityManageView extends GetView<CommunityManageController> {
                                   strokeWidth: 2,
                                 ),
                               )
-                            : const Text('Değişiklikleri Kaydet'),
+                            : Text(AppStrings.saveChanges),
                       ),
                     ),
                   ),
@@ -181,7 +182,7 @@ class CommunityManageView extends GetView<CommunityManageController> {
                   // Üyelik Talepleri
                   if (controller.pendingMembers.isNotEmpty) ...[
                     Text(
-                      'Üyelik Talepleri',
+                      AppStrings.membershipRequests,
                       style: Theme.of(context).textTheme.titleMedium,
                     ),
                     const SizedBox(height: 16),
@@ -195,7 +196,7 @@ class CommunityManageView extends GetView<CommunityManageController> {
 
                   // Üye Listesi
                   Text(
-                    'Üyeler',
+                    AppStrings.members,
                     style: Theme.of(context).textTheme.titleMedium,
                   ),
                   const SizedBox(height: 16),
@@ -219,14 +220,14 @@ class CommunityManageView extends GetView<CommunityManageController> {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Topluluğu Sil'),
-        content: const Text(
-          'Bu işlem geri alınamaz. Topluluğu silmek istediğinizden emin misiniz?',
+        title: Text(AppStrings.deleteCommunity),
+        content: Text(
+          AppStrings.deleteCommunityConfirmation,
         ),
         actions: [
           TextButton(
             onPressed: () => Get.back(),
-            child: const Text('İptal'),
+            child: Text(AppStrings.cancel),
           ),
           TextButton(
             onPressed: () {
@@ -234,7 +235,7 @@ class CommunityManageView extends GetView<CommunityManageController> {
               controller.deleteCommunity();
             },
             style: TextButton.styleFrom(foregroundColor: Colors.red),
-            child: const Text('Sil'),
+            child: Text(AppStrings.delete),
           ),
         ],
       ),

@@ -13,10 +13,10 @@ class ResponsiveAuthWrapper extends StatelessWidget {
   final _responsiveController = Get.find<ResponsiveController>();
 
   ResponsiveAuthWrapper({
-    Key? key,
+    super.key,
     required this.authController,
     this.isLogin = true,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {

@@ -1,3 +1,4 @@
+import 'package:devshabitat/app/constants/app_strings.dart';
 import 'package:flutter/material.dart';
 import '../../../models/feed_item.dart';
 import '../../../services/asset_optimization_service.dart';
@@ -81,18 +82,18 @@ class ActivityFeedCard extends StatelessWidget {
       children: [
         _buildActionButton(
           icon: feedItem.isLiked ? Icons.favorite : Icons.favorite_border,
-          label: 'Beğen',
+          label: AppStrings.like,
           onPressed: onLike,
           color: feedItem.isLiked ? Colors.red : null,
         ),
         _buildActionButton(
           icon: Icons.comment_outlined,
-          label: 'Yorum Yap',
+          label: AppStrings.comment,
           onPressed: onComment,
         ),
         _buildActionButton(
           icon: Icons.share_outlined,
-          label: 'Paylaş',
+          label: AppStrings.share,
           onPressed: onShare,
         ),
       ],
@@ -118,17 +119,17 @@ class ActivityFeedCard extends StatelessWidget {
       child: Row(
         children: [
           _buildStatText(
-            '${feedItem.likesCount} beğeni',
+            '${feedItem.likesCount} ${AppStrings.likes}',
             context,
           ),
           const SizedBox(width: 16),
           _buildStatText(
-            '${feedItem.commentsCount} yorum',
+            '${feedItem.commentsCount} ${AppStrings.comments}',
             context,
           ),
           const SizedBox(width: 16),
           _buildStatText(
-            '${feedItem.sharesCount} paylaşım',
+            '${feedItem.sharesCount} ${AppStrings.shares}',
             context,
           ),
         ],

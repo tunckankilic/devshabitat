@@ -1,3 +1,4 @@
+import 'package:devshabitat/app/constants/app_strings.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../../controllers/messaging_controller.dart';
@@ -24,7 +25,7 @@ class ChatScreen extends GetView<MessagingController> {
         title: Obx(() {
           final conversation = controller.selectedConversation.value;
           return Text(
-            conversation?.participantName ?? 'Sohbet',
+            conversation?.participantName ?? AppStrings.chat,
             style: Theme.of(context).textTheme.titleLarge,
           );
         }),
@@ -39,7 +40,7 @@ class ChatScreen extends GetView<MessagingController> {
                   controller.conversationMessages[conversationId] ?? [];
               if (messages.isEmpty) {
                 return const Center(
-                  child: Text('Henüz mesaj yok'),
+                  child: Text(AppStrings.noMessages),
                 );
               }
 
@@ -116,7 +117,7 @@ class ChatScreen extends GetView<MessagingController> {
             child: TextField(
               controller: textController,
               decoration: InputDecoration(
-                hintText: 'Mesajınızı yazın...',
+                hintText: AppStrings.writeYourMessage,
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(24.0),
                   borderSide: BorderSide.none,

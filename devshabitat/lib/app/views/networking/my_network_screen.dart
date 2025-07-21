@@ -1,3 +1,4 @@
+import 'package:devshabitat/app/constants/app_strings.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../../controllers/responsive_controller.dart';
@@ -13,7 +14,7 @@ class MyNetworkScreen extends StatelessWidget {
       length: 3,
       child: Scaffold(
         appBar: AppBar(
-          title: Text('Ağım',
+          title: Text(AppStrings.myNetwork,
               style: TextStyle(
                   fontSize:
                       responsive.responsiveValue(mobile: 18, tablet: 20))),
@@ -21,9 +22,9 @@ class MyNetworkScreen extends StatelessWidget {
             labelStyle: TextStyle(
                 fontSize: responsive.responsiveValue(mobile: 14, tablet: 16)),
             tabs: const [
-              Tab(text: 'Genel Bakış'),
-              Tab(text: 'Bağlantılar'),
-              Tab(text: 'Analitik'),
+              Tab(text: AppStrings.generalOverview),
+              Tab(text: AppStrings.connections),
+              Tab(text: AppStrings.analytics),
             ],
           ),
         ),
@@ -74,28 +75,28 @@ class _OverviewTab extends StatelessWidget {
           responsive.responsiveValue(mobile: 1.5, tablet: 1.8, desktop: 2.0),
       children: [
         _StatCard(
-          title: 'Toplam Bağlantı',
+          title: AppStrings.totalConnections,
           value: '156',
           trend: '+12%',
           isPositive: true,
           icon: Icons.people_outline,
         ),
         _StatCard(
-          title: 'Kabul Oranı',
+          title: AppStrings.acceptanceRate,
           value: '%85',
           trend: '+5%',
           isPositive: true,
           icon: Icons.check_circle_outline,
         ),
         _StatCard(
-          title: 'Haftalık Büyüme',
+          title: AppStrings.weeklyGrowth,
           value: '+23',
           trend: '+15%',
           isPositive: true,
           icon: Icons.trending_up,
         ),
         _StatCard(
-          title: 'Aktif Bağlantılar',
+          title: AppStrings.activeConnections,
           value: '89',
           trend: '-3%',
           isPositive: false,
@@ -115,7 +116,7 @@ class _OverviewTab extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              'Haftalık Büyüme',
+              AppStrings.weeklyGrowth,
               style: TextStyle(
                 fontSize: responsive.responsiveValue(mobile: 18, tablet: 20),
                 fontWeight: FontWeight.bold,
@@ -153,7 +154,7 @@ class _OverviewTab extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              'En İyi Yetenekler',
+              AppStrings.bestSkills,
               style: TextStyle(
                 fontSize: responsive.responsiveValue(mobile: 18, tablet: 20),
                 fontWeight: FontWeight.bold,
@@ -200,7 +201,7 @@ class _OverviewTab extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              'Son Aktiviteler',
+              AppStrings.recentActivity,
               style: TextStyle(
                 fontSize: responsive.responsiveValue(mobile: 18, tablet: 20),
                 fontWeight: FontWeight.bold,
@@ -209,23 +210,23 @@ class _OverviewTab extends StatelessWidget {
             SizedBox(
                 height: responsive.responsiveValue(mobile: 16, tablet: 20)),
             _ActivityItem(
-              title: 'Yeni Bağlantı',
+              title: AppStrings.newConnection,
               description: 'Ahmet Y. ile bağlantı kuruldu',
-              time: '2 saat önce',
+              time: '2 hours ago',
               icon: Icons.person_add,
             ),
             SizedBox(height: responsive.responsiveValue(mobile: 8, tablet: 12)),
             _ActivityItem(
-              title: 'Profil Görüntüleme',
+              title: AppStrings.profileView,
               description: 'Profiliniz 25 kez görüntülendi',
-              time: '1 gün önce',
+              time: '1 day ago',
               icon: Icons.visibility,
             ),
             SizedBox(height: responsive.responsiveValue(mobile: 8, tablet: 12)),
             _ActivityItem(
-              title: 'Yetenek Onayı',
+              title: AppStrings.skillApproval,
               description: 'Flutter yeteneğiniz 3 kişi tarafından onaylandı',
-              time: '2 gün önce',
+              time: '2 days ago',
               icon: Icons.verified,
             ),
           ],
@@ -252,7 +253,7 @@ class _ConnectionsTab extends StatelessWidget {
                       fontSize:
                           responsive.responsiveValue(mobile: 16, tablet: 18)),
                   decoration: InputDecoration(
-                    hintText: 'Bağlantılarda ara...',
+                    hintText: AppStrings.searchConnections,
                     hintStyle: TextStyle(
                         fontSize:
                             responsive.responsiveValue(mobile: 16, tablet: 18)),
@@ -294,7 +295,7 @@ class _ConnectionsTab extends StatelessWidget {
             itemCount: 10, // Örnek veri
             itemBuilder: (context, index) {
               return _buildConnectionCard(
-                'Kullanıcı ${index + 1}',
+                'User ${index + 1}',
                 'Flutter Developer',
                 'https://via.placeholder.com/150',
               );
@@ -316,7 +317,7 @@ class _AnalyticsTab extends StatelessWidget {
       child: Column(
         children: [
           _buildAnalyticCard(
-            'Bağlantı Dağılımı',
+            AppStrings.connectionDistribution,
             _PieChartWidget(
               segments: [
                 _PieSegment('Aktif', 0.45, Colors.green),
@@ -327,12 +328,12 @@ class _AnalyticsTab extends StatelessWidget {
           ),
           SizedBox(height: responsive.responsiveValue(mobile: 16, tablet: 24)),
           _buildAnalyticCard(
-            'Etkileşim Analizi',
+            AppStrings.interactionAnalysis,
             _InteractionChart(),
           ),
           SizedBox(height: responsive.responsiveValue(mobile: 16, tablet: 24)),
           _buildAnalyticCard(
-            'Büyüme Trendi',
+            AppStrings.growthTrend,
             _TrendLineChart(),
           ),
         ],
@@ -744,7 +745,7 @@ void _showFilterDialog() {
   Get.dialog(
     AlertDialog(
       title: Text(
-        'Filtreleme Seçenekleri',
+        AppStrings.filterOptions,
         style: TextStyle(
             fontSize: responsive.responsiveValue(mobile: 18, tablet: 20)),
       ),
@@ -753,7 +754,7 @@ void _showFilterDialog() {
         children: [
           ListTile(
             title: Text(
-              'Tüm Bağlantılar',
+              AppStrings.allConnections,
               style: TextStyle(
                   fontSize: responsive.responsiveValue(mobile: 16, tablet: 18)),
             ),
@@ -766,7 +767,7 @@ void _showFilterDialog() {
           ),
           ListTile(
             title: Text(
-              'Yeni Bağlantılar',
+              AppStrings.newConnections,
               style: TextStyle(
                   fontSize: responsive.responsiveValue(mobile: 16, tablet: 18)),
             ),
@@ -779,7 +780,7 @@ void _showFilterDialog() {
           ),
           ListTile(
             title: Text(
-              'Aktif Bağlantılar',
+              AppStrings.activeConnections,
               style: TextStyle(
                   fontSize: responsive.responsiveValue(mobile: 16, tablet: 18)),
             ),
@@ -796,7 +797,7 @@ void _showFilterDialog() {
         TextButton(
           onPressed: () => Get.back(),
           child: Text(
-            'İptal',
+            AppStrings.cancel,
             style: TextStyle(
                 fontSize: responsive.responsiveValue(mobile: 14, tablet: 16)),
           ),
@@ -811,7 +812,7 @@ void _showSortDialog() {
   Get.dialog(
     AlertDialog(
       title: Text(
-        'Sıralama Seçenekleri',
+        AppStrings.sortOptions,
         style: TextStyle(
             fontSize: responsive.responsiveValue(mobile: 18, tablet: 20)),
       ),
@@ -820,7 +821,7 @@ void _showSortDialog() {
         children: [
           ListTile(
             title: Text(
-              'İsme Göre',
+              AppStrings.byName,
               style: TextStyle(
                   fontSize: responsive.responsiveValue(mobile: 16, tablet: 18)),
             ),
@@ -833,7 +834,7 @@ void _showSortDialog() {
           ),
           ListTile(
             title: Text(
-              'Bağlantı Tarihine Göre',
+              AppStrings.byConnectionDate,
               style: TextStyle(
                   fontSize: responsive.responsiveValue(mobile: 16, tablet: 18)),
             ),
@@ -846,7 +847,7 @@ void _showSortDialog() {
           ),
           ListTile(
             title: Text(
-              'Etkileşime Göre',
+              AppStrings.byInteraction,
               style: TextStyle(
                   fontSize: responsive.responsiveValue(mobile: 16, tablet: 18)),
             ),
@@ -863,7 +864,7 @@ void _showSortDialog() {
         TextButton(
           onPressed: () => Get.back(),
           child: Text(
-            'İptal',
+            AppStrings.cancel,
             style: TextStyle(
                 fontSize: responsive.responsiveValue(mobile: 14, tablet: 16)),
           ),

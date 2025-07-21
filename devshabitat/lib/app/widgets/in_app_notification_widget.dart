@@ -1,3 +1,4 @@
+import 'package:devshabitat/app/constants/app_strings.dart';
 import 'package:flutter/material.dart';
 import '../models/notification_model.dart';
 
@@ -72,19 +73,19 @@ class InAppNotificationWidget extends StatelessWidget {
 
     // Bildirim tipine göre icon ve renk belirle
     switch (notification.data?['type']) {
-      case 'message':
+      case AppStrings.messages:
         iconData = Icons.message;
         iconColor = Colors.blue;
         break;
-      case 'event':
+      case AppStrings.event:
         iconData = Icons.event;
         iconColor = Colors.green;
         break;
-      case 'community':
+      case AppStrings.community:
         iconData = Icons.group;
         iconColor = Colors.purple;
         break;
-      case 'connection':
+      case AppStrings.connections:
         iconData = Icons.person_add;
         iconColor = Colors.orange;
         break;
@@ -108,15 +109,15 @@ class InAppNotificationWidget extends StatelessWidget {
     final difference = now.difference(dateTime);
 
     if (difference.inDays > 7) {
-      return '${dateTime.day}/${dateTime.month}/${dateTime.year}';
+      return AppStrings.dateTimeFormat(dateTime);
     } else if (difference.inDays > 0) {
-      return '${difference.inDays} gün önce';
+      return AppStrings.daysAgo(difference.inDays);
     } else if (difference.inHours > 0) {
-      return '${difference.inHours} saat önce';
+      return AppStrings.hoursAgo(difference.inHours);
     } else if (difference.inMinutes > 0) {
-      return '${difference.inMinutes} dakika önce';
+      return AppStrings.minutesAgo(difference.inMinutes);
     } else {
-      return 'Az önce';
+      return AppStrings.justNow;
     }
   }
 }

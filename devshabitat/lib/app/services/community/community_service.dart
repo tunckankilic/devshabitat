@@ -234,7 +234,7 @@ class CommunityService {
     final snapshot = await _firestore
         .collection(_collection)
         .where('name', isGreaterThanOrEqualTo: searchTerm)
-        .where('name', isLessThanOrEqualTo: searchTerm + '\uf8ff')
+        .where('name', isLessThanOrEqualTo: '$searchTerm\uf8ff')
         .get();
 
     return snapshot.docs

@@ -1,3 +1,4 @@
+import 'package:devshabitat/app/constants/app_strings.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:image_picker/image_picker.dart';
@@ -12,14 +13,14 @@ class EditProfileView extends GetView<ProfileController> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Profili Düzenle'),
+        title: Text(AppStrings.editProfile),
         actions: [
           TextButton(
             onPressed: () async {
               await controller.updateProfile();
               Get.back();
             },
-            child: const Text('Kaydet'),
+            child: Text(AppStrings.save),
           ),
         ],
       ),
@@ -88,9 +89,9 @@ class EditProfileView extends GetView<ProfileController> {
             // Ad Soyad
             TextFormField(
               controller: controller.nameController,
-              decoration: const InputDecoration(
-                labelText: 'Ad Soyad',
-                hintText: 'Adınız ve Soyadınız',
+              decoration: InputDecoration(
+                labelText: AppStrings.name,
+                hintText: AppStrings.nameHint,
                 prefixIcon: Icon(Icons.person),
                 border: OutlineInputBorder(),
               ),
@@ -100,9 +101,9 @@ class EditProfileView extends GetView<ProfileController> {
             // Ünvan
             TextFormField(
               controller: controller.titleController,
-              decoration: const InputDecoration(
-                labelText: 'Ünvan',
-                hintText: 'Örn: Senior Software Developer',
+              decoration: InputDecoration(
+                labelText: AppStrings.title,
+                hintText: AppStrings.titleHint,
                 prefixIcon: Icon(Icons.work),
                 border: OutlineInputBorder(),
               ),
@@ -113,8 +114,8 @@ class EditProfileView extends GetView<ProfileController> {
             TextFormField(
               controller: controller.companyController,
               decoration: const InputDecoration(
-                labelText: 'Şirket',
-                hintText: 'Çalıştığınız şirket',
+                labelText: AppStrings.company,
+                hintText: AppStrings.companyHint,
                 prefixIcon: Icon(Icons.business),
                 border: OutlineInputBorder(),
               ),
@@ -126,8 +127,8 @@ class EditProfileView extends GetView<ProfileController> {
               controller: controller.bioController,
               maxLines: 3,
               decoration: const InputDecoration(
-                labelText: 'Hakkımda',
-                hintText: 'Kendinizi kısaca tanıtın',
+                labelText: AppStrings.bio,
+                hintText: AppStrings.bioHint,
                 prefixIcon: Icon(Icons.description),
                 border: OutlineInputBorder(),
                 alignLabelWithHint: true,
@@ -138,9 +139,9 @@ class EditProfileView extends GetView<ProfileController> {
             // Konum
             TextFormField(
               controller: controller.locationController,
-              decoration: const InputDecoration(
-                labelText: 'Konum',
-                hintText: 'Şehir, Ülke',
+              decoration: InputDecoration(
+                labelText: AppStrings.location,
+                hintText: AppStrings.locationHint,
                 prefixIcon: Icon(Icons.location_on),
                 border: OutlineInputBorder(),
               ),
@@ -150,9 +151,9 @@ class EditProfileView extends GetView<ProfileController> {
             // GitHub Kullanıcı Adı
             TextFormField(
               controller: controller.githubUsernameController,
-              decoration: const InputDecoration(
-                labelText: 'GitHub Kullanıcı Adı',
-                hintText: 'GitHub kullanıcı adınız',
+              decoration: InputDecoration(
+                labelText: AppStrings.githubUsername,
+                hintText: AppStrings.githubUsernameHint,
                 prefixIcon: Icon(Icons.code),
                 border: OutlineInputBorder(),
               ),
@@ -167,13 +168,13 @@ class EditProfileView extends GetView<ProfileController> {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Fotoğraf Seç'),
+        title: Text(AppStrings.selectProfileImage),
         content: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
             ListTile(
               leading: const Icon(Icons.camera),
-              title: const Text('Kamera'),
+              title: Text(AppStrings.camera),
               onTap: () {
                 Get.back();
                 _pickImage(ImageSource.camera);
@@ -181,7 +182,7 @@ class EditProfileView extends GetView<ProfileController> {
             ),
             ListTile(
               leading: const Icon(Icons.photo_library),
-              title: const Text('Galeri'),
+              title: Text(AppStrings.gallery),
               onTap: () {
                 Get.back();
                 _pickImage(ImageSource.gallery);
@@ -205,14 +206,14 @@ class EditProfileView extends GetView<ProfileController> {
           compressQuality: 80,
           uiSettings: [
             AndroidUiSettings(
-              toolbarTitle: 'Fotoğrafı Düzenle',
+              toolbarTitle: AppStrings.editProfileImage,
               toolbarColor: Get.theme.primaryColor,
               toolbarWidgetColor: Colors.white,
               initAspectRatio: CropAspectRatioPreset.square,
               lockAspectRatio: true,
             ),
             IOSUiSettings(
-              title: 'Fotoğrafı Düzenle',
+              title: AppStrings.editProfileImage,
               aspectRatioLockEnabled: true,
               minimumAspectRatio: 1.0,
             ),
@@ -225,8 +226,8 @@ class EditProfileView extends GetView<ProfileController> {
       }
     } catch (e) {
       Get.snackbar(
-        'Hata',
-        'Fotoğraf seçilirken bir hata oluştu',
+        AppStrings.error,
+        AppStrings.errorOccurredWhileSelectingImage,
         snackPosition: SnackPosition.BOTTOM,
         backgroundColor: Colors.red,
         colorText: Colors.white,

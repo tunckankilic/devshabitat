@@ -1,3 +1,4 @@
+import 'package:devshabitat/app/constants/app_strings.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../../../controllers/home_controller.dart';
@@ -31,7 +32,7 @@ class ConnectionsOverviewCard extends GetView<HomeController> {
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Text(
-                  'Bağlantılarım',
+                  AppStrings.myConnections,
                   style: TextStyle(
                     fontSize: responsive.responsiveValue(
                       mobile: 18,
@@ -43,7 +44,7 @@ class ConnectionsOverviewCard extends GetView<HomeController> {
                 TextButton(
                   onPressed: () => Get.toNamed('/connections'),
                   child: Text(
-                    'Tümünü Gör',
+                    AppStrings.viewAll,
                     style: TextStyle(
                       fontSize: responsive.responsiveValue(
                         mobile: 14,
@@ -63,7 +64,7 @@ class ConnectionsOverviewCard extends GetView<HomeController> {
               return Column(
                 children: [
                   _buildConnectionStat(
-                    label: 'Toplam Bağlantı',
+                    label: AppStrings.totalConnections,
                     value: controller.connectionCount.value.toString(),
                     icon: Icons.people,
                   ),
@@ -71,7 +72,7 @@ class ConnectionsOverviewCard extends GetView<HomeController> {
                       height:
                           responsive.responsiveValue(mobile: 12, tablet: 16)),
                   _buildConnectionStat(
-                    label: 'Yeni Mesajlar',
+                    label: AppStrings.newMessages,
                     value: '3',
                     icon: Icons.message,
                   ),
@@ -79,7 +80,7 @@ class ConnectionsOverviewCard extends GetView<HomeController> {
                       height:
                           responsive.responsiveValue(mobile: 12, tablet: 16)),
                   _buildConnectionStat(
-                    label: 'Bekleyen İstekler',
+                    label: AppStrings.pendingRequests,
                     value: '5',
                     icon: Icons.person_add,
                   ),

@@ -1,3 +1,4 @@
+import 'package:devshabitat/app/constants/app_strings.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:devshabitat/app/controllers/event/event_discovery_controller.dart';
@@ -5,7 +6,7 @@ import 'package:devshabitat/app/widgets/event/event_card_widget.dart';
 import 'package:devshabitat/app/widgets/event/event_calendar_widget.dart';
 
 class MyEventsView extends GetView<EventDiscoveryController> {
-  const MyEventsView({Key? key}) : super(key: key);
+  const MyEventsView({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -13,12 +14,12 @@ class MyEventsView extends GetView<EventDiscoveryController> {
       length: 3,
       child: Scaffold(
         appBar: AppBar(
-          title: const Text('Etkinliklerim'),
+          title: Text(AppStrings.myEvents),
           bottom: const TabBar(
             tabs: [
-              Tab(text: 'Yaklaşan'),
-              Tab(text: 'Geçmiş'),
-              Tab(text: 'Takvim'),
+              Tab(text: AppStrings.upcoming),
+              Tab(text: AppStrings.past),
+              Tab(text: AppStrings.calendar),
             ],
           ),
         ),
@@ -59,8 +60,8 @@ class MyEventsView extends GetView<EventDiscoveryController> {
               const SizedBox(height: 16),
               Text(
                 isUpcoming
-                    ? 'Yaklaşan etkinlik bulunmuyor'
-                    : 'Geçmiş etkinlik bulunmuyor',
+                    ? AppStrings.noUpcomingEvents
+                    : AppStrings.noPastEvents,
                 style: const TextStyle(
                   fontSize: 16,
                   color: Colors.grey,

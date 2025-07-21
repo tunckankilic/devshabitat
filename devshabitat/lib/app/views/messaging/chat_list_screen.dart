@@ -1,3 +1,4 @@
+import 'package:devshabitat/app/constants/app_strings.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../../controllers/messaging_controller.dart';
@@ -14,13 +15,13 @@ class ChatListScreen extends GetView<MessagingController> {
     return Scaffold(
       appBar: AppBar(
         title: Obx(() => controller.searchQuery.isEmpty
-            ? Text('Mesajlar', style: theme.textTheme.titleLarge)
+            ? Text(AppStrings.messages, style: theme.textTheme.titleLarge)
             : TextField(
                 controller:
                     TextEditingController(text: controller.searchQuery.value),
                 onChanged: (value) => controller.searchQuery.value = value,
                 decoration: InputDecoration(
-                  hintText: 'Ara...',
+                  hintText: AppStrings.search,
                   border: InputBorder.none,
                   hintStyle:
                       TextStyle(color: theme.colorScheme.onSurfaceVariant),
@@ -64,7 +65,7 @@ class ChatListScreen extends GetView<MessagingController> {
                   const SizedBox(height: 16),
                   FilledButton(
                     onPressed: controller.loadConversations,
-                    child: const Text('Tekrar Dene'),
+                    child: Text(AppStrings.tryAgain),
                   ),
                 ],
               ),
@@ -83,14 +84,14 @@ class ChatListScreen extends GetView<MessagingController> {
                   ),
                   const SizedBox(height: 16),
                   Text(
-                    'Henüz sohbet bulunmuyor',
+                    AppStrings.noChats,
                     style: theme.textTheme.titleMedium?.copyWith(
                       color: theme.colorScheme.onSurfaceVariant,
                     ),
                   ),
                   const SizedBox(height: 8),
                   Text(
-                    'Yeni bir sohbet başlatmak için + butonuna tıklayın',
+                    AppStrings.startChat,
                     style: theme.textTheme.bodyMedium?.copyWith(
                       color: theme.colorScheme.onSurfaceVariant,
                     ),

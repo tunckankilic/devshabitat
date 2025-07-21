@@ -117,7 +117,7 @@ class AuthRepository implements IAuthRepository {
 
       // Mevcut hesabın sağlayıcılarını kontrol et
       if (signInMethods.contains(provider)) {
-        throw Exception('Bu email adresi zaten $provider ile kayıtlı');
+        throw Exception(AppStrings.emailAlreadyInUse);
       }
 
       // Kullanıcıya hangi sağlayıcıları kullanabileceğini bildir
@@ -139,7 +139,7 @@ class AuthRepository implements IAuthRepository {
       }).join(', ');
 
       throw Exception(
-          'Bu email adresi zaten şu yöntemlerle kayıtlı: $availableProviders');
+          'This email is already in use with the following providers: $availableProviders');
     } catch (e) {
       throw _handleAuthException(e);
     }
@@ -151,8 +151,8 @@ class AuthRepository implements IAuthRepository {
     try {
       await _handleEmailCollision(email, provider);
     } catch (e) {
-      _logger.e('Email çakışması tespit edildi: $e');
-      throw e;
+      _logger.e('Email collision detected: $e');
+      throw Exception(e);
     }
   }
 
@@ -163,15 +163,12 @@ class AuthRepository implements IAuthRepository {
         throw Exception(AppStrings.googleLoginNotSupported);
       }
 
-      final GoogleSignInAccount? googleUser =
-          await _googleSignIn.authenticate();
-      if (googleUser == null) throw Exception(AppStrings.googleLoginCancelled);
+      final googleUser = await _googleSignIn.authenticate();
 
       // Email çakışmasını kontrol et
       await _checkEmailBeforeSocialSignIn(googleUser.email, 'google.com');
 
-      final GoogleSignInAuthentication googleAuth =
-          await googleUser.authentication;
+      final GoogleSignInAuthentication googleAuth = googleUser.authentication;
       final credential = GoogleAuthProvider.credential(
         accessToken: googleAuth.idToken,
         idToken: googleAuth.idToken,
@@ -333,15 +330,15 @@ class AuthRepository implements IAuthRepository {
   Future<List<String>> getUserConnections() async {
     try {
       final user = _auth.currentUser;
-      if (user == null) throw Exception('Kullanıcı oturum açmamış');
+      if (user == null) throw Exception(AppStrings.userNotLoggedIn);
 
       final doc = await _firestore.collection('users').doc(user.uid).get();
-      if (!doc.exists) throw Exception('Kullanıcı profili bulunamadı');
+      if (!doc.exists) throw Exception(AppStrings.userProfileNotFound);
 
       final data = doc.data();
       return List<String>.from(data?['connections'] ?? []);
     } catch (e) {
-      _logger.e('Bağlantılar alınamadı: $e');
+      _logger.e('Connections not found: $e');
       throw _handleAuthException(e);
     }
   }
@@ -350,7 +347,7 @@ class AuthRepository implements IAuthRepository {
   Future<void> addConnection(String userId) async {
     try {
       final user = _auth.currentUser;
-      if (user == null) throw Exception('Kullanıcı oturum açmamış');
+      if (user == null) throw Exception(AppStrings.userNotLoggedIn);
 
       final batch = _firestore.batch();
 
@@ -374,7 +371,7 @@ class AuthRepository implements IAuthRepository {
 
       await batch.commit();
     } catch (e) {
-      _logger.e('Bağlantı eklenemedi: $e');
+      _logger.e('Connection not added: $e');
       throw _handleAuthException(e);
     }
   }
@@ -383,7 +380,7 @@ class AuthRepository implements IAuthRepository {
   Future<void> removeConnection(String userId) async {
     try {
       final user = _auth.currentUser;
-      if (user == null) throw Exception('Kullanıcı oturum açmamış');
+      if (user == null) throw Exception(AppStrings.userNotLoggedIn);
 
       final batch = _firestore.batch();
 
@@ -407,7 +404,7 @@ class AuthRepository implements IAuthRepository {
 
       await batch.commit();
     } catch (e) {
-      _logger.e('Bağlantı kaldırılamadı: $e');
+      _logger.e('Connection not removed: $e');
       throw _handleAuthException(e);
     }
   }
@@ -418,7 +415,7 @@ class AuthRepository implements IAuthRepository {
       final doc = await _firestore.collection('users').doc(userId).get();
       return doc.data();
     } catch (e) {
-      _logger.e('Kullanıcı profili alınamadı: $e');
+      _logger.e('User profile not found: $e');
       throw _handleAuthException(e);
     }
   }
@@ -428,23 +425,22 @@ class AuthRepository implements IAuthRepository {
     try {
       final currentUser = _auth.currentUser;
       if (currentUser == null) {
-        throw Exception('Hesap bağlamak için önce giriş yapmalısınız');
+        throw Exception(AppStrings.userNotLoggedIn);
       }
 
       // GitHub OAuth akışını başlat
       final accessToken = await _githubOAuthService.getAccessToken();
 
       if (accessToken == null) {
-        _logger.w(
-            'GitHub OAuth akışı başarısız oldu veya kullanıcı tarafından iptal edildi');
-        throw Exception('GitHub hesabı bağlanamadı. Lütfen tekrar deneyin.');
+        _logger.w('GitHub OAuth flow failed or was cancelled by user');
+        throw Exception(AppStrings.githubLoginFailed);
       }
 
       // GitHub hesabını mevcut hesaba bağla
       final githubAuthCredential = GithubAuthProvider.credential(accessToken);
       await currentUser.linkWithCredential(githubAuthCredential);
 
-      _logger.i('GitHub hesabı başarıyla bağlandı: ${currentUser.email}');
+      _logger.i('GitHub account successfully linked: ${currentUser.email}');
 
       // Firestore'daki kullanıcı belgesini güncelle
       await _firestore.collection('users').doc(currentUser.uid).update({
@@ -452,14 +448,13 @@ class AuthRepository implements IAuthRepository {
         'updatedAt': FieldValue.serverTimestamp(),
       });
     } catch (e) {
-      _logger.e('GitHub hesabı bağlanırken hata: $e');
+      _logger.e('Error linking GitHub account: $e');
 
       if (e is FirebaseAuthException) {
         if (e.code == 'provider-already-linked') {
-          throw Exception('Bu GitHub hesabı zaten bağlı');
+          throw Exception(AppStrings.githubAccountAlreadyLinked);
         } else if (e.code == 'credential-already-in-use') {
-          throw Exception(
-              'Bu GitHub hesabı başka bir kullanıcı tarafından kullanılıyor');
+          throw Exception(AppStrings.githubAccountAlreadyInUse);
         }
       }
 
@@ -472,7 +467,7 @@ class AuthRepository implements IAuthRepository {
     try {
       await _auth.currentUser?.unlink(providerId);
     } catch (e) {
-      _logger.e('Provider bağlantısı kesilirken hata: $e');
+      _logger.e('Error unlinking provider: $e');
       throw _handleAuthException(e);
     }
   }
@@ -488,7 +483,7 @@ class AuthRepository implements IAuthRepository {
         });
       }
     } catch (e) {
-      _logger.e('Profil güncellenirken hata: $e');
+      _logger.e('Error updating user profile: $e');
       throw _handleAuthException(e);
     }
   }
@@ -568,7 +563,7 @@ class AuthRepository implements IAuthRepository {
         }
       }
     } catch (e) {
-      _logger.e('Sosyal giriş işlenirken hata: $e');
+      _logger.e('Error handling social sign in: $e');
       throw _handleAuthException(e);
     }
   }
@@ -751,7 +746,7 @@ class AuthRepository implements IAuthRepository {
         });
       }
     } catch (e) {
-      _logger.e('Son görülme zamanı güncellenemedi: $e');
+      _logger.e('Last seen time not updated: $e');
     }
   }
 
@@ -794,7 +789,7 @@ class AuthRepository implements IAuthRepository {
     try {
       return await _githubOAuthService.getAccessToken();
     } catch (e) {
-      _logger.e('GitHub access token alınamadı: $e');
+      _logger.e('GitHub access token not found: $e');
       throw _handleAuthException(e);
     }
   }
@@ -803,7 +798,7 @@ class AuthRepository implements IAuthRepository {
     try {
       return await _githubOAuthService.getUserInfo(accessToken);
     } catch (e) {
-      _logger.e('GitHub kullanıcı bilgileri alınamadı: $e');
+      _logger.e('GitHub user info not found: $e');
       throw _handleAuthException(e);
     }
   }

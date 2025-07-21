@@ -1,15 +1,16 @@
+import 'package:devshabitat/app/constants/app_strings.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:devshabitat/app/controllers/location/map_controller.dart';
 
 class LocationSettingsView extends GetView<MapController> {
-  const LocationSettingsView({Key? key}) : super(key: key);
+  const LocationSettingsView({super.key});
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Konum Ayarları'),
+        title: Text(AppStrings.locationSettings),
       ),
       body: ListView(
         padding: const EdgeInsets.all(16),
@@ -31,7 +32,7 @@ class LocationSettingsView extends GetView<MapController> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         const Text(
-          'Konum İzinleri',
+          AppStrings.locationPermissions,
           style: TextStyle(
             fontSize: 18,
             fontWeight: FontWeight.bold,
@@ -39,8 +40,8 @@ class LocationSettingsView extends GetView<MapController> {
         ),
         const SizedBox(height: 8),
         ListTile(
-          title: const Text('Konum Erişimi'),
-          subtitle: const Text('Uygulamanın konumunuza erişmesine izin verin'),
+          title: Text(AppStrings.locationAccess),
+          subtitle: Text(AppStrings.allowLocationAccess),
           trailing: Obx(() {
             return Switch(
               value: controller.locationPermissionGranted.value,
@@ -49,9 +50,8 @@ class LocationSettingsView extends GetView<MapController> {
           }),
         ),
         ListTile(
-          title: const Text('Arka Planda Konum'),
-          subtitle: const Text(
-              'Uygulama arka plandayken konum güncellemelerine izin verin'),
+          title: Text(AppStrings.backgroundLocation),
+          subtitle: Text(AppStrings.allowBackgroundLocation),
           trailing: Obx(() {
             return Switch(
               value: controller.backgroundLocationEnabled.value,
@@ -70,7 +70,7 @@ class LocationSettingsView extends GetView<MapController> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         const Text(
-          'Konum Takibi',
+          AppStrings.locationTracking,
           style: TextStyle(
             fontSize: 18,
             fontWeight: FontWeight.bold,
@@ -78,16 +78,14 @@ class LocationSettingsView extends GetView<MapController> {
         ),
         const SizedBox(height: 8),
         ListTile(
-          title: const Text('Konum Güncellemeleri'),
-          subtitle:
-              const Text('Ne sıklıkta konum güncellemesi alınacağını seçin'),
+          title: Text(AppStrings.locationUpdates),
+          subtitle: Text(AppStrings.selectUpdateInterval),
           onTap: () => _showUpdateIntervalDialog(context),
           trailing: const Icon(Icons.chevron_right),
         ),
         ListTile(
-          title: const Text('Pil Optimizasyonu'),
-          subtitle: const Text(
-              'Pil kullanımını optimize etmek için konum hassasiyetini ayarlayın'),
+          title: Text(AppStrings.batteryOptimization),
+          subtitle: Text(AppStrings.adjustLocationAccuracy),
           onTap: () => _showAccuracyDialog(context),
           trailing: const Icon(Icons.chevron_right),
         ),
@@ -100,7 +98,7 @@ class LocationSettingsView extends GetView<MapController> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         const Text(
-          'Bildirimler',
+          AppStrings.notifications,
           style: TextStyle(
             fontSize: 18,
             fontWeight: FontWeight.bold,
@@ -108,8 +106,8 @@ class LocationSettingsView extends GetView<MapController> {
         ),
         const SizedBox(height: 8),
         ListTile(
-          title: const Text('Yakındaki Etkinlikler'),
-          subtitle: const Text('Yakınınızdaki etkinlikler için bildirim alın'),
+          title: Text(AppStrings.nearbyEvents),
+          subtitle: Text(AppStrings.receiveNotificationsForNearbyEvents),
           trailing: Obx(() {
             return Switch(
               value: controller.nearbyEventNotifications.value,
@@ -118,9 +116,8 @@ class LocationSettingsView extends GetView<MapController> {
           }),
         ),
         ListTile(
-          title: const Text('Yakındaki Geliştiriciler'),
-          subtitle:
-              const Text('Yakınınızdaki geliştiriciler için bildirim alın'),
+          title: Text(AppStrings.nearbyDevelopers),
+          subtitle: Text(AppStrings.receiveNotificationsForNearbyDevelopers),
           trailing: Obx(() {
             return Switch(
               value: controller.nearbyDeveloperNotifications.value,
@@ -137,7 +134,7 @@ class LocationSettingsView extends GetView<MapController> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         const Text(
-          'Gizlilik',
+          AppStrings.privacy,
           style: TextStyle(
             fontSize: 18,
             fontWeight: FontWeight.bold,
@@ -145,8 +142,8 @@ class LocationSettingsView extends GetView<MapController> {
         ),
         const SizedBox(height: 8),
         ListTile(
-          title: const Text('Konum Paylaşımı'),
-          subtitle: const Text('Konumunuzu diğer kullanıcılarla paylaşın'),
+          title: Text(AppStrings.locationSharing),
+          subtitle: Text(AppStrings.shareLocationWithOthers),
           trailing: Obx(() {
             return Switch(
               value: controller.locationSharingEnabled.value,
@@ -155,8 +152,8 @@ class LocationSettingsView extends GetView<MapController> {
           }),
         ),
         ListTile(
-          title: const Text('Konum Geçmişi'),
-          subtitle: const Text('Konum geçmişinizi yönetin'),
+          title: Text(AppStrings.locationHistory),
+          subtitle: Text(AppStrings.manageLocationHistory),
           onTap: () => Get.toNamed('/location-history'),
           trailing: const Icon(Icons.chevron_right),
         ),
@@ -168,12 +165,12 @@ class LocationSettingsView extends GetView<MapController> {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Güncelleme Sıklığı'),
+        title: Text(AppStrings.updateInterval),
         content: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
             RadioListTile<int>(
-              title: const Text('Yüksek (5 saniye)'),
+              title: Text(AppStrings.high),
               value: 5,
               groupValue: controller.updateInterval.value,
               onChanged: (value) {
@@ -182,7 +179,7 @@ class LocationSettingsView extends GetView<MapController> {
               },
             ),
             RadioListTile<int>(
-              title: const Text('Normal (15 saniye)'),
+              title: Text(AppStrings.normal),
               value: 15,
               groupValue: controller.updateInterval.value,
               onChanged: (value) {
@@ -191,7 +188,7 @@ class LocationSettingsView extends GetView<MapController> {
               },
             ),
             RadioListTile<int>(
-              title: const Text('Düşük (30 saniye)'),
+              title: Text(AppStrings.low),
               value: 30,
               groupValue: controller.updateInterval.value,
               onChanged: (value) {
@@ -209,13 +206,13 @@ class LocationSettingsView extends GetView<MapController> {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Konum Hassasiyeti'),
+        title: Text(AppStrings.locationAccuracy),
         content: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
             RadioListTile<String>(
-              title: const Text('Yüksek Hassasiyet'),
-              subtitle: const Text('Daha fazla pil kullanımı'),
+              title: Text(AppStrings.high),
+              subtitle: Text(AppStrings.moreBatteryUsage),
               value: 'high',
               groupValue: controller.locationAccuracy.value,
               onChanged: (value) {
@@ -224,8 +221,8 @@ class LocationSettingsView extends GetView<MapController> {
               },
             ),
             RadioListTile<String>(
-              title: const Text('Dengeli'),
-              subtitle: const Text('Önerilen'),
+              title: Text(AppStrings.balanced),
+              subtitle: Text(AppStrings.recommended),
               value: 'balanced',
               groupValue: controller.locationAccuracy.value,
               onChanged: (value) {
@@ -234,8 +231,8 @@ class LocationSettingsView extends GetView<MapController> {
               },
             ),
             RadioListTile<String>(
-              title: const Text('Düşük Hassasiyet'),
-              subtitle: const Text('Pil tasarrufu'),
+              title: Text(AppStrings.low),
+              subtitle: Text(AppStrings.batterySaving),
               value: 'low',
               groupValue: controller.locationAccuracy.value,
               onChanged: (value) {

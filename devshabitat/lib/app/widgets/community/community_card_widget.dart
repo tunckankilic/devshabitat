@@ -1,3 +1,4 @@
+import 'package:devshabitat/app/constants/app_strings.dart';
 import 'package:devshabitat/app/routes/app_pages.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -11,11 +12,11 @@ class CommunityCardWidget extends StatelessWidget {
   final VoidCallback? onTap;
 
   const CommunityCardWidget({
-    Key? key,
+    super.key,
     required this.community,
     this.isManageable = false,
     this.onTap,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -133,17 +134,17 @@ class CommunityCardWidget extends StatelessWidget {
                       _buildStat(
                         context,
                         Icons.people,
-                        '${community.memberCount} Üye',
+                        '${community.memberCount} ${AppStrings.members}',
                       ),
                       _buildStat(
                         context,
                         Icons.event,
-                        '${community.eventCount} Etkinlik',
+                        '${community.eventCount} ${AppStrings.events}',
                       ),
                       _buildStat(
                         context,
                         Icons.message,
-                        '${community.postCount} Gönderi',
+                        '${community.postCount} ${AppStrings.posts}',
                       ),
                     ],
                   ),

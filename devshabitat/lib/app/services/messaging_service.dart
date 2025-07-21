@@ -256,7 +256,7 @@ class MessagingService extends GetxService {
           });
         } catch (transactionError) {
           _logger.e('Transaction içinde hata: $transactionError');
-          throw transactionError;
+          throw Exception(transactionError);
         }
       });
     } catch (e) {
@@ -690,7 +690,7 @@ class MessagingService extends GetxService {
 
       final querySnapshot = await messagesQuery
           .where('content', isGreaterThanOrEqualTo: query)
-          .where('content', isLessThanOrEqualTo: query + '\uf8ff')
+          .where('content', isLessThanOrEqualTo: '$query\uf8ff')
           .get();
 
       return querySnapshot.docs

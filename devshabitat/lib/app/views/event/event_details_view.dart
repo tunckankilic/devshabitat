@@ -1,3 +1,4 @@
+import 'package:devshabitat/app/constants/app_strings.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:devshabitat/app/controllers/event/event_controller.dart';
@@ -10,7 +11,7 @@ import '../../widgets/responsive/responsive_overflow_handler.dart'
 import '../../widgets/responsive/animated_responsive_layout.dart';
 
 class EventDetailsView extends BaseView<EventController> {
-  const EventDetailsView({Key? key}) : super(key: key);
+  const EventDetailsView({super.key});
 
   @override
   Widget buildView(BuildContext context) {
@@ -143,7 +144,7 @@ class EventDetailsView extends BaseView<EventController> {
     return Column(
       children: [
         _buildInfoSection(
-          'Etkinlik Tipi',
+          AppStrings.eventType,
           _getEventTypeText(event.type),
           _getEventTypeIcon(event.type),
         ),
@@ -153,10 +154,10 @@ class EventDetailsView extends BaseView<EventController> {
           tablet: 24,
         )),
         _buildInfoSection(
-          'Lokasyon',
+          AppStrings.location,
           event.location == EventLocation.online
-              ? 'Online'
-              : event.venueAddress ?? 'Konum belirtilmemiş',
+              ? AppStrings.online
+              : event.venueAddress ?? AppStrings.noLocation,
           event.location == EventLocation.online
               ? Icons.computer
               : Icons.location_on,
@@ -169,7 +170,7 @@ class EventDetailsView extends BaseView<EventController> {
             tablet: 12,
           )),
           ResponsiveText(
-            'Toplantı Linki: ${event.onlineMeetingUrl}',
+            '${AppStrings.onlineMeetingUrl}: ${event.onlineMeetingUrl}',
             style: TextStyle(
               fontSize: responsive.responsiveValue(
                 mobile: 14,
@@ -186,7 +187,7 @@ class EventDetailsView extends BaseView<EventController> {
           tablet: 24,
         )),
         _buildInfoSection(
-          'Tarih ve Saat',
+          AppStrings.dateAndTime,
           '${_formatDate(event.startDate)} - ${_formatDate(event.endDate)}',
           Icons.calendar_today,
         ),
@@ -196,7 +197,7 @@ class EventDetailsView extends BaseView<EventController> {
           tablet: 24,
         )),
         _buildInfoSection(
-          'Katılımcı Sayısı',
+          AppStrings.participantCount,
           '${event.currentParticipants}/${event.participantLimit}',
           Icons.person,
         ),
@@ -294,15 +295,15 @@ class EventDetailsView extends BaseView<EventController> {
   String _getEventTypeText(EventType type) {
     switch (type) {
       case EventType.meetup:
-        return 'Meetup';
+        return AppStrings.meetup;
       case EventType.workshop:
-        return 'Workshop';
+        return AppStrings.workshop;
       case EventType.hackathon:
-        return 'Hackathon';
+        return AppStrings.hackathon;
       case EventType.conference:
-        return 'Konferans';
+        return AppStrings.conference;
       case EventType.other:
-        return 'Diğer';
+        return AppStrings.other;
     }
   }
 

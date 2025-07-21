@@ -1,3 +1,4 @@
+import 'package:devshabitat/app/constants/app_strings.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:flutter_highlight/flutter_highlight.dart';
@@ -47,7 +48,7 @@ class CodeDiscussionWidget extends StatelessWidget {
                   ),
                   const SizedBox(width: 8),
                   Text(
-                    'Paylaşım: ${_formatDate(snippet.createdAt)}',
+                    'Shared: ${_formatDate(snippet.createdAt)}',
                     style: Theme.of(context).textTheme.bodySmall,
                   ),
                 ],
@@ -72,10 +73,10 @@ class CodeDiscussionWidget extends StatelessWidget {
         ),
 
         // Yorumlar
-        const Padding(
+        Padding(
           padding: EdgeInsets.all(16.0),
           child: Text(
-            'Yorumlar',
+            AppStrings.comments,
             style: TextStyle(
               fontSize: 18,
               fontWeight: FontWeight.bold,
@@ -94,10 +95,10 @@ class CodeDiscussionWidget extends StatelessWidget {
 
         // Çözüm Önerileri
         if (snippet.solutions.isNotEmpty) ...[
-          const Padding(
+          Padding(
             padding: EdgeInsets.all(16.0),
             child: Text(
-              'Çözüm Önerileri',
+              AppStrings.solutionSuggestions,
               style: TextStyle(
                 fontSize: 18,
                 fontWeight: FontWeight.bold,
@@ -155,7 +156,7 @@ class CommentCard extends StatelessWidget {
           children: [
             if (comment.lineNumber != null)
               Text(
-                'Satır ${comment.lineNumber}',
+                'Comment ${comment.lineNumber}',
                 style: TextStyle(
                   color: Theme.of(context).primaryColor,
                   fontWeight: FontWeight.bold,
@@ -199,12 +200,12 @@ class SolutionCard extends StatelessWidget {
             Row(
               children: [
                 Text(
-                  'Çözüm Önerisi',
+                  AppStrings.solutionSuggestions,
                   style: Theme.of(context).textTheme.titleMedium,
                 ),
                 const Spacer(),
                 Text(
-                  '${solution.votes} oy',
+                  '${solution.votes} vote',
                   style: Theme.of(context).textTheme.bodySmall,
                 ),
                 IconButton(
@@ -274,8 +275,8 @@ class _AddCommentFormState extends State<AddCommentForm> {
         Expanded(
           child: TextField(
             controller: _controller,
-            decoration: const InputDecoration(
-              hintText: 'Yorum ekle...',
+            decoration: InputDecoration(
+              hintText: AppStrings.writeYourComment,
               border: OutlineInputBorder(),
             ),
             maxLines: null,
@@ -289,7 +290,7 @@ class _AddCommentFormState extends State<AddCommentForm> {
               _controller.clear();
             }
           },
-          child: const Text('Gönder'),
+          child: Text(AppStrings.send),
         ),
       ],
     );

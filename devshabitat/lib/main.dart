@@ -1,3 +1,4 @@
+import 'package:devshabitat/app/constants/app_strings.dart';
 import 'package:devshabitat/firebase_options.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -39,7 +40,7 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return GetMaterialApp(
-      title: 'DevsHabitat',
+      title: AppStrings.appName,
       theme: DevHabitatTheme.lightTheme,
       darkTheme: DevHabitatTheme.darkTheme,
       initialRoute: _getInitialRoute(),

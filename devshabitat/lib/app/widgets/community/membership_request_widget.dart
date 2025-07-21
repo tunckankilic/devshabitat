@@ -1,3 +1,4 @@
+import 'package:devshabitat/app/constants/app_strings.dart';
 import 'package:devshabitat/app/models/user_profile_model.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -27,7 +28,7 @@ class MembershipRequestWidget extends StatelessWidget {
           padding: responsive.responsivePadding(all: 16),
           child: Center(
             child: Text(
-              'Bekleyen üyelik talebi bulunmamaktadır.',
+              AppStrings.noPendingMembers,
               style: TextStyle(
                 fontSize: performanceService.getOptimizedTextSize(
                   cacheKey: 'membership_request_empty',
@@ -48,7 +49,7 @@ class MembershipRequestWidget extends StatelessWidget {
           Padding(
             padding: responsive.responsivePadding(all: 16),
             child: Text(
-              'Üyelik Talepleri',
+              AppStrings.membershipRequests,
               style: Theme.of(context).textTheme.titleLarge?.copyWith(
                     fontSize: performanceService.getOptimizedTextSize(
                       cacheKey: 'membership_request_title',
@@ -116,7 +117,7 @@ class MembershipRequestWidget extends StatelessWidget {
                       ),
                       color: Colors.green,
                       onPressed: () => onAccept(member),
-                      tooltip: 'Kabul Et',
+                      tooltip: AppStrings.accept,
                     ),
                     IconButton(
                       icon: Icon(
@@ -125,7 +126,7 @@ class MembershipRequestWidget extends StatelessWidget {
                       ),
                       color: Colors.red,
                       onPressed: () => onReject(member),
-                      tooltip: 'Reddet',
+                      tooltip: AppStrings.reject,
                     ),
                   ],
                 ),

@@ -1,3 +1,4 @@
+import 'package:devshabitat/app/constants/app_strings.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../../controllers/responsive_controller.dart';
@@ -11,9 +12,9 @@ class CommunityEventView extends StatefulWidget {
   final CommunityModel? community;
 
   const CommunityEventView({
-    Key? key,
+    super.key,
     this.community,
-  }) : super(key: key);
+  });
 
   @override
   State<CommunityEventView> createState() => _CommunityEventViewState();
@@ -80,8 +81,8 @@ class _CommunityEventViewState extends State<CommunityEventView>
     } catch (e) {
       setState(() => _isLoading = false);
       Get.snackbar(
-        'Hata',
-        'Etkinlikler yüklenirken bir hata oluştu',
+        AppStrings.error,
+        AppStrings.errorLoadingEvents,
         snackPosition: SnackPosition.BOTTOM,
       );
     }
@@ -181,8 +182,8 @@ class _CommunityEventViewState extends State<CommunityEventView>
       appBar: AppBar(
         title: Text(
           widget.community != null
-              ? '${widget.community!.name} Etkinlikleri'
-              : 'Topluluk Etkinlikleri',
+              ? '${widget.community!.name} ${AppStrings.events}'
+              : AppStrings.communityEvents,
           style: TextStyle(
             fontSize: performanceService.getOptimizedTextSize(
               cacheKey: 'community_event_appbar_title',
@@ -198,7 +199,7 @@ class _CommunityEventViewState extends State<CommunityEventView>
               size: responsive.minTouchTargetSize,
             ),
             onPressed: _showFilterDialog,
-            tooltip: 'Filtrele',
+            tooltip: AppStrings.filter,
           ),
           IconButton(
             icon: Icon(
@@ -206,7 +207,7 @@ class _CommunityEventViewState extends State<CommunityEventView>
               size: responsive.minTouchTargetSize,
             ),
             onPressed: _createNewEvent,
-            tooltip: 'Yeni Etkinlik',
+            tooltip: AppStrings.newEvent,
           ),
         ],
         bottom: TabBar(
@@ -214,7 +215,7 @@ class _CommunityEventViewState extends State<CommunityEventView>
           tabs: [
             Tab(
               child: Text(
-                'Tüm Etkinlikler',
+                AppStrings.allEvents,
                 style: TextStyle(
                   fontSize: performanceService.getOptimizedTextSize(
                     cacheKey: 'community_event_tab_all',
@@ -226,7 +227,7 @@ class _CommunityEventViewState extends State<CommunityEventView>
             ),
             Tab(
               child: Text(
-                'Yaklaşan',
+                AppStrings.upcoming,
                 style: TextStyle(
                   fontSize: performanceService.getOptimizedTextSize(
                     cacheKey: 'community_event_tab_upcoming',
@@ -238,7 +239,7 @@ class _CommunityEventViewState extends State<CommunityEventView>
             ),
             Tab(
               child: Text(
-                'Geçmiş',
+                AppStrings.past,
                 style: TextStyle(
                   fontSize: performanceService.getOptimizedTextSize(
                     cacheKey: 'community_event_tab_past',
@@ -281,7 +282,7 @@ class _CommunityEventViewState extends State<CommunityEventView>
           size: responsive.minTouchTargetSize,
         ),
         label: Text(
-          'Yeni Etkinlik',
+          AppStrings.newEvent,
           style: TextStyle(
             fontSize: performanceService.getOptimizedTextSize(
               cacheKey: 'community_event_fab_text',
@@ -310,7 +311,7 @@ class _CommunityEventViewState extends State<CommunityEventView>
           ),
         ),
         decoration: InputDecoration(
-          hintText: 'Etkinlik ara...',
+          hintText: AppStrings.searchEvent,
           hintStyle: TextStyle(
             fontSize: performanceService.getOptimizedTextSize(
               cacheKey: 'community_event_search_hint',
@@ -355,12 +356,12 @@ class _CommunityEventViewState extends State<CommunityEventView>
         children: [
           if (_selectedEventType != null)
             _buildFilterChip(
-              '${_getEventTypeName(_selectedEventType!)}',
+              _getEventTypeName(_selectedEventType!),
               () => setState(() => _selectedEventType = null),
             ),
           if (_selectedLocation != null)
             _buildFilterChip(
-              '${_getLocationName(_selectedLocation!)}',
+              _getLocationName(_selectedLocation!),
               () => setState(() => _selectedLocation = null),
             ),
           if (_selectedCategoryId != null)
@@ -370,17 +371,17 @@ class _CommunityEventViewState extends State<CommunityEventView>
             ),
           if (_showOnlyUpcoming)
             _buildFilterChip(
-              'Sadece Yaklaşan',
+              AppStrings.onlyUpcoming,
               () => setState(() => _showOnlyUpcoming = false),
             ),
           if (_showOnlyOnline)
             _buildFilterChip(
-              'Sadece Online',
+              AppStrings.onlyOnline,
               () => setState(() => _showOnlyOnline = false),
             ),
           if (_showOnlyOffline)
             _buildFilterChip(
-              'Sadece Offline',
+              AppStrings.onlyOffline,
               () => setState(() => _showOnlyOffline = false),
             ),
         ],
@@ -456,7 +457,7 @@ class _CommunityEventViewState extends State<CommunityEventView>
               tablet: 20,
             )),
             Text(
-              'Etkinlik bulunamadı',
+              AppStrings.noEventsFound,
               style: Theme.of(context).textTheme.titleMedium?.copyWith(
                     fontSize: responsive.responsiveValue(
                       mobile: 16,
@@ -470,7 +471,7 @@ class _CommunityEventViewState extends State<CommunityEventView>
               tablet: 12,
             )),
             Text(
-              'Filtreleri değiştirmeyi deneyin',
+              AppStrings.tryChangingFilters,
               style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                     fontSize: responsive.responsiveValue(
                       mobile: 14,
@@ -637,8 +638,8 @@ class _CommunityEventViewState extends State<CommunityEventView>
                       )),
                       Text(
                         event.location == EventLocation.online
-                            ? 'Online'
-                            : event.venueAddress ?? 'Konum belirtilmemiş',
+                            ? AppStrings.online
+                            : event.venueAddress ?? AppStrings.locationNotSet,
                         style: theme.textTheme.bodySmall?.copyWith(
                           fontSize: performanceService.getOptimizedTextSize(
                             cacheKey: 'community_event_card_location',
@@ -673,7 +674,7 @@ class _CommunityEventViewState extends State<CommunityEventView>
                         tablet: 8,
                       )),
                       Text(
-                        '${event.currentParticipants}/${event.participantLimit} katılımcı',
+                        '${event.currentParticipants}/${event.participantLimit} ${AppStrings.participants}',
                         style: theme.textTheme.bodySmall?.copyWith(
                           fontSize: performanceService.getOptimizedTextSize(
                             cacheKey: 'community_event_card_participants',
@@ -704,7 +705,7 @@ class _CommunityEventViewState extends State<CommunityEventView>
                             size: responsive.minTouchTargetSize,
                           ),
                           label: Text(
-                            'Katıl',
+                            AppStrings.join,
                             style: TextStyle(
                               fontSize: performanceService.getOptimizedTextSize(
                                 cacheKey: 'community_event_card_join_button',
@@ -726,7 +727,7 @@ class _CommunityEventViewState extends State<CommunityEventView>
                           Icons.share,
                           size: responsive.minTouchTargetSize,
                         ),
-                        tooltip: 'Paylaş',
+                        tooltip: AppStrings.share,
                       ),
                       IconButton(
                         onPressed: () => _showEventOptions(event),
@@ -734,7 +735,7 @@ class _CommunityEventViewState extends State<CommunityEventView>
                           Icons.more_vert,
                           size: responsive.minTouchTargetSize,
                         ),
-                        tooltip: 'Daha fazla',
+                        tooltip: AppStrings.more,
                       ),
                     ],
                   ),
@@ -757,15 +758,15 @@ class _CommunityEventViewState extends State<CommunityEventView>
 
     if (event.isEnding) {
       color = Colors.grey;
-      text = 'Tamamlandı';
+      text = AppStrings.completed;
       icon = Icons.check_circle;
     } else if (event.isStarting) {
       color = Colors.green;
-      text = 'Devam Ediyor';
+      text = AppStrings.inProgress;
       icon = Icons.play_circle;
     } else {
       color = Colors.blue;
-      text = 'Yaklaşan';
+      text = AppStrings.upcoming;
       icon = Icons.schedule;
     }
 
@@ -822,11 +823,11 @@ class _CommunityEventViewState extends State<CommunityEventView>
     final performanceService = Get.find<ResponsivePerformanceService>();
 
     final typeNames = {
-      EventType.workshop: 'Workshop',
-      EventType.meetup: 'Meetup',
-      EventType.conference: 'Konferans',
-      EventType.hackathon: 'Hackathon',
-      EventType.other: 'Diğer',
+      EventType.workshop: AppStrings.workshop,
+      EventType.meetup: AppStrings.meetup,
+      EventType.conference: AppStrings.conference,
+      EventType.hackathon: AppStrings.hackathon,
+      EventType.other: AppStrings.other,
     };
 
     return Container(
@@ -844,7 +845,7 @@ class _CommunityEventViewState extends State<CommunityEventView>
         ),
       ),
       child: Text(
-        typeNames[type] ?? 'Diğer',
+        typeNames[type] ?? AppStrings.other,
         style: TextStyle(
           color: Theme.of(context).colorScheme.onPrimaryContainer,
           fontSize: performanceService.getOptimizedTextSize(
@@ -871,24 +872,24 @@ class _CommunityEventViewState extends State<CommunityEventView>
   String _getEventTypeName(EventType type) {
     switch (type) {
       case EventType.workshop:
-        return 'Workshop';
+        return AppStrings.workshop;
       case EventType.meetup:
-        return 'Meetup';
+        return AppStrings.meetup;
       case EventType.conference:
-        return 'Konferans';
+        return AppStrings.conference;
       case EventType.hackathon:
-        return 'Hackathon';
+        return AppStrings.hackathon;
       case EventType.other:
-        return 'Diğer';
+        return AppStrings.other;
     }
   }
 
   String _getLocationName(EventLocation location) {
     switch (location) {
       case EventLocation.online:
-        return 'Online';
+        return AppStrings.online;
       case EventLocation.offline:
-        return 'Offline';
+        return AppStrings.offline;
     }
   }
 
@@ -897,7 +898,7 @@ class _CommunityEventViewState extends State<CommunityEventView>
       context: context,
       builder: (context) => AlertDialog(
         title: Text(
-          'Filtreler',
+          AppStrings.filters,
           style: TextStyle(
             fontSize:
                 Get.find<ResponsivePerformanceService>().getOptimizedTextSize(
@@ -915,7 +916,7 @@ class _CommunityEventViewState extends State<CommunityEventView>
               DropdownButtonFormField<EventType>(
                 value: _selectedEventType,
                 decoration: InputDecoration(
-                  labelText: 'Etkinlik Türü',
+                  labelText: AppStrings.eventType,
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(
                       Get.find<ResponsiveController>().responsiveValue(
@@ -928,7 +929,7 @@ class _CommunityEventViewState extends State<CommunityEventView>
                 items: [
                   const DropdownMenuItem(
                     value: null,
-                    child: Text('Tümü'),
+                    child: Text(AppStrings.all),
                   ),
                   ...EventType.values.map((type) => DropdownMenuItem(
                         value: type,
@@ -949,7 +950,7 @@ class _CommunityEventViewState extends State<CommunityEventView>
               DropdownButtonFormField<EventLocation>(
                 value: _selectedLocation,
                 decoration: InputDecoration(
-                  labelText: 'Lokasyon',
+                  labelText: AppStrings.location,
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(
                       Get.find<ResponsiveController>().responsiveValue(
@@ -962,7 +963,7 @@ class _CommunityEventViewState extends State<CommunityEventView>
                 items: [
                   const DropdownMenuItem(
                     value: null,
-                    child: Text('Tümü'),
+                    child: Text(AppStrings.all),
                   ),
                   ...EventLocation.values.map((location) => DropdownMenuItem(
                         value: location,
@@ -982,7 +983,7 @@ class _CommunityEventViewState extends State<CommunityEventView>
               DropdownButtonFormField<String>(
                 value: _selectedCategoryId,
                 decoration: InputDecoration(
-                  labelText: 'Kategori',
+                  labelText: AppStrings.category,
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(
                       Get.find<ResponsiveController>().responsiveValue(
@@ -995,7 +996,7 @@ class _CommunityEventViewState extends State<CommunityEventView>
                 items: [
                   const DropdownMenuItem(
                     value: null,
-                    child: Text('Tümü'),
+                    child: Text(AppStrings.all),
                   ),
                   ..._categories.map((category) => DropdownMenuItem(
                         value: category.id,
@@ -1015,7 +1016,7 @@ class _CommunityEventViewState extends State<CommunityEventView>
               // Checkbox filtreleri
               CheckboxListTile(
                 title: Text(
-                  'Sadece yaklaşan etkinlikler',
+                  AppStrings.onlyUpcoming,
                   style: TextStyle(
                     fontSize: Get.find<ResponsivePerformanceService>()
                         .getOptimizedTextSize(
@@ -1031,7 +1032,7 @@ class _CommunityEventViewState extends State<CommunityEventView>
               ),
               CheckboxListTile(
                 title: Text(
-                  'Sadece online etkinlikler',
+                  AppStrings.onlyOnline,
                   style: TextStyle(
                     fontSize: Get.find<ResponsivePerformanceService>()
                         .getOptimizedTextSize(
@@ -1046,7 +1047,7 @@ class _CommunityEventViewState extends State<CommunityEventView>
               ),
               CheckboxListTile(
                 title: Text(
-                  'Sadece offline etkinlikler',
+                  AppStrings.onlyOffline,
                   style: TextStyle(
                     fontSize: Get.find<ResponsivePerformanceService>()
                         .getOptimizedTextSize(
@@ -1076,7 +1077,7 @@ class _CommunityEventViewState extends State<CommunityEventView>
               Navigator.pop(context);
             },
             child: Text(
-              'Sıfırla',
+              AppStrings.reset,
               style: TextStyle(
                 fontSize: Get.find<ResponsivePerformanceService>()
                     .getOptimizedTextSize(
@@ -1090,7 +1091,7 @@ class _CommunityEventViewState extends State<CommunityEventView>
           ElevatedButton(
             onPressed: () => Navigator.pop(context),
             child: Text(
-              'Uygula',
+              AppStrings.apply,
               style: TextStyle(
                 fontSize: Get.find<ResponsivePerformanceService>()
                     .getOptimizedTextSize(
@@ -1119,8 +1120,8 @@ class _CommunityEventViewState extends State<CommunityEventView>
   void _joinEvent(EventModel event) {
     // Etkinliğe katılma işlemi
     Get.snackbar(
-      'Başarılı',
-      'Etkinliğe katılım talebiniz gönderildi',
+      AppStrings.success,
+      AppStrings.eventJoinRequestSent,
       snackPosition: SnackPosition.BOTTOM,
     );
   }
@@ -1128,8 +1129,8 @@ class _CommunityEventViewState extends State<CommunityEventView>
   void _shareEvent(EventModel event) {
     // Etkinlik paylaşma işlemi
     Get.snackbar(
-      'Paylaş',
-      'Etkinlik paylaşım linki kopyalandı',
+      AppStrings.share,
+      AppStrings.eventShareLinkCopied,
       snackPosition: SnackPosition.BOTTOM,
     );
   }
@@ -1146,7 +1147,7 @@ class _CommunityEventViewState extends State<CommunityEventView>
               size: Get.find<ResponsiveController>().minTouchTarget,
             ),
             title: Text(
-              'Düzenle',
+              AppStrings.edit,
               style: TextStyle(
                 fontSize: Get.find<ResponsivePerformanceService>()
                     .getOptimizedTextSize(
@@ -1167,7 +1168,7 @@ class _CommunityEventViewState extends State<CommunityEventView>
               size: Get.find<ResponsiveController>().minTouchTarget,
             ),
             title: Text(
-              'Sil',
+              AppStrings.delete,
               style: TextStyle(
                 fontSize: Get.find<ResponsivePerformanceService>()
                     .getOptimizedTextSize(
@@ -1188,7 +1189,7 @@ class _CommunityEventViewState extends State<CommunityEventView>
               size: Get.find<ResponsiveController>().minTouchTarget,
             ),
             title: Text(
-              'Linki Kopyala',
+              AppStrings.copyLink,
               style: TextStyle(
                 fontSize: Get.find<ResponsivePerformanceService>()
                     .getOptimizedTextSize(
@@ -1213,7 +1214,7 @@ class _CommunityEventViewState extends State<CommunityEventView>
       context: context,
       builder: (context) => AlertDialog(
         title: Text(
-          'Etkinliği Sil',
+          AppStrings.deleteEvent,
           style: TextStyle(
             fontSize:
                 Get.find<ResponsivePerformanceService>().getOptimizedTextSize(
@@ -1224,7 +1225,7 @@ class _CommunityEventViewState extends State<CommunityEventView>
           ),
         ),
         content: Text(
-          'Bu etkinliği silmek istediğinizden emin misiniz?',
+          AppStrings.deleteEventConfirmation,
           style: TextStyle(
             fontSize:
                 Get.find<ResponsivePerformanceService>().getOptimizedTextSize(
@@ -1238,7 +1239,7 @@ class _CommunityEventViewState extends State<CommunityEventView>
           TextButton(
             onPressed: () => Navigator.pop(context),
             child: Text(
-              'İptal',
+              AppStrings.cancel,
               style: TextStyle(
                 fontSize: Get.find<ResponsivePerformanceService>()
                     .getOptimizedTextSize(
@@ -1254,8 +1255,8 @@ class _CommunityEventViewState extends State<CommunityEventView>
               Navigator.pop(context);
               // Etkinlik silme işlemi
               Get.snackbar(
-                'Başarılı',
-                'Etkinlik silindi',
+                AppStrings.success,
+                AppStrings.eventDeleted,
                 snackPosition: SnackPosition.BOTTOM,
               );
             },
@@ -1263,7 +1264,7 @@ class _CommunityEventViewState extends State<CommunityEventView>
               backgroundColor: Colors.red,
             ),
             child: Text(
-              'Sil',
+              AppStrings.delete,
               style: TextStyle(
                 fontSize: Get.find<ResponsivePerformanceService>()
                     .getOptimizedTextSize(

@@ -1,10 +1,10 @@
 import '../config/security_config.dart';
 
 class InputValidator {
-  // Genel input validation
+  // General input validation
   static String? validateRequired(String? value, String fieldName) {
     if (value == null || value.trim().isEmpty) {
-      return '$fieldName alanı zorunludur';
+      return '$fieldName field is required';
     }
     return null;
   }
@@ -12,58 +12,58 @@ class InputValidator {
   // Email validation
   static String? validateEmail(String? value) {
     if (value == null || value.trim().isEmpty) {
-      return 'E-posta adresi zorunludur';
+      return 'Email address is required';
     }
     if (value.length > SecurityConfig.MAX_EMAIL_LENGTH) {
-      return 'E-posta adresi çok uzun';
+      return 'Email address is too long';
     }
     if (!SecurityConfig.isEmailValid(value)) {
-      return 'Geçerli bir e-posta adresi giriniz';
+      return 'Please enter a valid email address';
     }
     return null;
   }
 
-  // Şifre validation
+  // Password validation
   static String? validatePassword(String? value) {
     if (value == null || value.trim().isEmpty) {
-      return 'Şifre zorunludur';
+      return 'Password is required';
     }
     if (value.length < SecurityConfig.MIN_PASSWORD_LENGTH) {
-      return 'Şifre en az ${SecurityConfig.MIN_PASSWORD_LENGTH} karakter olmalıdır';
+      return 'Password must be at least ${SecurityConfig.MIN_PASSWORD_LENGTH} characters';
     }
     if (value.length > SecurityConfig.MAX_PASSWORD_LENGTH) {
-      return 'Şifre en fazla ${SecurityConfig.MAX_PASSWORD_LENGTH} karakter olmalıdır';
+      return 'Password must be at most ${SecurityConfig.MAX_PASSWORD_LENGTH} characters';
     }
     if (!SecurityConfig.isPasswordValid(value)) {
-      return 'Şifre en az bir harf ve bir rakam içermelidir';
+      return 'Password must contain at least one letter and one number';
     }
     return null;
   }
 
-  // Kullanıcı adı validation
+  // Username validation
   static String? validateUsername(String? value) {
     if (value == null || value.trim().isEmpty) {
-      return 'Kullanıcı adı zorunludur';
+      return 'Username is required';
     }
     if (value.length > SecurityConfig.MAX_USERNAME_LENGTH) {
-      return 'Kullanıcı adı çok uzun';
+      return 'Username is too long';
     }
     if (!SecurityConfig.isUsernameValid(value)) {
-      return 'Kullanıcı adı sadece harf, rakam ve alt çizgi içerebilir';
+      return 'Username can only contain letters, numbers and underscores';
     }
     return null;
   }
 
-  // Telefon numarası validation
+  // Phone number validation
   static String? validatePhone(String? value) {
     if (value == null || value.trim().isEmpty) {
-      return 'Telefon numarası zorunludur';
+      return 'Phone number is required';
     }
     if (value.length > SecurityConfig.MAX_PHONE_LENGTH) {
-      return 'Telefon numarası çok uzun';
+      return 'Phone number is too long';
     }
     if (!SecurityConfig.isPhoneValid(value)) {
-      return 'Geçerli bir telefon numarası giriniz';
+      return 'Please enter a valid phone number';
     }
     return null;
   }
@@ -71,36 +71,36 @@ class InputValidator {
   // URL validation
   static String? validateUrl(String? value) {
     if (value == null || value.trim().isEmpty) {
-      return null; // URL opsiyonel olabilir
+      return null; // URL can be optional
     }
     try {
       final uri = Uri.parse(value);
       if (!uri.hasScheme || !uri.hasAuthority) {
-        return 'Geçerli bir URL giriniz';
+        return 'Please enter a valid URL';
       }
     } catch (e) {
-      return 'Geçerli bir URL giriniz';
+      return 'Please enter a valid URL';
     }
     return null;
   }
 
-  // Tarih validation
+  // Date validation
   static String? validateDate(String? value) {
     if (value == null || value.trim().isEmpty) {
-      return 'Tarih zorunludur';
+      return 'Date is required';
     }
     try {
       final date = DateTime.parse(value);
       if (date.isAfter(DateTime.now())) {
-        return 'Gelecek bir tarih giremezsiniz';
+        return 'Cannot enter a future date';
       }
     } catch (e) {
-      return 'Geçerli bir tarih giriniz';
+      return 'Please enter a valid date';
     }
     return null;
   }
 
-  // Sayı validation
+  // Number validation
   static String? validateNumber(
     String? value, {
     double? min,
@@ -108,49 +108,49 @@ class InputValidator {
     bool allowDecimals = true,
   }) {
     if (value == null || value.trim().isEmpty) {
-      return 'Bu alan zorunludur';
+      return 'This field is required';
     }
     try {
       final number = allowDecimals ? double.parse(value) : int.parse(value);
       if (min != null && number < min) {
-        return 'En az $min olmalıdır';
+        return 'Must be at least $min';
       }
       if (max != null && number > max) {
-        return 'En fazla $max olmalıdır';
+        return 'Must be at most $max';
       }
     } catch (e) {
       return allowDecimals
-          ? 'Geçerli bir sayı giriniz'
-          : 'Geçerli bir tam sayı giriniz';
+          ? 'Please enter a valid number'
+          : 'Please enter a valid integer';
     }
     return null;
   }
 
-  // Dosya adı validation
+  // File name validation
   static String? validateFileName(String? value) {
     if (value == null || value.trim().isEmpty) {
-      return 'Dosya adı zorunludur';
+      return 'File name is required';
     }
     if (value.length > SecurityConfig.MAX_FILE_NAME_LENGTH) {
-      return 'Dosya adı çok uzun';
+      return 'File name is too long';
     }
     if (!SecurityConfig.isFileNameSafe(value)) {
-      return 'Geçersiz dosya adı';
+      return 'Invalid file name';
     }
     return null;
   }
 
-  // Kredi kartı numarası validation
+  // Credit card number validation
   static String? validateCreditCard(String? value) {
     if (value == null || value.trim().isEmpty) {
-      return 'Kredi kartı numarası zorunludur';
+      return 'Credit card number is required';
     }
-    // Sadece rakamları al
+    // Get only numbers
     final cleanNumber = value.replaceAll(RegExp(r'\D'), '');
     if (cleanNumber.length != 16) {
-      return 'Geçerli bir kredi kartı numarası giriniz';
+      return 'Please enter a valid credit card number';
     }
-    // Luhn algoritması kontrolü
+    // Luhn algorithm check
     int sum = 0;
     bool alternate = false;
     for (int i = cleanNumber.length - 1; i >= 0; i--) {
@@ -165,39 +165,39 @@ class InputValidator {
       alternate = !alternate;
     }
     if (sum % 10 != 0) {
-      return 'Geçerli bir kredi kartı numarası giriniz';
+      return 'Please enter a valid credit card number';
     }
     return null;
   }
 
-  // Para miktarı validation
+  // Amount validation
   static String? validateAmount(
     String? value, {
     double? min,
     double? max,
-    String? currency = 'TL',
+    String? currency = 'USD',
   }) {
     if (value == null || value.trim().isEmpty) {
-      return 'Tutar zorunludur';
+      return 'Amount is required';
     }
     try {
       final amount = double.parse(value.replaceAll(RegExp(r'[^\d.]'), ''));
       if (min != null && amount < min) {
-        return 'En az $min $currency olmalıdır';
+        return 'Must be at least $min $currency';
       }
       if (max != null && amount > max) {
-        return 'En fazla $max $currency olmalıdır';
+        return 'Must be at most $max $currency';
       }
       if (amount <= 0) {
-        return 'Geçerli bir tutar giriniz';
+        return 'Please enter a valid amount';
       }
     } catch (e) {
-      return 'Geçerli bir tutar giriniz';
+      return 'Please enter a valid amount';
     }
     return null;
   }
 
-  // Metin uzunluğu validation
+  // Text length validation
   static String? validateLength(
     String? value, {
     required int minLength,
@@ -205,29 +205,29 @@ class InputValidator {
     String? fieldName,
   }) {
     if (value == null || value.trim().isEmpty) {
-      return '${fieldName ?? 'Bu alan'} zorunludur';
+      return '${fieldName ?? 'This field'} is required';
     }
     if (value.length < minLength) {
-      return '${fieldName ?? 'Bu alan'} en az $minLength karakter olmalıdır';
+      return '${fieldName ?? 'This field'} must be at least $minLength characters';
     }
     if (maxLength != null && value.length > maxLength) {
-      return '${fieldName ?? 'Bu alan'} en fazla $maxLength karakter olmalıdır';
+      return '${fieldName ?? 'This field'} must be at most $maxLength characters';
     }
     return null;
   }
 
-  // Özel karakter kontrolü
+  // Special character validation
   static String? validateSpecialCharacters(
     String? value, {
     required String allowedCharacters,
     String? fieldName,
   }) {
     if (value == null || value.trim().isEmpty) {
-      return '${fieldName ?? 'Bu alan'} zorunludur';
+      return '${fieldName ?? 'This field'} is required';
     }
     final regex = RegExp('[^$allowedCharacters]');
     if (regex.hasMatch(value)) {
-      return '${fieldName ?? 'Bu alan'} sadece şu karakterleri içerebilir: $allowedCharacters';
+      return '${fieldName ?? 'This field'} can only contain the following characters: $allowedCharacters';
     }
     return null;
   }

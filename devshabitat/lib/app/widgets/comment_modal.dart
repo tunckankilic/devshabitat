@@ -1,3 +1,4 @@
+import 'package:devshabitat/app/constants/app_strings.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -59,8 +60,7 @@ class CommentModal extends StatelessWidget {
                     return ListTile(
                       leading: CircleAvatar(
                         backgroundImage: NetworkImage(
-                          comment['userPhotoUrl'] ??
-                              'https://via.placeholder.com/150',
+                          comment['userPhotoUrl'] ?? AppStrings.defaultPicUrl,
                         ),
                       ),
                       title: Text(comment['userName'] ?? 'Kullanıcı'),
@@ -92,8 +92,8 @@ class CommentModal extends StatelessWidget {
                 Expanded(
                   child: TextField(
                     controller: _commentController,
-                    decoration: const InputDecoration(
-                      hintText: 'Yorumunuzu yazın...',
+                    decoration: InputDecoration(
+                      hintText: AppStrings.writeYourComment,
                       border: OutlineInputBorder(),
                     ),
                     maxLines: null,

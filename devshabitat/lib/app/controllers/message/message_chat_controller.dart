@@ -3,8 +3,6 @@ import 'package:flutter/material.dart';
 import 'dart:async';
 import '../../models/message_model.dart';
 import '../../models/conversation_model.dart';
-import '../../services/messaging_service.dart';
-import '../../core/services/error_handler_service.dart';
 import '../../core/services/memory_manager_service.dart';
 import 'message_base_controller.dart';
 
@@ -19,12 +17,9 @@ class MessageChatController extends MessageBaseController
   StreamSubscription? _messageStreamSubscription;
 
   MessageChatController({
-    required MessagingService messagingService,
-    required ErrorHandlerService errorHandler,
-  }) : super(
-          messagingService: messagingService,
-          errorHandler: errorHandler,
-        );
+    required super.messagingService,
+    required super.errorHandler,
+  });
 
   Future<void> loadMessages(String conversationId) async {
     try {

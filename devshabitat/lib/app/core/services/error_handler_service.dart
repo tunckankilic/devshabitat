@@ -1,3 +1,5 @@
+// ignore_for_file: constant_identifier_names
+
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:logger/logger.dart';
@@ -53,35 +55,31 @@ class ErrorHandlerService extends GetxService {
 
     switch (errorType) {
       case VALIDATION_ERROR:
-        message = 'Lütfen girdiğiniz bilgileri kontrol edin.';
+        message = 'Please check the information you entered';
         break;
       case NETWORK_ERROR:
-        message = 'İnternet bağlantınızı kontrol edin.';
+        message = 'Check your internet connection';
         break;
       case AUTH_ERROR:
-        message = 'Oturum süreniz dolmuş olabilir. Lütfen tekrar giriş yapın.';
+        message = 'Your session may have expired. Please log in again';
         break;
       case FILE_ERROR:
-        message = 'Dosya işlemi başarısız oldu. Lütfen tekrar deneyin.';
+        message = 'File operation failed. Please try again later';
         break;
       case SERVER_ERROR:
-        message = 'Bir sunucu hatası oluştu. Lütfen daha sonra tekrar deneyin.';
+        message = 'A server error occurred. Please try again later';
         break;
       case DISCUSSION_ERROR:
-        message =
-            'Bir tartışma hatası oluştu. Lütfen daha sonra tekrar deneyin.';
+        message = 'A discussion error occurred. Please try again later';
         break;
       case PORTFOLIO_ERROR:
-        message =
-            'Bir portföy hatası oluştu. Lütfen daha sonra tekrar deneyin.';
+        message = 'A portfolio error occurred. Please try again later';
         break;
       case MATCHING_ERROR:
-        message =
-            'Bir eşleştirme hatası oluştu. Lütfen daha sonra tekrar deneyin.';
+        message = 'A matching error occurred. Please try again later';
         break;
       default:
-        message =
-            'Beklenmeyen bir hata oluştu. Lütfen daha sonra tekrar deneyin.';
+        message = 'An unexpected error occurred. Please try again later';
     }
 
     Get.snackbar(
@@ -95,7 +93,7 @@ class ErrorHandlerService extends GetxService {
   // Input validation
   String? validateInput(String input, {bool sanitize = true}) {
     if (input.isEmpty) {
-      return 'Bu alan boş bırakılamaz';
+      return 'This field cannot be left blank';
     }
 
     if (sanitize) {
@@ -103,7 +101,7 @@ class ErrorHandlerService extends GetxService {
     }
 
     if (input.length < 3) {
-      return 'En az 3 karakter girmelisiniz';
+      return 'Please enter at least 3 characters';
     }
 
     return null;
@@ -111,14 +109,14 @@ class ErrorHandlerService extends GetxService {
 
   String? validateEmail(String email) {
     if (!_config.isValidEmail(email)) {
-      return 'Geçerli bir e-posta adresi giriniz';
+      return 'Please enter a valid email address';
     }
     return null;
   }
 
   String? validatePassword(String password) {
     if (!_config.isValidPassword(password)) {
-      return 'Şifre en az 8 karakter uzunluğunda olmalı ve büyük/küçük harf, rakam ve özel karakter içermelidir';
+      return 'Password must be at least 8 characters long and contain uppercase/lowercase letters, numbers, and special characters';
     }
     return null;
   }
@@ -126,11 +124,11 @@ class ErrorHandlerService extends GetxService {
   // Dosya validation
   String? validateFile(String fileName, int fileSize) {
     if (!_config.isValidFileType(fileName)) {
-      return 'Bu dosya türü desteklenmiyor';
+      return 'This file type is not supported';
     }
 
     if (!_config.isValidFileSize(fileSize)) {
-      return 'Dosya boyutu çok büyük (max: ${AppConfig.maxFileSize ~/ (1024 * 1024)}MB)';
+      return 'File size is too large (max: ${AppConfig.maxFileSize ~/ (1024 * 1024)}MB)';
     }
 
     return null;
@@ -154,9 +152,9 @@ class ErrorHandlerService extends GetxService {
 
   void handleSuccess(String message,
       {SnackPosition position = SnackPosition.BOTTOM}) {
-    _logger.i('Başarılı: $message');
+    _logger.i('Success: $message');
     Get.snackbar(
-      'Başarılı',
+      'Success',
       message,
       snackPosition: position,
       backgroundColor: Colors.green,
@@ -169,9 +167,9 @@ class ErrorHandlerService extends GetxService {
 
   void handleWarning(String message,
       {SnackPosition position = SnackPosition.BOTTOM}) {
-    _logger.w('Uyarı: $message');
+    _logger.w('Warning: $message');
     Get.snackbar(
-      'Uyarı',
+      'Warning',
       message,
       snackPosition: position,
       backgroundColor: Colors.orange,
@@ -184,9 +182,9 @@ class ErrorHandlerService extends GetxService {
 
   void handleInfo(String message,
       {SnackPosition position = SnackPosition.BOTTOM}) {
-    _logger.i('Bilgi: $message');
+    _logger.i('Info: $message');
     Get.snackbar(
-      'Bilgi',
+      'Info',
       message,
       snackPosition: position,
       backgroundColor: Colors.blue,
@@ -205,7 +203,7 @@ class ErrorHandlerService extends GetxService {
         actions: [
           TextButton(
             onPressed: () => Get.back(),
-            child: const Text('Tamam'),
+            child: const Text('OK'),
           ),
         ],
       ),
@@ -220,7 +218,7 @@ class ErrorHandlerService extends GetxService {
         actions: [
           TextButton(
             onPressed: () => Get.back(),
-            child: const Text('Tamam'),
+            child: const Text('OK'),
           ),
         ],
       ),
@@ -231,8 +229,8 @@ class ErrorHandlerService extends GetxService {
     required String title,
     required String message,
     required VoidCallback onConfirm,
-    String confirmText = 'Evet',
-    String cancelText = 'Hayır',
+    String confirmText = 'Yes',
+    String cancelText = 'No',
   }) {
     Get.dialog(
       AlertDialog(

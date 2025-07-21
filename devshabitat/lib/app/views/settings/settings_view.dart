@@ -1,3 +1,4 @@
+import 'package:devshabitat/app/constants/app_strings.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../../controllers/settings_controller.dart';
@@ -20,7 +21,7 @@ class SettingsView extends BaseView<SettingsController> {
     return Scaffold(
       appBar: AppBar(
         title: ResponsiveText(
-          'Ayarlar',
+          AppStrings.settings,
           style: TextStyle(
             fontSize: responsive.responsiveValue(
               mobile: 20,
@@ -87,11 +88,11 @@ class SettingsView extends BaseView<SettingsController> {
 
   Widget _buildAppearanceSection() {
     return _buildSection(
-      'Görünüm',
+      AppStrings.appearance,
       [
         Obx(
           () => SettingsListTile(
-            title: 'Karanlık Mod',
+            title: AppStrings.darkMode,
             icon: Icons.dark_mode,
             trailing: Switch(
               value: controller.isDarkMode.value,
@@ -105,16 +106,16 @@ class SettingsView extends BaseView<SettingsController> {
 
   Widget _buildNotificationsSection() {
     return _buildSection(
-      'Bildirimler',
+      AppStrings.notifications,
       [
         SettingsListTile(
-          title: 'Bildirim Ayarları',
+          title: AppStrings.notificationSettings,
           icon: Icons.notifications_active,
           onTap: () => Get.toNamed(AppRoutes.notificationSettings),
         ),
         Obx(
           () => SettingsListTile(
-            title: 'Bildirimleri Etkinleştir',
+            title: AppStrings.enableNotifications,
             icon: Icons.notifications,
             trailing: Switch(
               value: controller.isNotificationsEnabled.value,
@@ -124,7 +125,7 @@ class SettingsView extends BaseView<SettingsController> {
         ),
         Obx(
           () => SettingsListTile(
-            title: 'Ses',
+            title: AppStrings.sound,
             icon: Icons.volume_up,
             trailing: Switch(
               value: controller.isSoundEnabled.value,
@@ -138,11 +139,11 @@ class SettingsView extends BaseView<SettingsController> {
 
   Widget _buildLanguageSection() {
     return _buildSection(
-      'Dil',
+      AppStrings.language,
       [
         Obx(
           () => SettingsListTile(
-            title: 'Uygulama Dili',
+            title: AppStrings.appLanguage,
             subtitle: controller.selectedLanguage.value,
             icon: Icons.language,
             onTap: () => _showLanguageDialog(Get.context!),
@@ -154,10 +155,10 @@ class SettingsView extends BaseView<SettingsController> {
 
   Widget _buildAccountSection() {
     return _buildSection(
-      'Hesap',
+      AppStrings.account,
       [
         SettingsListTile(
-          title: 'Çıkış Yap',
+          title: AppStrings.signOut,
           icon: Icons.exit_to_app,
           onTap: () => controller.signOut(),
         ),
@@ -204,7 +205,7 @@ class SettingsView extends BaseView<SettingsController> {
       context: context,
       builder: (context) => AlertDialog(
         title: ResponsiveText(
-          'Dil Seçin',
+          AppStrings.selectLanguage,
           style: TextStyle(
             fontSize: responsive.responsiveValue(
               mobile: 18,

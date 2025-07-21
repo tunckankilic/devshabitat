@@ -3,7 +3,7 @@ import 'package:get/get.dart';
 import '../../controllers/responsive_controller.dart';
 
 abstract class BaseView<T extends GetxController> extends GetView<T> {
-  const BaseView({Key? key}) : super(key: key);
+  const BaseView({super.key});
 
   @override
   Widget build(BuildContext context) {

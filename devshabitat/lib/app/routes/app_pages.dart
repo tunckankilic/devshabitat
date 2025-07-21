@@ -1,3 +1,5 @@
+// ignore_for_file: constant_identifier_names
+
 import 'package:devshabitat/app/views/auth/register/register_view.dart';
 import 'package:get/get.dart';
 import '../views/auth/login_view.dart';

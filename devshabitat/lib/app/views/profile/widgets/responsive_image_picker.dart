@@ -1,3 +1,4 @@
+import 'package:devshabitat/app/constants/app_strings.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../../../controllers/image_upload_controller.dart';
@@ -73,13 +74,13 @@ class ResponsiveImagePicker extends StatelessWidget {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Profil Resmi Seç'),
+        title: Text(AppStrings.selectProfileImage),
         content: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
             ListTile(
               leading: const Icon(Icons.photo_library),
-              title: const Text('Galeriden Seç'),
+              title: Text(AppStrings.selectFromGallery),
               onTap: () {
                 Navigator.pop(context);
                 imageUploadController.pickImageFromGallery();
@@ -87,7 +88,7 @@ class ResponsiveImagePicker extends StatelessWidget {
             ),
             ListTile(
               leading: const Icon(Icons.camera_alt),
-              title: const Text('Fotoğraf Çek'),
+              title: Text(AppStrings.takePhoto),
               onTap: () {
                 Navigator.pop(context);
                 imageUploadController.takeImageFromCamera();

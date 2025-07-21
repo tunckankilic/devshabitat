@@ -1,3 +1,4 @@
+import 'package:devshabitat/app/constants/app_strings.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../../../controllers/responsive_controller.dart';
@@ -7,7 +8,7 @@ import '../widgets/social_login_button.dart';
 class SmallPhoneLogin extends GetView<AuthController> {
   final _responsiveController = Get.find<ResponsiveController>();
 
-  SmallPhoneLogin({Key? key}) : super(key: key);
+  SmallPhoneLogin({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -34,7 +35,7 @@ class SmallPhoneLogin extends GetView<AuthController> {
             tablet: 48.0,
           )),
           Text(
-            'Hoş Geldiniz',
+            AppStrings.welcome,
             style: TextStyle(
               fontSize: _responsiveController.responsiveValue(
                 mobile: 20.0,
@@ -49,7 +50,7 @@ class SmallPhoneLogin extends GetView<AuthController> {
             tablet: 12.0,
           )),
           Text(
-            'Devam etmek için giriş yapın',
+            AppStrings.loginDescription,
             style: TextStyle(
               fontSize: _responsiveController.responsiveValue(
                 mobile: 14.0,
@@ -70,7 +71,7 @@ class SmallPhoneLogin extends GetView<AuthController> {
                   controller: controller.emailController,
                   keyboardType: TextInputType.emailAddress,
                   decoration: InputDecoration(
-                    labelText: 'E-posta',
+                    labelText: AppStrings.email,
                     prefixIcon: Icon(
                       Icons.email,
                       size: _responsiveController.responsiveValue(
@@ -145,7 +146,7 @@ class SmallPhoneLogin extends GetView<AuthController> {
                   child: TextButton(
                     onPressed: () => Get.toNamed('/forgot-password'),
                     child: Text(
-                      'Şifremi Unuttum',
+                      AppStrings.forgotPassword,
                       style: TextStyle(
                         fontSize: _responsiveController.responsiveValue(
                           mobile: 12.0,
@@ -194,7 +195,7 @@ class SmallPhoneLogin extends GetView<AuthController> {
                             ),
                           )
                         : Text(
-                            'Giriş Yap',
+                            AppStrings.login,
                             style: TextStyle(
                               fontSize: _responsiveController.responsiveValue(
                                 mobile: 14.0,
@@ -220,7 +221,7 @@ class SmallPhoneLogin extends GetView<AuthController> {
                   horizontal: 12.0,
                 ),
                 child: Text(
-                  'veya',
+                  AppStrings.or,
                   style: TextStyle(
                     fontSize: _responsiveController.responsiveValue(
                       mobile: 12.0,
@@ -239,7 +240,7 @@ class SmallPhoneLogin extends GetView<AuthController> {
             tablet: 32.0,
           )),
           SocialLoginButton(
-            text: 'Google ile Devam Et',
+            text: AppStrings.continueWithGoogle,
             imagePath: 'assets/icons/google.png',
             onPressed: () => controller.signInWithGoogle(),
             backgroundColor: Colors.white,
@@ -252,7 +253,7 @@ class SmallPhoneLogin extends GetView<AuthController> {
             tablet: 16.0,
           )),
           SocialLoginButton(
-            text: 'Apple ile Devam Et',
+            text: AppStrings.continueWithApple,
             imagePath: 'assets/icons/apple.png',
             onPressed: () => controller.signInWithApple(),
             backgroundColor: Colors.black,
@@ -267,7 +268,7 @@ class SmallPhoneLogin extends GetView<AuthController> {
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               Text(
-                'Hesabınız yok mu?',
+                AppStrings.noAccount,
                 style: TextStyle(
                   fontSize: _responsiveController.responsiveValue(
                     mobile: 12.0,
@@ -278,7 +279,7 @@ class SmallPhoneLogin extends GetView<AuthController> {
               TextButton(
                 onPressed: () => Get.toNamed('/register'),
                 child: Text(
-                  'Kayıt Ol',
+                  AppStrings.register,
                   style: TextStyle(
                     fontSize: _responsiveController.responsiveValue(
                       mobile: 12.0,

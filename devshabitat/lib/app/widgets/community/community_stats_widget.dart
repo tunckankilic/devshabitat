@@ -1,3 +1,4 @@
+import 'package:devshabitat/app/constants/app_strings.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../../controllers/responsive_controller.dart';
@@ -32,7 +33,7 @@ class CommunityStatsWidget extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            'Topluluk İstatistikleri',
+            AppStrings.communityStatistics,
             style: TextStyle(
               fontSize: responsive.responsiveValue(mobile: 18, tablet: 22),
               fontWeight: FontWeight.bold,
@@ -44,7 +45,7 @@ class CommunityStatsWidget extends StatelessWidget {
               Expanded(
                 child: _buildStatItem(
                   responsive,
-                  'Üyeler',
+                  AppStrings.members,
                   '${community.memberCount}',
                   Icons.people,
                 ),
@@ -54,7 +55,7 @@ class CommunityStatsWidget extends StatelessWidget {
               Expanded(
                 child: _buildStatItem(
                   responsive,
-                  'Etkinlikler',
+                  AppStrings.events,
                   '${community.eventCount}',
                   Icons.event,
                 ),
@@ -67,7 +68,7 @@ class CommunityStatsWidget extends StatelessWidget {
               Expanded(
                 child: _buildStatItem(
                   responsive,
-                  'Aktiflik',
+                  AppStrings.activity,
                   _getActivityLevel(75),
                   Icons.trending_up,
                 ),
@@ -77,7 +78,7 @@ class CommunityStatsWidget extends StatelessWidget {
               Expanded(
                 child: _buildStatItem(
                   responsive,
-                  'Derecelendirme',
+                  AppStrings.rating,
                   '4.5',
                   Icons.star,
                 ),
@@ -94,7 +95,7 @@ class CommunityStatsWidget extends StatelessWidget {
           ),
           SizedBox(height: responsive.responsiveValue(mobile: 4, tablet: 6)),
           Text(
-            'Aktiflik Seviyesi: ${_getActivityLevel(75)}',
+            '${AppStrings.activityLevel}: ${_getActivityLevel(75)}',
             style: TextStyle(
               fontSize: responsive.responsiveValue(mobile: 12, tablet: 14),
               color: Colors.grey[600],
@@ -139,11 +140,11 @@ class CommunityStatsWidget extends StatelessWidget {
   }
 
   String _getActivityLevel(int level) {
-    if (level >= 80) return 'Çok Yüksek';
-    if (level >= 60) return 'Yüksek';
-    if (level >= 40) return 'Orta';
-    if (level >= 20) return 'Düşük';
-    return 'Çok Düşük';
+    if (level >= 80) return AppStrings.veryHigh;
+    if (level >= 60) return AppStrings.high;
+    if (level >= 40) return AppStrings.medium;
+    if (level >= 20) return AppStrings.low;
+    return AppStrings.veryLow;
   }
 
   Color _getActivityColor(int level) {

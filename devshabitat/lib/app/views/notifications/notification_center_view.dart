@@ -1,21 +1,22 @@
+import 'package:devshabitat/app/constants/app_strings.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../../controllers/notification_controller.dart';
 import '../../widgets/in_app_notification_widget.dart';
 
 class NotificationCenterView extends GetView<NotificationController> {
-  const NotificationCenterView({Key? key}) : super(key: key);
+  const NotificationCenterView({super.key});
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Bildirimler'),
+        title: Text(AppStrings.notifications),
         actions: [
           IconButton(
             icon: const Icon(Icons.done_all),
             onPressed: controller.markAllAsRead,
-            tooltip: 'Tümünü okundu işaretle',
+            tooltip: AppStrings.markAllAsRead,
           ),
           PopupMenuButton<String>(
             onSelected: (value) {
@@ -33,14 +34,14 @@ class NotificationCenterView extends GetView<NotificationController> {
                 value: 'filter',
                 child: ListTile(
                   leading: Icon(Icons.filter_list),
-                  title: Text('Filtrele'),
+                  title: Text(AppStrings.filter),
                 ),
               ),
               const PopupMenuItem(
                 value: 'settings',
                 child: ListTile(
                   leading: Icon(Icons.settings),
-                  title: Text('Ayarlar'),
+                  title: Text(AppStrings.settings),
                 ),
               ),
             ],
@@ -86,7 +87,7 @@ class NotificationCenterView extends GetView<NotificationController> {
           ),
           const SizedBox(height: 16),
           Text(
-            'Henüz bildiriminiz yok',
+            AppStrings.noNotifications,
             style: TextStyle(
               fontSize: 18,
               color: Colors.grey[600],
@@ -95,7 +96,7 @@ class NotificationCenterView extends GetView<NotificationController> {
           ),
           const SizedBox(height: 8),
           Text(
-            'Yeni bildirimler burada görünecek',
+            AppStrings.newNotificationsWillAppearHere,
             style: TextStyle(
               color: Colors.grey[500],
             ),
@@ -109,22 +110,22 @@ class NotificationCenterView extends GetView<NotificationController> {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Bildirimleri Filtrele'),
+        title: Text(AppStrings.filterNotifications),
         content: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            _buildFilterOption('Tümü', 'all'),
-            _buildFilterOption('Okunmamış', 'unread'),
-            _buildFilterOption('Mesajlar', 'message'),
-            _buildFilterOption('Etkinlikler', 'event'),
-            _buildFilterOption('Topluluk', 'community'),
-            _buildFilterOption('Bağlantılar', 'connection'),
+            _buildFilterOption(AppStrings.all, 'all'),
+            _buildFilterOption(AppStrings.unread, 'unread'),
+            _buildFilterOption(AppStrings.messages, 'message'),
+            _buildFilterOption(AppStrings.events, 'event'),
+            _buildFilterOption(AppStrings.communities, 'community'),
+            _buildFilterOption(AppStrings.connections, 'connection'),
           ],
         ),
         actions: [
           TextButton(
             onPressed: () => Get.back(),
-            child: const Text('Kapat'),
+            child: Text(AppStrings.close),
           ),
         ],
       ),

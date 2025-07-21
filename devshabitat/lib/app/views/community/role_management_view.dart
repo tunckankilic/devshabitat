@@ -1,3 +1,5 @@
+import 'package:devshabitat/app/constants/app_strings.dart';
+import 'package:devshabitat/app/views/auth/widgets/adaptive_loading_indicator.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../../controllers/community/role_controller.dart';
@@ -5,7 +7,7 @@ import '../../models/community/role_model.dart';
 import '../../models/user_profile_model.dart';
 
 class RoleManagementView extends GetView<RoleController> {
-  const RoleManagementView({Key? key}) : super(key: key);
+  const RoleManagementView({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -13,11 +15,11 @@ class RoleManagementView extends GetView<RoleController> {
       length: 2,
       child: Scaffold(
         appBar: AppBar(
-          title: const Text('Rol Yönetimi'),
+          title: const Text(AppStrings.roleManagement),
           bottom: const TabBar(
             tabs: [
-              Tab(text: 'Roller'),
-              Tab(text: 'Üyeler'),
+              Tab(text: AppStrings.roles),
+              Tab(text: AppStrings.members),
             ],
           ),
         ),
@@ -48,7 +50,7 @@ class RoleManagementView extends GetView<RoleController> {
   Widget _buildRolesTab() {
     return Obx(
       () => controller.isLoading.value
-          ? const Center(child: CircularProgressIndicator())
+          ? Center(child: AdaptiveLoadingIndicator())
           : ListView.builder(
               itemCount: controller.roles.length,
               itemBuilder: (context, index) {
@@ -80,7 +82,7 @@ class RoleManagementView extends GetView<RoleController> {
   Widget _buildMembersTab() {
     return Obx(
       () => controller.isLoading.value
-          ? const Center(child: CircularProgressIndicator())
+          ? Center(child: AdaptiveLoadingIndicator())
           : ListView.builder(
               itemCount: controller.members.length,
               itemBuilder: (context, index) {
@@ -143,7 +145,7 @@ class RoleManagementView extends GetView<RoleController> {
             mainAxisSize: MainAxisSize.min,
             children: [
               const Text(
-                'Yeni Rol Oluştur',
+                AppStrings.newRole,
                 style: TextStyle(
                   fontSize: 20,
                   fontWeight: FontWeight.bold,
@@ -153,7 +155,7 @@ class RoleManagementView extends GetView<RoleController> {
               TextField(
                 controller: nameController,
                 decoration: const InputDecoration(
-                  labelText: 'Rol Adı',
+                  labelText: AppStrings.roleName,
                   border: OutlineInputBorder(),
                 ),
               ),
@@ -161,7 +163,7 @@ class RoleManagementView extends GetView<RoleController> {
               TextField(
                 controller: descriptionController,
                 decoration: const InputDecoration(
-                  labelText: 'Açıklama',
+                  labelText: AppStrings.description,
                   border: OutlineInputBorder(),
                 ),
                 maxLines: 2,
@@ -170,7 +172,7 @@ class RoleManagementView extends GetView<RoleController> {
               TextField(
                 controller: colorController,
                 decoration: const InputDecoration(
-                  labelText: 'Renk (HEX)',
+                  labelText: AppStrings.color,
                   border: OutlineInputBorder(),
                 ),
               ),
@@ -178,14 +180,14 @@ class RoleManagementView extends GetView<RoleController> {
               TextField(
                 controller: iconController,
                 decoration: const InputDecoration(
-                  labelText: 'İkon',
+                  labelText: AppStrings.icon,
                   border: OutlineInputBorder(),
                 ),
               ),
               const SizedBox(height: 8),
               Row(
                 children: [
-                  const Text('Öncelik:'),
+                  const Text(AppStrings.priority),
                   Expanded(
                     child: Obx(
                       () => Slider(
@@ -201,7 +203,7 @@ class RoleManagementView extends GetView<RoleController> {
                 ],
               ),
               const SizedBox(height: 16),
-              const Text('İzinler'),
+              const Text(AppStrings.permissions),
               Expanded(
                 child: SingleChildScrollView(
                   child: Obx(
@@ -229,7 +231,7 @@ class RoleManagementView extends GetView<RoleController> {
                 children: [
                   TextButton(
                     onPressed: () => Get.back(),
-                    child: const Text('İptal'),
+                    child: const Text(AppStrings.cancel),
                   ),
                   ElevatedButton(
                     onPressed: () {
@@ -261,7 +263,7 @@ class RoleManagementView extends GetView<RoleController> {
 
                       controller.createRole(role);
                     },
-                    child: const Text('Oluştur'),
+                    child: const Text(AppStrings.create),
                   ),
                 ],
               ),
@@ -288,7 +290,7 @@ class RoleManagementView extends GetView<RoleController> {
             mainAxisSize: MainAxisSize.min,
             children: [
               const Text(
-                'Rolü Düzenle',
+                AppStrings.editRole,
                 style: TextStyle(
                   fontSize: 20,
                   fontWeight: FontWeight.bold,
@@ -298,7 +300,7 @@ class RoleManagementView extends GetView<RoleController> {
               TextField(
                 controller: nameController,
                 decoration: const InputDecoration(
-                  labelText: 'Rol Adı',
+                  labelText: AppStrings.roleName,
                   border: OutlineInputBorder(),
                 ),
               ),
@@ -306,7 +308,7 @@ class RoleManagementView extends GetView<RoleController> {
               TextField(
                 controller: descriptionController,
                 decoration: const InputDecoration(
-                  labelText: 'Açıklama',
+                  labelText: AppStrings.description,
                   border: OutlineInputBorder(),
                 ),
                 maxLines: 2,
@@ -315,7 +317,7 @@ class RoleManagementView extends GetView<RoleController> {
               TextField(
                 controller: colorController,
                 decoration: const InputDecoration(
-                  labelText: 'Renk (HEX)',
+                  labelText: AppStrings.color,
                   border: OutlineInputBorder(),
                 ),
               ),
@@ -323,14 +325,14 @@ class RoleManagementView extends GetView<RoleController> {
               TextField(
                 controller: iconController,
                 decoration: const InputDecoration(
-                  labelText: 'İkon',
+                  labelText: AppStrings.icon,
                   border: OutlineInputBorder(),
                 ),
               ),
               const SizedBox(height: 8),
               Row(
                 children: [
-                  const Text('Öncelik:'),
+                  const Text(AppStrings.priority),
                   Expanded(
                     child: Obx(
                       () => Slider(
@@ -346,7 +348,7 @@ class RoleManagementView extends GetView<RoleController> {
                 ],
               ),
               const SizedBox(height: 16),
-              const Text('İzinler'),
+              const Text(AppStrings.permissions),
               Expanded(
                 child: SingleChildScrollView(
                   child: Obx(
@@ -374,7 +376,7 @@ class RoleManagementView extends GetView<RoleController> {
                 children: [
                   TextButton(
                     onPressed: () => Get.back(),
-                    child: const Text('İptal'),
+                    child: const Text(AppStrings.cancel),
                   ),
                   ElevatedButton(
                     onPressed: () {
@@ -401,7 +403,7 @@ class RoleManagementView extends GetView<RoleController> {
 
                       controller.updateRole(updatedRole);
                     },
-                    child: const Text('Kaydet'),
+                    child: const Text(AppStrings.save),
                   ),
                 ],
               ),
@@ -415,12 +417,12 @@ class RoleManagementView extends GetView<RoleController> {
   void _showDeleteRoleDialog(BuildContext context, RoleModel role) {
     Get.dialog(
       AlertDialog(
-        title: const Text('Rolü Sil'),
-        content: Text('${role.name} rolünü silmek istediğinize emin misiniz?'),
+        title: const Text(AppStrings.deleteRole),
+        content: Text('${role.name} ${AppStrings.deleteRoleConfirmation}'),
         actions: [
           TextButton(
             onPressed: () => Get.back(),
-            child: const Text('İptal'),
+            child: const Text(AppStrings.cancel),
           ),
           ElevatedButton(
             onPressed: () {
@@ -429,7 +431,7 @@ class RoleManagementView extends GetView<RoleController> {
             style: ElevatedButton.styleFrom(
               backgroundColor: Colors.red,
             ),
-            child: const Text('Sil'),
+            child: const Text(AppStrings.delete),
           ),
         ],
       ),
@@ -447,7 +449,7 @@ class RoleManagementView extends GetView<RoleController> {
             mainAxisSize: MainAxisSize.min,
             children: [
               Text(
-                '${user.fullName} - Roller',
+                '${user.fullName} - ${AppStrings.roles}',
                 style: const TextStyle(
                   fontSize: 20,
                   fontWeight: FontWeight.bold,
@@ -459,7 +461,7 @@ class RoleManagementView extends GetView<RoleController> {
                   future: controller.getMemberRoles(user.id),
                   builder: (context, snapshot) {
                     if (snapshot.connectionState == ConnectionState.waiting) {
-                      return const Center(child: CircularProgressIndicator());
+                      return Center(child: AdaptiveLoadingIndicator());
                     }
 
                     final userRoles = snapshot.data ?? [];
@@ -493,7 +495,7 @@ class RoleManagementView extends GetView<RoleController> {
               const SizedBox(height: 16),
               ElevatedButton(
                 onPressed: () => Get.back(),
-                child: const Text('Kapat'),
+                child: const Text(AppStrings.close),
               ),
             ],
           ),
@@ -505,37 +507,37 @@ class RoleManagementView extends GetView<RoleController> {
   String _getPermissionText(RolePermission permission) {
     switch (permission) {
       case RolePermission.viewContent:
-        return 'İçerikleri Görüntüleme';
+        return AppStrings.viewContent;
       case RolePermission.createContent:
-        return 'İçerik Oluşturma';
+        return AppStrings.createContent;
       case RolePermission.editOwnContent:
-        return 'Kendi İçeriklerini Düzenleme';
+        return AppStrings.editOwnContent;
       case RolePermission.deleteOwnContent:
-        return 'Kendi İçeriklerini Silme';
+        return AppStrings.deleteOwnContent;
       case RolePermission.moderateContent:
-        return 'İçerik Moderasyonu';
+        return AppStrings.moderateContent;
       case RolePermission.banUsers:
-        return 'Kullanıcı Yasaklama';
+        return AppStrings.banUsers;
       case RolePermission.manageRoles:
-        return 'Rol Yönetimi';
+        return AppStrings.manageRoles;
       case RolePermission.manageSettings:
-        return 'Ayar Yönetimi';
+        return AppStrings.manageSettings;
       case RolePermission.manageRules:
-        return 'Kural Yönetimi';
+        return AppStrings.manageRules;
       case RolePermission.manageResources:
-        return 'Kaynak Yönetimi';
+        return AppStrings.manageResources;
       case RolePermission.createEvents:
-        return 'Etkinlik Oluşturma';
+        return AppStrings.createEvents;
       case RolePermission.pinContent:
-        return 'İçerik Sabitleme';
+        return AppStrings.pinContent;
       case RolePermission.assignRoles:
-        return 'Rol Atama';
+        return AppStrings.assignRoles;
       case RolePermission.viewAnalytics:
-        return 'Analitikleri Görüntüleme';
+        return AppStrings.viewAnalytics;
       case RolePermission.manageMembers:
-        return 'Üye Yönetimi';
+        return AppStrings.manageMembers;
       case RolePermission.deleteContent:
-        return 'İçerik Silme';
+        return AppStrings.deleteContent;
     }
   }
 }

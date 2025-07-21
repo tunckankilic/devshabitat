@@ -1,16 +1,17 @@
+import 'package:devshabitat/app/constants/app_strings.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../../controllers/community/community_create_controller.dart';
 import '../../widgets/image_upload_widget.dart';
 
 class CommunityCreateView extends GetView<CommunityCreateController> {
-  const CommunityCreateView({Key? key}) : super(key: key);
+  const CommunityCreateView({super.key});
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Topluluk Oluştur'),
+        title: Text(AppStrings.createCommunity),
       ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(16),
@@ -26,7 +27,7 @@ class CommunityCreateView extends GetView<CommunityCreateController> {
                 aspectRatio: 16 / 9,
                 maxWidth: 1920,
                 maxHeight: 1080,
-                label: 'Kapak Fotoğrafı',
+                label: AppStrings.coverImage,
               ),
               const SizedBox(height: 24),
 
@@ -34,13 +35,13 @@ class CommunityCreateView extends GetView<CommunityCreateController> {
               TextFormField(
                 controller: controller.nameController,
                 decoration: const InputDecoration(
-                  labelText: 'Topluluk Adı',
-                  hintText: 'Topluluğunuzun adını girin',
+                  labelText: AppStrings.communityName,
+                  hintText: AppStrings.communityNameHint,
                   border: OutlineInputBorder(),
                 ),
                 validator: (value) {
                   if (value == null || value.isEmpty) {
-                    return 'Topluluk adı gereklidir';
+                    return AppStrings.communityNameRequired;
                   }
                   return null;
                 },
@@ -51,14 +52,14 @@ class CommunityCreateView extends GetView<CommunityCreateController> {
               TextFormField(
                 controller: controller.descriptionController,
                 decoration: const InputDecoration(
-                  labelText: 'Topluluk Açıklaması',
-                  hintText: 'Topluluğunuzu kısaca tanıtın',
+                  labelText: AppStrings.communityDescription,
+                  hintText: AppStrings.communityDescriptionHint,
                   border: OutlineInputBorder(),
                 ),
                 maxLines: 3,
                 validator: (value) {
                   if (value == null || value.isEmpty) {
-                    return 'Topluluk açıklaması gereklidir';
+                    return AppStrings.communityDescriptionRequired;
                   }
                   return null;
                 },
@@ -67,7 +68,7 @@ class CommunityCreateView extends GetView<CommunityCreateController> {
 
               // Kategori Seçimi
               Text(
-                'Kategoriler',
+                AppStrings.categories,
                 style: Theme.of(context).textTheme.titleMedium,
               ),
               const SizedBox(height: 8),
@@ -96,15 +97,15 @@ class CommunityCreateView extends GetView<CommunityCreateController> {
 
               // Topluluk Ayarları
               Text(
-                'Topluluk Ayarları',
+                AppStrings.communitySettings,
                 style: Theme.of(context).textTheme.titleMedium,
               ),
               const SizedBox(height: 16),
               Obx(
                 () => SwitchListTile(
-                  title: const Text('Üyelik Onayı Gerekli'),
-                  subtitle: const Text(
-                    'Etkinleştirilirse, yeni üyelerin katılım talepleri moderatörler tarafından onaylanmalıdır',
+                  title: Text(AppStrings.membershipApprovalRequired),
+                  subtitle: Text(
+                    AppStrings.membershipApprovalRequiredDescription,
                   ),
                   value: controller.requiresApproval.value,
                   onChanged: (value) =>
@@ -114,9 +115,9 @@ class CommunityCreateView extends GetView<CommunityCreateController> {
               const SizedBox(height: 8),
               Obx(
                 () => SwitchListTile(
-                  title: const Text('Sadece Üyeler Görebilir'),
-                  subtitle: const Text(
-                    'Etkinleştirilirse, topluluk içeriği sadece üyeler tarafından görüntülenebilir',
+                  title: Text(AppStrings.onlyMembersCanView),
+                  subtitle: Text(
+                    AppStrings.onlyMembersCanViewDescription,
                   ),
                   value: controller.isPrivate.value,
                   onChanged: (value) => controller.isPrivate.value = value,
@@ -140,7 +141,7 @@ class CommunityCreateView extends GetView<CommunityCreateController> {
                               strokeWidth: 2,
                             ),
                           )
-                        : const Text('Topluluk Oluştur'),
+                        : Text(AppStrings.createCommunity),
                   ),
                 ),
               ),

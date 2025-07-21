@@ -1,3 +1,4 @@
+import 'package:devshabitat/app/constants/app_strings.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../../../controllers/comments_controller.dart';
@@ -10,12 +11,12 @@ class CommentsView extends GetView<CommentsController> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Yorumlar'),
+        title: Text(AppStrings.comments),
         actions: [
           IconButton(
             icon: const Icon(Icons.refresh),
             onPressed: () => controller.refreshComments(),
-            tooltip: 'Yenile',
+            tooltip: AppStrings.refresh,
           ),
         ],
       ),
@@ -53,7 +54,7 @@ class CommentsView extends GetView<CommentsController> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              'Orijinal Gönderi',
+              AppStrings.originalPost,
               style: TextStyle(
                 fontSize: 12,
                 color: Colors.grey.shade600,
@@ -116,7 +117,7 @@ class CommentsView extends GetView<CommentsController> {
               const SizedBox(height: 16),
               ElevatedButton(
                 onPressed: () => controller.refreshComments(),
-                child: const Text('Tekrar Dene'),
+                child: Text(AppStrings.tryAgain),
               ),
             ],
           ),
@@ -135,7 +136,7 @@ class CommentsView extends GetView<CommentsController> {
               ),
               const SizedBox(height: 16),
               Text(
-                'Henüz yorum yok',
+                AppStrings.noComments,
                 style: TextStyle(
                   fontSize: 16,
                   color: Colors.grey.shade600,
@@ -143,7 +144,7 @@ class CommentsView extends GetView<CommentsController> {
               ),
               const SizedBox(height: 8),
               Text(
-                'İlk yorumu sen yap!',
+                AppStrings.makeFirstComment,
                 style: TextStyle(
                   fontSize: 14,
                   color: Colors.grey.shade500,
@@ -226,7 +227,7 @@ class CommentsView extends GetView<CommentsController> {
                           children: [
                             Icon(Icons.delete, size: 16),
                             SizedBox(width: 8),
-                            Text('Sil'),
+                            Text(AppStrings.delete),
                           ],
                         ),
                       ),
@@ -282,7 +283,7 @@ class CommentsView extends GetView<CommentsController> {
             child: TextField(
               controller: textController,
               decoration: const InputDecoration(
-                hintText: 'Yorumunuzu yazın...',
+                hintText: AppStrings.writeYourComment,
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.all(Radius.circular(24)),
                 ),

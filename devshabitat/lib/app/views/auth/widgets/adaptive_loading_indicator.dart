@@ -10,11 +10,11 @@ class AdaptiveLoadingIndicator extends StatelessWidget {
   final bool isSmall;
 
   AdaptiveLoadingIndicator({
-    Key? key,
+    super.key,
     this.color,
     this.message,
     this.isSmall = false,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {

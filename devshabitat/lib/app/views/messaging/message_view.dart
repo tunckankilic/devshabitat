@@ -1,3 +1,4 @@
+import 'package:devshabitat/app/constants/app_strings.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../../controllers/message/message_chat_controller.dart';
@@ -25,7 +26,7 @@ class MessageView extends BaseView<MessageChatController> {
     return Scaffold(
       appBar: AppBar(
         title: ResponsiveText(
-          'Mesajlar',
+          AppStrings.messages,
           style: TextStyle(
             fontSize: responsive.responsiveValue(
               mobile: 18,
@@ -63,7 +64,7 @@ class MessageView extends BaseView<MessageChatController> {
                   if (listController.conversations.isEmpty) {
                     return Center(
                       child: ResponsiveText(
-                        'Henüz bir konuşma yok',
+                        AppStrings.noChats,
                         style: TextStyle(
                           fontSize: responsive.responsiveValue(
                             mobile: 16,
@@ -157,7 +158,7 @@ class MessageView extends BaseView<MessageChatController> {
           ),
         ),
         subtitle: ResponsiveText(
-          conversation.lastMessage ?? 'Mesaj yok',
+          conversation.lastMessage ?? AppStrings.noMessages,
           style: TextStyle(
             fontSize: responsive.responsiveValue(
               mobile: 14,
@@ -193,7 +194,7 @@ class MessageView extends BaseView<MessageChatController> {
                   ),
                 ),
                 child: ResponsiveText(
-                  'Yeni',
+                  AppStrings.newMessages,
                   style: TextStyle(
                     color: Colors.white,
                     fontSize: responsive.responsiveValue(
@@ -232,7 +233,7 @@ class MessageView extends BaseView<MessageChatController> {
                 size: responsive.responsiveValue(mobile: 24, tablet: 32),
               ),
               title: ResponsiveText(
-                'Konuşmayı Sil',
+                AppStrings.deleteConversation,
                 style: TextStyle(
                   fontSize: responsive.responsiveValue(
                     mobile: 16,
@@ -251,7 +252,7 @@ class MessageView extends BaseView<MessageChatController> {
                 size: responsive.responsiveValue(mobile: 24, tablet: 32),
               ),
               title: ResponsiveText(
-                'Arşivle',
+                AppStrings.archive,
                 style: TextStyle(
                   fontSize: responsive.responsiveValue(
                     mobile: 16,
@@ -270,7 +271,7 @@ class MessageView extends BaseView<MessageChatController> {
                 size: responsive.responsiveValue(mobile: 24, tablet: 32),
               ),
               title: ResponsiveText(
-                'Engelle',
+                AppStrings.block,
                 style: TextStyle(
                   fontSize: responsive.responsiveValue(
                     mobile: 16,
@@ -293,7 +294,7 @@ class MessageView extends BaseView<MessageChatController> {
     Get.dialog(
       AlertDialog(
         title: ResponsiveText(
-          'Konuşmayı Sil',
+          AppStrings.deleteConversation,
           style: TextStyle(
             fontSize: responsive.responsiveValue(
               mobile: 18,
@@ -302,7 +303,7 @@ class MessageView extends BaseView<MessageChatController> {
           ),
         ),
         content: ResponsiveText(
-          'Bu konuşmayı silmek istediğinize emin misiniz?',
+          AppStrings.confirmDeleteConversation,
           style: TextStyle(
             fontSize: responsive.responsiveValue(
               mobile: 16,
@@ -314,7 +315,7 @@ class MessageView extends BaseView<MessageChatController> {
           TextButton(
             onPressed: () => Get.back(),
             child: ResponsiveText(
-              'İptal',
+              AppStrings.cancel,
               style: TextStyle(
                 fontSize: responsive.responsiveValue(
                   mobile: 14,
@@ -329,7 +330,7 @@ class MessageView extends BaseView<MessageChatController> {
               listController.deleteConversation(conversation.id);
             },
             child: ResponsiveText(
-              'Sil',
+              AppStrings.delete,
               style: TextStyle(
                 fontSize: responsive.responsiveValue(
                   mobile: 14,
@@ -351,13 +352,13 @@ class MessageView extends BaseView<MessageChatController> {
     if (difference.inDays > 7) {
       return '${time.day}/${time.month}/${time.year}';
     } else if (difference.inDays > 0) {
-      return '${difference.inDays} gün önce';
+      return '${difference.inDays} days ago';
     } else if (difference.inHours > 0) {
-      return '${difference.inHours} saat önce';
+      return '${difference.inHours} hours ago';
     } else if (difference.inMinutes > 0) {
-      return '${difference.inMinutes} dk önce';
+      return '${difference.inMinutes} mins ago';
     } else {
-      return 'Şimdi';
+      return AppStrings.now;
     }
   }
 }

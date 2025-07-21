@@ -1,3 +1,4 @@
+import 'package:devshabitat/app/constants/app_strings.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../../controllers/message_search_controller.dart';
@@ -16,7 +17,7 @@ class SearchView extends GetView<MessageSearchController> {
     return Scaffold(
       appBar: AppBar(
         title: ResponsiveText(
-          'Arama',
+          AppStrings.search,
           style: TextStyle(
             fontSize: responsive.responsiveValue(
               mobile: 18,
@@ -91,7 +92,7 @@ class SearchView extends GetView<MessageSearchController> {
           ),
         ),
         decoration: InputDecoration(
-          hintText: 'Mesajlarda ara...',
+          hintText: AppStrings.searchMessages,
           hintStyle: TextStyle(
             fontSize: responsive.responsiveValue(
               mobile: 16.0,
@@ -195,7 +196,7 @@ class SearchView extends GetView<MessageSearchController> {
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 ResponsiveText(
-                  'Son Aramalar',
+                  AppStrings.recentSearches,
                   style: TextStyle(
                     fontSize: responsive.responsiveValue(
                       mobile: 16,
@@ -207,7 +208,7 @@ class SearchView extends GetView<MessageSearchController> {
                 TextButton(
                   onPressed: controller.clearRecentSearches,
                   child: ResponsiveText(
-                    'Temizle',
+                    AppStrings.clear,
                     style: TextStyle(
                       fontSize: responsive.responsiveValue(
                         mobile: 14,
@@ -325,15 +326,15 @@ class SearchView extends GetView<MessageSearchController> {
   String _getCategoryLabel(SearchCategory category) {
     switch (category) {
       case SearchCategory.all:
-        return 'Tümü';
+        return AppStrings.all;
       case SearchCategory.messages:
-        return 'Mesajlar';
+        return AppStrings.messages;
       case SearchCategory.media:
-        return 'Medya';
+        return AppStrings.media;
       case SearchCategory.documents:
-        return 'Dokümanlar';
+        return AppStrings.documents;
       case SearchCategory.links:
-        return 'Linkler';
+        return AppStrings.links;
     }
   }
 
@@ -647,7 +648,7 @@ class SearchView extends GetView<MessageSearchController> {
               ),
               SizedBox(height: sectionSpacing),
               _buildAnalyticsSection(
-                'Son Aramalar',
+                AppStrings.recentSearches,
                 analytics['recentSearches']
                     .map<Widget>((stat) => ResponsiveText(
                           '${stat.term} - ${_formatDate(stat.lastSearched)}',
@@ -667,7 +668,7 @@ class SearchView extends GetView<MessageSearchController> {
           TextButton(
             onPressed: () => Get.back(),
             child: ResponsiveText(
-              'Kapat',
+              AppStrings.close,
               style: TextStyle(
                 fontSize: responsive.responsiveValue(
                   mobile: 16.0,
@@ -722,7 +723,7 @@ class SearchView extends GetView<MessageSearchController> {
       context: context,
       builder: (context) => AlertDialog(
         title: ResponsiveText(
-          'Filtreler',
+          AppStrings.filters,
           style: TextStyle(
             fontSize: responsive.responsiveValue(
               mobile: 18.0,
@@ -738,25 +739,25 @@ class SearchView extends GetView<MessageSearchController> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               _buildFilterSection(
-                'Mesaj Türleri',
+                AppStrings.messageTypes,
                 [
                   _buildFilterSwitch(
-                    'Metin Mesajları',
+                    AppStrings.textMessages,
                     controller.filterText,
                     controller.toggleTextFilter,
                   ),
                   _buildFilterSwitch(
-                    'Medya',
+                    AppStrings.media,
                     controller.filterMedia,
                     controller.toggleMediaFilter,
                   ),
                   _buildFilterSwitch(
-                    'Dokümanlar',
+                    AppStrings.documents,
                     controller.filterDocuments,
                     controller.toggleDocumentsFilter,
                   ),
                   _buildFilterSwitch(
-                    'Linkler',
+                    AppStrings.links,
                     controller.filterLinks,
                     controller.toggleLinksFilter,
                   ),
@@ -764,11 +765,11 @@ class SearchView extends GetView<MessageSearchController> {
               ),
               SizedBox(height: sectionSpacing),
               _buildFilterSection(
-                'Sıralama ve Öncelik',
+                AppStrings.sortingAndPriority,
                 [
                   ListTile(
                     title: ResponsiveText(
-                      'Sıralama',
+                      AppStrings.sorting,
                       style: TextStyle(
                         fontSize: responsive.responsiveValue(
                           mobile: 16.0,
@@ -792,7 +793,7 @@ class SearchView extends GetView<MessageSearchController> {
                     ),
                   ),
                   _buildFilterSwitch(
-                    'Öncelikli Mesajlar',
+                    AppStrings.priorityMessages,
                     controller.showPriority,
                     (value) {
                       controller.showPriority.value = value;
@@ -805,11 +806,11 @@ class SearchView extends GetView<MessageSearchController> {
               ),
               SizedBox(height: sectionSpacing),
               _buildFilterSection(
-                'Tarih Aralığı',
+                AppStrings.dateRange,
                 [
                   ListTile(
                     title: ResponsiveText(
-                      'Tarih Seç',
+                      AppStrings.selectDate,
                       style: TextStyle(
                         fontSize: responsive.responsiveValue(
                           mobile: 16.0,
@@ -822,7 +823,7 @@ class SearchView extends GetView<MessageSearchController> {
                       final end = controller.endDate.value;
                       if (start == null || end == null) {
                         return ResponsiveText(
-                          'Seçilmedi',
+                          AppStrings.notSelected,
                           style: TextStyle(
                             fontSize: responsive.responsiveValue(
                               mobile: 14.0,
@@ -862,7 +863,7 @@ class SearchView extends GetView<MessageSearchController> {
           TextButton(
             onPressed: () => Get.back(),
             child: ResponsiveText(
-              'İptal',
+              AppStrings.cancel,
               style: TextStyle(
                 fontSize: responsive.responsiveValue(
                   mobile: 16.0,
@@ -877,7 +878,7 @@ class SearchView extends GetView<MessageSearchController> {
               Get.back();
             },
             child: ResponsiveText(
-              'Uygula',
+              AppStrings.apply,
               style: TextStyle(
                 fontSize: responsive.responsiveValue(
                   mobile: 16.0,
@@ -950,7 +951,7 @@ class SearchView extends GetView<MessageSearchController> {
       context: context,
       builder: (context) => AlertDialog(
         title: ResponsiveText(
-          'Minimum Öncelik',
+          AppStrings.minimumPriority,
           style: TextStyle(
             fontSize: responsive.responsiveValue(
               mobile: 18.0,
@@ -980,7 +981,7 @@ class SearchView extends GetView<MessageSearchController> {
               ),
             ),
             ResponsiveText(
-              'Seçilen değer: ${controller.minPriority.value}',
+              '${AppStrings.selectedValue}: ${controller.minPriority.value}',
               style: TextStyle(
                 fontSize: responsive.responsiveValue(
                   mobile: 14.0,
@@ -994,7 +995,7 @@ class SearchView extends GetView<MessageSearchController> {
           TextButton(
             onPressed: () => Get.back(),
             child: ResponsiveText(
-              'Tamam',
+              AppStrings.ok,
               style: TextStyle(
                 fontSize: responsive.responsiveValue(
                   mobile: 16.0,

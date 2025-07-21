@@ -1,3 +1,4 @@
+import 'package:devshabitat/app/constants/app_strings.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../../controllers/settings/privacy_settings_controller.dart';
@@ -9,19 +10,19 @@ class PrivacySettingsView extends GetView<PrivacySettingsController> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Gizlilik Ayarları'),
+        title: Text(AppStrings.privacySettings),
       ),
       body: Obx(
         () => ListView(
           padding: const EdgeInsets.all(16),
           children: [
             _buildSection(
-              'Profil Görünürlüğü',
+              AppStrings.profileVisibility,
               [
                 SwitchListTile(
-                  title: const Text('Profili Herkese Açık Yap'),
+                  title: Text(AppStrings.makeProfilePublic),
                   subtitle: const Text(
-                    'Profiliniz tüm kullanıcılar tarafından görüntülenebilir',
+                    AppStrings.profileVisibilitySubtitle,
                   ),
                   value: controller.settings.value.isProfilePublic,
                   onChanged: (value) => controller.updateSettings(
@@ -29,7 +30,7 @@ class PrivacySettingsView extends GetView<PrivacySettingsController> {
                   ),
                 ),
                 SwitchListTile(
-                  title: const Text('Konum Bilgisini Göster'),
+                  title: Text(AppStrings.showLocation),
                   value: controller.settings.value.showLocation,
                   onChanged: (value) => controller.updateSettings(
                     showLocation: value,
@@ -38,17 +39,17 @@ class PrivacySettingsView extends GetView<PrivacySettingsController> {
               ],
             ),
             _buildSection(
-              'Bağlantı İstekleri',
+              AppStrings.connectionRequests,
               [
                 SwitchListTile(
-                  title: const Text('Bağlantı İsteklerine İzin Ver'),
+                  title: Text(AppStrings.allowConnectionRequests),
                   value: controller.settings.value.allowConnectionRequests,
                   onChanged: (value) => controller.updateSettings(
                     allowConnectionRequests: value,
                   ),
                 ),
                 SwitchListTile(
-                  title: const Text('Mentorluk İsteklerine İzin Ver'),
+                  title: Text(AppStrings.allowMentorshipRequests),
                   value: controller.settings.value.allowMentorshipRequests,
                   onChanged: (value) => controller.updateSettings(
                     allowMentorshipRequests: value,
@@ -57,17 +58,17 @@ class PrivacySettingsView extends GetView<PrivacySettingsController> {
               ],
             ),
             _buildSection(
-              'Profil Detayları',
+              AppStrings.profileDetails,
               [
                 SwitchListTile(
-                  title: const Text('Teknolojileri Göster'),
+                  title: Text(AppStrings.showTechnologies),
                   value: controller.settings.value.showTechnologies,
                   onChanged: (value) => controller.updateSettings(
                     showTechnologies: value,
                   ),
                 ),
                 SwitchListTile(
-                  title: const Text('Biyografiyi Göster'),
+                  title: Text(AppStrings.showBio),
                   value: controller.settings.value.showBio,
                   onChanged: (value) => controller.updateSettings(
                     showBio: value,
@@ -76,7 +77,7 @@ class PrivacySettingsView extends GetView<PrivacySettingsController> {
               ],
             ),
             _buildSection(
-              'Engellenen Kullanıcılar',
+              AppStrings.blockedUsers,
               [
                 ListView.builder(
                   shrinkWrap: true,

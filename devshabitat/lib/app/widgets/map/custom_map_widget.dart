@@ -11,7 +11,7 @@ class CustomMapWidget extends StatelessWidget {
   final Function(GoogleMapController)? onMapCreated;
 
   const CustomMapWidget({
-    Key? key,
+    super.key,
     required this.markers,
     required this.initialPosition,
     this.initialZoom = 14.0,
@@ -19,7 +19,7 @@ class CustomMapWidget extends StatelessWidget {
     this.onTap,
     this.onCameraMove,
     this.onMapCreated,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {

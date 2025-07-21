@@ -1,3 +1,4 @@
+import 'package:devshabitat/app/constants/app_strings.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../../../controllers/responsive_controller.dart';
@@ -24,7 +25,7 @@ class SocialAuthButtons extends StatelessWidget {
       children: [
         SizedBox(height: responsive.responsiveValue(mobile: 24, tablet: 32)),
         Text(
-          'veya',
+          AppStrings.or,
           style: TextStyle(
             fontSize: responsive.responsiveValue(mobile: 14, tablet: 16),
             color: Colors.grey[600],
@@ -37,7 +38,7 @@ class SocialAuthButtons extends StatelessWidget {
           _buildSocialButton(
             responsive,
             context,
-            'Google ile ${isLogin ? 'Giriş Yap' : 'Kayıt Ol'}',
+            'With Google ${isLogin ? AppStrings.login : AppStrings.register}',
             'assets/icons/baseline_google_black_48dp.png',
             onGoogleAuth!,
           ),
@@ -49,7 +50,7 @@ class SocialAuthButtons extends StatelessWidget {
           _buildSocialButton(
             responsive,
             context,
-            'Apple ile ${isLogin ? 'Giriş Yap' : 'Kayıt Ol'}',
+            'With Apple ${isLogin ? AppStrings.login : AppStrings.register}',
             'assets/icons/apple-logo.png',
             onAppleAuth!,
           ),
@@ -61,7 +62,7 @@ class SocialAuthButtons extends StatelessWidget {
           _buildSocialButton(
             responsive,
             context,
-            'Facebook ile ${isLogin ? 'Giriş Yap' : 'Kayıt Ol'}',
+            'With Facebook ${isLogin ? AppStrings.login : AppStrings.register}',
             'assets/icons/f_logo_RGB_Blue_58.png',
             onFacebookAuth!,
           ),

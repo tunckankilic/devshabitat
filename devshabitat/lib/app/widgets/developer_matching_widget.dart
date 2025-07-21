@@ -1,3 +1,4 @@
+import 'package:devshabitat/app/constants/app_strings.dart';
 import 'package:devshabitat/app/models/user_profile_model.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -33,7 +34,7 @@ class SkillMatchCard extends GetView<DeveloperMatchingController> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              'Benzer Geliştiriciler',
+              AppStrings.similarDevelopers,
               style: Theme.of(context).textTheme.titleLarge,
             ),
             const SizedBox(height: 16),
@@ -43,8 +44,8 @@ class SkillMatchCard extends GetView<DeveloperMatchingController> {
               }
 
               if (controller.similarDevelopers.isEmpty) {
-                return const Center(
-                  child: Text('Henüz benzer geliştirici bulunamadı'),
+                return Center(
+                  child: Text(AppStrings.noSimilarDevelopers),
                 );
               }
 
@@ -84,7 +85,7 @@ class ProjectSuggestions extends GetView<DeveloperMatchingController> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              'İşbirliği Önerileri',
+              AppStrings.projectSuggestions,
               style: Theme.of(context).textTheme.titleLarge,
             ),
             const SizedBox(height: 16),
@@ -94,8 +95,8 @@ class ProjectSuggestions extends GetView<DeveloperMatchingController> {
               }
 
               if (controller.projectSuggestions.isEmpty) {
-                return const Center(
-                  child: Text('Henüz proje önerisi bulunamadı'),
+                return Center(
+                  child: Text(AppStrings.noProjectSuggestions),
                 );
               }
 
@@ -131,7 +132,7 @@ class MentorshipCard extends GetView<DeveloperMatchingController> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              'Mentorluk Fırsatları',
+              AppStrings.mentorshipOpportunities,
               style: Theme.of(context).textTheme.titleLarge,
             ),
             const SizedBox(height: 16),
@@ -141,8 +142,8 @@ class MentorshipCard extends GetView<DeveloperMatchingController> {
               }
 
               if (controller.potentialMentors.isEmpty) {
-                return const Center(
-                  child: Text('Henüz mentor bulunamadı'),
+                return Center(
+                  child: Text(AppStrings.noMentors),
                 );
               }
 
@@ -210,12 +211,12 @@ class DeveloperCard extends StatelessWidget {
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Text(
-              '${(matchScore * 100).toInt()}% Eşleşme',
+              '${(matchScore * 100).toInt()}% Match',
               style: Theme.of(context).textTheme.bodySmall,
             ),
             ElevatedButton(
               onPressed: onConnect,
-              child: const Text('Bağlantı Kur'),
+              child: const Text(AppStrings.connect),
             ),
           ],
         ),
@@ -303,7 +304,7 @@ class MentorCard extends StatelessWidget {
         ),
         trailing: ElevatedButton(
           onPressed: onRequest,
-          child: const Text('Mentorluk İste'),
+          child: Text(AppStrings.mentorshipRequest),
         ),
       ),
     );

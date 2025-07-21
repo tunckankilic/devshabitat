@@ -1,3 +1,4 @@
+import 'package:devshabitat/app/constants/app_strings.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../../controllers/home_controller.dart';
@@ -17,7 +18,7 @@ class NotificationsView extends BaseView<HomeController> {
     return Scaffold(
       appBar: AppBar(
         title: ResponsiveText(
-          'Bildirimler',
+          AppStrings.notifications,
           style: TextStyle(
             fontSize: responsive.responsiveValue(
               mobile: 18,
@@ -124,7 +125,8 @@ class NotificationsView extends BaseView<HomeController> {
           overflow: TextOverflow.ellipsis,
         ),
         trailing: ResponsiveText(
-          '${notification.createdAt.difference(DateTime.now()).inHours.abs()} saat önce',
+          AppStrings.hoursAgo(
+              notification.createdAt.difference(DateTime.now()).inHours.abs()),
           style: TextStyle(
             fontSize: responsive.responsiveValue(
               mobile: 12,

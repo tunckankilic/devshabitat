@@ -1,3 +1,4 @@
+import 'package:devshabitat/app/constants/app_strings.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../../controllers/community/community_controller.dart';
@@ -16,7 +17,7 @@ import '../../widgets/responsive/responsive_overflow_handler.dart'
 import '../../widgets/responsive/animated_responsive_layout.dart';
 
 class CommunityDetailView extends BaseView<CommunityController> {
-  const CommunityDetailView({Key? key}) : super(key: key);
+  const CommunityDetailView({super.key});
 
   @override
   Widget buildView(BuildContext context) {
@@ -44,7 +45,7 @@ class CommunityDetailView extends BaseView<CommunityController> {
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     ResponsiveText(
-                      'Hata: ${controller.error.value}',
+                      'Error: ${controller.error.value}',
                       textAlign: TextAlign.center,
                       style: TextStyle(
                         fontSize: performanceService.getOptimizedTextSize(
@@ -63,7 +64,7 @@ class CommunityDetailView extends BaseView<CommunityController> {
                       onPressed: () => controller
                           .loadCommunity(controller.community.value?.id ?? ''),
                       child: ResponsiveText(
-                        'Tekrar Dene',
+                        AppStrings.retry,
                         style: TextStyle(
                           fontSize: performanceService.getOptimizedTextSize(
                             cacheKey: 'community_detail_retry',
@@ -82,7 +83,7 @@ class CommunityDetailView extends BaseView<CommunityController> {
             if (community == null) {
               return Center(
                 child: ResponsiveText(
-                  'Topluluk bulunamadı',
+                  AppStrings.communityNotFound,
                   style: TextStyle(
                     fontSize: performanceService.getOptimizedTextSize(
                       cacheKey: 'community_detail_not_found',
@@ -289,7 +290,9 @@ class CommunityDetailView extends BaseView<CommunityController> {
             ),
           ),
           label: ResponsiveText(
-            controller.isMember.value ? 'Topluluktan Ayrıl' : 'Topluluğa Katıl',
+            controller.isMember.value
+                ? AppStrings.leaveCommunity
+                : AppStrings.joinCommunity,
             style: TextStyle(
               fontSize: performanceService.getOptimizedTextSize(
                 cacheKey: 'community_detail_button_text',
@@ -343,7 +346,7 @@ class CommunityDetailView extends BaseView<CommunityController> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         ResponsiveText(
-          'Üyeler',
+          AppStrings.members,
           style: Theme.of(context).textTheme.titleLarge?.copyWith(
                 fontSize: performanceService.getOptimizedTextSize(
                   cacheKey: 'community_detail_members_title',

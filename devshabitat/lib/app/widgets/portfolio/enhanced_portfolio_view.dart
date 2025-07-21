@@ -1,5 +1,6 @@
 // ignore_for_file: deprecated_member_use
 
+import 'package:devshabitat/app/constants/app_strings.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:fl_chart/fl_chart.dart';
@@ -89,8 +90,8 @@ class TechStackItem extends StatelessWidget {
         mainAxisAlignment: MainAxisAlignment.center,
         crossAxisAlignment: CrossAxisAlignment.end,
         children: [
-          Text('${tech.projectCount} proje'),
-          Text('${tech.totalStars} yıldız'),
+          Text('${tech.projectCount} ${AppStrings.projects}'),
+          Text('${tech.totalStars} ${AppStrings.stars}'),
         ],
       ),
     );
@@ -125,13 +126,13 @@ class TechStackItem extends StatelessWidget {
   String _getExperienceLevelText(ExperienceLevel level) {
     switch (level) {
       case ExperienceLevel.beginner:
-        return 'Başlangıç';
+        return AppStrings.beginner;
       case ExperienceLevel.intermediate:
-        return 'Orta Seviye';
+        return AppStrings.intermediate;
       case ExperienceLevel.advanced:
-        return 'İleri Seviye';
+        return AppStrings.advanced;
       case ExperienceLevel.expert:
-        return 'Uzman';
+        return AppStrings.expert;
     }
   }
 }
@@ -149,7 +150,7 @@ class ProjectShowcase extends GetView<PortfolioController> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              'Öne Çıkan Projeler',
+              AppStrings.featuredProjects,
               style: Theme.of(context).textTheme.titleLarge,
             ),
             const SizedBox(height: 16),
@@ -255,7 +256,7 @@ class ContributionTimeline extends GetView<PortfolioController> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              'Katkı Zaman Çizelgesi',
+              AppStrings.contributionTimeline,
               style: Theme.of(context).textTheme.titleLarge,
             ),
             const SizedBox(height: 16),
@@ -265,8 +266,8 @@ class ContributionTimeline extends GetView<PortfolioController> {
               }
 
               if (controller.contributionData.isEmpty) {
-                return const Center(
-                  child: Text('Katkı verisi bulunamadı'),
+                return Center(
+                  child: Text(AppStrings.noContributionData),
                 );
               }
 

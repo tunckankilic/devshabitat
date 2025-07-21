@@ -1,3 +1,4 @@
+import 'package:devshabitat/app/constants/app_strings.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../controllers/auth_controller.dart';
@@ -25,8 +26,7 @@ class GitHubAuthChecker extends StatelessWidget {
         }
 
         if (snapshot.hasError) {
-          return _buildErrorWidget(
-              context, 'Bir hata oluştu: ${snapshot.error}');
+          return _buildErrorWidget(context, AppStrings.errorGeneric);
         }
 
         final username = snapshot.data;
@@ -51,13 +51,13 @@ class GitHubAuthChecker extends StatelessWidget {
           ),
           const SizedBox(height: 16),
           Text(
-            customMessage ?? 'GitHub ile Giriş Gerekli',
+            customMessage ?? AppStrings.githubAuthRequired,
             style: Theme.of(context).textTheme.headlineSmall,
             textAlign: TextAlign.center,
           ),
           const SizedBox(height: 8),
           Text(
-            'Bu özelliği kullanmak için GitHub hesabınızla giriş yapmanız gerekiyor.',
+            AppStrings.githubAuthRequired,
             style: Theme.of(context).textTheme.bodyMedium,
             textAlign: TextAlign.center,
           ),
@@ -70,7 +70,7 @@ class GitHubAuthChecker extends StatelessWidget {
               authController.signInWithGithub();
             },
             icon: const Icon(Icons.login),
-            label: const Text('GitHub ile Giriş Yap'),
+            label: const Text(AppStrings.githubAuthRequired),
           ),
         ],
       ),
@@ -89,7 +89,7 @@ class GitHubAuthChecker extends StatelessWidget {
           ),
           const SizedBox(height: 16),
           Text(
-            'Hata',
+            AppStrings.error,
             style: Theme.of(context).textTheme.headlineSmall,
             textAlign: TextAlign.center,
           ),
@@ -105,7 +105,7 @@ class GitHubAuthChecker extends StatelessWidget {
               // Sayfayı yenile
               Get.forceAppUpdate();
             },
-            child: const Text('Tekrar Dene'),
+            child: const Text(AppStrings.tryAgain),
           ),
         ],
       ),

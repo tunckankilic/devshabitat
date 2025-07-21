@@ -1,15 +1,16 @@
+import 'package:devshabitat/app/constants/app_strings.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../../services/notification_service.dart';
 
 class NotificationSettingsView extends GetView<NotificationService> {
-  const NotificationSettingsView({Key? key}) : super(key: key);
+  const NotificationSettingsView({super.key});
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Bildirim Ayarları'),
+        title: Text(AppStrings.notificationSettings),
       ),
       body: SingleChildScrollView(
         child: Padding(
@@ -17,8 +18,8 @@ class NotificationSettingsView extends GetView<NotificationService> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const Text(
-                'Genel Ayarlar',
+              Text(
+                AppStrings.generalSettings,
                 style: TextStyle(
                   fontSize: 18,
                   fontWeight: FontWeight.bold,
@@ -27,8 +28,8 @@ class NotificationSettingsView extends GetView<NotificationService> {
               const SizedBox(height: 16),
               _buildGeneralSettings(),
               const SizedBox(height: 24),
-              const Text(
-                'Bildirim Kategorileri',
+              Text(
+                AppStrings.notificationCategories,
                 style: TextStyle(
                   fontSize: 18,
                   fontWeight: FontWeight.bold,
@@ -49,16 +50,16 @@ class NotificationSettingsView extends GetView<NotificationService> {
         children: [
           Obx(
             () => SwitchListTile(
-              title: const Text('Push Bildirimleri'),
-              subtitle: const Text('Uygulama kapalıyken bildirim al'),
+              title: Text(AppStrings.pushNotifications),
+              subtitle: Text(AppStrings.pushNotificationsSubtitle),
               value: controller.isPushEnabled.value,
               onChanged: (value) => controller.updatePushPreference(value),
             ),
           ),
           Obx(
             () => SwitchListTile(
-              title: const Text('Uygulama İçi Bildirimler'),
-              subtitle: const Text('Uygulama açıkken bildirim al'),
+              title: Text(AppStrings.inAppNotifications),
+              subtitle: Text(AppStrings.inAppNotificationsSubtitle),
               value: controller.isInAppEnabled.value,
               onChanged: (value) => controller.updateInAppPreference(value),
             ),
@@ -74,8 +75,8 @@ class NotificationSettingsView extends GetView<NotificationService> {
         children: [
           Obx(
             () => SwitchListTile(
-              title: const Text('Etkinlik Bildirimleri'),
-              subtitle: const Text('Yeni etkinlikler ve güncellemeler'),
+              title: Text(AppStrings.eventNotifications),
+              subtitle: Text(AppStrings.eventNotificationsSubtitle),
               value: controller.categoryPreferences['events']?.value ?? true,
               onChanged: (value) =>
                   controller.updateCategoryPreference('events', value),
@@ -83,8 +84,8 @@ class NotificationSettingsView extends GetView<NotificationService> {
           ),
           Obx(
             () => SwitchListTile(
-              title: const Text('Mesaj Bildirimleri'),
-              subtitle: const Text('Yeni mesajlar ve yanıtlar'),
+              title: Text(AppStrings.messageNotifications),
+              subtitle: Text(AppStrings.messageNotificationsSubtitle),
               value: controller.categoryPreferences['messages']?.value ?? true,
               onChanged: (value) =>
                   controller.updateCategoryPreference('messages', value),
@@ -92,8 +93,8 @@ class NotificationSettingsView extends GetView<NotificationService> {
           ),
           Obx(
             () => SwitchListTile(
-              title: const Text('Topluluk Bildirimleri'),
-              subtitle: const Text('Topluluk etkinlikleri ve duyurular'),
+              title: Text(AppStrings.communityNotifications),
+              subtitle: Text(AppStrings.communityNotificationsSubtitle),
               value: controller.categoryPreferences['community']?.value ?? true,
               onChanged: (value) =>
                   controller.updateCategoryPreference('community', value),
@@ -101,8 +102,8 @@ class NotificationSettingsView extends GetView<NotificationService> {
           ),
           Obx(
             () => SwitchListTile(
-              title: const Text('Bağlantı Bildirimleri'),
-              subtitle: const Text('Yeni bağlantı istekleri ve güncellemeler'),
+              title: Text(AppStrings.connectionNotifications),
+              subtitle: Text(AppStrings.connectionNotificationsSubtitle),
               value:
                   controller.categoryPreferences['connections']?.value ?? true,
               onChanged: (value) =>

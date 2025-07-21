@@ -1,3 +1,4 @@
+import 'package:devshabitat/app/constants/app_strings.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:devshabitat/app/services/chat_export_service.dart';
@@ -48,7 +49,7 @@ class ChatSettingsDialog extends StatelessWidget {
                 const SizedBox(width: 12),
                 Expanded(
                   child: Text(
-                    'Sohbet Ayarları',
+                    AppStrings.chatSettings,
                     style: Theme.of(context).textTheme.headlineSmall,
                   ),
                 ),
@@ -61,7 +62,7 @@ class ChatSettingsDialog extends StatelessWidget {
             const SizedBox(height: 20),
 
             // Dışa Aktarma Seçenekleri
-            _buildSectionTitle(context, 'Dışa Aktarma'),
+            _buildSectionTitle(context, AppStrings.export),
             const SizedBox(height: 8),
 
             Obx(() => exportService.isExporting
@@ -70,14 +71,14 @@ class ChatSettingsDialog extends StatelessWidget {
                     children: [
                       _buildExportOption(
                         icon: Icons.code,
-                        title: 'JSON olarak dışa aktar',
-                        subtitle: 'Teknik format, veri analizi için uygun',
+                        title: AppStrings.exportJson,
+                        subtitle: AppStrings.exportJsonSubtitle,
                         onTap: () => _exportToJson(exportService),
                       ),
                       _buildExportOption(
                         icon: Icons.table_chart,
-                        title: 'CSV olarak dışa aktar',
-                        subtitle: 'Excel\'de açılabilir tablo formatı',
+                        title: AppStrings.exportCsv,
+                        subtitle: AppStrings.exportCsvSubtitle,
                         onTap: () => _exportToCsv(exportService),
                       ),
                     ],
@@ -86,15 +87,14 @@ class ChatSettingsDialog extends StatelessWidget {
             const Divider(height: 32),
 
             // Sohbet Yönetimi
-            _buildSectionTitle(context, 'Sohbet Yönetimi'),
+            _buildSectionTitle(context, AppStrings.chatManagement),
             const SizedBox(height: 8),
 
             _buildSettingsTile(
               icon: isArchived ? Icons.unarchive : Icons.archive,
-              title: isArchived ? 'Arşivden çıkar' : 'Arşivle',
-              subtitle: isArchived
-                  ? 'Sohbeti ana listeye geri getir'
-                  : 'Sohbeti arşive taşı',
+              title: isArchived ? AppStrings.unarchive : AppStrings.archive,
+              subtitle:
+                  isArchived ? AppStrings.returnToMainList : AppStrings.archive,
               onTap: onArchiveToggle,
             ),
 
@@ -103,32 +103,32 @@ class ChatSettingsDialog extends StatelessWidget {
                   ? Icons.notifications_off
                   : Icons.notifications,
               title: notificationsEnabled
-                  ? 'Bildirimleri kapat'
-                  : 'Bildirimleri aç',
+                  ? AppStrings.disableNotifications
+                  : AppStrings.enableNotifications,
               subtitle: notificationsEnabled
-                  ? 'Bu sohbet için bildirimleri devre dışı bırak'
-                  : 'Bu sohbet için bildirimleri etkinleştir',
+                  ? AppStrings.disableNotificationsSubtitle
+                  : AppStrings.enableNotificationsSubtitle,
               onTap: onNotificationToggle,
             ),
 
             const Divider(height: 32),
 
             // Gizlilik Kontrolleri
-            _buildSectionTitle(context, 'Gizlilik'),
+            _buildSectionTitle(context, AppStrings.privacy),
             const SizedBox(height: 8),
 
             _buildSettingsTile(
               icon: Icons.block,
-              title: 'Engelle',
-              subtitle: 'Bu kullanıcıyı engelle',
+              title: AppStrings.block,
+              subtitle: AppStrings.blockSubtitle,
               textColor: Colors.orange,
               onTap: onBlock,
             ),
 
             _buildSettingsTile(
               icon: Icons.report,
-              title: 'Şikayet et',
-              subtitle: 'Bu sohbeti uygunsuz içerik için bildir',
+              title: AppStrings.report,
+              subtitle: AppStrings.reportSubtitle,
               textColor: Colors.red,
               onTap: onReport,
             ),
@@ -136,13 +136,13 @@ class ChatSettingsDialog extends StatelessWidget {
             const Divider(height: 32),
 
             // Tehlikeli İşlemler
-            _buildSectionTitle(context, 'Tehlikeli İşlemler'),
+            _buildSectionTitle(context, AppStrings.dangerousOperations),
             const SizedBox(height: 8),
 
             _buildSettingsTile(
               icon: Icons.delete_forever,
-              title: 'Sohbeti sil',
-              subtitle: 'Bu işlem geri alınamaz',
+              title: AppStrings.deleteChat,
+              subtitle: AppStrings.deleteChatSubtitle,
               textColor: Colors.red,
               onTap: () => _showDeleteConfirmation(chatController),
             ),
@@ -186,7 +186,7 @@ class ChatSettingsDialog extends StatelessWidget {
         padding: const EdgeInsets.all(16),
         child: Column(
           children: [
-            const Text('Dışa aktarılıyor...'),
+            const Text(AppStrings.exporting),
             const SizedBox(height: 8),
             LinearProgressIndicator(value: progress),
             const SizedBox(height: 8),
@@ -234,15 +234,14 @@ class ChatSettingsDialog extends StatelessWidget {
     Get.back();
     Get.dialog(
       AlertDialog(
-        title: const Text('Sohbeti Sil'),
+        title: const Text(AppStrings.deleteChat),
         content: const Text(
-          'Bu sohbeti kalıcı olarak silmek istediğinizden emin misiniz? '
-          'Bu işlem geri alınamaz.',
+          AppStrings.deleteChatSubtitle,
         ),
         actions: [
           TextButton(
             onPressed: () => Get.back(),
-            child: const Text('İptal'),
+            child: const Text(AppStrings.cancel),
           ),
           ElevatedButton(
             onPressed: () async {
@@ -251,7 +250,8 @@ class ChatSettingsDialog extends StatelessWidget {
               Get.back(); // Ana sayfaya geri dön
             },
             style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
-            child: const Text('Sil', style: TextStyle(color: Colors.white)),
+            child: const Text(AppStrings.delete,
+                style: TextStyle(color: Colors.white)),
           ),
         ],
       ),

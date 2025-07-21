@@ -1,3 +1,4 @@
+import 'package:devshabitat/app/constants/app_strings.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:devshabitat/app/models/event/event_model.dart';
@@ -13,7 +14,7 @@ class EventFilterWidget extends StatelessWidget {
   final Function(EventType?) onEventTypeChanged;
 
   const EventFilterWidget({
-    Key? key,
+    super.key,
     required this.showOnlineOnly,
     required this.showOfflineOnly,
     required this.showUpcomingOnly,
@@ -22,7 +23,7 @@ class EventFilterWidget extends StatelessWidget {
     required this.onOfflineFilterChanged,
     required this.onUpcomingFilterChanged,
     required this.onEventTypeChanged,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -43,7 +44,7 @@ class EventFilterWidget extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           const Text(
-            'Filtreler',
+            AppStrings.filters,
             style: TextStyle(
               fontSize: 18,
               fontWeight: FontWeight.bold,
@@ -55,19 +56,19 @@ class EventFilterWidget extends StatelessWidget {
             runSpacing: 8,
             children: [
               _buildFilterChip(
-                label: 'Online',
+                label: AppStrings.online,
                 selected: showOnlineOnly,
                 onSelected: onOnlineFilterChanged,
                 icon: Icons.computer,
               ),
               _buildFilterChip(
-                label: 'Yüz yüze',
+                label: AppStrings.offline,
                 selected: showOfflineOnly,
                 onSelected: onOfflineFilterChanged,
                 icon: Icons.location_on,
               ),
               _buildFilterChip(
-                label: 'Yaklaşan',
+                label: AppStrings.upcoming,
                 selected: showUpcomingOnly,
                 onSelected: onUpcomingFilterChanged,
                 icon: Icons.upcoming,
@@ -76,7 +77,7 @@ class EventFilterWidget extends StatelessWidget {
           ),
           const SizedBox(height: 16),
           const Text(
-            'Etkinlik Türü',
+            AppStrings.eventType,
             style: TextStyle(
               fontSize: 16,
               fontWeight: FontWeight.w500,
@@ -155,15 +156,15 @@ class EventFilterWidget extends StatelessWidget {
   String _getEventTypeText(EventType type) {
     switch (type) {
       case EventType.meetup:
-        return 'Meetup';
+        return AppStrings.meetup;
       case EventType.workshop:
-        return 'Workshop';
+        return AppStrings.workshop;
       case EventType.hackathon:
-        return 'Hackathon';
+        return AppStrings.hackathon;
       case EventType.conference:
-        return 'Konferans';
+        return AppStrings.conference;
       case EventType.other:
-        return 'Diğer';
+        return AppStrings.other;
     }
   }
 }
