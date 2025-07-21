@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../../../controllers/responsive_controller.dart';
+import 'package:sign_in_with_apple/sign_in_with_apple.dart';
 
 class SocialLoginButton extends StatelessWidget {
   late final _responsiveController = Get.find<ResponsiveController>();
@@ -11,6 +12,7 @@ class SocialLoginButton extends StatelessWidget {
   final bool isOutlined;
   final Color? backgroundColor;
   final Color? textColor;
+  final bool isAppleButton;
 
   SocialLoginButton({
     super.key,
@@ -21,10 +23,22 @@ class SocialLoginButton extends StatelessWidget {
     this.isOutlined = false,
     this.backgroundColor,
     this.textColor,
+    this.isAppleButton = false,
   });
 
   @override
   Widget build(BuildContext context) {
+    if (isAppleButton) {
+      return SignInWithAppleButton(
+        onPressed: onPressed,
+        height: _responsiveController.responsiveValue(
+          mobile: 48.0,
+          tablet: 56.0,
+        ),
+        style: SignInWithAppleButtonStyle.black,
+      );
+    }
+
     return Container(
       height: _responsiveController.responsiveValue(
         mobile: 48.0,

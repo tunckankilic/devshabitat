@@ -258,6 +258,7 @@ class SmallPhoneLogin extends GetView<AuthController> {
             onPressed: () => controller.signInWithApple(),
             backgroundColor: Colors.black,
             textColor: Colors.white,
+            isAppleButton: true,
           ),
           SizedBox(
               height: _responsiveController.responsiveValue(
