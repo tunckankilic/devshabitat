@@ -737,7 +737,7 @@ class AppStrings {
   static const String loginDescription =
       'Welcome back! Please sign in to continue';
   static const String continueWithGoogle = 'Continue with Google';
-  static const String continueWithApple = 'Continue with Apple';
+  static const String continueWithApple = 'Sign in with Apple';
   static const String noAccount = 'Don\'t have an account?';
   static const String forgotPasswordDescription =
       'Enter your email to receive a password reset link';
