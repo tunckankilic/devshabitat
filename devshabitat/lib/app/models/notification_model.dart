@@ -1,42 +1,79 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 
+enum NotificationType {
+  connection, // Connection requests, accepted connections
+  message, // New messages, mentions
+  event, // Event invites, reminders
+  community, // Community updates, mentions
+  project, // Project updates, mentions
+  system // System notifications, updates
+}
+
 class NotificationModel {
   final String id;
   final String title;
   final String body;
-  final String? imageUrl;
-  final Map<String, dynamic>? data;
   final DateTime createdAt;
   final bool isRead;
+  final NotificationType type;
+  final Map<String, dynamic>? data;
 
   NotificationModel({
     required this.id,
     required this.title,
     required this.body,
-    this.imageUrl,
-    this.data,
     required this.createdAt,
-    this.isRead = false,
+    required this.isRead,
+    required this.type,
+    this.data,
   });
 
-  Map<String, dynamic> toMap() => {
-        'id': id,
-        'title': title,
-        'body': body,
-        'imageUrl': imageUrl,
-        'data': data,
-        'createdAt': createdAt,
-        'isRead': isRead,
-      };
+  factory NotificationModel.fromJson(Map<String, dynamic> json) {
+    return NotificationModel(
+      id: json['id'] as String,
+      title: json['title'] as String,
+      body: json['body'] as String,
+      createdAt: (json['createdAt'] as Timestamp).toDate(),
+      isRead: json['isRead'] as bool? ?? false,
+      type: NotificationType.values.firstWhere(
+        (e) => e.toString() == 'NotificationType.${json['type']}',
+        orElse: () => NotificationType.system,
+      ),
+      data: json['data'] as Map<String, dynamic>?,
+    );
+  }
 
-  factory NotificationModel.fromMap(Map<String, dynamic> map) =>
-      NotificationModel(
-        id: map['id'] ?? '',
-        title: map['title'] ?? '',
-        body: map['body'] ?? '',
-        imageUrl: map['imageUrl'],
-        data: map['data'],
-        createdAt: (map['createdAt'] as Timestamp).toDate(),
-        isRead: map['isRead'] ?? false,
-      );
+  String get notificationIcon {
+    switch (type) {
+      case NotificationType.connection:
+        return 'person_add';
+      case NotificationType.message:
+        return 'message';
+      case NotificationType.event:
+        return 'event';
+      case NotificationType.community:
+        return 'groups';
+      case NotificationType.project:
+        return 'code';
+      case NotificationType.system:
+        return 'info';
+    }
+  }
+
+  String get typeLabel {
+    switch (type) {
+      case NotificationType.connection:
+        return 'Connection';
+      case NotificationType.message:
+        return 'Message';
+      case NotificationType.event:
+        return 'Event';
+      case NotificationType.community:
+        return 'Community';
+      case NotificationType.project:
+        return 'Project';
+      case NotificationType.system:
+        return 'System';
+    }
+  }
 }

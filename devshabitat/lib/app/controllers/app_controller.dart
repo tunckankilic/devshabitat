@@ -65,6 +65,8 @@ class AppController extends GetxController {
   // Uygulama durumunu sıfırla
   void resetAppState() {
     _isLoading.value = false;
-    // Diğer state sıfırlama işlemleri
+    _isDarkMode.value = false;
+    _isOnline.value = true;
+    Get.changeThemeMode(ThemeMode.light); // Tema modunu da varsayılana döndür
   }
 }

@@ -1,11 +1,13 @@
 import 'dart:convert';
 import 'package:devshabitat/app/repositories/auth_repository.dart';
+import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:logger/logger.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter/foundation.dart';
 import '../models/notification_model.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:package_info_plus/package_info_plus.dart';
@@ -574,14 +576,29 @@ class NotificationService extends GetxService {
         body: message.notification?.body ?? '',
         data: message.data,
         createdAt: DateTime.now(),
+        isRead: false,
+        type: NotificationType.values.firstWhere(
+          (e) =>
+              e.toString() ==
+              'NotificationType.${message.data['type'] ?? 'system'}',
+          orElse: () => NotificationType.system,
+        ),
       );
 
-      await FirebaseFirestore.instance
+      await _firestore
           .collection('users')
           .doc(userId)
           .collection('notifications')
           .doc(notification.id)
-          .set(notification.toMap());
+          .set({
+        'id': notification.id,
+        'title': notification.title,
+        'body': notification.body,
+        'data': notification.data,
+        'createdAt': notification.createdAt,
+        'isRead': notification.isRead,
+        'type': notification.type.toString().split('.').last,
+      });
     }
   }
 
@@ -594,6 +611,34 @@ class NotificationService extends GetxService {
           .collection('notifications')
           .doc(notificationId)
           .update({'isRead': true});
+    }
+  }
+
+  Future<List<NotificationModel>> getNotifications({
+    int limit = 20,
+    DocumentSnapshot? lastDocument,
+  }) async {
+    try {
+      var query = _firestore
+          .collection('notifications')
+          .where('userId',
+              isEqualTo: Get.find<AuthRepository>().currentUser?.uid)
+          .orderBy('createdAt', descending: true)
+          .limit(limit);
+
+      if (lastDocument != null) {
+        query = query.startAfterDocument(lastDocument);
+      }
+
+      final snapshot = await query.get();
+
+      return snapshot.docs
+          .map((doc) =>
+              NotificationModel.fromJson({...doc.data(), 'id': doc.id}))
+          .toList();
+    } catch (e) {
+      debugPrint('Error getting notifications: $e');
+      return [];
     }
   }
 }

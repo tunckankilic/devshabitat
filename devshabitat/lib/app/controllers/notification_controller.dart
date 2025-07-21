@@ -38,7 +38,7 @@ class NotificationController extends GetxController {
   void _updateNotifications(List<QueryDocumentSnapshot> docs) {
     notifications.value = docs.map((doc) {
       final data = doc.data() as Map<String, dynamic>;
-      return NotificationModel.fromMap(data);
+      return NotificationModel.fromJson({...data, 'id': doc.id});
     }).toList();
 
     notifications.sort((a, b) => b.createdAt.compareTo(a.createdAt));
