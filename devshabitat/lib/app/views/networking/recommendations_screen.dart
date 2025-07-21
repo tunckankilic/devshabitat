@@ -1,3 +1,4 @@
+import 'package:devshabitat/app/constants/app_strings.dart';
 import 'package:devshabitat/app/repositories/auth_repository.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -21,8 +22,8 @@ class RecommendationsScreen extends StatelessWidget {
       _recommendations.value = recommendations;
     } catch (e) {
       Get.snackbar(
-        'Hata',
-        'Öneriler yüklenirken bir hata oluştu',
+        AppStrings.error,
+        AppStrings.errorLoadingRecommendations,
         snackPosition: SnackPosition.BOTTOM,
         backgroundColor: Colors.red,
         colorText: Colors.white,
@@ -39,7 +40,7 @@ class RecommendationsScreen extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(
         title: Text(
-          'Tanıyor Olabileceğiniz Kişiler',
+          AppStrings.peopleYouMayKnow,
           style: TextStyle(
               fontSize: responsive.responsiveValue(mobile: 18, tablet: 20)),
         ),
@@ -77,7 +78,7 @@ class RecommendationsScreen extends StatelessWidget {
               SizedBox(
                   height: responsive.responsiveValue(mobile: 16, tablet: 24)),
               Text(
-                'Henüz Öneri Yok',
+                AppStrings.noRecommendations,
                 style: Get.textTheme.headlineSmall?.copyWith(
                   fontSize: responsive.responsiveValue(mobile: 20, tablet: 24),
                 ),
@@ -86,11 +87,7 @@ class RecommendationsScreen extends StatelessWidget {
               SizedBox(
                   height: responsive.responsiveValue(mobile: 8, tablet: 12)),
               Text(
-                'Daha fazla öneri almak için profilinizi güncelleyin:\n\n'
-                '• Yeteneklerinizi ekleyin\n'
-                '• İş deneyimlerinizi paylaşın\n'
-                '• Lokasyon bilginizi güncelleyin\n'
-                '• Şirket bilgilerinizi ekleyin',
+                AppStrings.updateProfileForMoreRecommendations,
                 style: Get.textTheme.bodyLarge?.copyWith(
                   fontSize: responsive.responsiveValue(mobile: 16, tablet: 18),
                 ),
@@ -103,7 +100,7 @@ class RecommendationsScreen extends StatelessWidget {
                 icon: Icon(Icons.edit,
                     size: responsive.responsiveValue(mobile: 20, tablet: 24)),
                 label: Text(
-                  'Profili Düzenle',
+                  AppStrings.editProfile,
                   style: TextStyle(
                       fontSize:
                           responsive.responsiveValue(mobile: 16, tablet: 18)),
@@ -128,7 +125,7 @@ class RecommendationsScreen extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  'Önerilen Bağlantılar',
+                  AppStrings.recommendedConnections,
                   style: Get.textTheme.titleLarge?.copyWith(
                     fontSize:
                         responsive.responsiveValue(mobile: 20, tablet: 24),
@@ -137,7 +134,7 @@ class RecommendationsScreen extends StatelessWidget {
                 SizedBox(
                     height: responsive.responsiveValue(mobile: 8, tablet: 12)),
                 Text(
-                  'Yetenekler, deneyimler ve ortak noktalar baz alınarak önerilir',
+                  AppStrings.recommendationsBasedOnSkills,
                   style: Get.textTheme.bodyMedium?.copyWith(
                     fontSize:
                         responsive.responsiveValue(mobile: 14, tablet: 16),
@@ -201,7 +198,7 @@ class RecommendationsScreen extends StatelessWidget {
               SizedBox(
                   height: responsive.responsiveValue(mobile: 12, tablet: 16)),
               Text(
-                user.displayName ?? 'İsimsiz Kullanıcı',
+                user.displayName ?? AppStrings.unknownUser,
                 style: Get.textTheme.titleMedium?.copyWith(
                   fontSize: responsive.responsiveValue(mobile: 16, tablet: 18),
                 ),
@@ -236,7 +233,7 @@ class RecommendationsScreen extends StatelessWidget {
                 icon: Icon(Icons.person_add,
                     size: responsive.responsiveValue(mobile: 18, tablet: 20)),
                 label: Text(
-                  'Bağlan',
+                  AppStrings.connect,
                   style: TextStyle(
                       fontSize:
                           responsive.responsiveValue(mobile: 14, tablet: 16)),
@@ -257,8 +254,8 @@ class RecommendationsScreen extends StatelessWidget {
     try {
       await _authRepository.addConnection(user.id.value);
       Get.snackbar(
-        'Başarılı',
-        'Bağlantı isteği gönderildi',
+        AppStrings.success,
+        AppStrings.connectionRequestSent,
         snackPosition: SnackPosition.BOTTOM,
         backgroundColor: Colors.green,
         colorText: Colors.white,
@@ -266,8 +263,8 @@ class RecommendationsScreen extends StatelessWidget {
       _recommendations.remove(user);
     } catch (e) {
       Get.snackbar(
-        'Hata',
-        'Bağlantı isteği gönderilemedi',
+        AppStrings.error,
+        AppStrings.connectionRequestFailed,
         snackPosition: SnackPosition.BOTTOM,
         backgroundColor: Colors.red,
         colorText: Colors.white,

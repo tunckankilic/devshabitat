@@ -1,3 +1,4 @@
+import 'package:devshabitat/app/constants/app_strings.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:devshabitat/app/widgets/map/custom_map_widget.dart';
@@ -65,7 +66,7 @@ class EventMapView extends GetView<EventDiscoveryController> {
                     Expanded(
                       child: Obx(() {
                         return Text(
-                          '${controller.visibleEvents.length} etkinlik bulundu',
+                          '${controller.visibleEvents.length} ${AppStrings.eventsFound}',
                           style: TextStyle(
                             fontSize: responsive.responsiveValue(
                               mobile: 16,
@@ -87,7 +88,7 @@ class EventMapView extends GetView<EventDiscoveryController> {
                         ),
                       ),
                       onPressed: controller.refreshEvents,
-                      tooltip: 'Yenile',
+                      tooltip: AppStrings.refresh,
                     ),
                   ],
                 ),

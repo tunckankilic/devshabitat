@@ -1,3 +1,4 @@
+import 'package:devshabitat/app/constants/app_strings.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:devshabitat/app/controllers/event/event_discovery_controller.dart';
@@ -15,7 +16,7 @@ class EventDiscoveryView extends GetView<EventDiscoveryController> {
     return Scaffold(
       appBar: AppBar(
         title: Text(
-          'Etkinlik Keşfet',
+          AppStrings.eventDiscovery,
           style: TextStyle(fontSize: 20 * responsive.textScaleFactor),
         ),
         bottom: PreferredSize(
@@ -25,7 +26,7 @@ class EventDiscoveryView extends GetView<EventDiscoveryController> {
             child: TextField(
               style: TextStyle(fontSize: 16 * responsive.textScaleFactor),
               decoration: InputDecoration(
-                hintText: 'Etkinlik ara...',
+                hintText: AppStrings.searchEvent,
                 hintStyle: TextStyle(fontSize: 16 * responsive.textScaleFactor),
                 prefixIcon: Icon(
                   Icons.search,
@@ -101,19 +102,19 @@ class EventDiscoveryView extends GetView<EventDiscoveryController> {
             child: Row(
               children: [
                 _buildFilterChip(
-                  label: 'Online',
+                  label: AppStrings.online,
                   selected: controller.showOnlineOnly.value,
                   onSelected: controller.toggleOnlineOnly,
                 ),
                 SizedBox(width: 8 * responsive.textScaleFactor),
                 _buildFilterChip(
-                  label: 'Yüz yüze',
+                  label: AppStrings.inPerson,
                   selected: controller.showOfflineOnly.value,
                   onSelected: controller.toggleOfflineOnly,
                 ),
                 SizedBox(width: 8 * responsive.textScaleFactor),
                 _buildFilterChip(
-                  label: 'Yaklaşan',
+                  label: AppStrings.upcoming,
                   selected: controller.showUpcomingOnly.value,
                   onSelected: controller.toggleUpcomingOnly,
                 ),
@@ -165,15 +166,15 @@ class EventDiscoveryView extends GetView<EventDiscoveryController> {
   String _getEventTypeText(EventType type) {
     switch (type) {
       case EventType.meetup:
-        return 'Meetup';
+        return AppStrings.meetup;
       case EventType.workshop:
-        return 'Workshop';
+        return AppStrings.workshop;
       case EventType.hackathon:
-        return 'Hackathon';
+        return AppStrings.hackathon;
       case EventType.conference:
-        return 'Konferans';
+        return AppStrings.conference;
       case EventType.other:
-        return 'Diğer';
+        return AppStrings.other;
     }
   }
 }

@@ -1,3 +1,4 @@
+import 'package:devshabitat/app/constants/app_strings.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:devshabitat/app/widgets/search_result_tile.dart';
@@ -47,7 +48,7 @@ class MessageSearchScreen extends GetView<MessageSearchController> {
   Widget _buildSearchBar() {
     return SearchBar(
       controller: controller.searchController,
-      hintText: 'Mesajlarda ara...',
+      hintText: AppStrings.searchMessages,
       leading: const Icon(Icons.search),
       trailing: [
         IconButton(
@@ -67,19 +68,19 @@ class MessageSearchScreen extends GetView<MessageSearchController> {
       child: Obx(() => Row(
             children: [
               FilterChip(
-                label: const Text('Medya'),
+                label: Text(AppStrings.media),
                 selected: controller.filterMedia.value,
                 onSelected: controller.toggleMediaFilter,
               ),
               const SizedBox(width: 8),
               FilterChip(
-                label: const Text('Belgeler'),
+                label: Text(AppStrings.documents),
                 selected: controller.filterDocuments.value,
                 onSelected: controller.toggleDocumentsFilter,
               ),
               const SizedBox(width: 8),
               FilterChip(
-                label: const Text('Bağlantılar'),
+                label: Text(AppStrings.links),
                 selected: controller.filterLinks.value,
                 onSelected: controller.toggleLinksFilter,
               ),
@@ -109,7 +110,7 @@ class MessageSearchScreen extends GetView<MessageSearchController> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            'Son Aramalar',
+            AppStrings.recentSearches,
             style: Get.textTheme.titleMedium,
           ),
           const SizedBox(height: 8),
@@ -146,12 +147,12 @@ class MessageSearchScreen extends GetView<MessageSearchController> {
           ),
           const SizedBox(height: 16),
           Text(
-            'Sonuç bulunamadı',
+            AppStrings.noResults,
             style: Get.textTheme.titleLarge,
           ),
           const SizedBox(height: 8),
           Text(
-            'Farklı anahtar kelimeler deneyebilir veya\nfiltreleri değiştirebilirsiniz',
+            AppStrings.tryDifferentKeywords,
             textAlign: TextAlign.center,
             style: Get.textTheme.bodyMedium,
           ),
@@ -170,7 +171,7 @@ class MessageSearchScreen extends GetView<MessageSearchController> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              'Gelişmiş Filtreler',
+              AppStrings.advancedFilters,
               style: Get.textTheme.titleLarge,
             ),
             const SizedBox(height: 16),
@@ -187,7 +188,7 @@ class MessageSearchScreen extends GetView<MessageSearchController> {
                   controller.applyFilters();
                   Get.back();
                 },
-                child: const Text('Filtreleri Uygula'),
+                child: Text(AppStrings.applyFilters),
               ),
             ),
           ],
@@ -200,21 +201,21 @@ class MessageSearchScreen extends GetView<MessageSearchController> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Text('Tarih Aralığı'),
+        Text(AppStrings.dateRange),
         const SizedBox(height: 8),
         Row(
           children: [
             Expanded(
               child: Obx(() => OutlinedButton(
                     onPressed: controller.selectStartDate,
-                    child: Text(controller.startDate.value ?? 'Başlangıç'),
+                    child: Text(controller.startDate.value ?? AppStrings.start),
                   )),
             ),
             const SizedBox(width: 8),
             Expanded(
               child: Obx(() => OutlinedButton(
                     onPressed: controller.selectEndDate,
-                    child: Text(controller.endDate.value ?? 'Bitiş'),
+                    child: Text(controller.endDate.value ?? AppStrings.end),
                   )),
             ),
           ],
@@ -227,7 +228,7 @@ class MessageSearchScreen extends GetView<MessageSearchController> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Text('Gönderen'),
+        Text(AppStrings.sender),
         const SizedBox(height: 8),
         Obx(() => DropdownButtonFormField<String>(
               value: controller.selectedSender.value,
@@ -251,28 +252,28 @@ class MessageSearchScreen extends GetView<MessageSearchController> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Text('Mesaj Tipi'),
+        Text(AppStrings.messageType),
         const SizedBox(height: 8),
         Wrap(
           spacing: 8,
           children: [
             Obx(() => ChoiceChip(
-                  label: const Text('Metin'),
+                  label: Text(AppStrings.text),
                   selected: controller.filterText.value,
                   onSelected: controller.toggleTextFilter,
                 )),
             Obx(() => ChoiceChip(
-                  label: const Text('Medya'),
+                  label: Text(AppStrings.media),
                   selected: controller.filterMedia.value,
                   onSelected: controller.toggleMediaFilter,
                 )),
             Obx(() => ChoiceChip(
-                  label: const Text('Belge'),
+                  label: Text(AppStrings.documents),
                   selected: controller.filterDocuments.value,
                   onSelected: controller.toggleDocumentsFilter,
                 )),
             Obx(() => ChoiceChip(
-                  label: const Text('Bağlantı'),
+                  label: Text(AppStrings.links),
                   selected: controller.filterLinks.value,
                   onSelected: controller.toggleLinksFilter,
                 )),

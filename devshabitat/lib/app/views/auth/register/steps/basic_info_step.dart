@@ -1,3 +1,4 @@
+import 'package:devshabitat/app/constants/app_strings.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../../../../controllers/registration_controller.dart';
@@ -18,8 +19,8 @@ class BasicInfoStep extends GetView<RegistrationController> {
             controller: controller.emailController,
             keyboardType: TextInputType.emailAddress,
             decoration: InputDecoration(
-              labelText: 'E-posta',
-              hintText: 'ornek@email.com',
+              labelText: AppStrings.email,
+              hintText: AppStrings.emailHint,
               prefixIcon: Icon(
                 Icons.email,
                 size: _responsiveController.responsiveValue(
@@ -48,10 +49,10 @@ class BasicInfoStep extends GetView<RegistrationController> {
             ),
             validator: (value) {
               if (value == null || value.isEmpty) {
-                return 'E-posta adresi gerekli';
+                return AppStrings.emailRequired;
               }
               if (!GetUtils.isEmail(value)) {
-                return 'Geçerli bir e-posta adresi girin';
+                return AppStrings.emailInvalid;
               }
               return null;
             },
@@ -64,8 +65,8 @@ class BasicInfoStep extends GetView<RegistrationController> {
           TextFormField(
             controller: controller.displayNameController,
             decoration: InputDecoration(
-              labelText: 'Ad Soyad',
-              hintText: 'Adınız ve Soyadınız',
+              labelText: AppStrings.displayName,
+              hintText: AppStrings.displayNameHint,
               prefixIcon: Icon(
                 Icons.person,
                 size: _responsiveController.responsiveValue(
@@ -94,10 +95,10 @@ class BasicInfoStep extends GetView<RegistrationController> {
             ),
             validator: (value) {
               if (value == null || value.isEmpty) {
-                return 'Ad soyad gerekli';
+                return AppStrings.displayNameRequired;
               }
               if (value.length < 3) {
-                return 'Ad soyad en az 3 karakter olmalı';
+                return AppStrings.displayNameInvalid;
               }
               return null;
             },
@@ -111,8 +112,8 @@ class BasicInfoStep extends GetView<RegistrationController> {
             controller: controller.passwordController,
             obscureText: true,
             decoration: InputDecoration(
-              labelText: 'Şifre',
-              hintText: 'En az 8 karakter',
+              labelText: AppStrings.password,
+              hintText: AppStrings.passwordHint,
               prefixIcon: Icon(
                 Icons.lock,
                 size: _responsiveController.responsiveValue(
@@ -141,19 +142,19 @@ class BasicInfoStep extends GetView<RegistrationController> {
             ),
             validator: (value) {
               if (value == null || value.isEmpty) {
-                return 'Şifre gerekli';
+                return AppStrings.passwordRequired;
               }
               if (value.length < 8) {
-                return 'Şifre en az 8 karakter olmalı';
+                return AppStrings.passwordInvalid;
               }
               if (!value.contains(RegExp(r'[A-Z]'))) {
-                return 'Şifre en az bir büyük harf içermeli';
+                return AppStrings.passwordInvalid;
               }
               if (!value.contains(RegExp(r'[a-z]'))) {
-                return 'Şifre en az bir küçük harf içermeli';
+                return AppStrings.passwordInvalid;
               }
               if (!value.contains(RegExp(r'[0-9]'))) {
-                return 'Şifre en az bir rakam içermeli';
+                return AppStrings.passwordInvalid;
               }
               return null;
             },
@@ -167,8 +168,8 @@ class BasicInfoStep extends GetView<RegistrationController> {
             controller: controller.confirmPasswordController,
             obscureText: true,
             decoration: InputDecoration(
-              labelText: 'Şifre Tekrar',
-              hintText: 'Şifrenizi tekrar girin',
+              labelText: AppStrings.confirmPassword,
+              hintText: AppStrings.confirmPasswordHint,
               prefixIcon: Icon(
                 Icons.lock_outline,
                 size: _responsiveController.responsiveValue(
@@ -197,10 +198,10 @@ class BasicInfoStep extends GetView<RegistrationController> {
             ),
             validator: (value) {
               if (value == null || value.isEmpty) {
-                return 'Şifre tekrarı gerekli';
+                return AppStrings.confirmPasswordRequired;
               }
               if (value != controller.passwordController.text) {
-                return 'Şifreler eşleşmiyor';
+                return AppStrings.confirmPasswordInvalid;
               }
               return null;
             },
@@ -227,7 +228,7 @@ class BasicInfoStep extends GetView<RegistrationController> {
               )),
               Expanded(
                 child: Text(
-                  'Şifreniz en az 8 karakter uzunluğunda olmalı ve büyük/küçük harf, rakam ve özel karakter içermelidir.',
+                  AppStrings.passwordDescription,
                   style: TextStyle(
                     fontSize: _responsiveController.responsiveValue(
                       mobile: 12.0,

@@ -1,3 +1,4 @@
+import 'package:devshabitat/app/constants/app_strings.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
@@ -20,8 +21,8 @@ class ProfessionalInfoStep extends GetView<RegistrationController> {
           TextFormField(
             controller: controller.titleController,
             decoration: InputDecoration(
-              labelText: 'İş Ünvanı',
-              hintText: 'Örn: Senior Software Developer',
+              labelText: AppStrings.job,
+              hintText: AppStrings.jobHint,
               prefixIcon: Icon(Icons.work,
                   size: responsive.responsiveValue(mobile: 24, tablet: 28)),
               border: OutlineInputBorder(
@@ -42,8 +43,8 @@ class ProfessionalInfoStep extends GetView<RegistrationController> {
           TextFormField(
             controller: controller.companyController,
             decoration: InputDecoration(
-              labelText: 'Şirket',
-              hintText: 'Çalıştığınız şirket',
+              labelText: AppStrings.company,
+              hintText: AppStrings.companyHint,
               prefixIcon: Icon(Icons.business,
                   size: responsive.responsiveValue(mobile: 24, tablet: 28)),
               border: OutlineInputBorder(
@@ -69,8 +70,8 @@ class ProfessionalInfoStep extends GetView<RegistrationController> {
               LengthLimitingTextInputFormatter(2),
             ],
             decoration: InputDecoration(
-              labelText: 'Deneyim Yılı',
-              hintText: 'Örn: 5',
+              labelText: AppStrings.yearsOfExperience,
+              hintText: AppStrings.yearsOfExperienceHint,
               prefixIcon: Icon(Icons.timeline,
                   size: responsive.responsiveValue(mobile: 24, tablet: 28)),
               border: OutlineInputBorder(
@@ -89,7 +90,7 @@ class ProfessionalInfoStep extends GetView<RegistrationController> {
 
           // Çalışma Tercihleri
           Text(
-            'Çalışma Tercihleri',
+            AppStrings.workPreferences,
             style: TextStyle(
               fontSize: responsive.responsiveValue(mobile: 18, tablet: 22),
               fontWeight: FontWeight.bold,
@@ -100,7 +101,7 @@ class ProfessionalInfoStep extends GetView<RegistrationController> {
           // İş Aramaya Açık
           Obx(() => SwitchListTile(
                 title: Text(
-                  'İş Aramaya Açık',
+                  AppStrings.isAvailableForWork,
                   style: TextStyle(
                       fontSize:
                           responsive.responsiveValue(mobile: 16, tablet: 18)),
@@ -113,7 +114,7 @@ class ProfessionalInfoStep extends GetView<RegistrationController> {
           // Uzaktan Çalışma
           Obx(() => SwitchListTile(
                 title: Text(
-                  'Uzaktan Çalışmaya Açık',
+                  AppStrings.isRemote,
                   style: TextStyle(
                       fontSize:
                           responsive.responsiveValue(mobile: 16, tablet: 18)),
@@ -125,7 +126,7 @@ class ProfessionalInfoStep extends GetView<RegistrationController> {
           // Tam Zamanlı
           Obx(() => SwitchListTile(
                 title: Text(
-                  'Tam Zamanlı',
+                  AppStrings.isFullTime,
                   style: TextStyle(
                       fontSize:
                           responsive.responsiveValue(mobile: 16, tablet: 18)),
@@ -137,7 +138,7 @@ class ProfessionalInfoStep extends GetView<RegistrationController> {
           // Yarı Zamanlı
           Obx(() => SwitchListTile(
                 title: Text(
-                  'Yarı Zamanlı',
+                  AppStrings.isPartTime,
                   style: TextStyle(
                       fontSize:
                           responsive.responsiveValue(mobile: 16, tablet: 18)),
@@ -149,7 +150,7 @@ class ProfessionalInfoStep extends GetView<RegistrationController> {
           // Serbest Çalışma
           Obx(() => SwitchListTile(
                 title: Text(
-                  'Serbest Çalışma',
+                  AppStrings.isFreelance,
                   style: TextStyle(
                       fontSize:
                           responsive.responsiveValue(mobile: 16, tablet: 18)),
@@ -161,7 +162,7 @@ class ProfessionalInfoStep extends GetView<RegistrationController> {
           // Staj
           Obx(() => SwitchListTile(
                 title: Text(
-                  'Staj',
+                  AppStrings.isInternship,
                   style: TextStyle(
                       fontSize:
                           responsive.responsiveValue(mobile: 16, tablet: 18)),
@@ -174,7 +175,7 @@ class ProfessionalInfoStep extends GetView<RegistrationController> {
 
           // Bilgilendirme Metni
           Text(
-            'Bu bilgileri daha sonra profilinizden güncelleyebilirsiniz.',
+            AppStrings.professionalInfoDescription,
             style: TextStyle(
               color: Colors.grey,
               fontSize: responsive.responsiveValue(mobile: 12, tablet: 14),

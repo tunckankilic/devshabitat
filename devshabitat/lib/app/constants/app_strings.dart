@@ -167,4 +167,7 @@ class AppStrings {
   static String reactedWith(String emoji) {
     return 'Reacted with $emoji';
   }
+
+  static const String welcomeDescription =
+      'A platform for software developers. Share your projects, collaborate with others and grow together.';
 }

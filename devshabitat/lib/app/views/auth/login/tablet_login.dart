@@ -1,3 +1,4 @@
+import 'package:devshabitat/app/constants/app_strings.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../../../controllers/responsive_controller.dart';
@@ -37,7 +38,7 @@ class TabletLogin extends GetView<AuthController> {
                         tablet: 56.0,
                       )),
                       Text(
-                        'DevHabitat\'a Hoş Geldiniz',
+                        AppStrings.welcome,
                         style: TextStyle(
                           fontSize: _responsiveController.responsiveValue(
                             mobile: 32.0,
@@ -58,7 +59,7 @@ class TabletLogin extends GetView<AuthController> {
                           horizontal: 48.0,
                         ),
                         child: Text(
-                          'Yazılım geliştiriciler için özel bir platform. Projelerinizi paylaşın, işbirliği yapın ve birlikte büyüyün.',
+                          AppStrings.welcomeDescription,
                           style: TextStyle(
                             fontSize: _responsiveController.responsiveValue(
                               mobile: 18.0,
@@ -91,7 +92,7 @@ class TabletLogin extends GetView<AuthController> {
                       crossAxisAlignment: CrossAxisAlignment.stretch,
                       children: [
                         Text(
-                          'Giriş Yap',
+                          AppStrings.login,
                           style: TextStyle(
                             fontSize: _responsiveController.responsiveValue(
                               mobile: 32.0,
@@ -110,8 +111,8 @@ class TabletLogin extends GetView<AuthController> {
                           controller: controller.emailController,
                           keyboardType: TextInputType.emailAddress,
                           decoration: InputDecoration(
-                            labelText: 'E-posta',
-                            hintText: 'ornek@email.com',
+                            labelText: AppStrings.email,
+                            hintText: AppStrings.emailHint,
                             prefixIcon: Icon(
                               Icons.email,
                               size: _responsiveController.responsiveValue(
@@ -141,10 +142,10 @@ class TabletLogin extends GetView<AuthController> {
                           ),
                           validator: (value) {
                             if (value == null || value.isEmpty) {
-                              return 'E-posta adresi gerekli';
+                              return AppStrings.emailRequired;
                             }
                             if (!GetUtils.isEmail(value)) {
-                              return 'Geçerli bir e-posta adresi girin';
+                              return AppStrings.emailInvalid;
                             }
                             return null;
                           },
@@ -158,8 +159,8 @@ class TabletLogin extends GetView<AuthController> {
                           controller: controller.passwordController,
                           obscureText: true,
                           decoration: InputDecoration(
-                            labelText: 'Şifre',
-                            hintText: '••••••••',
+                            labelText: AppStrings.password,
+                            hintText: AppStrings.passwordHint,
                             prefixIcon: Icon(
                               Icons.lock,
                               size: _responsiveController.responsiveValue(
@@ -189,10 +190,10 @@ class TabletLogin extends GetView<AuthController> {
                           ),
                           validator: (value) {
                             if (value == null || value.isEmpty) {
-                              return 'Şifre gerekli';
+                              return AppStrings.passwordRequired;
                             }
                             if (value.length < 6) {
-                              return 'Şifre en az 6 karakter olmalı';
+                              return AppStrings.passwordInvalid;
                             }
                             return null;
                           },
@@ -207,7 +208,7 @@ class TabletLogin extends GetView<AuthController> {
                           child: TextButton(
                             onPressed: () => Get.toNamed('/forgot-password'),
                             child: Text(
-                              'Şifremi Unuttum',
+                              AppStrings.forgotPassword,
                               style: TextStyle(
                                 fontSize: _responsiveController.responsiveValue(
                                   mobile: 14.0,
@@ -258,7 +259,7 @@ class TabletLogin extends GetView<AuthController> {
                                     ),
                                   )
                                 : Text(
-                                    'Giriş Yap',
+                                    AppStrings.login,
                                     style: TextStyle(
                                       fontSize:
                                           _responsiveController.responsiveValue(
@@ -282,7 +283,7 @@ class TabletLogin extends GetView<AuthController> {
                                 horizontal: 24.0,
                               ),
                               child: Text(
-                                'veya',
+                                AppStrings.or,
                                 style: TextStyle(
                                   fontSize:
                                       _responsiveController.responsiveValue(
@@ -305,7 +306,7 @@ class TabletLogin extends GetView<AuthController> {
                           children: [
                             Expanded(
                               child: SocialLoginButton(
-                                text: 'Google ile Devam Et',
+                                text: AppStrings.continueWithGoogle,
                                 imagePath: 'assets/icons/google.png',
                                 onPressed: () => controller.signInWithGoogle(),
                                 backgroundColor: Colors.white,
@@ -320,7 +321,7 @@ class TabletLogin extends GetView<AuthController> {
                             )),
                             Expanded(
                               child: SocialLoginButton(
-                                text: 'Apple ile Devam Et',
+                                text: AppStrings.continueWithApple,
                                 imagePath: 'assets/icons/apple.png',
                                 onPressed: () => controller.signInWithApple(),
                                 backgroundColor: Colors.black,
@@ -338,7 +339,7 @@ class TabletLogin extends GetView<AuthController> {
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
                             Text(
-                              'Hesabınız yok mu?',
+                              AppStrings.noAccount,
                               style: TextStyle(
                                 fontSize: _responsiveController.responsiveValue(
                                   mobile: 16.0,
@@ -349,7 +350,7 @@ class TabletLogin extends GetView<AuthController> {
                             TextButton(
                               onPressed: () => Get.toNamed('/register'),
                               child: Text(
-                                'Kayıt Ol',
+                                AppStrings.register,
                                 style: TextStyle(
                                   fontSize:
                                       _responsiveController.responsiveValue(

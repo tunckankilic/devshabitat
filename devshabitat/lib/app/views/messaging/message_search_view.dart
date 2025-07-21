@@ -1,3 +1,4 @@
+import 'package:devshabitat/app/constants/app_strings.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../../controllers/message/message_search_controller.dart';
@@ -21,7 +22,7 @@ class MessageSearchView extends BaseView<MessageSearchController> {
           style: TextStyle(
               fontSize: responsive.responsiveValue(mobile: 16, tablet: 18)),
           decoration: InputDecoration(
-            hintText: 'Mesajlarda ara...',
+            hintText: AppStrings.searchMessages,
             hintStyle: TextStyle(
                 fontSize: responsive.responsiveValue(mobile: 16, tablet: 18)),
             border: InputBorder.none,
@@ -72,7 +73,7 @@ class MessageSearchView extends BaseView<MessageSearchController> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    'Filtreler',
+                    AppStrings.filters,
                     style: TextStyle(
                       fontSize:
                           responsive.responsiveValue(mobile: 18, tablet: 20),
@@ -89,7 +90,7 @@ class MessageSearchView extends BaseView<MessageSearchController> {
                           ? null
                           : controller.selectedConversation.value,
                       decoration: InputDecoration(
-                        labelText: 'Konuşma',
+                        labelText: AppStrings.conversation,
                         labelStyle: TextStyle(
                             fontSize: responsive.responsiveValue(
                                 mobile: 14, tablet: 16)),
@@ -107,7 +108,7 @@ class MessageSearchView extends BaseView<MessageSearchController> {
                   // Tarih seçimi
                   TextFormField(
                     decoration: InputDecoration(
-                      labelText: 'Tarih',
+                      labelText: AppStrings.date,
                       labelStyle: TextStyle(
                           fontSize: responsive.responsiveValue(
                               mobile: 14, tablet: 16)),
@@ -141,7 +142,7 @@ class MessageSearchView extends BaseView<MessageSearchController> {
                         ? null
                         : controller.selectedType.value,
                     decoration: InputDecoration(
-                      labelText: 'Mesaj Tipi',
+                      labelText: AppStrings.messageType,
                       labelStyle: TextStyle(
                           fontSize: responsive.responsiveValue(
                               mobile: 14, tablet: 16)),
@@ -153,15 +154,15 @@ class MessageSearchView extends BaseView<MessageSearchController> {
                     items: const [
                       DropdownMenuItem(
                         value: 'text',
-                        child: Text('Metin'),
+                        child: Text(AppStrings.text),
                       ),
                       DropdownMenuItem(
                         value: 'image',
-                        child: Text('Görsel'),
+                        child: Text(AppStrings.image),
                       ),
                       DropdownMenuItem(
                         value: 'file',
-                        child: Text('Dosya'),
+                        child: Text(AppStrings.file),
                       ),
                     ],
                     onChanged: controller.setTypeFilter,
@@ -176,7 +177,7 @@ class MessageSearchView extends BaseView<MessageSearchController> {
                           size: responsive.responsiveValue(
                               mobile: 24, tablet: 28)),
                       label: Text(
-                        'Filtreleri Temizle',
+                        AppStrings.clearFilters,
                         style: TextStyle(
                             fontSize: responsive.responsiveValue(
                                 mobile: 14, tablet: 16)),
@@ -199,7 +200,7 @@ class MessageSearchView extends BaseView<MessageSearchController> {
               if (controller.searchQuery.isEmpty) {
                 return Center(
                   child: Text(
-                    'Aramak istediğiniz mesajı yazın',
+                    AppStrings.writeYourMessage,
                     style: TextStyle(
                         fontSize:
                             responsive.responsiveValue(mobile: 16, tablet: 18)),
@@ -210,7 +211,7 @@ class MessageSearchView extends BaseView<MessageSearchController> {
               if (controller.searchResults.isEmpty) {
                 return Center(
                   child: Text(
-                    'Sonuç bulunamadı',
+                    AppStrings.noResults,
                     style: TextStyle(
                         fontSize:
                             responsive.responsiveValue(mobile: 16, tablet: 18)),
@@ -270,13 +271,13 @@ class MessageSearchView extends BaseView<MessageSearchController> {
     if (difference.inDays > 7) {
       return '${time.day}/${time.month}/${time.year}';
     } else if (difference.inDays > 0) {
-      return '${difference.inDays} gün önce';
+      return '${difference.inDays} days ago';
     } else if (difference.inHours > 0) {
-      return '${difference.inHours} saat önce';
+      return '${difference.inHours} hours ago';
     } else if (difference.inMinutes > 0) {
-      return '${difference.inMinutes} dk önce';
+      return '${difference.inMinutes} mins ago';
     } else {
-      return 'Şimdi';
+      return AppStrings.now;
     }
   }
 }

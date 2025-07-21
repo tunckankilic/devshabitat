@@ -1,3 +1,4 @@
+import 'package:devshabitat/app/constants/app_strings.dart';
 import 'package:devshabitat/app/widgets/user_card.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -21,7 +22,7 @@ class DiscoveryScreen extends BaseView<DiscoveryController> {
       child: Scaffold(
         appBar: AppBar(
           title: ResponsiveText(
-            'Keşfet',
+            AppStrings.discover,
             style: TextStyle(
               fontSize: responsive.responsiveValue(
                 mobile: 18,
@@ -39,7 +40,7 @@ class DiscoveryScreen extends BaseView<DiscoveryController> {
                     tablet: 28,
                   ),
                 ),
-                text: 'Arama',
+                text: AppStrings.search,
               ),
               Tab(
                 icon: Icon(
@@ -49,7 +50,7 @@ class DiscoveryScreen extends BaseView<DiscoveryController> {
                     tablet: 28,
                   ),
                 ),
-                text: 'Öneriler',
+                text: AppStrings.recommendations,
               ),
               Tab(
                 icon: Icon(
@@ -59,7 +60,7 @@ class DiscoveryScreen extends BaseView<DiscoveryController> {
                     tablet: 28,
                   ),
                 ),
-                text: 'Bağlantılar',
+                text: AppStrings.connections,
               ),
               Tab(
                 icon: Icon(
@@ -69,7 +70,7 @@ class DiscoveryScreen extends BaseView<DiscoveryController> {
                     tablet: 28,
                   ),
                 ),
-                text: 'İstekler',
+                text: AppStrings.requests,
               ),
             ],
             labelStyle: TextStyle(
@@ -120,7 +121,7 @@ class DiscoveryScreen extends BaseView<DiscoveryController> {
               ),
             ),
             decoration: InputDecoration(
-              hintText: 'Kullanıcı ara...',
+              hintText: AppStrings.searchUser,
               hintStyle: TextStyle(
                 fontSize: responsive.responsiveValue(
                   mobile: 16,
@@ -381,7 +382,7 @@ class DiscoveryScreen extends BaseView<DiscoveryController> {
           ),
         ),
         subtitle: ResponsiveText(
-          connection.title ?? 'Başlık belirtilmemiş',
+          connection.title ?? AppStrings.noTitle,
           style: TextStyle(
             fontSize: responsive.responsiveValue(
               mobile: 14,
@@ -432,8 +433,8 @@ class DiscoveryScreen extends BaseView<DiscoveryController> {
               ),
             ),
             tabs: [
-              Tab(text: 'Gelen İstekler'),
-              Tab(text: 'Giden İstekler'),
+              Tab(text: AppStrings.incomingRequests),
+              Tab(text: AppStrings.outgoingRequests),
             ],
           ),
           Expanded(
@@ -547,7 +548,7 @@ class DiscoveryScreen extends BaseView<DiscoveryController> {
             ),
             if (request.mutualConnections > 0)
               ResponsiveText(
-                '${request.mutualConnections} ortak bağlantı',
+                '${request.mutualConnections} ${AppStrings.mutualConnections}',
                 style: TextStyle(
                   fontSize: responsive.responsiveValue(
                     mobile: 12,
@@ -616,7 +617,7 @@ class DiscoveryScreen extends BaseView<DiscoveryController> {
                 ),
               ),
               title: ResponsiveText(
-                'Profili Görüntüle',
+                AppStrings.viewProfile,
                 style: TextStyle(
                   fontSize: responsive.responsiveValue(
                     mobile: 16,
@@ -638,7 +639,7 @@ class DiscoveryScreen extends BaseView<DiscoveryController> {
                 ),
               ),
               title: ResponsiveText(
-                'Mesaj Gönder',
+                AppStrings.sendMessage,
                 style: TextStyle(
                   fontSize: responsive.responsiveValue(
                     mobile: 16,
@@ -661,7 +662,7 @@ class DiscoveryScreen extends BaseView<DiscoveryController> {
                 color: Colors.red,
               ),
               title: ResponsiveText(
-                'Bağlantıyı Kaldır',
+                AppStrings.removeConnection,
                 style: TextStyle(
                   fontSize: responsive.responsiveValue(
                     mobile: 16,
@@ -685,7 +686,7 @@ class DiscoveryScreen extends BaseView<DiscoveryController> {
     Get.dialog(
       AlertDialog(
         title: ResponsiveText(
-          isIncoming ? 'İsteği Reddet' : 'İsteği Geri Çek',
+          isIncoming ? AppStrings.rejectRequest : AppStrings.withdrawRequest,
           style: TextStyle(
             fontSize: responsive.responsiveValue(
               mobile: 18,
@@ -695,8 +696,8 @@ class DiscoveryScreen extends BaseView<DiscoveryController> {
         ),
         content: ResponsiveText(
           isIncoming
-              ? 'Bu bağlantı isteğini reddetmek istediğinize emin misiniz?'
-              : 'Bu bağlantı isteğini geri çekmek istediğinize emin misiniz?',
+              ? AppStrings.rejectRequestConfirmation
+              : AppStrings.withdrawRequestConfirmation,
           style: TextStyle(
             fontSize: responsive.responsiveValue(
               mobile: 16,
@@ -708,7 +709,7 @@ class DiscoveryScreen extends BaseView<DiscoveryController> {
           TextButton(
             onPressed: () => Get.back(),
             child: ResponsiveText(
-              'İptal',
+              AppStrings.cancel,
               style: TextStyle(
                 fontSize: responsive.responsiveValue(
                   mobile: 14,
@@ -727,7 +728,7 @@ class DiscoveryScreen extends BaseView<DiscoveryController> {
               }
             },
             child: ResponsiveText(
-              isIncoming ? 'Reddet' : 'Geri Çek',
+              isIncoming ? AppStrings.reject : AppStrings.withdraw,
               style: TextStyle(
                 fontSize: responsive.responsiveValue(
                   mobile: 14,
@@ -746,7 +747,7 @@ class DiscoveryScreen extends BaseView<DiscoveryController> {
     Get.dialog(
       AlertDialog(
         title: ResponsiveText(
-          'Bağlantıyı Kaldır',
+          AppStrings.removeConnection,
           style: TextStyle(
             fontSize: responsive.responsiveValue(
               mobile: 18,
@@ -755,7 +756,7 @@ class DiscoveryScreen extends BaseView<DiscoveryController> {
           ),
         ),
         content: ResponsiveText(
-          'Bu kişiyi bağlantılarınızdan kaldırmak istediğinize emin misiniz?',
+          AppStrings.removeConnectionConfirmation,
           style: TextStyle(
             fontSize: responsive.responsiveValue(
               mobile: 16,
@@ -767,7 +768,7 @@ class DiscoveryScreen extends BaseView<DiscoveryController> {
           TextButton(
             onPressed: () => Get.back(),
             child: ResponsiveText(
-              'İptal',
+              AppStrings.cancel,
               style: TextStyle(
                 fontSize: responsive.responsiveValue(
                   mobile: 14,
@@ -782,7 +783,7 @@ class DiscoveryScreen extends BaseView<DiscoveryController> {
               controller.removeConnection(connection);
             },
             child: ResponsiveText(
-              'Kaldır',
+              AppStrings.remove,
               style: TextStyle(
                 fontSize: responsive.responsiveValue(
                   mobile: 14,

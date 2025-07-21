@@ -1,3 +1,4 @@
+import 'package:devshabitat/app/constants/app_strings.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../../../controllers/auth_controller.dart';
@@ -45,7 +46,7 @@ class GlassRegisterCard extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           Text(
-            'Kayıt Ol',
+            AppStrings.register,
             style: TextStyle(
               fontSize: _responsiveController.responsiveValue(
                 mobile: 24.0,
@@ -71,7 +72,7 @@ class GlassRegisterCard extends StatelessWidget {
               ),
             ),
             decoration: InputDecoration(
-              labelText: 'E-posta',
+              labelText: AppStrings.email,
               labelStyle: TextStyle(
                 fontSize: _responsiveController.responsiveValue(
                   mobile: 14.0,
@@ -109,7 +110,7 @@ class GlassRegisterCard extends StatelessWidget {
               ),
             ),
             decoration: InputDecoration(
-              labelText: 'Şifre',
+              labelText: AppStrings.password,
               labelStyle: TextStyle(
                 fontSize: _responsiveController.responsiveValue(
                   mobile: 14.0,
@@ -147,7 +148,7 @@ class GlassRegisterCard extends StatelessWidget {
               ),
             ),
             decoration: InputDecoration(
-              labelText: 'Şifre Tekrarı',
+              labelText: AppStrings.confirmPassword,
               labelStyle: TextStyle(
                 fontSize: _responsiveController.responsiveValue(
                   mobile: 14.0,
@@ -184,7 +185,7 @@ class GlassRegisterCard extends StatelessWidget {
               ),
             ),
             decoration: InputDecoration(
-              labelText: 'Kullanıcı Adı',
+              labelText: AppStrings.username,
               labelStyle: TextStyle(
                 fontSize: _responsiveController.responsiveValue(
                   mobile: 14.0,
@@ -221,7 +222,7 @@ class GlassRegisterCard extends StatelessWidget {
               ),
             ),
             decoration: InputDecoration(
-              labelText: 'GitHub Kullanıcı Adı',
+              labelText: AppStrings.githubUsername,
               labelStyle: TextStyle(
                 fontSize: _responsiveController.responsiveValue(
                   mobile: 14.0,
@@ -264,7 +265,7 @@ class GlassRegisterCard extends StatelessWidget {
                   ),
                 ),
                 child: Text(
-                  'Kayıt Ol',
+                  AppStrings.register,
                   style: TextStyle(
                     fontSize: _responsiveController.responsiveValue(
                       mobile: 16.0,
@@ -281,7 +282,7 @@ class GlassRegisterCard extends StatelessWidget {
           TextButton(
             onPressed: () => Get.back(),
             child: Text(
-              'Zaten hesabın var mı? Giriş yap',
+              AppStrings.alreadyHaveAccount,
               style: TextStyle(
                 fontSize: _responsiveController.responsiveValue(
                   mobile: 14.0,

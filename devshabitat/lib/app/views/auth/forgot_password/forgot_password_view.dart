@@ -1,3 +1,4 @@
+import 'package:devshabitat/app/constants/app_strings.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../../../controllers/responsive_controller.dart';
@@ -13,7 +14,7 @@ class ForgotPasswordView extends GetView<AuthController> {
     return Scaffold(
       appBar: AppBar(
         title: Text(
-          'Şifremi Unuttum',
+          AppStrings.forgotPassword,
           style: TextStyle(
             fontSize: _responsiveController.responsiveValue(
               mobile: 18.0,
@@ -35,7 +36,7 @@ class ForgotPasswordView extends GetView<AuthController> {
                   tablet: 48.0,
                 )),
                 Text(
-                  'Şifrenizi mi unuttunuz?',
+                  AppStrings.forgotPasswordDescription,
                   style: TextStyle(
                     fontSize: _responsiveController.responsiveValue(
                       mobile: 24.0,
@@ -50,7 +51,7 @@ class ForgotPasswordView extends GetView<AuthController> {
                   tablet: 12.0,
                 )),
                 Text(
-                  'E-posta adresinizi girin, size şifre sıfırlama bağlantısı gönderelim.',
+                  'Enter your email address and we\'ll send you a password reset link.',
                   style: TextStyle(
                     fontSize: _responsiveController.responsiveValue(
                       mobile: 16.0,
@@ -69,8 +70,8 @@ class ForgotPasswordView extends GetView<AuthController> {
                     controller: controller.emailController,
                     keyboardType: TextInputType.emailAddress,
                     decoration: InputDecoration(
-                      labelText: 'E-posta',
-                      hintText: 'E-posta adresinizi girin',
+                      labelText: AppStrings.email,
+                      hintText: AppStrings.emailHint,
                       prefixIcon: Icon(
                         Icons.email,
                         size: _responsiveController.responsiveValue(
@@ -99,10 +100,10 @@ class ForgotPasswordView extends GetView<AuthController> {
                     ),
                     validator: (value) {
                       if (value == null || value.isEmpty) {
-                        return 'E-posta adresi gerekli';
+                        return AppStrings.emailRequired;
                       }
                       if (!GetUtils.isEmail(value)) {
-                        return 'Geçerli bir e-posta adresi girin';
+                        return AppStrings.emailInvalid;
                       }
                       return null;
                     },
@@ -149,7 +150,7 @@ class ForgotPasswordView extends GetView<AuthController> {
                               ),
                             )
                           : Text(
-                              'Şifre Sıfırlama Bağlantısı Gönder',
+                              AppStrings.sendPasswordResetLink,
                               style: TextStyle(
                                 fontSize: _responsiveController.responsiveValue(
                                   mobile: 16.0,

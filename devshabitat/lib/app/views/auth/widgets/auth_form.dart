@@ -1,3 +1,4 @@
+import 'package:devshabitat/app/constants/app_strings.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../../../controllers/responsive_controller.dart';
@@ -51,8 +52,8 @@ class _AuthFormState extends State<AuthForm> {
               ),
             ),
             decoration: InputDecoration(
-              labelText: 'E-posta',
-              hintText: 'ornek@email.com',
+              labelText: AppStrings.email,
+              hintText: AppStrings.emailHint,
               prefixIcon: Icon(
                 Icons.email_outlined,
                 size: responsive.responsiveValue(mobile: 20, tablet: 24),
@@ -60,10 +61,10 @@ class _AuthFormState extends State<AuthForm> {
             ),
             validator: (value) {
               if (value == null || value.isEmpty) {
-                return 'E-posta gerekli';
+                return AppStrings.emailRequired;
               }
               if (!GetUtils.isEmail(value)) {
-                return 'Geçerli bir e-posta girin';
+                return AppStrings.emailInvalid;
               }
               return null;
             },
@@ -83,7 +84,7 @@ class _AuthFormState extends State<AuthForm> {
               ),
             ),
             decoration: InputDecoration(
-              labelText: 'Şifre',
+              labelText: AppStrings.password,
               prefixIcon: Icon(
                 Icons.lock_outlined,
                 size: responsive.responsiveValue(mobile: 20, tablet: 24),
@@ -102,10 +103,10 @@ class _AuthFormState extends State<AuthForm> {
             ),
             validator: (value) {
               if (value == null || value.isEmpty) {
-                return 'Şifre gerekli';
+                return AppStrings.passwordRequired;
               }
               if (value.length < 6) {
-                return 'Şifre en az 6 karakter olmalı';
+                return AppStrings.passwordInvalid;
               }
               return null;
             },
@@ -127,7 +128,7 @@ class _AuthFormState extends State<AuthForm> {
                 }
               },
               child: Text(
-                widget.isLogin ? 'Giriş Yap' : 'Kayıt Ol',
+                widget.isLogin ? AppStrings.login : AppStrings.register,
                 style: TextStyle(
                   fontSize: performanceService.getOptimizedTextSize(
                     cacheKey: 'auth_form_button',

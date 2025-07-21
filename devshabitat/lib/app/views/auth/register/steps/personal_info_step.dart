@@ -1,5 +1,6 @@
 // ignore_for_file: deprecated_member_use
 
+import 'package:devshabitat/app/constants/app_strings.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../../../../controllers/responsive_controller.dart';
@@ -46,8 +47,8 @@ class PersonalInfoStep extends GetView<RegistrationController> {
               controller.photoUrlController.text = downloadUrl;
               Get.back();
               Get.snackbar(
-                'Başarılı',
-                'Profil fotoğrafı güncellendi',
+                AppStrings.success,
+                AppStrings.profileImageUpdatedSuccessfully,
                 snackPosition: SnackPosition.BOTTOM,
                 backgroundColor: Colors.green,
                 colorText: Colors.white,
@@ -59,8 +60,8 @@ class PersonalInfoStep extends GetView<RegistrationController> {
     } catch (e) {
       Get.back();
       Get.snackbar(
-        'Hata',
-        'Fotoğraf seçilirken bir hata oluştu',
+        AppStrings.error,
+        AppStrings.profileImageUpdateError,
         snackPosition: SnackPosition.BOTTOM,
         backgroundColor: Colors.red,
         colorText: Colors.white,
@@ -102,8 +103,8 @@ class PersonalInfoStep extends GetView<RegistrationController> {
           // Başarılı koordinat girişi feedback'i
           if (value.contains(',') && parts.length == 2) {
             Get.snackbar(
-              'Başarılı',
-              'Konum koordinatları güncellendi',
+              AppStrings.success,
+              AppStrings.locationCoordinatesUpdated,
               snackPosition: SnackPosition.BOTTOM,
               backgroundColor: Colors.green.withOpacity(0.8),
               colorText: Colors.white,
@@ -113,8 +114,8 @@ class PersonalInfoStep extends GetView<RegistrationController> {
         } else {
           // Geçersiz koordinat aralığı
           Get.snackbar(
-            'Geçersiz Koordinat',
-            'Enlem: -90 ile 90, Boylam: -180 ile 180 arasında olmalı',
+            AppStrings.invalidCoordinates,
+            AppStrings.coordinatesValidationMessage,
             snackPosition: SnackPosition.BOTTOM,
             backgroundColor: Colors.orange.withOpacity(0.8),
             colorText: Colors.white,
@@ -126,8 +127,8 @@ class PersonalInfoStep extends GetView<RegistrationController> {
       // Geçersiz format - sadece virgül içeriyorsa uyarı ver
       if (value.contains(',')) {
         Get.snackbar(
-          'Geçersiz Format',
-          'Lütfen koordinatları "enlem, boylam" formatında girin',
+          AppStrings.invalidFormat,
+          AppStrings.coordinatesFormatHint,
           snackPosition: SnackPosition.BOTTOM,
           backgroundColor: Colors.red.withOpacity(0.8),
           colorText: Colors.white,
@@ -222,8 +223,8 @@ class PersonalInfoStep extends GetView<RegistrationController> {
             controller: controller.bioController,
             maxLines: 3,
             decoration: InputDecoration(
-              labelText: 'Hakkımda',
-              hintText: 'Kendinizi kısaca tanıtın',
+              labelText: AppStrings.bio,
+              hintText: AppStrings.bioHint,
               prefixIcon: Icon(
                 Icons.description,
                 size: _responsiveController.responsiveValue(
@@ -264,8 +265,8 @@ class PersonalInfoStep extends GetView<RegistrationController> {
               controller: controller.locationController,
               onChanged: _updateLocation,
               decoration: InputDecoration(
-                labelText: 'Konum Koordinatları',
-                hintText: 'Örn: 41.0082, 28.9784',
+                labelText: AppStrings.locationCoordinates,
+                hintText: AppStrings.locationCoordinatesHint,
                 prefixIcon: Icon(
                   Icons.location_on,
                   size: _responsiveController.responsiveValue(
@@ -296,7 +297,7 @@ class PersonalInfoStep extends GetView<RegistrationController> {
                   vertical: 16.0,
                 ),
                 helperText: locationText.isNotEmpty && !isValidLocation
-                    ? 'Geçerli koordinat formatı: enlem, boylam'
+                    ? AppStrings.coordinatesFormatHint
                     : null,
                 helperStyle: TextStyle(
                   color: Colors.red,
@@ -322,8 +323,8 @@ class PersonalInfoStep extends GetView<RegistrationController> {
           TextFormField(
             controller: controller.locationNameController,
             decoration: InputDecoration(
-              labelText: 'Konum Adı',
-              hintText: 'Şehir, Ülke',
+              labelText: AppStrings.locationName,
+              hintText: AppStrings.locationNameHint,
               prefixIcon: Icon(
                 Icons.place,
                 size: _responsiveController.responsiveValue(
@@ -357,7 +358,7 @@ class PersonalInfoStep extends GetView<RegistrationController> {
             tablet: 32.0,
           )),
           Text(
-            'Minimum 3 yetenek ekleyin',
+            AppStrings.minimumSkillsHint,
             style: TextStyle(
               color: Colors.grey,
               fontSize: _responsiveController.responsiveValue(

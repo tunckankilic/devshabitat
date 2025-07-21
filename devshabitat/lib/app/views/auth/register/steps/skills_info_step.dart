@@ -1,3 +1,4 @@
+import 'package:devshabitat/app/constants/app_strings.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../../../../controllers/registration_controller.dart';
@@ -17,7 +18,7 @@ class SkillsInfoStep extends GetView<RegistrationController> {
         children: [
           // Yetenekler
           Text(
-            'Yetenekler',
+            AppStrings.skills,
             style: TextStyle(
               fontSize: responsive.responsiveValue(mobile: 18, tablet: 22),
               fontWeight: FontWeight.bold,
@@ -43,7 +44,7 @@ class SkillsInfoStep extends GetView<RegistrationController> {
                 label: Icon(Icons.add,
                     size: responsive.responsiveValue(mobile: 20, tablet: 24)),
                 onPressed: () => _showAddDialog(
-                    context, 'Yetenek', controller.selectedSkills),
+                    context, AppStrings.skill, controller.selectedSkills),
               ),
             ],
           ),
@@ -51,7 +52,7 @@ class SkillsInfoStep extends GetView<RegistrationController> {
 
           // Programlama Dilleri
           Text(
-            'Programlama Dilleri',
+            AppStrings.programmingLanguages,
             style: TextStyle(
               fontSize: responsive.responsiveValue(mobile: 18, tablet: 22),
               fontWeight: FontWeight.bold,
@@ -78,7 +79,9 @@ class SkillsInfoStep extends GetView<RegistrationController> {
                 label: Icon(Icons.add,
                     size: responsive.responsiveValue(mobile: 20, tablet: 24)),
                 onPressed: () => _showAddDialog(
-                    context, 'Programlama Dili', controller.selectedLanguages),
+                    context,
+                    AppStrings.programmingLanguage,
+                    controller.selectedLanguages),
               ),
             ],
           ),
@@ -86,7 +89,7 @@ class SkillsInfoStep extends GetView<RegistrationController> {
 
           // İlgi Alanları
           Text(
-            'İlgi Alanları',
+            AppStrings.interests,
             style: TextStyle(
               fontSize: responsive.responsiveValue(mobile: 18, tablet: 22),
               fontWeight: FontWeight.bold,
@@ -113,7 +116,7 @@ class SkillsInfoStep extends GetView<RegistrationController> {
                 label: Icon(Icons.add,
                     size: responsive.responsiveValue(mobile: 20, tablet: 24)),
                 onPressed: () => _showAddDialog(
-                    context, 'İlgi Alanı', controller.selectedInterests),
+                    context, AppStrings.interest, controller.selectedInterests),
               ),
             ],
           ),
@@ -121,7 +124,7 @@ class SkillsInfoStep extends GetView<RegistrationController> {
 
           // Sosyal Medya Bağlantıları
           Text(
-            'Sosyal Medya Bağlantıları',
+            AppStrings.socialMediaLinks,
             style: TextStyle(
               fontSize: responsive.responsiveValue(mobile: 18, tablet: 22),
               fontWeight: FontWeight.bold,
@@ -137,7 +140,7 @@ class SkillsInfoStep extends GetView<RegistrationController> {
 
           // Portfolyo URL'leri
           Text(
-            'Portfolyo URL\'leri',
+            AppStrings.portfolioUrls,
             style: TextStyle(
               fontSize: responsive.responsiveValue(mobile: 18, tablet: 22),
               fontWeight: FontWeight.bold,
@@ -163,7 +166,7 @@ class SkillsInfoStep extends GetView<RegistrationController> {
                 label: Icon(Icons.add,
                     size: responsive.responsiveValue(mobile: 20, tablet: 24)),
                 onPressed: () => _showAddDialog(
-                    context, 'Portfolyo URL', controller.portfolioUrls),
+                    context, AppStrings.portfolioUrl, controller.portfolioUrls),
               ),
             ],
           ),
@@ -171,7 +174,7 @@ class SkillsInfoStep extends GetView<RegistrationController> {
 
           // Bilgilendirme Metni
           Text(
-            'Bu bilgileri daha sonra profilinizden güncelleyebilirsiniz.',
+            AppStrings.skillsInfoDescription,
             style: TextStyle(
               color: Colors.grey,
               fontSize: responsive.responsiveValue(mobile: 12, tablet: 14),
@@ -190,7 +193,7 @@ class SkillsInfoStep extends GetView<RegistrationController> {
       onChanged: (value) => controller.socialLinks[key] = value,
       decoration: InputDecoration(
         labelText: label,
-        hintText: '$label profilinizin URL\'si',
+        hintText: '$label profile URL',
         prefixIcon: Icon(
           key == 'linkedin'
               ? Icons.link
@@ -221,7 +224,7 @@ class SkillsInfoStep extends GetView<RegistrationController> {
       context: context,
       builder: (context) => AlertDialog(
         title: Text(
-          '$type Ekle',
+          '$type Add',
           style: TextStyle(
               fontSize: responsive.responsiveValue(mobile: 18, tablet: 22)),
         ),
@@ -241,7 +244,7 @@ class SkillsInfoStep extends GetView<RegistrationController> {
           TextButton(
             onPressed: () => Navigator.pop(context),
             child: Text(
-              'İptal',
+              AppStrings.cancel,
               style: TextStyle(
                   fontSize: responsive.responsiveValue(mobile: 16, tablet: 18)),
             ),
@@ -254,7 +257,7 @@ class SkillsInfoStep extends GetView<RegistrationController> {
               }
             },
             child: Text(
-              'Ekle',
+              AppStrings.add,
               style: TextStyle(
                   fontSize: responsive.responsiveValue(mobile: 16, tablet: 18)),
             ),

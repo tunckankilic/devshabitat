@@ -1,3 +1,4 @@
+import 'package:devshabitat/app/constants/app_strings.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../../controllers/privacy_controller.dart';
@@ -12,7 +13,7 @@ class PrivacySettingsScreen extends GetView<PrivacyController> {
 
     return Scaffold(
       appBar: AppBar(
-        title: Text('Gizlilik Ayarları',
+        title: Text(AppStrings.privacySettings,
             style: TextStyle(
                 fontSize: responsive.responsiveValue(mobile: 18, tablet: 20))),
       ),
@@ -29,7 +30,7 @@ class PrivacySettingsScreen extends GetView<PrivacyController> {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
-                            'Profil Gizliliği',
+                            AppStrings.profilePrivacy,
                             style: TextStyle(
                               fontSize: responsive.responsiveValue(
                                   mobile: 18, tablet: 20),
@@ -40,7 +41,7 @@ class PrivacySettingsScreen extends GetView<PrivacyController> {
                               height: responsive.responsiveValue(
                                   mobile: 16, tablet: 20)),
                           _buildPrivacyOption(
-                            'Profil Görünürlüğü',
+                            AppStrings.profileVisibility,
                             'Profilinizi kimlerin görebileceğini seçin',
                             Icons.visibility,
                             responsive,
@@ -49,7 +50,7 @@ class PrivacySettingsScreen extends GetView<PrivacyController> {
                               height: responsive.responsiveValue(
                                   mobile: 8, tablet: 12)),
                           _buildPrivacyOption(
-                            'Bağlantı İstekleri',
+                            AppStrings.connectionRequests,
                             'Kimlerden bağlantı isteği alabileceğinizi seçin',
                             Icons.person_add,
                             responsive,
@@ -68,7 +69,7 @@ class PrivacySettingsScreen extends GetView<PrivacyController> {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
-                            'Bildirim Ayarları',
+                            AppStrings.notificationSettings,
                             style: TextStyle(
                               fontSize: responsive.responsiveValue(
                                   mobile: 18, tablet: 20),
@@ -79,16 +80,16 @@ class PrivacySettingsScreen extends GetView<PrivacyController> {
                               height: responsive.responsiveValue(
                                   mobile: 16, tablet: 20)),
                           _buildNotificationOption(
-                            'Bağlantı İstekleri',
-                            'Yeni bağlantı istekleri için bildirim al',
+                            AppStrings.connectionRequests,
+                            AppStrings.newConnectionRequests,
                             responsive,
                           ),
                           SizedBox(
                               height: responsive.responsiveValue(
                                   mobile: 8, tablet: 12)),
                           _buildNotificationOption(
-                            'Mesajlar',
-                            'Yeni mesajlar için bildirim al',
+                            AppStrings.messages,
+                            AppStrings.newMessages,
                             responsive,
                           ),
                         ],
@@ -105,7 +106,7 @@ class PrivacySettingsScreen extends GetView<PrivacyController> {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
-                            'Engelleme Yönetimi',
+                            AppStrings.blockManagement,
                             style: TextStyle(
                               fontSize: responsive.responsiveValue(
                                   mobile: 18, tablet: 20),
@@ -116,8 +117,8 @@ class PrivacySettingsScreen extends GetView<PrivacyController> {
                               height: responsive.responsiveValue(
                                   mobile: 16, tablet: 20)),
                           _buildPrivacyOption(
-                            'Engellenen Kullanıcılar',
-                            'Engellediğiniz kullanıcıları yönetin',
+                            AppStrings.blockedUsers,
+                            AppStrings.manageBlockedUsers,
                             Icons.block,
                             responsive,
                           ),
@@ -145,7 +146,7 @@ class PrivacySettingsScreen extends GetView<PrivacyController> {
       trailing: Icon(Icons.chevron_right,
           size: responsive.responsiveValue(mobile: 24, tablet: 28)),
       onTap: () {
-        if (title == 'Engellenen Kullanıcılar') {
+        if (title == AppStrings.blockedUsers) {
           _showBlockedUsers(responsive);
         } else {
           _showVisibilityOptions(responsive);
@@ -185,7 +186,7 @@ class PrivacySettingsScreen extends GetView<PrivacyController> {
           mainAxisSize: MainAxisSize.min,
           children: [
             Text(
-              'Profil Görünürlüğü',
+              AppStrings.profileVisibility,
               style: TextStyle(
                 fontSize: responsive.responsiveValue(mobile: 18, tablet: 20),
                 fontWeight: FontWeight.bold,
@@ -197,13 +198,13 @@ class PrivacySettingsScreen extends GetView<PrivacyController> {
               leading: Icon(Icons.public,
                   size: responsive.responsiveValue(mobile: 24, tablet: 28)),
               title: Text(
-                'Herkese Açık',
+                AppStrings.public,
                 style: TextStyle(
                     fontSize:
                         responsive.responsiveValue(mobile: 16, tablet: 18)),
               ),
               subtitle: Text(
-                'Profilinizi herkes görebilir',
+                AppStrings.everyoneCanSee,
                 style: TextStyle(
                     fontSize:
                         responsive.responsiveValue(mobile: 14, tablet: 16)),
@@ -217,13 +218,13 @@ class PrivacySettingsScreen extends GetView<PrivacyController> {
               leading: Icon(Icons.group,
                   size: responsive.responsiveValue(mobile: 24, tablet: 28)),
               title: Text(
-                'Sadece Bağlantılar',
+                AppStrings.onlyConnections,
                 style: TextStyle(
                     fontSize:
                         responsive.responsiveValue(mobile: 16, tablet: 18)),
               ),
               subtitle: Text(
-                'Profilinizi sadece bağlantılarınız görebilir',
+                AppStrings.onlyConnectionsCanSee,
                 style: TextStyle(
                     fontSize:
                         responsive.responsiveValue(mobile: 14, tablet: 16)),
@@ -237,13 +238,13 @@ class PrivacySettingsScreen extends GetView<PrivacyController> {
               leading: Icon(Icons.lock,
                   size: responsive.responsiveValue(mobile: 24, tablet: 28)),
               title: Text(
-                'Gizli',
+                AppStrings.private,
                 style: TextStyle(
                     fontSize:
                         responsive.responsiveValue(mobile: 16, tablet: 18)),
               ),
               subtitle: Text(
-                'Profiliniz gizlidir',
+                AppStrings.yourProfileIsPrivate,
                 style: TextStyle(
                     fontSize:
                         responsive.responsiveValue(mobile: 14, tablet: 16)),
@@ -274,7 +275,7 @@ class PrivacySettingsScreen extends GetView<PrivacyController> {
           mainAxisSize: MainAxisSize.min,
           children: [
             Text(
-              'Engellenen Kullanıcılar',
+              AppStrings.blockedUsers,
               style: TextStyle(
                 fontSize: responsive.responsiveValue(mobile: 18, tablet: 20),
                 fontWeight: FontWeight.bold,
@@ -298,7 +299,7 @@ class PrivacySettingsScreen extends GetView<PrivacyController> {
                       ),
                     ),
                     title: Text(
-                      'Kullanıcı ${index + 1}',
+                      'User ${index + 1}',
                       style: TextStyle(
                           fontSize: responsive.responsiveValue(
                               mobile: 16, tablet: 18)),
@@ -308,7 +309,7 @@ class PrivacySettingsScreen extends GetView<PrivacyController> {
                         // Engeli kaldır
                       },
                       child: Text(
-                        'Engeli Kaldır',
+                        AppStrings.removeBlock,
                         style: TextStyle(
                           fontSize: responsive.responsiveValue(
                               mobile: 14, tablet: 16),
@@ -341,7 +342,7 @@ class PrivacySettingsScreen extends GetView<PrivacyController> {
           mainAxisSize: MainAxisSize.min,
           children: [
             Text(
-              'Bildirim Ayarları',
+              AppStrings.notificationSettings,
               style: TextStyle(
                 fontSize: responsive.responsiveValue(mobile: 18, tablet: 20),
                 fontWeight: FontWeight.bold,
@@ -351,13 +352,13 @@ class PrivacySettingsScreen extends GetView<PrivacyController> {
                 height: responsive.responsiveValue(mobile: 16, tablet: 20)),
             SwitchListTile(
               title: Text(
-                'Bağlantı İstekleri',
+                AppStrings.connectionRequests,
                 style: TextStyle(
                     fontSize:
                         responsive.responsiveValue(mobile: 16, tablet: 18)),
               ),
               subtitle: Text(
-                'Yeni bağlantı istekleri için bildirim al',
+                AppStrings.newConnectionRequests,
                 style: TextStyle(
                     fontSize:
                         responsive.responsiveValue(mobile: 14, tablet: 16)),
@@ -369,13 +370,13 @@ class PrivacySettingsScreen extends GetView<PrivacyController> {
             ),
             SwitchListTile(
               title: Text(
-                'Mesajlar',
+                AppStrings.messages,
                 style: TextStyle(
                     fontSize:
                         responsive.responsiveValue(mobile: 16, tablet: 18)),
               ),
               subtitle: Text(
-                'Yeni mesajlar için bildirim al',
+                AppStrings.newMessages,
                 style: TextStyle(
                     fontSize:
                         responsive.responsiveValue(mobile: 14, tablet: 16)),
@@ -387,13 +388,13 @@ class PrivacySettingsScreen extends GetView<PrivacyController> {
             ),
             SwitchListTile(
               title: Text(
-                'Etkileşimler',
+                AppStrings.interactions,
                 style: TextStyle(
                     fontSize:
                         responsive.responsiveValue(mobile: 16, tablet: 18)),
               ),
               subtitle: Text(
-                'Profilinizle ilgili etkileşimler için bildirim al',
+                AppStrings.interactionsWithYourProfile,
                 style: TextStyle(
                     fontSize:
                         responsive.responsiveValue(mobile: 14, tablet: 16)),

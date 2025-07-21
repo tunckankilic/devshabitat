@@ -1,3 +1,4 @@
+import 'package:devshabitat/app/constants/app_strings.dart';
 import 'package:devshabitat/app/controllers/auth_controller.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -59,7 +60,7 @@ class ProfileSummaryCard extends GetView<AuthController> {
                       Obx(() {
                         final user = controller.currentUser;
                         return Text(
-                          user?.displayName ?? 'İsimsiz Kullanıcı',
+                          user?.displayName ?? AppStrings.noName,
                           style: TextStyle(
                             fontSize: responsive.responsiveValue(
                               mobile: 18,
@@ -95,7 +96,7 @@ class ProfileSummaryCard extends GetView<AuthController> {
             Obx(() {
               final profile = controller.userProfile;
               return Text(
-                profile['bio'] ?? 'Henüz bir biyografi eklenmemiş.',
+                profile['bio'] ?? AppStrings.noBio,
                 style: TextStyle(
                   fontSize: responsive.responsiveValue(
                     mobile: 14,
@@ -111,17 +112,17 @@ class ProfileSummaryCard extends GetView<AuthController> {
               children: [
                 _buildStatItem(
                   icon: Icons.code,
-                  label: 'Projeler',
+                  label: AppStrings.projects,
                   value: '12',
                 ),
                 _buildStatItem(
                   icon: Icons.people,
-                  label: 'Takipçiler',
+                  label: AppStrings.followers,
                   value: '250',
                 ),
                 _buildStatItem(
                   icon: Icons.star,
-                  label: 'Yıldızlar',
+                  label: AppStrings.stars,
                   value: '1.2K',
                 ),
               ],

@@ -1,3 +1,4 @@
+import 'package:devshabitat/app/constants/app_strings.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../../controllers/community/community_discovery_controller.dart';
@@ -19,7 +20,7 @@ class CommunityDiscoveryView extends BaseView<CommunityDiscoveryController> {
     return Scaffold(
       appBar: AppBar(
         title: ResponsiveText(
-          'Toplulukları Keşfet',
+          AppStrings.discoverCommunities,
           style: TextStyle(
             fontSize: responsive.responsiveValue(
               mobile: 18,
@@ -79,7 +80,7 @@ class CommunityDiscoveryView extends BaseView<CommunityDiscoveryController> {
                       ElevatedButton(
                         onPressed: controller.refreshCommunities,
                         child: ResponsiveText(
-                          'Tekrar Dene',
+                          AppStrings.retry,
                           style: TextStyle(
                             fontSize: responsive.responsiveValue(
                               mobile: 14,
@@ -96,7 +97,7 @@ class CommunityDiscoveryView extends BaseView<CommunityDiscoveryController> {
               if (controller.communities.isEmpty) {
                 return Center(
                   child: ResponsiveText(
-                    'Henüz topluluk bulunmamaktadır.',
+                    AppStrings.noCommunitiesFound,
                     style: TextStyle(
                       fontSize: responsive.responsiveValue(
                         mobile: 16,
@@ -128,7 +129,7 @@ class CommunityDiscoveryView extends BaseView<CommunityDiscoveryController> {
           ),
         ),
         label: ResponsiveText(
-          'Topluluk Oluştur',
+          AppStrings.createCommunity,
           style: TextStyle(
             fontSize: responsive.responsiveValue(
               mobile: 14,

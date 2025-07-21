@@ -1,5 +1,6 @@
 // ignore_for_file: use_build_context_synchronously
 
+import 'package:devshabitat/app/constants/app_strings.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:devshabitat/app/controllers/event/event_create_controller.dart';
@@ -12,7 +13,7 @@ class EventCreateView extends GetView<EventCreateController> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Etkinlik Oluştur'),
+        title: Text(AppStrings.createEvent),
         actions: [
           Obx(
             () => TextButton(
@@ -26,7 +27,7 @@ class EventCreateView extends GetView<EventCreateController> {
                         valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
                       ),
                     )
-                  : const Text('Oluştur'),
+                  : const Text(AppStrings.create),
             ),
           ),
         ],
@@ -38,7 +39,7 @@ class EventCreateView extends GetView<EventCreateController> {
           children: [
             TextFormField(
               decoration: const InputDecoration(
-                labelText: 'Etkinlik Başlığı',
+                labelText: AppStrings.eventTitle,
                 border: OutlineInputBorder(),
               ),
               onChanged: controller.updateTitle,
@@ -46,7 +47,7 @@ class EventCreateView extends GetView<EventCreateController> {
             const SizedBox(height: 16),
             TextFormField(
               decoration: const InputDecoration(
-                labelText: 'Etkinlik Açıklaması',
+                labelText: AppStrings.eventDescription,
                 border: OutlineInputBorder(),
               ),
               maxLines: 3,
@@ -55,7 +56,7 @@ class EventCreateView extends GetView<EventCreateController> {
             const SizedBox(height: 16),
             DropdownButtonFormField<EventType>(
               decoration: const InputDecoration(
-                labelText: 'Etkinlik Tipi',
+                labelText: AppStrings.eventType,
                 border: OutlineInputBorder(),
               ),
               value: controller.type.value,
@@ -74,7 +75,7 @@ class EventCreateView extends GetView<EventCreateController> {
             const SizedBox(height: 16),
             DropdownButtonFormField<EventLocation>(
               decoration: const InputDecoration(
-                labelText: 'Etkinlik Lokasyonu',
+                labelText: AppStrings.eventLocation,
                 border: OutlineInputBorder(),
               ),
               value: controller.location.value,
@@ -82,7 +83,9 @@ class EventCreateView extends GetView<EventCreateController> {
                 return DropdownMenuItem(
                   value: location,
                   child: Text(
-                    location == EventLocation.online ? 'Online' : 'Yüz yüze',
+                    location == EventLocation.online
+                        ? AppStrings.online
+                        : AppStrings.inPerson,
                   ),
                 );
               }).toList(),
@@ -97,14 +100,14 @@ class EventCreateView extends GetView<EventCreateController> {
               () => controller.location.value == EventLocation.online
                   ? TextFormField(
                       decoration: const InputDecoration(
-                        labelText: 'Online Toplantı Linki',
+                        labelText: AppStrings.onlineMeetingUrl,
                         border: OutlineInputBorder(),
                       ),
                       onChanged: controller.updateOnlineMeetingUrl,
                     )
                   : TextFormField(
                       decoration: const InputDecoration(
-                        labelText: 'Etkinlik Adresi',
+                        labelText: AppStrings.eventAddress,
                         border: OutlineInputBorder(),
                       ),
                       onChanged: controller.updateVenueAddress,
@@ -116,7 +119,7 @@ class EventCreateView extends GetView<EventCreateController> {
                 Expanded(
                   child: TextFormField(
                     decoration: const InputDecoration(
-                      labelText: 'Başlangıç Tarihi',
+                      labelText: AppStrings.startDate,
                       border: OutlineInputBorder(),
                     ),
                     readOnly: true,
@@ -154,7 +157,7 @@ class EventCreateView extends GetView<EventCreateController> {
                 Expanded(
                   child: TextFormField(
                     decoration: const InputDecoration(
-                      labelText: 'Bitiş Tarihi',
+                      labelText: AppStrings.endDate,
                       border: OutlineInputBorder(),
                     ),
                     readOnly: true,
@@ -194,7 +197,7 @@ class EventCreateView extends GetView<EventCreateController> {
             const SizedBox(height: 16),
             TextFormField(
               decoration: const InputDecoration(
-                labelText: 'Katılımcı Limiti',
+                labelText: AppStrings.participantLimit,
                 border: OutlineInputBorder(),
               ),
               keyboardType: TextInputType.number,
@@ -203,7 +206,7 @@ class EventCreateView extends GetView<EventCreateController> {
             ),
             const SizedBox(height: 16),
             const Text(
-              'Kategoriler',
+              AppStrings.categories,
               style: TextStyle(
                 fontSize: 16,
                 fontWeight: FontWeight.bold,
@@ -231,15 +234,15 @@ class EventCreateView extends GetView<EventCreateController> {
   String _getEventTypeText(EventType type) {
     switch (type) {
       case EventType.meetup:
-        return 'Meetup';
+        return AppStrings.meetup;
       case EventType.workshop:
-        return 'Workshop';
+        return AppStrings.workshop;
       case EventType.hackathon:
-        return 'Hackathon';
+        return AppStrings.hackathon;
       case EventType.conference:
-        return 'Konferans';
+        return AppStrings.conference;
       case EventType.other:
-        return 'Diğer';
+        return AppStrings.other;
     }
   }
 

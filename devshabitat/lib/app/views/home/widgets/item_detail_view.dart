@@ -1,3 +1,4 @@
+import 'package:devshabitat/app/constants/app_strings.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../../../controllers/home_controller.dart';
@@ -12,7 +13,7 @@ class ItemDetailView extends GetView<HomeController> {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Detay'),
+        title: Text(AppStrings.detail),
       ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(16),
@@ -36,18 +37,18 @@ class ItemDetailView extends GetView<HomeController> {
               children: [
                 _buildStatItem(
                   icon: Icons.favorite,
-                  label: '${item.likesCount} Beğeni',
+                  label: '${item.likesCount} ${AppStrings.likes}',
                   isActive: item.isLiked,
                   onTap: () => controller.onLike(item),
                 ),
                 _buildStatItem(
                   icon: Icons.comment,
-                  label: '${item.commentsCount} Yorum',
+                  label: '${item.commentsCount} ${AppStrings.comments}',
                   onTap: () => controller.onComment(item),
                 ),
                 _buildStatItem(
                   icon: Icons.share,
-                  label: '${item.sharesCount} Paylaşım',
+                  label: '${item.sharesCount} ${AppStrings.shares}',
                   onTap: () => controller.onShare(item),
                 ),
               ],

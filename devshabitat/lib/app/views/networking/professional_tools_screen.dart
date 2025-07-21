@@ -1,3 +1,4 @@
+import 'package:devshabitat/app/constants/app_strings.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../../controllers/networking_controller.dart';
@@ -14,7 +15,7 @@ class ProfessionalToolsScreen extends StatelessWidget {
 
     return Scaffold(
       appBar: AppBar(
-        title: Text('Profesyonel Araçlar',
+        title: Text(AppStrings.professionalTools,
             style: TextStyle(
                 fontSize: responsive.responsiveValue(mobile: 18, tablet: 20))),
       ),
@@ -22,11 +23,11 @@ class ProfessionalToolsScreen extends StatelessWidget {
         padding: responsive.responsivePadding(all: 16),
         children: [
           _buildSection(
-            'Profil Araçları',
+            AppStrings.profileTools,
             [
               _buildToolCard(
-                'Profil Analizi',
-                'Profilinizin performansını analiz edin',
+                AppStrings.profileAnalysis,
+                AppStrings.analyzeYourProfile,
                 Icons.analytics,
                 () => _showAnalyticsDetails(responsive),
                 responsive,
@@ -34,8 +35,8 @@ class ProfessionalToolsScreen extends StatelessWidget {
               SizedBox(
                   height: responsive.responsiveValue(mobile: 8, tablet: 12)),
               _buildToolCard(
-                'SEO Optimizasyonu',
-                'Profilinizi arama sonuçlarında öne çıkarın',
+                AppStrings.seoOptimization,
+                AppStrings.improveYourSearchResults,
                 Icons.search,
                 () => _showSkillGapAnalysis(responsive),
                 responsive,
@@ -43,8 +44,8 @@ class ProfessionalToolsScreen extends StatelessWidget {
               SizedBox(
                   height: responsive.responsiveValue(mobile: 8, tablet: 12)),
               _buildToolCard(
-                'Veri Dışa Aktarma',
-                'Profil verilerinizi farklı formatlarda dışa aktarın',
+                AppStrings.dataExport,
+                AppStrings.exportYourData,
                 Icons.download,
                 () => _showExportOptions(responsive),
                 responsive,
@@ -54,11 +55,11 @@ class ProfessionalToolsScreen extends StatelessWidget {
           ),
           SizedBox(height: responsive.responsiveValue(mobile: 16, tablet: 20)),
           _buildSection(
-            'Bağlantı Araçları',
+            AppStrings.connectionTools,
             [
               _buildToolCard(
-                'Bağlantı Yöneticisi',
-                'Bağlantılarınızı organize edin',
+                AppStrings.connectionManager,
+                AppStrings.organizeYourConnections,
                 Icons.people,
                 () {},
                 responsive,
@@ -66,8 +67,8 @@ class ProfessionalToolsScreen extends StatelessWidget {
               SizedBox(
                   height: responsive.responsiveValue(mobile: 8, tablet: 12)),
               _buildToolCard(
-                'İçerik Paylaşımı',
-                'Bağlantılarınızla içerik paylaşın',
+                AppStrings.contentSharing,
+                AppStrings.shareYourContent,
                 Icons.share,
                 () {},
                 responsive,
@@ -77,10 +78,10 @@ class ProfessionalToolsScreen extends StatelessWidget {
           ),
           SizedBox(height: responsive.responsiveValue(mobile: 16, tablet: 20)),
           _buildSection(
-            'İstatistikler',
+            AppStrings.statistics,
             [
               _buildStatCard(
-                'Profil Görüntülenme',
+                AppStrings.profileViews,
                 '1.2K',
                 '+15%',
                 Icons.visibility,
@@ -89,7 +90,7 @@ class ProfessionalToolsScreen extends StatelessWidget {
               SizedBox(
                   height: responsive.responsiveValue(mobile: 8, tablet: 12)),
               _buildStatCard(
-                'Etkileşim Oranı',
+                AppStrings.interactionRate,
                 '%78',
                 '+5%',
                 Icons.trending_up,
@@ -257,7 +258,7 @@ class ProfessionalToolsScreen extends StatelessWidget {
           mainAxisSize: MainAxisSize.min,
           children: [
             Text(
-              'Veri Dışa Aktarma',
+              AppStrings.dataExport,
               style: TextStyle(
                 fontSize: responsive.responsiveValue(mobile: 18, tablet: 20),
                 fontWeight: FontWeight.bold,
@@ -269,7 +270,7 @@ class ProfessionalToolsScreen extends StatelessWidget {
               leading: Icon(Icons.picture_as_pdf,
                   size: responsive.responsiveValue(mobile: 24, tablet: 28)),
               title: Text(
-                'PDF Olarak Dışa Aktar',
+                AppStrings.exportAsPdf,
                 style: TextStyle(
                     fontSize:
                         responsive.responsiveValue(mobile: 16, tablet: 18)),
@@ -283,7 +284,7 @@ class ProfessionalToolsScreen extends StatelessWidget {
               leading: Icon(Icons.table_chart,
                   size: responsive.responsiveValue(mobile: 24, tablet: 28)),
               title: Text(
-                'CSV Olarak Dışa Aktar',
+                AppStrings.exportAsCsv,
                 style: TextStyle(
                     fontSize:
                         responsive.responsiveValue(mobile: 16, tablet: 18)),
@@ -297,7 +298,7 @@ class ProfessionalToolsScreen extends StatelessWidget {
               leading: Icon(Icons.code,
                   size: responsive.responsiveValue(mobile: 24, tablet: 28)),
               title: Text(
-                'JSON Olarak Dışa Aktar',
+                AppStrings.exportAsJson,
                 style: TextStyle(
                     fontSize:
                         responsive.responsiveValue(mobile: 16, tablet: 18)),
@@ -315,8 +316,8 @@ class ProfessionalToolsScreen extends StatelessWidget {
 
   void _exportData(String format, ResponsiveController responsive) {
     Get.snackbar(
-      'Dışa Aktarma',
-      'Veriler $format formatında dışa aktarılıyor...',
+      AppStrings.dataExport,
+      '${AppStrings.exportingData} $format',
       snackPosition: SnackPosition.BOTTOM,
       margin: responsive.responsivePadding(all: 16),
       borderRadius: responsive.responsiveValue(mobile: 8, tablet: 12),
@@ -339,7 +340,7 @@ class ProfessionalToolsScreen extends StatelessWidget {
           mainAxisSize: MainAxisSize.min,
           children: [
             Text(
-              'Detaylı Analiz',
+              AppStrings.detailedAnalysis,
               style: TextStyle(
                 fontSize: responsive.responsiveValue(mobile: 18, tablet: 20),
                 fontWeight: FontWeight.bold,
@@ -348,7 +349,7 @@ class ProfessionalToolsScreen extends StatelessWidget {
             SizedBox(
                 height: responsive.responsiveValue(mobile: 16, tablet: 20)),
             _buildAnalyticItem(
-              'Profil Görüntülenme',
+              AppStrings.profileViews,
               '1.2K',
               '+15%',
               Icons.visibility,
@@ -356,7 +357,7 @@ class ProfessionalToolsScreen extends StatelessWidget {
             ),
             SizedBox(height: responsive.responsiveValue(mobile: 8, tablet: 12)),
             _buildAnalyticItem(
-              'Etkileşim Oranı',
+              AppStrings.interactionRate,
               '%78',
               '+5%',
               Icons.trending_up,
@@ -364,7 +365,7 @@ class ProfessionalToolsScreen extends StatelessWidget {
             ),
             SizedBox(height: responsive.responsiveValue(mobile: 8, tablet: 12)),
             _buildAnalyticItem(
-              'Bağlantı Artışı',
+              AppStrings.connectionGrowth,
               '45',
               '+8%',
               Icons.people,
@@ -435,7 +436,7 @@ class ProfessionalToolsScreen extends StatelessWidget {
           mainAxisSize: MainAxisSize.min,
           children: [
             Text(
-              'Yetenek Analizi',
+              AppStrings.skillAnalysis,
               style: TextStyle(
                 fontSize: responsive.responsiveValue(mobile: 18, tablet: 20),
                 fontWeight: FontWeight.bold,

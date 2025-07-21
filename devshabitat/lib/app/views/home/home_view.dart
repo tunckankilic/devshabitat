@@ -1,3 +1,4 @@
+import 'package:devshabitat/app/constants/app_strings.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../../controllers/home_controller.dart';
@@ -17,7 +18,7 @@ class HomeView extends BaseView<HomeController> {
     return Scaffold(
       appBar: AppBar(
         title: Text(
-          'Ana Sayfa',
+          AppStrings.home,
           style: TextStyle(
               fontSize: responsive.responsiveValue(
             mobile: 20,
@@ -82,7 +83,7 @@ class HomeView extends BaseView<HomeController> {
             ElevatedButton(
               onPressed: controller.loadData,
               child: Text(
-                'Tekrar Dene',
+                AppStrings.tryAgain,
                 style: TextStyle(
                     fontSize:
                         responsive.responsiveValue(mobile: 16, tablet: 18)),
@@ -197,13 +198,13 @@ class HomeView extends BaseView<HomeController> {
           ),
           SizedBox(height: responsive.responsiveValue(mobile: 16, tablet: 20)),
           Text(
-            'Henüz içerik yok',
+            AppStrings.noContent,
             style: Theme.of(Get.context!).textTheme.titleMedium,
             textAlign: TextAlign.center,
           ),
           SizedBox(height: responsive.responsiveValue(mobile: 8, tablet: 12)),
           Text(
-            'Topluluklar ve etkinlikler keşfetmeye başlayın',
+            AppStrings.startDiscovering,
             style: Theme.of(Get.context!).textTheme.bodyMedium,
             textAlign: TextAlign.center,
           ),

@@ -1,3 +1,4 @@
+import 'package:devshabitat/app/constants/app_strings.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../../../controllers/registration_controller.dart';
@@ -114,7 +115,7 @@ class RegisterView extends GetView<RegistrationController> {
                       TextButton(
                         onPressed: () => controller.skipCurrentStep(),
                         child: Text(
-                          'Bu Adımı Atla',
+                          AppStrings.skipStep,
                           style: TextStyle(
                             fontSize: _responsiveController.responsiveValue(
                               mobile: 16.0,
@@ -141,8 +142,8 @@ class RegisterView extends GetView<RegistrationController> {
                             : null,
                         child: Text(
                           controller.currentStep == RegistrationStep.skillsInfo
-                              ? 'Kaydı Tamamla'
-                              : 'Devam Et',
+                              ? AppStrings.completeRegistration
+                              : AppStrings.continueRegistration,
                           style: TextStyle(
                             fontSize: _responsiveController.responsiveValue(
                               mobile: 18.0,
@@ -180,7 +181,7 @@ class RegisterView extends GetView<RegistrationController> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    'Kayıt Adımları',
+                    AppStrings.registrationSteps,
                     style: TextStyle(
                       fontSize: _responsiveController.responsiveValue(
                         mobile: 20.0,
@@ -195,22 +196,22 @@ class RegisterView extends GetView<RegistrationController> {
                     tablet: 24.0,
                   )),
                   _buildStepIndicator(
-                    'Temel Bilgiler',
+                    AppStrings.basicInfo,
                     RegistrationStep.basicInfo,
                     step,
                   ),
                   _buildStepIndicator(
-                    'Kişisel Bilgiler',
+                    AppStrings.personalInfo,
                     RegistrationStep.personalInfo,
                     step,
                   ),
                   _buildStepIndicator(
-                    'Profesyonel Bilgiler',
+                    AppStrings.professionalInfo,
                     RegistrationStep.professionalInfo,
                     step,
                   ),
                   _buildStepIndicator(
-                    'Yetenekler ve Diller',
+                    AppStrings.skillsInfo,
                     RegistrationStep.skillsInfo,
                     step,
                   ),
@@ -326,15 +327,15 @@ class RegisterView extends GetView<RegistrationController> {
   String _getStepTitle(RegistrationStep step) {
     switch (step) {
       case RegistrationStep.basicInfo:
-        return 'Temel Bilgiler';
+        return AppStrings.basicInfo;
       case RegistrationStep.personalInfo:
-        return 'Kişisel Bilgiler';
+        return AppStrings.personalInfo;
       case RegistrationStep.professionalInfo:
-        return 'Profesyonel Bilgiler';
+        return AppStrings.professionalInfo;
       case RegistrationStep.skillsInfo:
-        return 'Yetenekler ve Diller';
+        return AppStrings.skillsInfo;
       case RegistrationStep.completed:
-        return 'Kayıt Tamamlandı';
+        return AppStrings.completed;
     }
   }
 }

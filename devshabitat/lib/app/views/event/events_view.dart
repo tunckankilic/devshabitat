@@ -1,5 +1,6 @@
 // ignore_for_file: must_be_immutable
 
+import 'package:devshabitat/app/constants/app_strings.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:devshabitat/app/controllers/event/event_controller.dart';
@@ -15,7 +16,7 @@ class EventsView extends GetView<EventController> with PerformanceOptimizer {
     return optimizeWidgetTree(
       Scaffold(
         appBar: AppBar(
-          title: const Text('Etkinlikler'),
+          title: Text(AppStrings.events),
           actions: [
             IconButton(
               icon: const Icon(Icons.search),
@@ -109,8 +110,8 @@ class EventCard extends StatelessWidget {
                   const SizedBox(width: 4),
                   Text(
                     event.location == EventLocation.online
-                        ? 'Online'
-                        : event.venueAddress ?? 'Konum belirtilmemiş',
+                        ? AppStrings.online
+                        : event.venueAddress ?? AppStrings.noLocation,
                     style: const TextStyle(fontSize: 14),
                   ),
                   const Spacer(),
@@ -168,15 +169,15 @@ class EventCard extends StatelessWidget {
   String _getEventTypeText(EventType type) {
     switch (type) {
       case EventType.meetup:
-        return 'Meetup';
+        return AppStrings.meetup;
       case EventType.workshop:
-        return 'Workshop';
+        return AppStrings.workshop;
       case EventType.hackathon:
-        return 'Hackathon';
+        return AppStrings.hackathon;
       case EventType.conference:
-        return 'Konferans';
+        return AppStrings.conference;
       case EventType.other:
-        return 'Diğer';
+        return AppStrings.other;
     }
   }
 

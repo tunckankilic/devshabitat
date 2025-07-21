@@ -1,3 +1,4 @@
+import 'package:devshabitat/app/constants/app_strings.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../../widgets/skill_chip.dart';
@@ -82,7 +83,7 @@ class UserProfileDetailScreen extends GetView<UserProfileController> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          user.title ?? "No Title",
+          user.title ?? AppStrings.noTitle,
           style: Get.textTheme.titleLarge,
         ),
         const SizedBox(height: 8),
@@ -91,14 +92,14 @@ class UserProfileDetailScreen extends GetView<UserProfileController> {
             const Icon(Icons.location_on_outlined, size: 16),
             const SizedBox(width: 4),
             Text(
-              user.locationName ?? "Konum belirtilmemiş",
+              user.locationName ?? AppStrings.noLocation,
               style: Get.textTheme.bodyMedium,
             ),
             const SizedBox(width: 16),
             const Icon(Icons.business_outlined, size: 16),
             const SizedBox(width: 4),
             Text(
-              user.company ?? "Şirket belirtilmemiş",
+              user.company ?? AppStrings.noCompany,
               style: Get.textTheme.bodyMedium,
             ),
           ],
@@ -112,12 +113,12 @@ class UserProfileDetailScreen extends GetView<UserProfileController> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          'Hakkında',
+          AppStrings.about,
           style: Get.textTheme.titleMedium,
         ),
         const SizedBox(height: 8),
         Text(
-          user.bio ?? "Henüz bir biyografi eklenmemiş",
+          user.bio ?? AppStrings.noBio,
           style: Get.textTheme.bodyMedium,
         ),
       ],
@@ -129,7 +130,7 @@ class UserProfileDetailScreen extends GetView<UserProfileController> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          'Yetenekler',
+          AppStrings.skills,
           style: Get.textTheme.titleMedium,
         ),
         const SizedBox(height: 8),
@@ -153,7 +154,7 @@ class UserProfileDetailScreen extends GetView<UserProfileController> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          'Deneyim',
+          AppStrings.experience,
           style: Get.textTheme.titleMedium,
         ),
         const SizedBox(height: 8),
@@ -169,7 +170,7 @@ class UserProfileDetailScreen extends GetView<UserProfileController> {
               leading: const Icon(Icons.work_outline),
               title: Text(experience.title),
               subtitle: Text(
-                '${experience.company} • ${experience.isCurrentRole ? "Şu anda" : "${experience.startDate.year} - ${experience.endDate?.year ?? ""}"}',
+                '${experience.company} • ${experience.isCurrentRole ? AppStrings.currently : "${experience.startDate.year} - ${experience.endDate?.year ?? ""}"}',
               ),
             );
           },

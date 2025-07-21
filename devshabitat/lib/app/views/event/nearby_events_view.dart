@@ -1,3 +1,4 @@
+import 'package:devshabitat/app/constants/app_strings.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../../controllers/event/event_discovery_controller.dart';
@@ -18,7 +19,7 @@ class NearbyEventsView extends BaseView<EventDiscoveryController> {
     return Scaffold(
       appBar: AppBar(
         title: ResponsiveText(
-          'Yakındaki Etkinlikler',
+          AppStrings.nearbyEvents,
           style: TextStyle(
             fontSize: responsive.responsiveValue(
               mobile: 18,
@@ -64,7 +65,7 @@ class NearbyEventsView extends BaseView<EventDiscoveryController> {
                   if (controller.events.isEmpty) {
                     return Center(
                       child: ResponsiveText(
-                        'Yakında etkinlik bulunamadı',
+                        AppStrings.noNearbyEvents,
                         style: TextStyle(
                           fontSize: responsive.responsiveValue(
                             mobile: 16,
@@ -119,7 +120,7 @@ class NearbyEventsView extends BaseView<EventDiscoveryController> {
                   children: [
                     FilterChip(
                       label: ResponsiveText(
-                        'Online',
+                        AppStrings.online,
                         style: TextStyle(
                           fontSize: responsive.responsiveValue(
                             mobile: 14,
@@ -132,7 +133,7 @@ class NearbyEventsView extends BaseView<EventDiscoveryController> {
                     ),
                     FilterChip(
                       label: ResponsiveText(
-                        'Yüz Yüze',
+                        AppStrings.inPerson,
                         style: TextStyle(
                           fontSize: responsive.responsiveValue(
                             mobile: 14,
@@ -150,7 +151,7 @@ class NearbyEventsView extends BaseView<EventDiscoveryController> {
                   child: Row(
                     children: [
                       ResponsiveText(
-                        'Arama Yarıçapı: ',
+                        '${AppStrings.searchRadius}: ',
                         style: TextStyle(
                           fontSize: responsive.responsiveValue(
                             mobile: 14,
