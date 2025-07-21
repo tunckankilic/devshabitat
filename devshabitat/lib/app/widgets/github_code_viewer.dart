@@ -1,3 +1,4 @@
+import 'package:devshabitat/app/constants/app_strings.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_highlight/flutter_highlight.dart';
 import 'package:flutter_highlight/themes/github.dart';
@@ -40,7 +41,7 @@ class _GitHubCodeViewerState extends State<GitHubCodeViewer> {
     try {
       _repoInfo = _service.parseGitHubUrl(widget.githubUrl);
       if (_repoInfo == null) {
-        throw Exception('Geçersiz GitHub URL\'si');
+        throw Exception(AppStrings.invalidGitHubUrl);
       }
 
       if (_repoInfo!['path']!.isEmpty) {
@@ -214,7 +215,7 @@ class _GitHubCodeViewerState extends State<GitHubCodeViewer> {
             const SizedBox(height: 16),
             ElevatedButton(
               onPressed: _loadContent,
-              child: const Text('Tekrar Dene'),
+              child: const Text(AppStrings.tryAgain),
             ),
           ],
         ),

@@ -1,3 +1,4 @@
+import 'package:devshabitat/app/constants/app_strings.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../services/lazy_loading_service.dart';
@@ -103,10 +104,10 @@ class _PaginatedListViewState<T> extends State<PaginatedListView<T>> {
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  const Text('Bir hata oluştu'),
+                  const Text(AppStrings.errorGeneric),
                   ElevatedButton(
                     onPressed: refresh,
-                    child: const Text('Tekrar Dene'),
+                    child: const Text(AppStrings.tryAgain),
                   ),
                 ],
               ),
@@ -115,7 +116,7 @@ class _PaginatedListViewState<T> extends State<PaginatedListView<T>> {
 
       if (_items.isEmpty) {
         return widget.emptyWidget ??
-            const Center(child: Text('Veri bulunamadı'));
+            const Center(child: Text(AppStrings.errorNoData));
       }
 
       return RefreshIndicator(

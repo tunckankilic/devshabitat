@@ -1,3 +1,4 @@
+import 'package:devshabitat/app/constants/app_strings.dart';
 import 'package:devshabitat/app/models/user_profile_model.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -83,10 +84,10 @@ class MemberListWidget extends StatelessWidget {
                   ),
                   onSelected: (value) {
                     switch (value) {
-                      case 'remove':
+                      case AppStrings.remove:
                         if (onRemoveMember != null) onRemoveMember!(member);
                         break;
-                      case 'promote':
+                      case AppStrings.promote:
                         if (onPromoteToModerator != null) {
                           onPromoteToModerator!(member);
                         }
@@ -95,7 +96,7 @@ class MemberListWidget extends StatelessWidget {
                   },
                   itemBuilder: (context) => [
                     PopupMenuItem(
-                      value: 'promote',
+                      value: AppStrings.promote,
                       child: Row(
                         children: [
                           Icon(
@@ -111,7 +112,7 @@ class MemberListWidget extends StatelessWidget {
                             tablet: 12.0,
                           )),
                           Text(
-                            'Moderatör Yap',
+                            AppStrings.promote,
                             style: TextStyle(
                               fontSize: performanceService.getOptimizedTextSize(
                                 cacheKey: 'member_list_promote_text',
@@ -124,7 +125,7 @@ class MemberListWidget extends StatelessWidget {
                       ),
                     ),
                     PopupMenuItem(
-                      value: 'remove',
+                      value: AppStrings.remove,
                       child: Row(
                         children: [
                           Icon(
@@ -140,7 +141,7 @@ class MemberListWidget extends StatelessWidget {
                             tablet: 12.0,
                           )),
                           Text(
-                            'Üyelikten Çıkar',
+                            AppStrings.onRemoveMember,
                             style: TextStyle(
                               fontSize: performanceService.getOptimizedTextSize(
                                 cacheKey: 'member_list_remove_text',

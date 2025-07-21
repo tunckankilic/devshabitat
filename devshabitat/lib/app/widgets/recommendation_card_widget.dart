@@ -1,3 +1,4 @@
+import 'package:devshabitat/app/constants/app_strings.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../models/enhanced_user_model.dart';
@@ -57,7 +58,7 @@ class RecommendationCard extends StatelessWidget {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          user.displayName ?? 'İsimsiz Kullanıcı',
+                          user.displayName ?? AppStrings.noName,
                           style: textTheme.titleMedium?.copyWith(
                             fontWeight: FontWeight.bold,
                           ),
@@ -151,7 +152,7 @@ class RecommendationCard extends StatelessWidget {
           ),
           const SizedBox(width: 4),
           Text(
-            '%$percentage Eşleşme',
+            '%$percentage match',
             style: Get.textTheme.bodyMedium?.copyWith(
               color: color,
               fontWeight: FontWeight.bold,
@@ -205,7 +206,8 @@ class RecommendationCard extends StatelessWidget {
                 ),
               )
             : const Icon(Icons.person_add),
-        label: Text(isLoading.value ? 'Bağlanıyor...' : 'Bağlan'),
+        label:
+            Text(isLoading.value ? AppStrings.connecting : AppStrings.connect),
         style: FilledButton.styleFrom(
           minimumSize: const Size(double.infinity, 40),
         ),

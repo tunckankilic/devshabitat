@@ -1,5 +1,6 @@
 // ignore_for_file: use_build_context_synchronously
 
+import 'package:devshabitat/app/constants/app_strings.dart';
 import 'package:flutter/material.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:photo_view/photo_view.dart';
@@ -66,7 +67,7 @@ class ImageViewerWidget extends StatelessWidget {
                 ),
                 const SizedBox(height: 16),
                 Text(
-                  'Görüntü yüklenemedi',
+                  AppStrings.imageLoadError,
                   style: Theme.of(context).textTheme.titleMedium?.copyWith(
                         color: Colors.white,
                       ),
@@ -90,7 +91,7 @@ class ImageViewerWidget extends StatelessWidget {
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
-          content: Text('Görüntü paylaşılırken bir hata oluştu'),
+          content: Text(AppStrings.errorGeneric),
         ),
       );
     }
@@ -105,13 +106,13 @@ class ImageViewerWidget extends StatelessWidget {
 
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
-          content: Text('Görüntü başarıyla kaydedildi'),
+          content: Text(AppStrings.imageSaved),
         ),
       );
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
-          content: Text('Görüntü kaydedilirken bir hata oluştu'),
+          content: Text(AppStrings.errorGeneric),
         ),
       );
     }

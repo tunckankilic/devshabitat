@@ -1,3 +1,4 @@
+import 'package:devshabitat/app/constants/app_strings.dart';
 import 'package:flutter/material.dart';
 import 'package:lottie/lottie.dart';
 import 'package:flutter_animate/flutter_animate.dart';
@@ -96,7 +97,7 @@ class SaveSuccessAnimation extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return SuccessAnimationWidget(
-      message: 'Başarıyla Kaydedildi',
+      message: AppStrings.saveSuccess,
       onAnimationEnd: onAnimationEnd,
       lottieAsset: AppAssets.saveSuccessAnimation,
     );
@@ -114,7 +115,7 @@ class UpdateSuccessAnimation extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return SuccessAnimationWidget(
-      message: 'Başarıyla Güncellendi',
+      message: AppStrings.updateSuccess,
       onAnimationEnd: onAnimationEnd,
       lottieAsset: AppAssets.updateSuccessAnimation,
     );

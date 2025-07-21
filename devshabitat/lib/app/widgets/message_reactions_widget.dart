@@ -1,3 +1,4 @@
+import 'package:devshabitat/app/constants/app_strings.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../controllers/message_interaction_controller.dart';
@@ -108,7 +109,7 @@ class MessageReactionsWidget extends StatelessWidget {
           mainAxisSize: MainAxisSize.min,
           children: [
             Text(
-              'Reacted with $emoji',
+              AppStrings.reactedWith(emoji),
               style: Theme.of(context).textTheme.titleMedium,
             ),
             const SizedBox(height: 16),
@@ -123,14 +124,15 @@ class MessageReactionsWidget extends StatelessWidget {
                     final userData =
                         snapshot.data!.data() as Map<String, dynamic>?;
                     return ListTile(
-                      title: Text(userData?['displayName'] ?? 'Kullanıcı'),
+                      title:
+                          Text(userData?['displayName'] ?? AppStrings.noName),
                       leading: const CircleAvatar(
                         child: Icon(Icons.person),
                       ),
                     );
                   }
                   return const ListTile(
-                    title: Text('Yükleniyor...'),
+                    title: Text(AppStrings.loading),
                     leading: CircleAvatar(
                       child: Icon(Icons.person),
                     ),

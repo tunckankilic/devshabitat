@@ -39,11 +39,11 @@ class ErrorHandler {
 
   // Hata mesajları
   static const Map<String, String> errorMessages = {
-    NETWORK_ERROR: 'İnternet bağlantınızı kontrol edin',
-    AUTH_ERROR: 'Oturum süreniz doldu, lütfen tekrar giriş yapın',
-    VALIDATION_ERROR: 'Lütfen girdiğiniz bilgileri kontrol edin',
-    SERVER_ERROR: 'Sunucu hatası, lütfen daha sonra tekrar deneyin',
-    UNKNOWN_ERROR: 'Beklenmeyen bir hata oluştu',
+    NETWORK_ERROR: 'Check your internet connection',
+    AUTH_ERROR: 'Your session has expired, please log in again',
+    VALIDATION_ERROR: 'Please check the information you entered',
+    SERVER_ERROR: 'Server error, please try again later',
+    UNKNOWN_ERROR: 'An unexpected error occurred',
   };
 
   // Ana hata yakalama metodu

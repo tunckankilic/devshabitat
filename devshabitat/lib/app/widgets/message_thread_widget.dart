@@ -1,3 +1,4 @@
+import 'package:devshabitat/app/constants/app_strings.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../controllers/thread_controller.dart';
@@ -183,7 +184,7 @@ class MessageThreadWidget extends StatelessWidget {
             child: TextField(
               controller: _replyController,
               decoration: const InputDecoration(
-                hintText: 'Yanıtınızı yazın...',
+                hintText: AppStrings.replyHint,
                 border: OutlineInputBorder(),
               ),
               maxLines: null,
@@ -207,7 +208,7 @@ class MessageThreadWidget extends StatelessWidget {
         children: [
           ListTile(
             leading: const Icon(Icons.delete),
-            title: const Text('Thread\'i Sil'),
+            title: const Text(AppStrings.deleteThread),
             onTap: () {
               Navigator.pop(context);
               _deleteThread();
@@ -215,7 +216,7 @@ class MessageThreadWidget extends StatelessWidget {
           ),
           ListTile(
             leading: const Icon(Icons.notifications),
-            title: const Text('Bildirimleri Yönet'),
+            title: const Text(AppStrings.manageNotifications),
             onTap: () {
               Navigator.pop(context);
               _showNotificationSettings(context);
@@ -241,8 +242,8 @@ class MessageThreadWidget extends StatelessWidget {
   void _deleteThread() {
     Get.dialog(
       AlertDialog(
-        title: const Text('Thread\'i Sil'),
-        content: const Text('Bu thread\'i silmek istediğinizden emin misiniz?'),
+        title: const Text(AppStrings.deleteThread),
+        content: const Text(AppStrings.deleteThreadConfirmation),
         actions: [
           TextButton(
             onPressed: () => Get.back(),
@@ -253,7 +254,7 @@ class MessageThreadWidget extends StatelessWidget {
               Get.back();
               controller.deleteThread(threadId);
             },
-            child: const Text('Sil'),
+            child: const Text(AppStrings.delete),
           ),
         ],
       ),
@@ -264,15 +265,15 @@ class MessageThreadWidget extends StatelessWidget {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Bildirim Ayarları'),
+        title: const Text(AppStrings.notificationSettings),
         content: Obx(() {
           final isEnabled = controller.threadNotifications[threadId] ?? true;
           return Column(
             mainAxisSize: MainAxisSize.min,
             children: [
               SwitchListTile(
-                title: const Text('Thread Bildirimleri'),
-                subtitle: Text(isEnabled ? 'Açık' : 'Kapalı'),
+                title: const Text(AppStrings.threadNotifications),
+                subtitle: Text(isEnabled ? AppStrings.open : AppStrings.close),
                 value: isEnabled,
                 onChanged: (value) {
                   controller.toggleThreadNotifications(threadId);
@@ -284,7 +285,7 @@ class MessageThreadWidget extends StatelessWidget {
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: const Text('Tamam'),
+            child: const Text(AppStrings.ok),
           ),
         ],
       ),

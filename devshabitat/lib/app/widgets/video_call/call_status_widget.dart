@@ -40,7 +40,7 @@ class CallStatusWidget extends GetView<VideoCallController> {
             ),
             const SizedBox(width: 4),
             const Text(
-              'Kaydediliyor',
+              AppStrings.recording,
               style: TextStyle(
                 color: Colors.white,
                 fontSize: 14,
@@ -82,13 +82,13 @@ class CallStatusWidget extends GetView<VideoCallController> {
   String _getStatusText(CallConnectionStatus status, Duration duration) {
     switch (status) {
       case CallConnectionStatus.connecting:
-        return 'Bağlanıyor...';
+        return AppStrings.connecting;
       case CallConnectionStatus.connected:
         return _formatDuration(duration);
       case CallConnectionStatus.reconnecting:
-        return 'Yeniden Bağlanıyor...';
+        return AppStrings.reconnecting;
       case CallConnectionStatus.disconnected:
-        return 'Bağlantı Kesildi';
+        return AppStrings.disconnected;
     }
   }
 

@@ -20,13 +20,13 @@ class EventMarkerWidget extends StatelessWidget {
 
   Color _getEventTypeColor() {
     switch (eventType.toLowerCase()) {
-      case 'workshop':
+      case AppStrings.workshop:
         return Colors.blue;
-      case 'meetup':
+      case AppStrings.meetup:
         return Colors.green;
-      case 'conference':
+      case AppStrings.conference:
         return Colors.purple;
-      case 'hackathon':
+      case AppStrings.hackathon:
         return Colors.orange;
       default:
         return Colors.grey;

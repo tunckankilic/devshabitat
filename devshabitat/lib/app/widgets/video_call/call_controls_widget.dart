@@ -55,7 +55,7 @@ class CallControlsWidget extends StatelessWidget {
                 ? Colors.grey.shade800
                 : Theme.of(context).colorScheme.error,
             onPressed: onToggleAudio,
-            tooltip: 'Mikrofon',
+            tooltip: AppStrings.microphone,
           ),
           _buildControlButton(
             icon: Obx(() => Icon(
@@ -66,13 +66,13 @@ class CallControlsWidget extends StatelessWidget {
                 ? Colors.grey.shade800
                 : Theme.of(context).colorScheme.error,
             onPressed: onToggleVideo,
-            tooltip: 'Kamera',
+            tooltip: AppStrings.camera,
           ),
           _buildControlButton(
             icon: const Icon(Icons.switch_camera, color: Colors.white),
             backgroundColor: Colors.grey.shade800,
             onPressed: onToggleBackgroundBlur,
-            tooltip: 'Kamera Değiştir',
+            tooltip: AppStrings.changeCamera,
           ),
           _buildControlButton(
             icon: Obx(() => Icon(
@@ -85,7 +85,7 @@ class CallControlsWidget extends StatelessWidget {
                 ? Theme.of(context).colorScheme.primary
                 : Colors.grey.shade800,
             onPressed: onToggleBackgroundBlur,
-            tooltip: 'Ekran Paylaşımı',
+            tooltip: AppStrings.screenShare,
           ),
           _buildControlButton(
             icon: Obx(() => Icon(
@@ -94,13 +94,13 @@ class CallControlsWidget extends StatelessWidget {
                 )),
             backgroundColor: Colors.grey.shade800,
             onPressed: isRecording ? onStopRecording : onStartRecording,
-            tooltip: 'Kayıt',
+            tooltip: AppStrings.record,
           ),
           _buildControlButton(
             icon: const Icon(Icons.call_end, color: Colors.white),
             backgroundColor: Theme.of(context).colorScheme.error,
             onPressed: onEndCall,
-            tooltip: 'Görüşmeyi Sonlandır',
+            tooltip: AppStrings.endCall,
           ),
         ],
       ),

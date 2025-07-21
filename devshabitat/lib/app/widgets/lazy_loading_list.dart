@@ -1,3 +1,4 @@
+import 'package:devshabitat/app/constants/app_strings.dart';
 import 'package:flutter/material.dart';
 
 class LazyLoadingList<T> extends StatefulWidget {
@@ -77,7 +78,7 @@ class _LazyLoadingListState<T> extends State<LazyLoadingList<T>> {
       }
       return widget.emptyWidget ??
           const Center(
-            child: Text('Veri bulunamadı'),
+            child: Text(AppStrings.errorNoData),
           );
     }
 

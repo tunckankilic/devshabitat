@@ -27,7 +27,7 @@ class FeedRepository {
           .map((doc) => FeedItem.fromMap(doc.data(), id: doc.id))
           .toList();
     } catch (e) {
-      throw Exception('Feed öğeleri yüklenirken hata oluştu: $e');
+      throw Exception(AppStrings.feedLoadingError);
     }
   }
 
@@ -50,7 +50,7 @@ class FeedRepository {
         'isLiked': true,
       });
     } catch (e) {
-      throw Exception('Beğeni işlemi başarısız oldu: $e');
+      throw Exception(AppStrings.likeError);
     }
   }
 
@@ -61,7 +61,7 @@ class FeedRepository {
         'isLiked': false,
       });
     } catch (e) {
-      throw Exception('Beğeni kaldırma işlemi başarısız oldu: $e');
+      throw Exception(AppStrings.unlikeError);
     }
   }
 
@@ -73,7 +73,7 @@ class FeedRepository {
         'sharedBy': FieldValue.arrayUnion([_authService.currentUser?.uid]),
       });
     } catch (e) {
-      throw Exception('Paylaşım işlemi başarısız oldu: $e');
+      throw Exception(AppStrings.shareError);
     }
   }
 }

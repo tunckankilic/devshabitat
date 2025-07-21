@@ -1,3 +1,4 @@
+import 'package:devshabitat/app/constants/app_strings.dart';
 import 'package:flutter/material.dart';
 import 'package:lottie/lottie.dart';
 import '../../constants/app_assets.dart';
@@ -75,8 +76,8 @@ class NoEventsWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return EmptyStateWidget(
-      message: 'Henüz hiç etkinlik yok.',
-      actionLabel: 'Etkinlik Oluştur',
+      message: AppStrings.noEvents,
+      actionLabel: AppStrings.createEvent,
       onAction: onCreateEvent,
       lottieAsset: AppAssets.noEventsAnimation,
     );
@@ -94,8 +95,8 @@ class NoCommunityWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return EmptyStateWidget(
-      message: 'Henüz hiç topluluk yok.',
-      actionLabel: 'Topluluk Oluştur',
+      message: AppStrings.noCommunities,
+      actionLabel: AppStrings.createCommunity,
       onAction: onCreateCommunity,
       lottieAsset: AppAssets.noCommunityAnimation,
     );

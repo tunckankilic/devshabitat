@@ -42,6 +42,7 @@ class AppStrings {
   static const String errorAuth =
       'Login failed. Please check your credentials.';
   static const String errorValidation = 'Please fill all fields correctly.';
+  static const String errorNoData = 'No Data Found';
 
   // Success messages
   static const String successLogin = 'Successfully logged in.';
@@ -125,4 +126,45 @@ class AppStrings {
   static const String matchPercentage = '{percentage}% Match';
   static const String lastSeen = 'Last seen {time}';
   static const String memberSince = 'Member since {date}';
+
+  // Profile
+  static const String noTitle = 'No Title';
+  static const String noLocations = 'No Locations';
+  static const String noBio = 'No Bio';
+  static const String noSkills = 'No Skills';
+  static const String noExperience = 'No Experience';
+  static const String noEducation = 'No Education';
+  static const String noProjects = 'No Projects';
+  static const String noConnectionss = 'No Connections';
+  static const String noMessages = 'No Messages';
+  static const String noNotifications = 'No Notifications';
+  static const String noSettings = 'No Settings';
+  static const String noProfile = 'No Profile';
+  static const String noPhotoUrl = '';
+  static const String noName = 'No Name';
+  static const String deletePost = 'Delete Post';
+  static const String reportPost = 'Report Post';
+  static const String githubRepo = 'GitHub Repository';
+  static const String postSharing = 'DevShabitat Post Sharing';
+  static String postSharingmessage(
+      {required String content, required String postId}) {
+    return 'A post on \'DevShabitat\': $content\n\nView post: https://devshabitat.com/posts/$postId';
+  }
+
+  static const String defaultPicUrl = 'https://via.placeholder.com/150';
+  static const String tryAgain = 'Try Again';
+  static const String replyHint = 'Write your reply...';
+  static const String deleteThread = 'Delete Thread';
+  static const String manageNotifications = 'Manage Notifications';
+  static const String deleteThreadConfirmation =
+      'Are you sure you want to delete this thread?';
+  static const String notificationSettings = 'Notification Settings';
+  static const String threadNotifications = 'Thread Notifications';
+  static const String open = 'Open';
+  static const String close = 'Close';
+  static const String ok = 'Ok';
+
+  static String reactedWith(String emoji) {
+    return 'Reacted with $emoji';
+  }
 }

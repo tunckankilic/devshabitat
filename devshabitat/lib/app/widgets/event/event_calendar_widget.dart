@@ -1,3 +1,4 @@
+import 'package:devshabitat/app/constants/app_strings.dart';
 import 'package:flutter/material.dart';
 import 'package:table_calendar/table_calendar.dart';
 import 'package:devshabitat/app/models/event/event_model.dart';
@@ -74,7 +75,7 @@ class EventCalendarWidget extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    'Etkinlikler - ${_formatDate(selectedDay!)}',
+                    '${AppStrings.events} - ${_formatDate(selectedDay!)}',
                     style: const TextStyle(
                       fontSize: 16,
                       fontWeight: FontWeight.bold,
@@ -97,7 +98,7 @@ class EventCalendarWidget extends StatelessWidget {
         child: Padding(
           padding: EdgeInsets.all(16.0),
           child: Text(
-            'Bu tarihte etkinlik bulunmuyor',
+            AppStrings.noEventsForDay,
             style: TextStyle(
               color: Colors.grey,
               fontStyle: FontStyle.italic,

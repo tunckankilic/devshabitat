@@ -1,3 +1,4 @@
+import 'package:devshabitat/app/constants/app_strings.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:devshabitat/app/services/video/webrtc_service.dart';
@@ -73,15 +74,15 @@ class ConnectionQualityIndicator extends StatelessWidget {
   String _getQualityText() {
     switch (quality) {
       case ConnectionQuality.excellent:
-        return 'Mükemmel';
+        return AppStrings.excellent;
       case ConnectionQuality.good:
-        return 'İyi';
+        return AppStrings.good;
       case ConnectionQuality.fair:
-        return 'Orta';
+        return AppStrings.fair;
       case ConnectionQuality.poor:
-        return 'Zayıf';
+        return AppStrings.poor;
       case ConnectionQuality.disconnected:
-        return 'Bağlantı Yok';
+        return AppStrings.disconnected;
     }
   }
 }
@@ -132,24 +133,24 @@ class ConnectionDetailsDialog extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              'Bağlantı Detayları',
+              AppStrings.connectionDetails,
               style: Get.textTheme.titleLarge,
             ),
             const SizedBox(height: 16),
             _buildDetailRow(
-              'Bağlantı Kalitesi',
+              AppStrings.connectionQuality,
               _getQualityText(stats.quality),
             ),
             _buildDetailRow(
-              'Bit Hızı',
+              AppStrings.bitRate,
               '${(stats.bitrate / 1000000).toStringAsFixed(2)} Mbps',
             ),
             _buildDetailRow(
-              'Paket Kaybı',
+              AppStrings.packetLoss,
               '%${stats.packetLoss.toStringAsFixed(1)}',
             ),
             _buildDetailRow(
-              'Gecikme',
+              AppStrings.latency,
               '${stats.roundTripTime.toStringAsFixed(0)}ms',
             ),
             const SizedBox(height: 16),
@@ -157,7 +158,7 @@ class ConnectionDetailsDialog extends StatelessWidget {
               alignment: Alignment.centerRight,
               child: TextButton(
                 onPressed: () => Get.back(),
-                child: const Text('Kapat'),
+                child: const Text(AppStrings.close),
               ),
             ),
           ],
@@ -190,15 +191,15 @@ class ConnectionDetailsDialog extends StatelessWidget {
   String _getQualityText(ConnectionQuality quality) {
     switch (quality) {
       case ConnectionQuality.excellent:
-        return 'Mükemmel';
+        return AppStrings.excellent;
       case ConnectionQuality.good:
-        return 'İyi';
+        return AppStrings.good;
       case ConnectionQuality.fair:
-        return 'Orta';
+        return AppStrings.fair;
       case ConnectionQuality.poor:
-        return 'Zayıf';
+        return AppStrings.poor;
       case ConnectionQuality.disconnected:
-        return 'Bağlantı Yok';
+        return AppStrings.disconnected;
     }
   }
 }

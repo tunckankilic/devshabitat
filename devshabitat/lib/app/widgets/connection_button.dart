@@ -1,3 +1,4 @@
+import 'package:devshabitat/app/constants/app_strings.dart';
 import 'package:flutter/material.dart';
 import '../controllers/user_profile_controller.dart';
 
@@ -20,15 +21,16 @@ class ConnectionButton extends StatelessWidget {
         return FloatingActionButton.extended(
           onPressed: () => _showConnectionDialog(context),
           icon: const Icon(Icons.person_add),
-          label: const Text('Bağlantı Kur'),
+          label: const Text(AppStrings.connect),
         );
 
       case ConnectionStatus.pending:
         return FloatingActionButton.extended(
           onPressed: null,
           icon: const Icon(Icons.hourglass_empty),
-          label: const Text('İstek Gönderildi'),
-          backgroundColor: Theme.of(context).colorScheme.surfaceContainerHighest,
+          label: const Text(AppStrings.requestSent),
+          backgroundColor:
+              Theme.of(context).colorScheme.surfaceContainerHighest,
           foregroundColor: Theme.of(context).colorScheme.onSurfaceVariant,
         );
 
@@ -36,7 +38,7 @@ class ConnectionButton extends StatelessWidget {
         return FloatingActionButton.extended(
           onPressed: onMessage,
           icon: const Icon(Icons.message),
-          label: const Text('Mesaj Gönder'),
+          label: const Text(AppStrings.sendMessage),
         );
     }
   }
@@ -47,19 +49,19 @@ class ConnectionButton extends StatelessWidget {
     return showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Bağlantı İsteği'),
+        title: const Text(AppStrings.connectinRequest),
         content: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
             const Text(
-              'Bu kullanıcıya bir bağlantı isteği göndermek istiyor musunuz?',
+              AppStrings.connectionRequest,
             ),
             const SizedBox(height: 16),
             TextField(
               controller: messageController,
               decoration: const InputDecoration(
-                labelText: 'Tanıtım mesajı (opsiyonel)',
-                hintText: 'Kendinizi kısaca tanıtın...',
+                labelText: AppStrings.introductionMessage,
+                hintText: AppStrings.introductionHint,
                 border: OutlineInputBorder(),
               ),
               maxLines: 3,
@@ -69,14 +71,14 @@ class ConnectionButton extends StatelessWidget {
         actions: [
           TextButton(
             onPressed: () => Navigator.of(context).pop(),
-            child: const Text('İptal'),
+            child: const Text(AppStrings.cancel),
           ),
           ElevatedButton(
             onPressed: () {
               onConnect();
               Navigator.of(context).pop();
             },
-            child: const Text('Gönder'),
+            child: const Text(AppStrings.send),
           ),
         ],
       ),

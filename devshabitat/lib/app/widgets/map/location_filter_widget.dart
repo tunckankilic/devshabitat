@@ -1,3 +1,4 @@
+import 'package:devshabitat/app/constants/app_strings.dart';
 import 'package:flutter/material.dart';
 import 'package:devshabitat/app/controllers/responsive_controller.dart';
 
@@ -54,7 +55,7 @@ class LocationFilterWidget extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            'Mesafe Filtresi',
+            AppStrings.distanceFilter,
             style: TextStyle(
               fontSize: responsive.responsiveValue(
                 mobile: 16,
@@ -74,7 +75,7 @@ class LocationFilterWidget extends StatelessWidget {
           ),
           SizedBox(height: responsive.responsivePadding(vertical: 16).top),
           Text(
-            'Kategoriler',
+            AppStrings.categories,
             style: TextStyle(
               fontSize: responsive.responsiveValue(
                 mobile: 16,
@@ -133,7 +134,7 @@ class LocationFilterWidget extends StatelessWidget {
           SizedBox(height: responsive.responsivePadding(vertical: 16).top),
           SwitchListTile(
             title: Text(
-              'Sadece Çevrimiçi',
+              AppStrings.onlineOnly,
               style: TextStyle(
                 fontSize: responsive.responsiveValue(
                   mobile: 16,

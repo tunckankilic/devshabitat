@@ -82,7 +82,7 @@ class SnackbarService extends GetxService {
   // Progress snackbar göster
   void showProgressSnackbar(String message) {
     Get.snackbar(
-      'İşlem Devam Ediyor',
+      'Processing',
       message,
       snackPosition: SnackPosition.TOP,
       backgroundColor: Colors.blue,
@@ -107,7 +107,7 @@ class SnackbarService extends GetxService {
     if (Get.isSnackbarOpen) {
       Get.closeCurrentSnackbar();
       Get.snackbar(
-        'Bilgi',
+        'Info',
         message,
         snackPosition: SnackPosition.TOP,
         backgroundColor: Colors.blue,
