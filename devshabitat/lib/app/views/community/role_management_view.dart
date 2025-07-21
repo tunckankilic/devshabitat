@@ -50,7 +50,7 @@ class RoleManagementView extends GetView<RoleController> {
   Widget _buildRolesTab() {
     return Obx(
       () => controller.isLoading.value
-          ? const Center(child: AdaptiveLoadingIndicator())
+          ? Center(child: AdaptiveLoadingIndicator())
           : ListView.builder(
               itemCount: controller.roles.length,
               itemBuilder: (context, index) {
@@ -82,7 +82,7 @@ class RoleManagementView extends GetView<RoleController> {
   Widget _buildMembersTab() {
     return Obx(
       () => controller.isLoading.value
-          ? const Center(child: AdaptiveLoadingIndicator())
+          ? Center(child: AdaptiveLoadingIndicator())
           : ListView.builder(
               itemCount: controller.members.length,
               itemBuilder: (context, index) {
@@ -461,7 +461,7 @@ class RoleManagementView extends GetView<RoleController> {
                   future: controller.getMemberRoles(user.id),
                   builder: (context, snapshot) {
                     if (snapshot.connectionState == ConnectionState.waiting) {
-                      return const Center(child: AdaptiveLoadingIndicator());
+                      return Center(child: AdaptiveLoadingIndicator());
                     }
 
                     final userRoles = snapshot.data ?? [];

@@ -1,3 +1,4 @@
+import 'package:devshabitat/app/constants/app_strings.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:devshabitat/app/controllers/video/video_call_controller.dart';
@@ -39,7 +40,7 @@ class CallStatusWidget extends GetView<VideoCallController> {
               ),
             ),
             const SizedBox(width: 4),
-            const Text(
+            Text(
               AppStrings.recording,
               style: TextStyle(
                 color: Colors.white,

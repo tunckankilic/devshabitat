@@ -73,7 +73,7 @@ class InAppNotificationWidget extends StatelessWidget {
 
     // Bildirim tipine göre icon ve renk belirle
     switch (notification.data?['type']) {
-      case AppStrings.message:
+      case AppStrings.messages:
         iconData = Icons.message;
         iconColor = Colors.blue;
         break;
@@ -85,7 +85,7 @@ class InAppNotificationWidget extends StatelessWidget {
         iconData = Icons.group;
         iconColor = Colors.purple;
         break;
-      case AppStrings.connection:
+      case AppStrings.connections:
         iconData = Icons.person_add;
         iconColor = Colors.orange;
         break;

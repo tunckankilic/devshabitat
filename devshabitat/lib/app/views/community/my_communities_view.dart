@@ -29,7 +29,7 @@ class MyCommunitiesView extends GetView<MyCommunitiesController> {
             Obx(
               () {
                 if (controller.isLoadingMemberships.value) {
-                  return const Center(child: AdaptiveLoadingIndicator());
+                  return Center(child: AdaptiveLoadingIndicator());
                 }
 
                 if (controller.error.value.isNotEmpty) {
@@ -78,7 +78,7 @@ class MyCommunitiesView extends GetView<MyCommunitiesController> {
             Obx(
               () {
                 if (controller.isLoadingManaged.value) {
-                  return const Center(child: AdaptiveLoadingIndicator());
+                  return Center(child: AdaptiveLoadingIndicator());
                 }
 
                 if (controller.error.value.isNotEmpty) {

@@ -39,7 +39,7 @@ class FeedView extends StatelessWidget with PerformanceOptimizer {
       loadingWidget: const Center(
         child: CircularProgressIndicator(),
       ),
-      emptyWidget: const Center(
+      emptyWidget: Center(
         child: Text(AppStrings.noPosts),
       ),
       errorWidget: Center(

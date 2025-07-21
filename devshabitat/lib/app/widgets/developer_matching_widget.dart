@@ -1,3 +1,4 @@
+import 'package:devshabitat/app/constants/app_strings.dart';
 import 'package:devshabitat/app/models/user_profile_model.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -43,7 +44,7 @@ class SkillMatchCard extends GetView<DeveloperMatchingController> {
               }
 
               if (controller.similarDevelopers.isEmpty) {
-                return const Center(
+                return Center(
                   child: Text(AppStrings.noSimilarDevelopers),
                 );
               }
@@ -94,7 +95,7 @@ class ProjectSuggestions extends GetView<DeveloperMatchingController> {
               }
 
               if (controller.projectSuggestions.isEmpty) {
-                return const Center(
+                return Center(
                   child: Text(AppStrings.noProjectSuggestions),
                 );
               }
@@ -141,7 +142,7 @@ class MentorshipCard extends GetView<DeveloperMatchingController> {
               }
 
               if (controller.potentialMentors.isEmpty) {
-                return const Center(
+                return Center(
                   child: Text(AppStrings.noMentors),
                 );
               }
@@ -303,7 +304,7 @@ class MentorCard extends StatelessWidget {
         ),
         trailing: ElevatedButton(
           onPressed: onRequest,
-          child: const Text(AppStrings.mentorshipRequest),
+          child: Text(AppStrings.mentorshipRequest),
         ),
       ),
     );

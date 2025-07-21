@@ -125,7 +125,8 @@ class NotificationsView extends BaseView<HomeController> {
           overflow: TextOverflow.ellipsis,
         ),
         trailing: ResponsiveText(
-          '${notification.createdAt.difference(DateTime.now()).inHours.abs()} ${AppStrings.hoursAgo}',
+          AppStrings.hoursAgo(
+              notification.createdAt.difference(DateTime.now()).inHours.abs()),
           style: TextStyle(
             fontSize: responsive.responsiveValue(
               mobile: 12,

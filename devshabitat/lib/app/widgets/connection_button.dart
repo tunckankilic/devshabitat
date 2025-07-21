@@ -28,7 +28,7 @@ class ConnectionButton extends StatelessWidget {
         return FloatingActionButton.extended(
           onPressed: null,
           icon: const Icon(Icons.hourglass_empty),
-          label: const Text(AppStrings.requestSent),
+          label: Text(AppStrings.requestSent),
           backgroundColor:
               Theme.of(context).colorScheme.surfaceContainerHighest,
           foregroundColor: Theme.of(context).colorScheme.onSurfaceVariant,
@@ -49,7 +49,7 @@ class ConnectionButton extends StatelessWidget {
     return showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text(AppStrings.connectinRequest),
+        title: Text(AppStrings.connectionRequest),
         content: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
