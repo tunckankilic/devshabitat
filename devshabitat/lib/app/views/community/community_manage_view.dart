@@ -6,7 +6,7 @@ import '../../widgets/community/membership_request_widget.dart';
 import '../../widgets/image_upload_widget.dart';
 
 class CommunityManageView extends GetView<CommunityManageController> {
-  const CommunityManageView({Key? key}) : super(key: key);
+  const CommunityManageView({super.key});
 
   @override
   Widget build(BuildContext context) {

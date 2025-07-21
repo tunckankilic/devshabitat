@@ -5,7 +5,7 @@ import '../../../../controllers/registration_controller.dart';
 import '../../../../controllers/responsive_controller.dart';
 
 class ProfessionalInfoStep extends GetView<RegistrationController> {
-  const ProfessionalInfoStep({Key? key}) : super(key: key);
+  const ProfessionalInfoStep({super.key});
 
   @override
   Widget build(BuildContext context) {

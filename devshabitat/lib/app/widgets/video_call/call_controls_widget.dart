@@ -1,3 +1,5 @@
+// ignore_for_file: deprecated_member_use
+
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
@@ -14,7 +16,7 @@ class CallControlsWidget extends StatelessWidget {
   final VoidCallback onEndCall;
 
   const CallControlsWidget({
-    Key? key,
+    super.key,
     required this.isAudioEnabled,
     required this.isVideoEnabled,
     required this.isBackgroundBlurEnabled,
@@ -25,7 +27,7 @@ class CallControlsWidget extends StatelessWidget {
     required this.onStartRecording,
     required this.onStopRecording,
     required this.onEndCall,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {

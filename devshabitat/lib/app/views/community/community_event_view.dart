@@ -11,9 +11,9 @@ class CommunityEventView extends StatefulWidget {
   final CommunityModel? community;
 
   const CommunityEventView({
-    Key? key,
+    super.key,
     this.community,
-  }) : super(key: key);
+  });
 
   @override
   State<CommunityEventView> createState() => _CommunityEventViewState();
@@ -355,12 +355,12 @@ class _CommunityEventViewState extends State<CommunityEventView>
         children: [
           if (_selectedEventType != null)
             _buildFilterChip(
-              '${_getEventTypeName(_selectedEventType!)}',
+              _getEventTypeName(_selectedEventType!),
               () => setState(() => _selectedEventType = null),
             ),
           if (_selectedLocation != null)
             _buildFilterChip(
-              '${_getLocationName(_selectedLocation!)}',
+              _getLocationName(_selectedLocation!),
               () => setState(() => _selectedLocation = null),
             ),
           if (_selectedCategoryId != null)

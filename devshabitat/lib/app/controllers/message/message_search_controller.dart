@@ -1,7 +1,5 @@
 import 'package:get/get.dart';
 import '../../models/message_model.dart';
-import '../../services/messaging_service.dart';
-import '../../core/services/error_handler_service.dart';
 import 'message_base_controller.dart';
 
 class MessageSearchController extends MessageBaseController {
@@ -13,12 +11,9 @@ class MessageSearchController extends MessageBaseController {
   final RxString selectedType = ''.obs;
 
   MessageSearchController({
-    required MessagingService messagingService,
-    required ErrorHandlerService errorHandler,
-  }) : super(
-          messagingService: messagingService,
-          errorHandler: errorHandler,
-        );
+    required super.messagingService,
+    required super.errorHandler,
+  });
 
   Future<void> searchMessages() async {
     if (searchQuery.value.isEmpty) return;

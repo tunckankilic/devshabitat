@@ -11,11 +11,11 @@ class CommunityCardWidget extends StatelessWidget {
   final VoidCallback? onTap;
 
   const CommunityCardWidget({
-    Key? key,
+    super.key,
     required this.community,
     this.isManageable = false,
     this.onTap,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {

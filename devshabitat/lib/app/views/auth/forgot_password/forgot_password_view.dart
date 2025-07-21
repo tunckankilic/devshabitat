@@ -6,7 +6,7 @@ import '../../../controllers/auth_controller.dart';
 class ForgotPasswordView extends GetView<AuthController> {
   final _responsiveController = Get.find<ResponsiveController>();
 
-  ForgotPasswordView({Key? key}) : super(key: key);
+  ForgotPasswordView({super.key});
 
   @override
   Widget build(BuildContext context) {

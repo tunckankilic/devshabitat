@@ -9,14 +9,14 @@ class EventMarkerWidget extends StatelessWidget {
   final VoidCallback? onTap;
 
   const EventMarkerWidget({
-    Key? key,
+    super.key,
     required this.eventId,
     required this.title,
     required this.dateTime,
     required this.attendeeCount,
     required this.eventType,
     this.onTap,
-  }) : super(key: key);
+  });
 
   Color _getEventTypeColor() {
     switch (eventType.toLowerCase()) {

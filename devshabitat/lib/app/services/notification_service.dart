@@ -435,8 +435,9 @@ class NotificationService extends GetxService {
     if (!isPushEnabled.value) return;
 
     final category = message.data['category'] as String?;
-    if (category != null && !(categoryPreferences[category]?.value ?? true))
+    if (category != null && !(categoryPreferences[category]?.value ?? true)) {
       return;
+    }
 
     // In-app bildirim göster
     if (isInAppEnabled.value) {

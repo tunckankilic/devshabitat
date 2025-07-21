@@ -5,7 +5,7 @@ import 'package:devshabitat/app/models/video/call_model.dart';
 import 'package:timeago/timeago.dart' as timeago;
 
 class CallHistoryView extends GetView<CallHistoryController> {
-  const CallHistoryView({Key? key}) : super(key: key);
+  const CallHistoryView({super.key});
 
   @override
   Widget build(BuildContext context) {

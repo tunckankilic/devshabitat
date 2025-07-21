@@ -16,7 +16,7 @@ import '../../widgets/responsive/responsive_overflow_handler.dart'
 import '../../widgets/responsive/animated_responsive_layout.dart';
 
 class CommunityDetailView extends BaseView<CommunityController> {
-  const CommunityDetailView({Key? key}) : super(key: key);
+  const CommunityDetailView({super.key});
 
   @override
   Widget buildView(BuildContext context) {

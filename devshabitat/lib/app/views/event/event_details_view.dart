@@ -10,7 +10,7 @@ import '../../widgets/responsive/responsive_overflow_handler.dart'
 import '../../widgets/responsive/animated_responsive_layout.dart';
 
 class EventDetailsView extends BaseView<EventController> {
-  const EventDetailsView({Key? key}) : super(key: key);
+  const EventDetailsView({super.key});
 
   @override
   Widget buildView(BuildContext context) {

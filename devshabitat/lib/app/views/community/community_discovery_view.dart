@@ -12,7 +12,7 @@ import '../../widgets/responsive/responsive_overflow_handler.dart'
 import '../../widgets/responsive/animated_responsive_layout.dart';
 
 class CommunityDiscoveryView extends BaseView<CommunityDiscoveryController> {
-  const CommunityDiscoveryView({Key? key}) : super(key: key);
+  const CommunityDiscoveryView({super.key});
 
   @override
   Widget buildView(BuildContext context) {

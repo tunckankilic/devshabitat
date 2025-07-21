@@ -152,7 +152,7 @@ class AuthRepository implements IAuthRepository {
       await _handleEmailCollision(email, provider);
     } catch (e) {
       _logger.e('Email çakışması tespit edildi: $e');
-      throw e;
+      throw Exception(e);
     }
   }
 
@@ -163,15 +163,12 @@ class AuthRepository implements IAuthRepository {
         throw Exception(AppStrings.googleLoginNotSupported);
       }
 
-      final GoogleSignInAccount? googleUser =
-          await _googleSignIn.authenticate();
-      if (googleUser == null) throw Exception(AppStrings.googleLoginCancelled);
+      final googleUser = await _googleSignIn.authenticate();
 
       // Email çakışmasını kontrol et
       await _checkEmailBeforeSocialSignIn(googleUser.email, 'google.com');
 
-      final GoogleSignInAuthentication googleAuth =
-          await googleUser.authentication;
+      final GoogleSignInAuthentication googleAuth = googleUser.authentication;
       final credential = GoogleAuthProvider.credential(
         accessToken: googleAuth.idToken,
         idToken: googleAuth.idToken,

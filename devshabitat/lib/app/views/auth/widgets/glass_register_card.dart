@@ -11,10 +11,10 @@ class GlassRegisterCard extends StatelessWidget {
   final _responsiveController = Get.find<ResponsiveController>();
 
   GlassRegisterCard({
-    Key? key,
+    super.key,
     required this.onRegister,
     required this.onGitHubValidation,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {

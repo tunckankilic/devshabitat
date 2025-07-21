@@ -4,7 +4,7 @@ import '../../controllers/community/moderation_controller.dart';
 import '../../models/community/moderation_model.dart';
 
 class ModerationView extends GetView<ModerationController> {
-  const ModerationView({Key? key}) : super(key: key);
+  const ModerationView({super.key});
 
   @override
   Widget build(BuildContext context) {

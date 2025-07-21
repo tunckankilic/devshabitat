@@ -3,7 +3,7 @@ import 'package:get/get.dart';
 import 'package:devshabitat/app/controllers/location/map_controller.dart';
 
 class LocationSettingsView extends GetView<MapController> {
-  const LocationSettingsView({Key? key}) : super(key: key);
+  const LocationSettingsView({super.key});
 
   @override
   Widget build(BuildContext context) {

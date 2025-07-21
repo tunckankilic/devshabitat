@@ -171,7 +171,7 @@ class MessageSearchService extends GetxService {
       final QuerySnapshot snapshot = await _firestore
           .collection('messages')
           .where('content', isGreaterThanOrEqualTo: query)
-          .where('content', isLessThan: query + 'z')
+          .where('content', isLessThan: '${query}z')
           .limit(5)
           .get();
 

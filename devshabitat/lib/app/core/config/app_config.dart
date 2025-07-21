@@ -25,11 +25,6 @@ class AppConfig extends GetxService {
 
   static String get googleMapsApiKey => Env.googleMapsApiKey;
 
-  @override
-  void onInit() {
-    super.onInit();
-  }
-
   Future<void> initialize() async {
     await _initializeEncryption();
   }

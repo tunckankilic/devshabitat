@@ -10,13 +10,13 @@ class RegistrationButtonWidget extends StatelessWidget {
   final VoidCallback onUnregister;
 
   const RegistrationButtonWidget({
-    Key? key,
+    super.key,
     required this.event,
     required this.isRegistered,
     required this.isLoading,
     required this.onRegister,
     required this.onUnregister,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {

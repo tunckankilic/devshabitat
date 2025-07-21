@@ -4,7 +4,7 @@ import '../../controllers/notification_controller.dart';
 import '../../widgets/in_app_notification_widget.dart';
 
 class NotificationCenterView extends GetView<NotificationController> {
-  const NotificationCenterView({Key? key}) : super(key: key);
+  const NotificationCenterView({super.key});
 
   @override
   Widget build(BuildContext context) {

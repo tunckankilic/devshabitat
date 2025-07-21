@@ -4,7 +4,7 @@ import '../../controllers/community/community_create_controller.dart';
 import '../../widgets/image_upload_widget.dart';
 
 class CommunityCreateView extends GetView<CommunityCreateController> {
-  const CommunityCreateView({Key? key}) : super(key: key);
+  const CommunityCreateView({super.key});
 
   @override
   Widget build(BuildContext context) {

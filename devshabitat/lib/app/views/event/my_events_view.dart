@@ -5,7 +5,7 @@ import 'package:devshabitat/app/widgets/event/event_card_widget.dart';
 import 'package:devshabitat/app/widgets/event/event_calendar_widget.dart';
 
 class MyEventsView extends GetView<EventDiscoveryController> {
-  const MyEventsView({Key? key}) : super(key: key);
+  const MyEventsView({super.key});
 
   @override
   Widget build(BuildContext context) {

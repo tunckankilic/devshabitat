@@ -12,13 +12,13 @@ class MemberListWidget extends StatelessWidget {
   final Function(UserProfile)? onPromoteToModerator;
 
   const MemberListWidget({
-    Key? key,
+    super.key,
     required this.members,
     this.isAdmin = false,
     this.onMemberTap,
     this.onRemoveMember,
     this.onPromoteToModerator,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {

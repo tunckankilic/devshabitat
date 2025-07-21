@@ -60,7 +60,7 @@ class MemoryDebugController extends GetxController with MemoryManagementMixin {
 }
 
 class MemoryDebugView extends GetView<MemoryDebugController> {
-  const MemoryDebugView({Key? key}) : super(key: key);
+  const MemoryDebugView({super.key});
 
   @override
   Widget build(BuildContext context) {

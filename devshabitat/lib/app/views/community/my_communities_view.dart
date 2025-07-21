@@ -5,7 +5,7 @@ import '../../widgets/community/community_card_widget.dart';
 import '../../routes/app_pages.dart';
 
 class MyCommunitiesView extends GetView<MyCommunitiesController> {
-  const MyCommunitiesView({Key? key}) : super(key: key);
+  const MyCommunitiesView({super.key});
 
   @override
   Widget build(BuildContext context) {

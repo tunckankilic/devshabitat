@@ -234,7 +234,7 @@ class MessageSearchController extends GetxController {
 
   Map<String, dynamic> getSearchAnalytics() {
     final totalSearches =
-        searchStats.values.fold(0, (sum, stat) => sum + stat.count);
+        searchStats.values.fold(0, (total, stat) => total + stat.count);
     final mostSearched = searchStats.values.reduce(
       (curr, next) => curr.count > next.count ? curr : next,
     );

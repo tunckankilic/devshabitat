@@ -1,7 +1,5 @@
 import 'package:get/get.dart';
 import '../../models/message_model.dart';
-import '../../services/messaging_service.dart';
-import '../../core/services/error_handler_service.dart';
 import 'message_base_controller.dart';
 
 class MessageInteractionController extends MessageBaseController {
@@ -11,12 +9,9 @@ class MessageInteractionController extends MessageBaseController {
   final RxBool isForwarding = false.obs;
 
   MessageInteractionController({
-    required MessagingService messagingService,
-    required ErrorHandlerService errorHandler,
-  }) : super(
-          messagingService: messagingService,
-          errorHandler: errorHandler,
-        );
+    required super.messagingService,
+    required super.errorHandler,
+  });
 
   void startReply(String messageId) {
     selectedMessageId.value = messageId;

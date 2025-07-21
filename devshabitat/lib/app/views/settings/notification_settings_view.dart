@@ -3,7 +3,7 @@ import 'package:get/get.dart';
 import '../../services/notification_service.dart';
 
 class NotificationSettingsView extends GetView<NotificationService> {
-  const NotificationSettingsView({Key? key}) : super(key: key);
+  const NotificationSettingsView({super.key});
 
   @override
   Widget build(BuildContext context) {

@@ -13,7 +13,7 @@ class EventFilterWidget extends StatelessWidget {
   final Function(EventType?) onEventTypeChanged;
 
   const EventFilterWidget({
-    Key? key,
+    super.key,
     required this.showOnlineOnly,
     required this.showOfflineOnly,
     required this.showUpcomingOnly,
@@ -22,7 +22,7 @@ class EventFilterWidget extends StatelessWidget {
     required this.onOfflineFilterChanged,
     required this.onUpcomingFilterChanged,
     required this.onEventTypeChanged,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {

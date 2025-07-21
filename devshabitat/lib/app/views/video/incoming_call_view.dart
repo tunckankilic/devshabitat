@@ -3,7 +3,7 @@ import 'package:get/get.dart';
 import 'package:devshabitat/app/controllers/video/video_call_controller.dart';
 
 class IncomingCallView extends GetView<VideoCallController> {
-  const IncomingCallView({Key? key}) : super(key: key);
+  const IncomingCallView({super.key});
 
   @override
   Widget build(BuildContext context) {

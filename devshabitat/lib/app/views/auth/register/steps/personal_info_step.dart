@@ -1,3 +1,5 @@
+// ignore_for_file: deprecated_member_use
+
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../../../../controllers/responsive_controller.dart';
@@ -11,7 +13,7 @@ class PersonalInfoStep extends GetView<RegistrationController> {
   final _responsiveController = Get.find<ResponsiveController>();
   final StorageService _storageService = Get.find<StorageService>();
 
-  PersonalInfoStep({Key? key}) : super(key: key);
+  PersonalInfoStep({super.key});
 
   Future<void> _pickImage() async {
     try {

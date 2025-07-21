@@ -6,7 +6,7 @@ import '../../../../controllers/responsive_controller.dart';
 class BasicInfoStep extends GetView<RegistrationController> {
   final _responsiveController = Get.find<ResponsiveController>();
 
-  BasicInfoStep({Key? key}) : super(key: key);
+  BasicInfoStep({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -253,26 +253,26 @@ class ValidationMessage extends StatelessWidget {
   final double fontSize;
 
   const ValidationMessage({
-    Key? key,
+    super.key,
     required this.icon,
     required this.message,
     required this.color,
     required this.iconSize,
     required this.fontSize,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
-    final _responsiveController = Get.find<ResponsiveController>();
+    final responsiveController = Get.find<ResponsiveController>();
     return Padding(
       padding: EdgeInsets.only(
-        bottom: _responsiveController.responsiveValue(mobile: 8, tablet: 12),
+        bottom: responsiveController.responsiveValue(mobile: 8, tablet: 12),
       ),
       child: Row(
         children: [
           Icon(icon, size: iconSize, color: color),
           SizedBox(
-            width: _responsiveController.responsiveValue(mobile: 8, tablet: 12),
+            width: responsiveController.responsiveValue(mobile: 8, tablet: 12),
           ),
           Text(
             message,

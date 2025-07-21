@@ -14,7 +14,7 @@ class LazyLoadingList<T> extends StatefulWidget {
   final double loadMoreThreshold;
 
   const LazyLoadingList({
-    Key? key,
+    super.key,
     required this.items,
     required this.itemBuilder,
     required this.onLoadMore,
@@ -26,7 +26,7 @@ class LazyLoadingList<T> extends StatefulWidget {
     this.scrollController,
     this.padding,
     this.loadMoreThreshold = 200.0,
-  }) : super(key: key);
+  });
 
   @override
   State<LazyLoadingList<T>> createState() => _LazyLoadingListState<T>();
@@ -128,7 +128,7 @@ class LazyLoadingGrid<T> extends StatefulWidget {
   final double childAspectRatio;
 
   const LazyLoadingGrid({
-    Key? key,
+    super.key,
     required this.items,
     required this.itemBuilder,
     required this.onLoadMore,
@@ -144,7 +144,7 @@ class LazyLoadingGrid<T> extends StatefulWidget {
     this.mainAxisSpacing = 8.0,
     this.crossAxisSpacing = 8.0,
     this.childAspectRatio = 1.0,
-  }) : super(key: key);
+  });
 
   @override
   State<LazyLoadingGrid<T>> createState() => _LazyLoadingGridState<T>();

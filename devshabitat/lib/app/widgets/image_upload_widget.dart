@@ -1,3 +1,5 @@
+// ignore_for_file: use_build_context_synchronously
+
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
@@ -13,14 +15,14 @@ class ImageUploadWidget extends StatelessWidget {
   final String label;
 
   const ImageUploadWidget({
-    Key? key,
+    super.key,
     required this.onImageSelected,
     this.imageUrl,
     this.aspectRatio = 1.0,
     this.maxWidth = 1024,
     this.maxHeight = 1024,
     required this.label,
-  }) : super(key: key);
+  });
 
   Future<void> _pickImage(BuildContext context) async {
     try {

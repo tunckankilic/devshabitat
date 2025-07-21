@@ -3,7 +3,7 @@ import 'package:get/get.dart';
 import 'base_view.dart';
 
 abstract class RefreshableView<T extends GetxController> extends BaseView<T> {
-  const RefreshableView({Key? key}) : super(key: key);
+  const RefreshableView({super.key});
 
   Future<void> onRefresh();
   Widget buildContent(BuildContext context);

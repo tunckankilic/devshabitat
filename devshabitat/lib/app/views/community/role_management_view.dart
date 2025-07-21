@@ -5,7 +5,7 @@ import '../../models/community/role_model.dart';
 import '../../models/user_profile_model.dart';
 
 class RoleManagementView extends GetView<RoleController> {
-  const RoleManagementView({Key? key}) : super(key: key);
+  const RoleManagementView({super.key});
 
   @override
   Widget build(BuildContext context) {

@@ -7,7 +7,7 @@ import '../widgets/social_login_button.dart';
 class TabletLogin extends GetView<AuthController> {
   final _responsiveController = Get.find<ResponsiveController>();
 
-  TabletLogin({Key? key}) : super(key: key);
+  TabletLogin({super.key});
 
   @override
   Widget build(BuildContext context) {

@@ -9,13 +9,13 @@ class DeveloperMarkerWidget extends StatelessWidget {
   final VoidCallback? onTap;
 
   const DeveloperMarkerWidget({
-    Key? key,
+    super.key,
     required this.developerId,
     this.avatarUrl,
     required this.name,
     this.isOnline = false,
     this.onTap,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {

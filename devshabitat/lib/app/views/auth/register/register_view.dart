@@ -10,7 +10,7 @@ import 'steps/skills_info_step.dart';
 class RegisterView extends GetView<RegistrationController> {
   final _responsiveController = Get.find<ResponsiveController>();
 
-  RegisterView({Key? key}) : super(key: key);
+  RegisterView({super.key});
 
   @override
   Widget build(BuildContext context) {
