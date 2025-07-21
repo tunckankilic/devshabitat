@@ -1,6 +1,7 @@
 // ignore_for_file: avoid_print
 
 import 'package:get/get.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import '../services/github_service.dart';
 import '../repositories/auth_repository.dart';
 import '../models/feed_item.dart';
@@ -29,6 +30,11 @@ class HomeController extends GetxController {
   final RxList<FeedItem> items = <FeedItem>[].obs;
   final Rx<FeedItem?> selectedFeedItem = Rx<FeedItem?>(null);
   final RxList<NotificationModel> notifications = <NotificationModel>[].obs;
+  final RxBool isLoadingMore = false.obs;
+  DocumentSnapshot? lastNotificationDocument;
+
+  int get unreadNotificationsCount =>
+      notifications.where((n) => !n.isRead).length;
 
   HomeController() {
     // Empty constructor
@@ -192,25 +198,32 @@ class HomeController extends GetxController {
 
   Future<void> getNotifications() async {
     try {
-      // Örnek bildirimler (gerçek implementasyonda API'den gelecek)
-      notifications.value = [
-        NotificationModel(
-          id: '1',
-          title: 'Yeni Bağlantı',
-          body: 'Ahmet sizinle bağlantı kurmak istiyor',
-          createdAt: DateTime.now().subtract(const Duration(hours: 2)),
-          isRead: false,
-        ),
-        NotificationModel(
-          id: '2',
-          title: 'Yeni Mesaj',
-          body: 'Mehmet size mesaj gönderdi',
-          createdAt: DateTime.now().subtract(const Duration(hours: 5)),
-          isRead: false,
-        ),
-      ];
+      final notifs = await _notificationService.getNotifications(
+        lastDocument: lastNotificationDocument,
+      );
+      if (notifs.isNotEmpty) {
+        notifications.addAll(notifs);
+        lastNotificationDocument = notifs.last as DocumentSnapshot;
+      }
     } catch (e) {
       debugPrint('Error fetching notifications: $e');
     }
+  }
+
+  Future<void> loadMoreNotifications() async {
+    if (isLoadingMore.value) return;
+
+    try {
+      isLoadingMore.value = true;
+      await getNotifications();
+    } finally {
+      isLoadingMore.value = false;
+    }
+  }
+
+  Future<void> refreshNotifications() async {
+    notifications.clear();
+    lastNotificationDocument = null;
+    await getNotifications();
   }
 }

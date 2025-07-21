@@ -46,6 +46,12 @@ Future<void> _saveNotificationToFirestore(RemoteMessage message) async {
       data: message.data,
       createdAt: DateTime.now(),
       isRead: false,
+      type: NotificationType.values.firstWhere(
+        (e) =>
+            e.toString() ==
+            'NotificationType.${message.data['type'] ?? 'system'}',
+        orElse: () => NotificationType.system,
+      ),
     );
 
     await firestore
@@ -53,7 +59,15 @@ Future<void> _saveNotificationToFirestore(RemoteMessage message) async {
         .doc(userId)
         .collection('notifications')
         .doc(notification.id)
-        .set(notification.toMap());
+        .set({
+      'id': notification.id,
+      'title': notification.title,
+      'body': notification.body,
+      'data': notification.data,
+      'createdAt': notification.createdAt,
+      'isRead': notification.isRead,
+      'type': notification.type.toString().split('.').last,
+    });
   }
 }
 
