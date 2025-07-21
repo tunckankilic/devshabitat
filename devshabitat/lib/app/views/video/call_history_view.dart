@@ -1,3 +1,4 @@
+import 'package:devshabitat/app/constants/app_strings.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:devshabitat/app/controllers/video/call_history_controller.dart';
@@ -11,7 +12,7 @@ class CallHistoryView extends GetView<CallHistoryController> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Görüşme Geçmişi'),
+        title: Text(AppStrings.callHistory),
         actions: [
           IconButton(
             icon: const Icon(Icons.filter_list),
@@ -41,7 +42,7 @@ class CallHistoryView extends GetView<CallHistoryController> {
           ),
           const SizedBox(height: 16),
           Text(
-            'Henüz görüşme geçmişiniz yok',
+            AppStrings.noCallHistory,
             style: Get.textTheme.titleMedium?.copyWith(
               color: Get.theme.colorScheme.onSurface.withOpacity(0.7),
             ),
@@ -78,7 +79,7 @@ class _CallHistoryTile extends StatelessWidget {
       ),
       title: Text(
         call.isGroupCall
-            ? '${call.participants.length} Kişilik Grup Görüşmesi'
+            ? '${call.participants.length} ${AppStrings.groupCall}'
             : call.participants.first.name,
       ),
       subtitle: Row(

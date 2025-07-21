@@ -109,6 +109,76 @@ class AppStrings {
   static const String location = 'Location';
   static const String company = 'Company';
   static const String website = 'Website';
+  static const String name = 'Name';
+  static const String nameHint = 'Enter your name';
+  static const String title = 'Title';
+  static const String titleHint = 'Enter your title';
+  static const String locationHint = 'Enter your location';
+  static const String githubUsernameHint = 'Enter your GitHub username';
+  static const String selectProfileImage = 'Select Profile Image';
+  static const String gallery = 'Gallery';
+  static const String editProfileImage = 'Edit Profile Image';
+  static const String errorOccurredWhileSelectingImage =
+      'Error occurred while selecting image';
+  static const String profileNotFound = 'Profile not found';
+  static const String aboutMe = 'About Me';
+  static const String frameworks = 'Frameworks';
+  static const String github = 'GitHub';
+  static const String githubDataNotLoaded = 'GitHub data not loaded';
+  static const String githubDataNotFound = 'GitHub data not found';
+  static const String workExperience = 'Work Experience';
+  static const String currentlyStudying = 'Currently Studying';
+  static const String graduate = 'Graduate';
+  static const String selectFromGallery = 'Select from Gallery';
+  static const String takePhoto = 'Take Photo';
+  static const String clear = 'Clear';
+  static const String messageTypes = 'Message Types';
+  static const String textMessages = 'Text Messages';
+  static const String sortingAndPriority = 'Sorting and Priority';
+  static const String sorting = 'Sorting';
+  static const String priorityMessages = 'Priority Messages';
+  static const String selectDate = 'Select Date';
+  static const String notSelected = 'Not Selected';
+  static const String minimumPriority = 'Minimum Priority';
+  static const String selectedValue = 'Selected Value';
+  static const String generalSettings = 'General Settings';
+  static const String notificationCategories = 'Notification Categories';
+  static const String pushNotifications = 'Push Notifications';
+  static const String pushNotificationsSubtitle = 'Receive push notifications';
+  static const String inAppNotifications = 'In-App Notifications';
+  static const String inAppNotificationsSubtitle =
+      'Receive in-app notifications';
+  static const String eventNotifications = 'Event Notifications';
+  static const String eventNotificationsSubtitle =
+      'Receive event notifications';
+  static const String messageNotifications = 'Message Notifications';
+  static const String messageNotificationsSubtitle =
+      'Receive message notifications';
+  static const String communityNotifications = 'Community Notifications';
+  static const String communityNotificationsSubtitle =
+      'Receive community notifications';
+  static const String connectionNotificationsSubtitle =
+      'Receive connection notifications';
+  static const String makeProfilePublic = 'Make Profile Public';
+  static const String profileVisibilitySubtitle =
+      'Your profile visibility settings';
+  static const String showLocation = 'Show Location';
+  static const String allowConnectionRequests = 'Allow Connection Requests';
+  static const String allowMentorshipRequests = 'Allow Mentorship Requests';
+  static const String profileDetails = 'Profile Details';
+  static const String showTechnologies = 'Show Technologies';
+  static const String showBio = 'Show Bio';
+  static const String appearance = 'Appearance';
+  static const String sound = 'Sound';
+  static const String language = 'Language';
+  static const String appLanguage = 'App Language';
+  static const String account = 'Account';
+  static const String signOut = 'Sign Out';
+  static const String selectLanguage = 'Select Language';
+  static const String callHistory = 'Call History';
+  static const String noCallHistory = 'No Call History';
+  static const String groupCall = 'Group Call';
+  static const String incomingCall = 'Incoming Call';
 
   // Actions
   static const String connect = 'Connect';

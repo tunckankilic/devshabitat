@@ -1,3 +1,4 @@
+import 'package:devshabitat/app/constants/app_strings.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../controllers/navigation_controller.dart';
@@ -43,7 +44,7 @@ class MainWrapper extends StatelessWidget {
                           size: responsiveController.minTouchTarget),
                       selectedIcon: Icon(Icons.home,
                           size: responsiveController.minTouchTarget),
-                      label: Text('Ana Sayfa',
+                      label: Text(AppStrings.home,
                           style: TextStyle(
                               fontSize: responsiveController.responsiveValue(
                                   mobile: 12, tablet: 14))),
@@ -53,7 +54,7 @@ class MainWrapper extends StatelessWidget {
                           size: responsiveController.minTouchTarget),
                       selectedIcon: Icon(Icons.explore,
                           size: responsiveController.minTouchTarget),
-                      label: Text('Keşfet',
+                      label: Text(AppStrings.discover,
                           style: TextStyle(
                               fontSize: responsiveController.responsiveValue(
                                   mobile: 12, tablet: 14))),
@@ -63,7 +64,7 @@ class MainWrapper extends StatelessWidget {
                           size: responsiveController.minTouchTarget),
                       selectedIcon: Icon(Icons.message,
                           size: responsiveController.minTouchTarget),
-                      label: Text('Mesajlar',
+                      label: Text(AppStrings.messages,
                           style: TextStyle(
                               fontSize: responsiveController.responsiveValue(
                                   mobile: 12, tablet: 14))),
@@ -73,7 +74,7 @@ class MainWrapper extends StatelessWidget {
                           size: responsiveController.minTouchTarget),
                       selectedIcon: Icon(Icons.person,
                           size: responsiveController.minTouchTarget),
-                      label: Text('Profil',
+                      label: Text(AppStrings.profile,
                           style: TextStyle(
                               fontSize: responsiveController.responsiveValue(
                                   mobile: 12, tablet: 14))),

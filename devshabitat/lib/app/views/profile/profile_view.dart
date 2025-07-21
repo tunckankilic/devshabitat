@@ -1,3 +1,4 @@
+import 'package:devshabitat/app/constants/app_strings.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:cached_network_image/cached_network_image.dart';
@@ -19,7 +20,7 @@ class ProfileView extends BaseView<ProfileController> {
     return Scaffold(
       appBar: AppBar(
         title: ResponsiveText(
-          'Profil',
+          AppStrings.profile,
           style: TextStyle(
             fontSize: responsive.responsiveValue(
               mobile: 18,
@@ -54,7 +55,7 @@ class ProfileView extends BaseView<ProfileController> {
           if (user == null) {
             return Center(
               child: ResponsiveText(
-                'Profil bulunamadı',
+                AppStrings.profileNotFound,
                 style: TextStyle(
                   fontSize: responsive.responsiveValue(
                     mobile: 16,
@@ -90,7 +91,7 @@ class ProfileView extends BaseView<ProfileController> {
           _buildProfileHeader(user),
           SizedBox(height: responsive.responsiveValue(mobile: 24, tablet: 32)),
           if (user.bio != null) ...[
-            _buildSectionTitle('Hakkımda'),
+            _buildSectionTitle(AppStrings.aboutMe),
             SizedBox(height: responsive.responsiveValue(mobile: 8, tablet: 12)),
             _buildBioSection(user.bio!),
             SizedBox(
@@ -124,7 +125,7 @@ class ProfileView extends BaseView<ProfileController> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     if (user.bio != null) ...[
-                      _buildSectionTitle('Hakkımda'),
+                      _buildSectionTitle(AppStrings.aboutMe),
                       SizedBox(
                           height: responsive.responsiveValue(
                               mobile: 8, tablet: 12)),
@@ -253,7 +254,7 @@ class ProfileView extends BaseView<ProfileController> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        _buildSectionTitle('Yetenekler'),
+        _buildSectionTitle(AppStrings.skills),
         SizedBox(height: responsive.responsiveValue(mobile: 8, tablet: 12)),
         Wrap(
           spacing: responsive.responsiveValue(mobile: 8, tablet: 12),
@@ -290,7 +291,7 @@ class ProfileView extends BaseView<ProfileController> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        _buildSectionTitle('Programlama Dilleri'),
+        _buildSectionTitle(AppStrings.programmingLanguages),
         SizedBox(height: responsive.responsiveValue(mobile: 8, tablet: 12)),
         Wrap(
           spacing: responsive.responsiveValue(mobile: 8, tablet: 12),
@@ -327,7 +328,7 @@ class ProfileView extends BaseView<ProfileController> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        _buildSectionTitle('Frameworks'),
+        _buildSectionTitle(AppStrings.frameworks),
         SizedBox(height: responsive.responsiveValue(mobile: 8, tablet: 12)),
         Wrap(
           spacing: responsive.responsiveValue(mobile: 8, tablet: 12),
@@ -364,7 +365,7 @@ class ProfileView extends BaseView<ProfileController> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        _buildSectionTitle('GitHub'),
+        _buildSectionTitle(AppStrings.github),
         SizedBox(height: responsive.responsiveValue(mobile: 8, tablet: 12)),
         FutureBuilder<Map<String, dynamic>>(
           future: controller.fetchGithubRepoData(user.githubUsername!),
@@ -381,7 +382,7 @@ class ProfileView extends BaseView<ProfileController> {
             }
             if (snapshot.hasError) {
               return ResponsiveText(
-                'GitHub verisi yüklenemedi: ${snapshot.error}',
+                '${AppStrings.githubDataNotLoaded}: ${snapshot.error}',
                 style: TextStyle(
                   fontSize: responsive.responsiveValue(
                     mobile: 14,
@@ -392,7 +393,7 @@ class ProfileView extends BaseView<ProfileController> {
             }
             if (!snapshot.hasData) {
               return ResponsiveText(
-                'GitHub verisi bulunamadı',
+                AppStrings.githubDataNotFound,
                 style: TextStyle(
                   fontSize: responsive.responsiveValue(
                     mobile: 14,
@@ -415,7 +416,7 @@ class ProfileView extends BaseView<ProfileController> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        _buildSectionTitle('İş Deneyimi'),
+        _buildSectionTitle(AppStrings.workExperience),
         SizedBox(height: responsive.responsiveValue(mobile: 8, tablet: 12)),
         ListView.builder(
           shrinkWrap: true,
@@ -454,7 +455,9 @@ class ProfileView extends BaseView<ProfileController> {
                         ),
                       ),
                       ResponsiveText(
-                        experience.isCurrentRole ? 'Şu an' : 'Geçmiş',
+                        experience.isCurrentRole
+                            ? AppStrings.currently
+                            : AppStrings.past,
                         style: TextStyle(
                           fontSize: responsive.responsiveValue(
                             mobile: 12,
@@ -480,7 +483,7 @@ class ProfileView extends BaseView<ProfileController> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        _buildSectionTitle('Eğitim'),
+        _buildSectionTitle(AppStrings.education),
         SizedBox(height: responsive.responsiveValue(mobile: 8, tablet: 12)),
         ListView.builder(
           shrinkWrap: true,
@@ -520,8 +523,8 @@ class ProfileView extends BaseView<ProfileController> {
                       ),
                       ResponsiveText(
                         education.isCurrentlyStudying
-                            ? 'Devam ediyor'
-                            : 'Mezun',
+                            ? AppStrings.currentlyStudying
+                            : AppStrings.graduate,
                         style: TextStyle(
                           fontSize: responsive.responsiveValue(
                             mobile: 12,

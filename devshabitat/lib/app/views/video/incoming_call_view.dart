@@ -1,3 +1,4 @@
+import 'package:devshabitat/app/constants/app_strings.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:devshabitat/app/controllers/video/video_call_controller.dart';
@@ -32,7 +33,7 @@ class IncomingCallView extends GetView<VideoCallController> {
             ),
             const SizedBox(height: 8),
             Text(
-              'Gelen Görüntülü Arama',
+              AppStrings.incomingCall,
               style: Theme.of(context).textTheme.bodyLarge?.copyWith(
                     color: Theme.of(context)
                         .colorScheme
