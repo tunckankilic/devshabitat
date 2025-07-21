@@ -1,6 +1,7 @@
 import 'package:devshabitat/app/constants/app_strings.dart';
 import 'package:devshabitat/firebase_options.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'app/routes/app_pages.dart';
@@ -14,6 +15,12 @@ import 'package:firebase_auth/firebase_auth.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
+
+  // Ekran yönlendirmesini sadece portrait ve upside down olarak ayarla
+  await SystemChrome.setPreferredOrientations([
+    DeviceOrientation.portraitUp,
+    DeviceOrientation.portraitDown,
+  ]);
 
   // AppConfig servisini başlat
   final config = Get.put(AppConfig());

@@ -1348,8 +1348,8 @@ class MockErrorHandlerService extends _i1.Mock
     required String? title,
     required String? message,
     required _i10.VoidCallback? onConfirm,
-    String? confirmText = 'Evet',
-    String? cancelText = 'Hayır',
+    String? confirmText = 'Yes',
+    String? cancelText = 'No',
   }) =>
       super.noSuchMethod(
         Invocation.method(
