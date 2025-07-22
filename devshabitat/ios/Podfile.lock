@@ -1188,48 +1188,7 @@ PODS:
     - abseil/meta/type_traits
     - abseil/xcprivacy
   - abseil/xcprivacy (1.20240722.0)
-  - AgoraInfra_iOS (1.2.13.1)
-  - AgoraRtcEngine_iOS (4.5.2):
-    - AgoraRtcEngine_iOS/AIAEC (= 4.5.2)
-    - AgoraRtcEngine_iOS/AIAECLL (= 4.5.2)
-    - AgoraRtcEngine_iOS/AINS (= 4.5.2)
-    - AgoraRtcEngine_iOS/AINSLL (= 4.5.2)
-    - AgoraRtcEngine_iOS/AudioBeauty (= 4.5.2)
-    - AgoraRtcEngine_iOS/ClearVision (= 4.5.2)
-    - AgoraRtcEngine_iOS/ContentInspect (= 4.5.2)
-    - AgoraRtcEngine_iOS/FaceCapture (= 4.5.2)
-    - AgoraRtcEngine_iOS/FaceDetection (= 4.5.2)
-    - AgoraRtcEngine_iOS/LipSync (= 4.5.2)
-    - AgoraRtcEngine_iOS/ReplayKit (= 4.5.2)
-    - AgoraRtcEngine_iOS/RtcBasic (= 4.5.2)
-    - AgoraRtcEngine_iOS/SpatialAudio (= 4.5.2)
-    - AgoraRtcEngine_iOS/VideoAv1CodecDec (= 4.5.2)
-    - AgoraRtcEngine_iOS/VideoAv1CodecEnc (= 4.5.2)
-    - AgoraRtcEngine_iOS/VideoCodecDec (= 4.5.2)
-    - AgoraRtcEngine_iOS/VideoCodecEnc (= 4.5.2)
-    - AgoraRtcEngine_iOS/VirtualBackground (= 4.5.2)
-    - AgoraRtcEngine_iOS/VQA (= 4.5.2)
-  - AgoraRtcEngine_iOS/AIAEC (4.5.2)
-  - AgoraRtcEngine_iOS/AIAECLL (4.5.2)
-  - AgoraRtcEngine_iOS/AINS (4.5.2)
-  - AgoraRtcEngine_iOS/AINSLL (4.5.2)
-  - AgoraRtcEngine_iOS/AudioBeauty (4.5.2)
-  - AgoraRtcEngine_iOS/ClearVision (4.5.2)
-  - AgoraRtcEngine_iOS/ContentInspect (4.5.2)
-  - AgoraRtcEngine_iOS/FaceCapture (4.5.2)
-  - AgoraRtcEngine_iOS/FaceDetection (4.5.2)
-  - AgoraRtcEngine_iOS/LipSync (4.5.2)
-  - AgoraRtcEngine_iOS/ReplayKit (4.5.2)
-  - AgoraRtcEngine_iOS/RtcBasic (4.5.2):
-    - AgoraInfra_iOS (= 1.2.13.1)
-  - AgoraRtcEngine_iOS/SpatialAudio (4.5.2)
-  - AgoraRtcEngine_iOS/VideoAv1CodecDec (4.5.2)
-  - AgoraRtcEngine_iOS/VideoAv1CodecEnc (4.5.2)
-  - AgoraRtcEngine_iOS/VideoCodecDec (4.5.2)
-  - AgoraRtcEngine_iOS/VideoCodecEnc (4.5.2)
-  - AgoraRtcEngine_iOS/VirtualBackground (4.5.2)
-  - AgoraRtcEngine_iOS/VQA (4.5.2)
-  - app_links (0.0.2):
+  - app_links (0.0.1):
     - Flutter
   - AppAuth (1.7.6):
     - AppAuth/Core (= 1.7.6)
@@ -1426,8 +1385,8 @@ PODS:
   - geolocator_apple (1.2.0):
     - Flutter
     - FlutterMacOS
-  - Google-Maps-iOS-Utils (5.0.0):
-    - GoogleMaps (~> 8.0)
+  - Google-Maps-iOS-Utils (6.1.0):
+    - GoogleMaps (~> 9.0)
   - google_maps_flutter_ios (0.0.1):
     - Flutter
     - Google-Maps-iOS-Utils (< 7.0, >= 5.0)
@@ -1441,11 +1400,9 @@ PODS:
   - GoogleDataTransport (10.1.0):
     - nanopb (~> 3.30910.0)
     - PromisesObjC (~> 2.4)
-  - GoogleMaps (8.4.0):
-    - GoogleMaps/Maps (= 8.4.0)
-  - GoogleMaps/Base (8.4.0)
-  - GoogleMaps/Maps (8.4.0):
-    - GoogleMaps/Base
+  - GoogleMaps (9.4.0):
+    - GoogleMaps/Maps (= 9.4.0)
+  - GoogleMaps/Maps (9.4.0)
   - GoogleSignIn (8.0.0):
     - AppAuth (< 2.0, >= 1.7.3)
     - AppCheckCore (~> 11.0)
@@ -1644,7 +1601,6 @@ PODS:
     - FlutterMacOS
 
 DEPENDENCIES:
-  - AgoraRtcEngine_iOS (~> 4.5.2)
   - app_links (from `.symlinks/plugins/app_links/ios`)
   - cloud_firestore (from `.symlinks/plugins/cloud_firestore/ios`)
   - connectivity_plus (from `.symlinks/plugins/connectivity_plus/ios`)
@@ -1663,10 +1619,8 @@ DEPENDENCIES:
   - flutter_webrtc (from `.symlinks/plugins/flutter_webrtc/ios`)
   - geocoding_ios (from `.symlinks/plugins/geocoding_ios/ios`)
   - geolocator_apple (from `.symlinks/plugins/geolocator_apple/darwin`)
-  - Google-Maps-iOS-Utils (~> 5.0.0)
   - google_maps_flutter_ios (from `.symlinks/plugins/google_maps_flutter_ios/ios`)
   - google_sign_in_ios (from `.symlinks/plugins/google_sign_in_ios/darwin`)
-  - GoogleMaps (= 8.4.0)
   - image_cropper (from `.symlinks/plugins/image_cropper/ios`)
   - image_picker_ios (from `.symlinks/plugins/image_picker_ios/ios`)
   - integration_test (from `.symlinks/plugins/integration_test/ios`)
@@ -1685,8 +1639,6 @@ DEPENDENCIES:
 SPEC REPOS:
   trunk:
     - abseil
-    - AgoraInfra_iOS
-    - AgoraRtcEngine_iOS
     - AppAuth
     - AppCheckCore
     - BoringSSL-GRPC
@@ -1802,9 +1754,7 @@ EXTERNAL SOURCES:
 
 SPEC CHECKSUMS:
   abseil: a05cc83bf02079535e17169a73c5be5ba47f714b
-  AgoraInfra_iOS: 3691b2b277a1712a35ae96de25af319de0d73d08
-  AgoraRtcEngine_iOS: 97e2398a2addda9057815a2a583a658e36796ff6
-  app_links: f3e17e4ee5e357b39d8b95290a9b2c299fca71c6
+  app_links: e70ca16b4b0f88253b3b3660200d4a10b4ea9795
   AppAuth: d4f13a8fe0baf391b2108511793e4b479691fb73
   AppCheckCore: cc8fd0a3a230ddd401f326489c99990b013f0c4f
   BoringSSL-GRPC: dded2a44897e45f28f08ae87a55ee4bcd19bc508
@@ -1843,11 +1793,11 @@ SPEC CHECKSUMS:
   flutter_webrtc: 90969010741a30ed57cb82ea3178e03306d87111
   geocoding_ios: eafacae6ad11a1eb56681f7d11df602a5fd49416
   geolocator_apple: 66b711889fd333205763b83c9dcf0a57a28c7afd
-  Google-Maps-iOS-Utils: 66d6de12be1ce6d3742a54661e7a79cb317a9321
+  Google-Maps-iOS-Utils: 0a484b05ed21d88c9f9ebbacb007956edd508a96
   google_maps_flutter_ios: e31555a04d1986ab130f2b9f24b6cdc861acc6d3
   google_sign_in_ios: 7411fab6948df90490dc4620ecbcabdc3ca04017
   GoogleDataTransport: aae35b7ea0c09004c3797d53c8c41f66f219d6a7
-  GoogleMaps: 8939898920281c649150e0af74aa291c60f2e77d
+  GoogleMaps: 0608099d4870cac8754bdba9b6953db543432438
   GoogleSignIn: ce8c89bb9b37fb624b92e7514cc67335d1e277e4
   GoogleUtilities: 00c88b9a86066ef77f0da2fab05f65d7768ed8e1
   "gRPC-C++": cc207623316fb041a7a3e774c252cf68a058b9e8
@@ -1881,6 +1831,6 @@ SPEC CHECKSUMS:
   WebRTC-SDK: dff00a3892bc570b6014e046297782084071657e
   webview_flutter_wkwebview: a4af96a051138e28e29f60101d094683b9f82188
 
-PODFILE CHECKSUM: 95c9ac496bd29ba9fbd01fe1184305cd941448a8
+PODFILE CHECKSUM: 8a2c3d6600c6a4344c003d7e2cf4b9832929a224
 
 COCOAPODS: 1.16.2

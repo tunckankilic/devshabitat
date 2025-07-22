@@ -10,7 +10,6 @@ class SecurityConfig {
   // API Key'ler için güvenli isimler
   static const String GOOGLE_MAPS_API_KEY = 'google_maps_api_key';
   static const String FIREBASE_API_KEY = 'firebase_api_key';
-  static const String AGORA_APP_ID = 'agora_app_id';
   static const String FACEBOOK_APP_ID = 'facebook_app_id';
 
   // Dosya yükleme güvenlik limitleri

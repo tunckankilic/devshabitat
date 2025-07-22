@@ -1,13 +1,14 @@
-import 'package:flutter/services.dart';
+import 'dart:convert';
+import 'dart:async';
+import 'package:http/http.dart' as http;
 import 'package:get/get.dart';
 import 'package:url_launcher/url_launcher.dart';
-import 'package:app_links/app_links.dart';
-import 'package:http/http.dart' as http;
-import 'dart:convert';
-import '../core/config/github_config.dart';
-import '../core/services/error_handler_service.dart';
+import 'package:flutter/services.dart';
 import 'package:logger/logger.dart';
 import '../constants/app_strings.dart';
+import '../core/services/error_handler_service.dart';
+import 'deep_linking_service.dart';
+import '../core/config/github_config.dart';
 
 class GitHubOAuthService extends GetxService {
   final Logger _logger;
@@ -97,9 +98,12 @@ class GitHubOAuthService extends GetxService {
 
   Future<String?> _handleRedirect() async {
     try {
-      final Uri uri = await AppLinks().uriLinkStream.first;
+      // DeepLinkingService'den OAuth callback'i dinle
+      final deepLinkingService = Get.find<DeepLinkingService>();
+      final params = await deepLinkingService.oauthCallbackStream.first
+          .timeout(Duration(seconds: 30)); // 30 saniye timeout
 
-      final code = uri.queryParameters['code'];
+      final code = params['code'];
       if (code == null) {
         _errorHandler.handleError(
             AppStrings.githubLoginFailed, ErrorHandlerService.AUTH_ERROR);
@@ -107,6 +111,11 @@ class GitHubOAuthService extends GetxService {
       }
 
       return code;
+    } on TimeoutException catch (e) {
+      _logger.e('OAuth timeout: $e');
+      _errorHandler.handleError(
+          AppStrings.githubLoginFailed, ErrorHandlerService.AUTH_ERROR);
+      return null;
     } on PlatformException catch (e) {
       _logger.e('Platform error: $e');
       _errorHandler.handleError(

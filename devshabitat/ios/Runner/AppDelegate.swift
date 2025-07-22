@@ -1,7 +1,7 @@
 import Flutter
 import UIKit
-import GoogleMaps
 import Firebase
+import GoogleMaps
 
 @main
 @objc class AppDelegate: FlutterAppDelegate {
@@ -9,20 +9,20 @@ import Firebase
     _ application: UIApplication,
     didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?
   ) -> Bool {
-    // Firebase'i başlat
+    
+    // Firebase'i initialize et
     FirebaseApp.configure()
     
-    // Google Maps API Key'i Info.plist'ten oku (güvenli yöntem)
+    // Google Maps API Key'i Info.plist'ten al ve configure et
     if let path = Bundle.main.path(forResource: "Info", ofType: "plist"),
        let plist = NSDictionary(contentsOfFile: path),
-       let googleMapsApiKey = plist["AIzaSyBpvPVP-DSCBjIIjzjP_h71QxPXXZPe7Bc"] as? String {
-      GMSServices.provideAPIKey(googleMapsApiKey)
-    } else {
-      // Fallback - direkt key (geçici)
-      GMSServices.provideAPIKey("AIzaSyBpvPVP-DSCBjIIjzjP_h71QxPXXZPe7Bc")
+       let apiKey = plist["GoogleMapsAPIKey"] as? String {
+      GMSServices.provideAPIKey(apiKey)
     }
     
+    // Flutter plugin'lerini kaydet - Firebase ve Google Maps da dahil
     GeneratedPluginRegistrant.register(with: self)
+    
     return super.application(application, didFinishLaunchingWithOptions: launchOptions)
   }
   
@@ -31,7 +31,7 @@ import Firebase
     open url: URL,
     options: [UIApplication.OpenURLOptionsKey: Any] = [:]
   ) -> Bool {
-    // GitHub OAuth ve diğer URL şemalarını işle
+    // OAuth URL şemalarını işle (GitHub, Google, Apple Sign-In)
     return super.application(app, open: url, options: options)
   }
 }

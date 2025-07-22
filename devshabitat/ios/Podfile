@@ -33,13 +33,6 @@ target 'Runner' do
 
   flutter_install_all_ios_pods File.dirname(File.realpath(__FILE__))
   
-  # Google Maps için gerekli pod'lar
-  pod 'GoogleMaps', '8.4.0'  # Daha stabil versiyon
-  pod 'Google-Maps-iOS-Utils', '~> 5.0.0'  # Versiyon güncellendi
-  
-  # Agora pod'u
-  pod 'AgoraRtcEngine_iOS', '~> 4.5.2'
-  
   target 'RunnerTests' do
     inherit! :search_paths
   end
@@ -92,9 +85,6 @@ post_install do |installer|
       if config.name == 'Debug'
         config.build_settings['EXCLUDED_ARCHS[sdk=iphonesimulator*]'] = 'arm64'
       end
-
-      # Agora için gerekli ayarlar
-      config.build_settings['VALID_ARCHS'] = 'arm64 x86_64'
       
       # Framework search paths
       config.build_settings['FRAMEWORK_SEARCH_PATHS'] ||= []

@@ -39,6 +39,15 @@
 				<string>com.tunckankilic.github</string>
 			</array>
 		</dict>
+		<!-- Firebase/Google OAuth için URL scheme -->
+		<dict>
+			<key>CFBundleURLName</key>
+			<string>Google OAuth</string>
+			<key>CFBundleURLSchemes</key>
+			<array>
+				<string>com.googleusercontent.apps.163730674615-mmjbadbppjvsua7qr0ph4hnmrprhraqb</string>
+			</array>
+		</dict>
 	</array>
 	<key>CFBundleVersion</key>
 	<string>$(FLUTTER_BUILD_NUMBER)</string>
