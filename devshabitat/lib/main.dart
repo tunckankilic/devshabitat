@@ -12,33 +12,43 @@ import 'app/services/background_message_handler_service.dart';
 import 'app/services/deep_linking_service.dart';
 import 'app/core/config/app_config.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'app/controllers/responsive_controller.dart';
 
 Future<void> main() async {
-  WidgetsFlutterBinding.ensureInitialized();
+  try {
+    WidgetsFlutterBinding.ensureInitialized();
 
-  // Ekran yönlendirmesini sadece portrait ve upside down olarak ayarla
-  await SystemChrome.setPreferredOrientations([
-    DeviceOrientation.portraitUp,
-    DeviceOrientation.portraitDown,
-  ]);
+    // Ekran yönlendirmesini sadece portrait ve upside down olarak ayarla
+    await SystemChrome.setPreferredOrientations([
+      DeviceOrientation.portraitUp,
+      DeviceOrientation.portraitDown,
+    ]);
 
-  // AppConfig servisini başlat
-  final config = Get.put(AppConfig());
-  await config.initialize();
+    // AppConfig servisini başlat
+    final config = Get.put(AppConfig());
+    await config.initialize();
 
-  // Firebase'i başlat
-  await Firebase.initializeApp(
-    options: DefaultFirebaseOptions.currentPlatform,
-  );
+    // Firebase'i başlat
+    await Firebase.initializeApp(
+      options: DefaultFirebaseOptions.currentPlatform,
+    );
 
-  // Background message handler'ı kaydet
-  FirebaseMessaging.onBackgroundMessage(firebaseMessagingBackgroundHandler);
+    // Background message handler'ı kaydet
+    FirebaseMessaging.onBackgroundMessage(firebaseMessagingBackgroundHandler);
 
-  // Deep linking servisini başlat
-  final deepLinkingService = Get.put(DeepLinkingService());
-  await deepLinkingService.init();
+    // Deep linking servisini başlat
+    final deepLinkingService = Get.put(DeepLinkingService());
+    await deepLinkingService.init();
 
-  runApp(const MyApp());
+    // Temel bağımlılıkları başlat
+    final appBinding = AppBinding();
+    appBinding.initSynchronousDependencies();
+
+    runApp(const MyApp());
+  } catch (e, stackTrace) {
+    debugPrint('Initialization error: $e\n$stackTrace');
+    runApp(const ErrorApp());
+  }
 }
 
 class MyApp extends StatelessWidget {
@@ -46,27 +56,47 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return GetMaterialApp(
-      title: AppStrings.appName,
-      theme: DevHabitatTheme.lightTheme,
-      darkTheme: DevHabitatTheme.darkTheme,
-      initialRoute: _getInitialRoute(),
-      getPages: AppPages.routes,
-      initialBinding: AppBinding(),
-      defaultTransition: Transition.fade,
-      debugShowCheckedModeBanner: false,
+    return MaterialApp(
+      home: GetMaterialApp(
+        title: AppStrings.appName,
+        theme: DevHabitatTheme.lightTheme,
+        darkTheme: DevHabitatTheme.darkTheme,
+        initialRoute: _getInitialRoute(),
+        getPages: AppPages.routes,
+        initialBinding: AppBinding(),
+        defaultTransition: Transition.fade,
+        debugShowCheckedModeBanner: false,
+        builder: (context, child) {
+          return MediaQuery(
+            data: MediaQuery.of(context).copyWith(textScaleFactor: 1.0),
+            child: child ?? const SizedBox(),
+          );
+        },
+      ),
     );
   }
 
   String _getInitialRoute() {
-    // Firebase Auth'tan mevcut kullanıcıyı kontrol et
     final currentUser = FirebaseAuth.instance.currentUser;
+    return currentUser != null ? AppRoutes.home : AppRoutes.login;
+  }
+}
 
-    // Eğer kullanıcı giriş yapmışsa anasayfaya, yapmamışsa login sayfasına yönlendir
-    if (currentUser != null) {
-      return AppRoutes.home;
-    } else {
-      return AppRoutes.login;
-    }
+class ErrorApp extends StatelessWidget {
+  const ErrorApp({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return MaterialApp(
+      home: Scaffold(
+        body: Center(
+          child: Text(
+            'Uygulama başlatılırken bir hata oluştu.\nLütfen tekrar deneyin.',
+            textAlign: TextAlign.center,
+            style: TextStyle(fontSize: 16),
+          ),
+        ),
+      ),
+    );
   }
 }

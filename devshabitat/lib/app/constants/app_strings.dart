@@ -20,6 +20,7 @@ class AppStrings {
   static const String confirmPassword = 'Confirm Password';
   static const String username = 'Username';
   static const String logout = 'Logout';
+  static const String continueWithGithub = 'Continue with GitHub';
 
   // Profile
   static const String profile = 'Profile';
