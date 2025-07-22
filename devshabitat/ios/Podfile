@@ -44,56 +44,135 @@ post_install do |installer|
     
     target.build_configurations.each do |config|
       config.build_settings['IPHONEOS_DEPLOYMENT_TARGET'] = '16.0'
-      
-      # Google Maps için gerekli ayarlar
-      config.build_settings['OTHER_LDFLAGS'] ||= []
-      config.build_settings['OTHER_LDFLAGS'] << '-ObjC'
-      
-      # XCode 15+ için gerekli ayarlar
-      config.build_settings['GCC_PREPROCESSOR_DEFINITIONS'] ||= [
-        '$(inherited)',
-        ## dart: PermissionGroup.camera
-        'PERMISSION_CAMERA=1',
-        ## dart: PermissionGroup.photos
-        'PERMISSION_PHOTOS=1',
-        ## dart: PermissionGroup.location
-        'PERMISSION_LOCATION=1',
-        ## dart: PermissionGroup.locationWhenInUse
-        'PERMISSION_LOCATION_WHEN_IN_USE=1',
-        ## dart: PermissionGroup.notification
-        'PERMISSION_NOTIFICATIONS=1',
-      ]
-      
-      # Bitcode desteğini kapat
       config.build_settings['ENABLE_BITCODE'] = 'NO'
       
-      # Swift version ayarları
-      if config.build_settings['SWIFT_VERSION'].nil?
-        config.build_settings['SWIFT_VERSION'] = '5.0'
+      # Privacy target'larını devre dışı bırak
+      if target.name.include?('_privacy') || target.product_name&.include?('_privacy')
+        config.build_settings['GENERATE_INFOPLIST_FILE'] = 'NO'
+        config.build_settings['CREATE_INFOPLIST_SECTION_IN_BINARY'] = 'NO'
+        config.build_settings['INFOPLIST_FILE'] = ''
       end
       
-      # Privacy manifest ayarları
-      config.build_settings['GENERATE_INFOPLIST_FILE'] = 'YES'
-      
-      # Metal performans optimizasyonları
-      config.build_settings['MTL_ENABLE_DEBUG_INFO'] = 'NO'
-      
-      # XCode 15 uyumluluk ayarları
-      config.build_settings['DEAD_CODE_STRIPPING'] = 'YES'
-      
-      # Simulator için arm64 hariç tut (sadece Debug'da)
-      if config.name == 'Debug'
-        config.build_settings['EXCLUDED_ARCHS[sdk=iphonesimulator*]'] = 'arm64'
+      # gRPC hedefleri için özel ayarlar
+      if target.name == 'gRPC-Core' || target.name == 'gRPC-C++'
+        config.build_settings['CLANG_ALLOW_NON_MODULAR_INCLUDES_IN_FRAMEWORK_MODULES'] = 'YES'
+        config.build_settings['GCC_PREPROCESSOR_DEFINITIONS'] ||= ['$(inherited)']
+        config.build_settings['GENERATE_INFOPLIST_FILE'] = 'NO'
+        config.build_settings['CREATE_INFOPLIST_SECTION_IN_BINARY'] = 'NO'
+        config.build_settings['SKIP_INSTALL'] = 'YES'
       end
+    end
+  end
+  
+  # Privacy target'larını kaldır
+  targets_to_remove = []
+  installer.pods_project.targets.each do |target|
+    if target.name.include?('_privacy') || 
+       target.product_name&.include?('_privacy') ||
+       target.name.end_with?('Privacy')
+      targets_to_remove << target
+    end
+  end
+  
+  targets_to_remove.each do |target|
+    puts "🗑️ Removing privacy target: #{target.name}"
+    target.remove_from_project
+  end
+  
+  # Privacy bundle file referanslarını kaldır
+  files_to_remove = []
+  installer.pods_project.files.each do |file_ref|
+    if file_ref.path&.include?('_privacy.bundle') || 
+       file_ref.path&.include?('PrivacyInfo.xcprivacy')
+      puts "🗑️ Removing problematic bundle: #{file_ref.path}"
+      files_to_remove << file_ref
+    end
+  end
+  files_to_remove.each { |file_ref| file_ref.remove_from_project }
+  
+  # CocoaPods resources script'ini düzenle - problematik bundle'ları kaldır
+  puts "🔧 Cleaning CocoaPods resources script..."
+  resources_script_path = File.join('Pods', 'Target Support Files', 'Pods-Runner', 'Pods-Runner-resources.sh')
+  
+  if File.exist?(resources_script_path)
+    script_content = File.read(resources_script_path)
+    
+    # Privacy bundle satırlarını kaldır
+    privacy_bundles = [
+      'AppAuthCore_Privacy.bundle',
+      'FirebaseAuth_Privacy.bundle',
+      'FirebaseCore_Privacy.bundle',
+      'FirebaseCoreExtension_Privacy.bundle',
+      'FirebaseCoreInternal_Privacy.bundle',
+      'FirebaseCrashlytics_Privacy.bundle',
+      'FirebaseFirestore_Privacy.bundle',
+      'FirebaseFirestoreInternal_Privacy.bundle',
+      'FirebaseInstallations_Privacy.bundle',
+      'FirebaseMessaging_Privacy.bundle',
+      'GTMAppAuth_Privacy.bundle',
+      'GTMSessionFetcher_Core_Privacy.bundle',
+      'GTMSessionFetcher_Full_Privacy.bundle',
+      'GoogleDataTransport_Privacy.bundle',
+      'GoogleUtilities_Privacy.bundle',
+      'FBLPromises_Privacy.bundle',
+      'Promises_Privacy.bundle',
+      'xcprivacy.bundle',
+      'firebase_messaging_Privacy.bundle',
+      'leveldb_Privacy.bundle',
+      'nanopb_Privacy.bundle',
+      '_privacy.bundle'
+    ]
+    
+    # gRPC bundle'ları da kaldır
+    grpc_bundles = [
+      'grpc.bundle',
+      'grpcpp.bundle',
+      'gRPCCertificates-Cpp.bundle',
+      'openssl_grpc.bundle'
+    ]
+    
+    problematic_bundles = privacy_bundles + grpc_bundles
+    
+    problematic_bundles.each do |bundle|
+      script_content.gsub!(/.*install_resource.*#{Regexp.escape(bundle)}.*\n/, '')
+    end
+    
+    File.write(resources_script_path, script_content)
+    puts "✅ Resources script cleaned successfully"
+  end
+  
+  # Build script phase ekle - runtime'da bundle'ları temizle
+  installer.pods_project.targets.each do |target|
+    if target.name == 'Runner'
+      script_phase = target.new_shell_script_build_phase('Clean Problematic Bundles')
+      script_phase.shell_script = <<~SCRIPT
+        echo "🧹 Cleaning problematic bundles from build products..."
+        
+        # Privacy ve gRPC bundle'ları temizle
+        find "${BUILT_PRODUCTS_DIR}" -name "*Privacy.bundle" -delete 2>/dev/null || true
+        find "${BUILT_PRODUCTS_DIR}" -name "*privacy.bundle" -delete 2>/dev/null || true
+        find "${BUILT_PRODUCTS_DIR}" -name "grpc.bundle" -delete 2>/dev/null || true
+        find "${BUILT_PRODUCTS_DIR}" -name "grpcpp.bundle" -delete 2>/dev/null || true
+        find "${BUILT_PRODUCTS_DIR}" -name "gRPCCertificates-Cpp.bundle" -delete 2>/dev/null || true
+        find "${BUILT_PRODUCTS_DIR}" -name "openssl_grpc.bundle" -delete 2>/dev/null || true
+        find "${BUILT_PRODUCTS_DIR}" -name "xcprivacy.bundle" -delete 2>/dev/null || true
+        
+        # Target build dir'den de temizle
+        if [ -d "${TARGET_BUILD_DIR}" ]; then
+          find "${TARGET_BUILD_DIR}" -name "*Privacy.bundle" -delete 2>/dev/null || true
+          find "${TARGET_BUILD_DIR}" -name "*privacy.bundle" -delete 2>/dev/null || true
+          find "${TARGET_BUILD_DIR}" -name "grpc.bundle" -delete 2>/dev/null || true
+          find "${TARGET_BUILD_DIR}" -name "grpcpp.bundle" -delete 2>/dev/null || true
+          find "${TARGET_BUILD_DIR}" -name "gRPCCertificates-Cpp.bundle" -delete 2>/dev/null || true
+          find "${TARGET_BUILD_DIR}" -name "openssl_grpc.bundle" -delete 2>/dev/null || true
+          find "${TARGET_BUILD_DIR}" -name "xcprivacy.bundle" -delete 2>/dev/null || true
+        fi
+        
+        echo "✅ Bundle cleanup completed"
+      SCRIPT
       
-      # Framework search paths
-      config.build_settings['FRAMEWORK_SEARCH_PATHS'] ||= []
-      config.build_settings['FRAMEWORK_SEARCH_PATHS'] << '$(inherited)'
-      config.build_settings['FRAMEWORK_SEARCH_PATHS'] << '$(PROJECT_DIR)/../.symlinks/plugins/google_maps_flutter_ios/ios/Frameworks'
-      
-      # Header search paths
-      config.build_settings['HEADER_SEARCH_PATHS'] ||= []
-      config.build_settings['HEADER_SEARCH_PATHS'] << '$(inherited)'
+      # Script'i build'in sonunda çalıştır
+      target.build_phases.move(script_phase, target.build_phases.count - 1)
     end
   end
 end

@@ -1,299 +1,233 @@
 import 'package:devshabitat/app/constants/app_strings.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import '../../../controllers/responsive_controller.dart';
 import '../../../controllers/auth_controller.dart';
 import '../widgets/social_login_button.dart';
 
 class SmallPhoneLogin extends GetView<AuthController> {
   final _responsiveController = Get.find<ResponsiveController>();
+  final _emailController = TextEditingController();
+  final _passwordController = TextEditingController();
+  final _formKey = GlobalKey<FormState>();
 
   SmallPhoneLogin({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      padding: _responsiveController.responsivePadding(all: 16.0),
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          SizedBox(
-              height: _responsiveController.responsiveValue(
-            mobile: 32.0,
-            tablet: 48.0,
-          )),
-          Image.asset(
-            'assets/images/logo.svg',
-            height: _responsiveController.responsiveValue(
-              mobile: 80.0,
-              tablet: 120.0,
-            ),
-          ),
-          SizedBox(
-              height: _responsiveController.responsiveValue(
-            mobile: 32.0,
-            tablet: 48.0,
-          )),
-          Text(
-            AppStrings.welcome,
-            style: TextStyle(
-              fontSize: _responsiveController.responsiveValue(
-                mobile: 20.0,
-                tablet: 24.0,
-              ),
-              fontWeight: FontWeight.bold,
-            ),
-          ),
-          SizedBox(
-              height: _responsiveController.responsiveValue(
-            mobile: 8.0,
-            tablet: 12.0,
-          )),
-          Text(
-            AppStrings.loginDescription,
-            style: TextStyle(
-              fontSize: _responsiveController.responsiveValue(
-                mobile: 14.0,
-                tablet: 16.0,
-              ),
-              color: Colors.grey[600],
-            ),
-          ),
-          SizedBox(
-              height: _responsiveController.responsiveValue(
-            mobile: 32.0,
-            tablet: 48.0,
-          )),
-          Form(
-            child: Column(
-              children: [
-                TextFormField(
-                  controller: controller.emailController,
-                  keyboardType: TextInputType.emailAddress,
-                  decoration: InputDecoration(
-                    labelText: AppStrings.email,
-                    prefixIcon: Icon(
-                      Icons.email,
-                      size: _responsiveController.responsiveValue(
-                        mobile: 20.0,
-                        tablet: 24.0,
-                      ),
-                    ),
-                    contentPadding: _responsiveController.responsivePadding(
-                      horizontal: 12.0,
-                      vertical: 12.0,
-                    ),
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(
-                        _responsiveController.responsiveValue(
-                          mobile: 8.0,
-                          tablet: 12.0,
-                        ),
-                      ),
-                    ),
-                  ),
-                  style: TextStyle(
-                    fontSize: _responsiveController.responsiveValue(
-                      mobile: 14.0,
-                      tablet: 16.0,
-                    ),
-                  ),
-                ),
-                SizedBox(
-                    height: _responsiveController.responsiveValue(
-                  mobile: 16.0,
-                  tablet: 24.0,
-                )),
-                TextFormField(
-                  controller: controller.passwordController,
-                  obscureText: true,
-                  decoration: InputDecoration(
-                    labelText: 'Şifre',
-                    prefixIcon: Icon(
-                      Icons.lock,
-                      size: _responsiveController.responsiveValue(
-                        mobile: 20.0,
-                        tablet: 24.0,
-                      ),
-                    ),
-                    contentPadding: _responsiveController.responsivePadding(
-                      horizontal: 12.0,
-                      vertical: 12.0,
-                    ),
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(
-                        _responsiveController.responsiveValue(
-                          mobile: 8.0,
-                          tablet: 12.0,
-                        ),
-                      ),
-                    ),
-                  ),
-                  style: TextStyle(
-                    fontSize: _responsiveController.responsiveValue(
-                      mobile: 14.0,
-                      tablet: 16.0,
-                    ),
-                  ),
-                ),
-                SizedBox(
-                    height: _responsiveController.responsiveValue(
-                  mobile: 8.0,
-                  tablet: 12.0,
-                )),
-                Align(
-                  alignment: Alignment.centerRight,
-                  child: TextButton(
-                    onPressed: () => Get.toNamed('/forgot-password'),
-                    child: Text(
-                      AppStrings.forgotPassword,
-                      style: TextStyle(
-                        fontSize: _responsiveController.responsiveValue(
-                          mobile: 12.0,
-                          tablet: 14.0,
-                        ),
-                      ),
-                    ),
-                  ),
-                ),
-                SizedBox(
-                    height: _responsiveController.responsiveValue(
-                  mobile: 24.0,
-                  tablet: 32.0,
-                )),
-                Obx(() {
-                  return ElevatedButton(
-                    onPressed: controller.isLoading
-                        ? null
-                        : () => controller.signInWithEmailAndPassword(),
-                    style: ElevatedButton.styleFrom(
-                      padding: _responsiveController.responsivePadding(
-                        vertical: 12.0,
-                      ),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(
-                          _responsiveController.responsiveValue(
-                            mobile: 8.0,
-                            tablet: 12.0,
-                          ),
-                        ),
-                      ),
-                    ),
-                    child: controller.isLoading
-                        ? SizedBox(
-                            width: _responsiveController.responsiveValue(
-                              mobile: 20.0,
-                              tablet: 24.0,
-                            ),
-                            height: _responsiveController.responsiveValue(
-                              mobile: 20.0,
-                              tablet: 24.0,
-                            ),
-                            child: CircularProgressIndicator(
-                              valueColor:
-                                  AlwaysStoppedAnimation<Color>(Colors.white),
-                            ),
-                          )
-                        : Text(
-                            AppStrings.login,
-                            style: TextStyle(
-                              fontSize: _responsiveController.responsiveValue(
-                                mobile: 14.0,
-                                tablet: 16.0,
-                              ),
-                            ),
-                          ),
-                  );
-                }),
-              ],
-            ),
-          ),
-          SizedBox(
-              height: _responsiveController.responsiveValue(
-            mobile: 24.0,
-            tablet: 32.0,
-          )),
-          Row(
-            children: [
-              Expanded(child: Divider()),
-              Padding(
-                padding: _responsiveController.responsivePadding(
-                  horizontal: 12.0,
-                ),
-                child: Text(
-                  AppStrings.or,
-                  style: TextStyle(
-                    fontSize: _responsiveController.responsiveValue(
-                      mobile: 12.0,
-                      tablet: 14.0,
-                    ),
-                    color: Colors.grey[600],
-                  ),
-                ),
-              ),
-              Expanded(child: Divider()),
-            ],
-          ),
-          SizedBox(
-              height: _responsiveController.responsiveValue(
-            mobile: 24.0,
-            tablet: 32.0,
-          )),
-          SocialLoginButton(
-            text: AppStrings.continueWithGoogle,
-            imagePath: 'assets/icons/google.png',
-            onPressed: () => controller.signInWithGoogle(),
-            backgroundColor: Colors.white,
-            textColor: Colors.black87,
-            isOutlined: true,
-          ),
-          SizedBox(
-              height: _responsiveController.responsiveValue(
-            mobile: 12.0,
-            tablet: 16.0,
-          )),
-          SocialLoginButton(
-            text: AppStrings.continueWithApple,
-            imagePath: 'assets/icons/apple.png',
-            onPressed: () => controller.signInWithApple(),
-            backgroundColor: Colors.black,
-            textColor: Colors.white,
-            isAppleButton: true,
-          ),
-          SizedBox(
-              height: _responsiveController.responsiveValue(
-            mobile: 24.0,
-            tablet: 32.0,
-          )),
-          Row(
+    return Material(
+      color: Colors.transparent,
+      child: Container(
+        padding: _responsiveController.responsivePadding(all: 16.0),
+        child: Form(
+          key: _formKey,
+          child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Text(
-                AppStrings.noAccount,
-                style: TextStyle(
-                  fontSize: _responsiveController.responsiveValue(
-                    mobile: 12.0,
-                    tablet: 14.0,
+              SizedBox(
+                height: _responsiveController.responsiveValue(
+                  mobile: 120.0,
+                  tablet: 160.0,
+                ),
+                child: SvgPicture.asset(
+                  'assets/images/logo.svg',
+                  fit: BoxFit.contain,
+                ),
+              ),
+              SizedBox(
+                height: _responsiveController.responsiveValue(
+                  mobile: 32.0,
+                  tablet: 48.0,
+                ),
+              ),
+              TextFormField(
+                controller: _emailController,
+                decoration: InputDecoration(
+                  labelText: AppStrings.email,
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(8.0),
+                  ),
+                  prefixIcon: Icon(Icons.email_outlined),
+                ),
+                keyboardType: TextInputType.emailAddress,
+                validator: (value) {
+                  if (value == null || value.isEmpty) {
+                    return 'Lütfen email adresinizi girin';
+                  }
+                  if (!GetUtils.isEmail(value)) {
+                    return 'Geçerli bir email adresi girin';
+                  }
+                  return null;
+                },
+              ),
+              SizedBox(
+                height: _responsiveController.responsiveValue(
+                  mobile: 16.0,
+                  tablet: 24.0,
+                ),
+              ),
+              TextFormField(
+                controller: _passwordController,
+                decoration: InputDecoration(
+                  labelText: AppStrings.password,
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(8.0),
+                  ),
+                  prefixIcon: Icon(Icons.lock_outline),
+                  suffixIcon: Obx(() => IconButton(
+                        icon: Icon(
+                          controller.isPasswordVisible
+                              ? Icons.visibility_outlined
+                              : Icons.visibility_off_outlined,
+                        ),
+                        onPressed: () => controller.togglePasswordVisibility(),
+                      )),
+                ),
+                obscureText: !controller.isPasswordVisible,
+                validator: (value) {
+                  if (value == null || value.isEmpty) {
+                    return 'Lütfen şifrenizi girin';
+                  }
+                  if (value.length < 6) {
+                    return 'Şifre en az 6 karakter olmalıdır';
+                  }
+                  return null;
+                },
+              ),
+              SizedBox(
+                height: _responsiveController.responsiveValue(
+                  mobile: 8.0,
+                  tablet: 12.0,
+                ),
+              ),
+              Align(
+                alignment: Alignment.centerRight,
+                child: TextButton(
+                  onPressed: () => Get.toNamed('/auth/forgot-password'),
+                  child: Text(AppStrings.forgotPassword),
+                ),
+              ),
+              SizedBox(
+                height: _responsiveController.responsiveValue(
+                  mobile: 16.0,
+                  tablet: 24.0,
+                ),
+              ),
+              SizedBox(
+                width: double.infinity,
+                height: _responsiveController.responsiveValue(
+                  mobile: 48.0,
+                  tablet: 56.0,
+                ),
+                child: ElevatedButton(
+                  onPressed: () {
+                    if (_formKey.currentState!.validate()) {
+                      controller.signInWithEmailAndPassword(
+                        _emailController.text,
+                        _passwordController.text,
+                      );
+                    }
+                  },
+                  style: ElevatedButton.styleFrom(
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(8.0),
+                    ),
+                  ),
+                  child: Text(
+                    AppStrings.login,
+                    style: TextStyle(
+                      fontSize: _responsiveController.responsiveValue(
+                        mobile: 16.0,
+                        tablet: 18.0,
+                      ),
+                    ),
                   ),
                 ),
               ),
-              TextButton(
-                onPressed: () => Get.toNamed('/register'),
-                child: Text(
-                  AppStrings.register,
-                  style: TextStyle(
-                    fontSize: _responsiveController.responsiveValue(
-                      mobile: 12.0,
-                      tablet: 14.0,
-                    ),
-                    fontWeight: FontWeight.bold,
-                  ),
+              SizedBox(
+                height: _responsiveController.responsiveValue(
+                  mobile: 24.0,
+                  tablet: 32.0,
                 ),
+              ),
+              Row(
+                children: [
+                  Expanded(child: Divider()),
+                  Padding(
+                    padding: EdgeInsets.symmetric(horizontal: 16.0),
+                    child: Text('veya'),
+                  ),
+                  Expanded(child: Divider()),
+                ],
+              ),
+              SizedBox(
+                height: _responsiveController.responsiveValue(
+                  mobile: 24.0,
+                  tablet: 32.0,
+                ),
+              ),
+              SocialLoginButton(
+                text: AppStrings.continueWithGoogle,
+                imagePath: 'assets/icons/baseline_google_black_48dp.png',
+                onPressed: () => controller.signInWithGoogle(),
+                backgroundColor: Colors.white,
+                textColor: Colors.black87,
+                isOutlined: true,
+              ),
+              SizedBox(
+                height: _responsiveController.responsiveValue(
+                  mobile: 12.0,
+                  tablet: 16.0,
+                ),
+              ),
+              SocialLoginButton(
+                text: AppStrings.continueWithApple,
+                imagePath: 'assets/icons/apple-logo.png',
+                onPressed: () => controller.signInWithApple(),
+                backgroundColor: Colors.black,
+                textColor: Colors.white,
+                isAppleButton: true,
+              ),
+              SizedBox(
+                height: _responsiveController.responsiveValue(
+                  mobile: 12.0,
+                  tablet: 16.0,
+                ),
+              ),
+              SocialLoginButton(
+                text: AppStrings.continueWithGithub,
+                imagePath: 'assets/icons/github-mark.png',
+                onPressed: () => controller.signInWithGithub(),
+                backgroundColor: Colors.black87,
+                textColor: Colors.white,
+              ),
+              SizedBox(
+                height: _responsiveController.responsiveValue(
+                  mobile: 24.0,
+                  tablet: 32.0,
+                ),
+              ),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Text('Hesabınız yok mu?'),
+                  TextButton(
+                    onPressed: () => Get.toNamed('/auth/register'),
+                    child: Text('Kayıt Ol'),
+                  ),
+                ],
               ),
             ],
           ),
-        ],
+        ),
       ),
     );
+  }
+
+  @override
+  void dispose() {
+    _emailController.dispose();
+    _passwordController.dispose();
   }
 }

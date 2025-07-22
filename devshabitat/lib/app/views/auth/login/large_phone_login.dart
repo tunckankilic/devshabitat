@@ -160,7 +160,10 @@ class LargePhoneLogin extends GetView<AuthController> {
                   return ElevatedButton(
                     onPressed: controller.isLoading
                         ? null
-                        : () => controller.signInWithEmailAndPassword(),
+                        : () => controller.signInWithEmailAndPassword(
+                              controller.emailController.text,
+                              controller.passwordController.text,
+                            ),
                     style: ElevatedButton.styleFrom(
                       padding: _responsiveController.responsivePadding(
                         vertical: 16.0,

@@ -18,6 +18,7 @@ class AuthController extends GetxController {
   final RxMap<String, dynamic> _userProfile = RxMap<String, dynamic>();
   final RxBool _isLoading = false.obs;
   final RxString _lastError = ''.obs;
+  final RxBool _isPasswordVisible = false.obs;
   final githubUsernameController = TextEditingController();
 
   // Platform bazlı kontroller
@@ -40,6 +41,11 @@ class AuthController extends GetxController {
   String get lastError => _lastError.value;
   bool get isAppleSignInAvailable => _isAppleSignInAvailable.value;
   bool get isGoogleSignInAvailable => _isGoogleSignInAvailable.value;
+  bool get isPasswordVisible => _isPasswordVisible.value;
+
+  void togglePasswordVisibility() {
+    _isPasswordVisible.value = !_isPasswordVisible.value;
+  }
 
   @override
   void onInit() {
@@ -222,8 +228,24 @@ class AuthController extends GetxController {
   }
 
   // Email auth delegations
-  Future<void> signInWithEmailAndPassword() =>
-      _emailAuth.signInWithEmailAndPassword();
+  Future<void> signInWithEmailAndPassword(String email, String password) async {
+    try {
+      if (email.isEmpty || password.isEmpty) {
+        throw Exception('E-posta ve şifre alanları boş bırakılamaz');
+      }
+
+      _isLoading.value = true;
+      _lastError.value = '';
+      await _authRepository.signInWithEmailAndPassword(email, password);
+      _errorHandler.handleSuccess('Giriş başarılı');
+    } catch (e) {
+      _lastError.value = e.toString();
+      _errorHandler.handleError(e, ErrorHandlerService.AUTH_ERROR);
+    } finally {
+      _isLoading.value = false;
+    }
+  }
+
   Future<void> createUserWithEmailAndPassword() =>
       _emailAuth.createUserWithEmailAndPassword();
   Future<void> sendPasswordResetEmail() => _emailAuth.sendPasswordResetEmail();

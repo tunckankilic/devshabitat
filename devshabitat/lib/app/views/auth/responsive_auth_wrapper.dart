@@ -149,7 +149,7 @@ class ResponsiveAuthWrapper extends StatelessWidget {
                 isLogin: isLogin,
                 onSubmit: (email, password) {
                   if (isLogin) {
-                    authController.signInWithEmailAndPassword();
+                    authController.signInWithEmailAndPassword(email, password);
                   } else {
                     authController.createUserWithEmailAndPassword();
                   }

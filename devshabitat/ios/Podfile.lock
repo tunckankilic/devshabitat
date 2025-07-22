@@ -1190,11 +1190,11 @@ PODS:
   - abseil/xcprivacy (1.20240722.0)
   - app_links (0.0.1):
     - Flutter
-  - AppAuth (1.7.6):
-    - AppAuth/Core (= 1.7.6)
-    - AppAuth/ExternalUserAgent (= 1.7.6)
-  - AppAuth/Core (1.7.6)
-  - AppAuth/ExternalUserAgent (1.7.6):
+  - AppAuth (2.0.0):
+    - AppAuth/Core (= 2.0.0)
+    - AppAuth/ExternalUserAgent (= 2.0.0)
+  - AppAuth/Core (2.0.0)
+  - AppAuth/ExternalUserAgent (2.0.0):
     - AppAuth/Core
   - AppCheckCore (11.2.0):
     - GoogleUtilities/Environment (~> 8.0)
@@ -1206,7 +1206,7 @@ PODS:
   - BoringSSL-GRPC/Implementation (0.0.37):
     - BoringSSL-GRPC/Interface (= 0.0.37)
   - BoringSSL-GRPC/Interface (0.0.37)
-  - cloud_firestore (5.6.11):
+  - cloud_firestore (5.6.12):
     - Firebase/Firestore (= 11.15.0)
     - firebase_core
     - Flutter
@@ -1265,22 +1265,22 @@ PODS:
   - Firebase/Storage (11.15.0):
     - Firebase/CoreOnly
     - FirebaseStorage (~> 11.15.0)
-  - firebase_auth (5.6.2):
+  - firebase_auth (5.7.0):
     - Firebase/Auth (= 11.15.0)
     - firebase_core
     - Flutter
-  - firebase_core (3.15.1):
+  - firebase_core (3.15.2):
     - Firebase/CoreOnly (= 11.15.0)
     - Flutter
-  - firebase_crashlytics (4.3.9):
+  - firebase_crashlytics (4.3.10):
     - Firebase/Crashlytics (= 11.15.0)
     - firebase_core
     - Flutter
-  - firebase_messaging (15.2.9):
+  - firebase_messaging (15.2.10):
     - Firebase/Messaging (= 11.15.0)
     - firebase_core
     - Flutter
-  - firebase_storage (12.4.9):
+  - firebase_storage (12.4.10):
     - Firebase/Storage (= 11.15.0)
     - firebase_core
     - Flutter
@@ -1392,10 +1392,9 @@ PODS:
     - Google-Maps-iOS-Utils (< 7.0, >= 5.0)
     - GoogleMaps (< 10.0, >= 8.4)
   - google_sign_in_ios (0.0.1):
-    - AppAuth (>= 1.7.4)
     - Flutter
     - FlutterMacOS
-    - GoogleSignIn (~> 8.0)
+    - GoogleSignIn (~> 9.0)
     - GTMSessionFetcher (>= 3.4.0)
   - GoogleDataTransport (10.1.0):
     - nanopb (~> 3.30910.0)
@@ -1403,10 +1402,10 @@ PODS:
   - GoogleMaps (9.4.0):
     - GoogleMaps/Maps (= 9.4.0)
   - GoogleMaps/Maps (9.4.0)
-  - GoogleSignIn (8.0.0):
-    - AppAuth (< 2.0, >= 1.7.3)
+  - GoogleSignIn (9.0.0):
+    - AppAuth (~> 2.0)
     - AppCheckCore (~> 11.0)
-    - GTMAppAuth (< 5.0, >= 4.1.1)
+    - GTMAppAuth (~> 5.0)
     - GTMSessionFetcher/Core (~> 3.3)
   - GoogleUtilities/AppDelegateSwizzler (8.1.0):
     - GoogleUtilities/Environment
@@ -1524,8 +1523,8 @@ PODS:
     - gRPC-Core/Privacy (= 1.69.0)
   - gRPC-Core/Interface (1.69.0)
   - gRPC-Core/Privacy (1.69.0)
-  - GTMAppAuth (4.1.1):
-    - AppAuth/Core (~> 1.7)
+  - GTMAppAuth (5.0.0):
+    - AppAuth/Core (~> 2.0)
     - GTMSessionFetcher/Core (< 4.0, >= 3.3)
   - GTMSessionFetcher (3.5.0):
     - GTMSessionFetcher/Full (= 3.5.0)
@@ -1755,21 +1754,21 @@ EXTERNAL SOURCES:
 SPEC CHECKSUMS:
   abseil: a05cc83bf02079535e17169a73c5be5ba47f714b
   app_links: e70ca16b4b0f88253b3b3660200d4a10b4ea9795
-  AppAuth: d4f13a8fe0baf391b2108511793e4b479691fb73
+  AppAuth: 1c1a8afa7e12f2ec3a294d9882dfa5ab7d3cb063
   AppCheckCore: cc8fd0a3a230ddd401f326489c99990b013f0c4f
   BoringSSL-GRPC: dded2a44897e45f28f08ae87a55ee4bcd19bc508
-  cloud_firestore: 06bb439e96941cdca91ac6bff6fa17d94952d4a8
+  cloud_firestore: 97e42181866db3cba3fe3935895ab779b6acacd6
   connectivity_plus: 2a701ffec2c0ae28a48cf7540e279787e77c447d
   device_info_plus: bf2e3232933866d73fe290f2942f2156cdd10342
   DKImagePickerController: 946cec48c7873164274ecc4624d19e3da4c1ef3c
   DKPhotoGallery: b3834fecb755ee09a593d7c9e389d8b5d6deed60
   file_picker: b159e0c068aef54932bb15dc9fd1571818edaf49
   Firebase: d99ac19b909cd2c548339c2241ecd0d1599ab02e
-  firebase_auth: b8ed959bf77eca5cf0312b5e29708fe8311a0ddf
-  firebase_core: cf4d42a8ac915e51c0c2dc103442f3036d941a2d
-  firebase_crashlytics: 9653f2d715c7d217ea34f3ee3e1d1e56672d5963
-  firebase_messaging: fee490327c1aae28a0da1e65fca856547deca493
-  firebase_storage: 4fbb09859bc847fe92d6fb3f5d4ed8cf7fe92164
+  firebase_auth: 5342db41af2ba5ed32a6177d9e326eecbebda912
+  firebase_core: 99a37263b3c27536063a7b601d9e2a49400a433c
+  firebase_crashlytics: 986773c0c7ea4c3f5a4ead141b58522fcd9dfdb1
+  firebase_messaging: bf6697c61f31c7cc0f654131212ff04c0115c2c7
+  firebase_storage: df33afa2324a7c6c444eba802576f1b1ba7a8108
   FirebaseAppCheckInterop: 06fe5a3799278ae4667e6c432edd86b1030fa3df
   FirebaseAuth: a6575e5fbf46b046c58dc211a28a5fbdd8d4c83b
   FirebaseAuthInterop: 7087d7a4ee4bc4de019b2d0c240974ed5d89e2fd
@@ -1795,14 +1794,14 @@ SPEC CHECKSUMS:
   geolocator_apple: 66b711889fd333205763b83c9dcf0a57a28c7afd
   Google-Maps-iOS-Utils: 0a484b05ed21d88c9f9ebbacb007956edd508a96
   google_maps_flutter_ios: e31555a04d1986ab130f2b9f24b6cdc861acc6d3
-  google_sign_in_ios: 7411fab6948df90490dc4620ecbcabdc3ca04017
+  google_sign_in_ios: 4bb0e529b167cadc6ac785b6ed943c0a0a4cc1c9
   GoogleDataTransport: aae35b7ea0c09004c3797d53c8c41f66f219d6a7
   GoogleMaps: 0608099d4870cac8754bdba9b6953db543432438
-  GoogleSignIn: ce8c89bb9b37fb624b92e7514cc67335d1e277e4
+  GoogleSignIn: c7f09cfbc85a1abf69187be091997c317cc33b77
   GoogleUtilities: 00c88b9a86066ef77f0da2fab05f65d7768ed8e1
   "gRPC-C++": cc207623316fb041a7a3e774c252cf68a058b9e8
   gRPC-Core: 860978b7db482de8b4f5e10677216309b5ff6330
-  GTMAppAuth: f69bd07d68cd3b766125f7e072c45d7340dea0de
+  GTMAppAuth: 217a876b249c3c585a54fd6f73e6b58c4f5c4238
   GTMSessionFetcher: 5aea5ba6bd522a239e236100971f10cb71b96ab6
   image_cropper: e0bb0042e4404ff2ef134e5cf0492cbd892156cd
   image_picker_ios: c560581cceedb403a6ff17f2f816d7fea1421fc1
@@ -1831,6 +1830,6 @@ SPEC CHECKSUMS:
   WebRTC-SDK: dff00a3892bc570b6014e046297782084071657e
   webview_flutter_wkwebview: a4af96a051138e28e29f60101d094683b9f82188
 
-PODFILE CHECKSUM: 8a2c3d6600c6a4344c003d7e2cf4b9832929a224
+PODFILE CHECKSUM: e2711e903b5e132395fedfdfdf15a1d242c253a5
 
 COCOAPODS: 1.16.2
