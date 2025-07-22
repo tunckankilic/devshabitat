@@ -1,8 +1,7 @@
 import Flutter
 import UIKit
-import GoogleMaps
 import Firebase
-import FBSDKCoreKit
+import GoogleMaps
 
 @main
 @objc class AppDelegate: FlutterAppDelegate {
@@ -10,17 +9,20 @@ import FBSDKCoreKit
     _ application: UIApplication,
     didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?
   ) -> Bool {
-    // Firebase'i başlat
+    
+    // Firebase'i initialize et
     FirebaseApp.configure()
     
-    // Facebook SDK'yı başlat
-    ApplicationDelegate.shared.application(
-        application,
-        didFinishLaunchingWithOptions: launchOptions
-    )
+    // Google Maps API Key'i Info.plist'ten al ve configure et
+    if let path = Bundle.main.path(forResource: "Info", ofType: "plist"),
+       let plist = NSDictionary(contentsOfFile: path),
+       let apiKey = plist["GoogleMapsAPIKey"] as? String {
+      GMSServices.provideAPIKey(apiKey)
+    }
     
-    GMSServices.provideAPIKey("AIzaSyBpvPVP-DSCBjIIjzjP_h71QxPXXZPe7Bc")
+    // Flutter plugin'lerini kaydet - Firebase ve Google Maps da dahil
     GeneratedPluginRegistrant.register(with: self)
+    
     return super.application(application, didFinishLaunchingWithOptions: launchOptions)
   }
   
@@ -29,17 +31,7 @@ import FBSDKCoreKit
     open url: URL,
     options: [UIApplication.OpenURLOptionsKey: Any] = [:]
   ) -> Bool {
-    // Facebook URL şemasını işle
-    if ApplicationDelegate.shared.application(
-        app,
-        open: url,
-        sourceApplication: options[UIApplication.OpenURLOptionsKey.sourceApplication] as? String,
-        annotation: options[UIApplication.OpenURLOptionsKey.annotation]
-    ) {
-        return true
-    }
-    
-    // Diğer URL şemalarını işle
+    // OAuth URL şemalarını işle (GitHub, Google, Apple Sign-In)
     return super.application(app, open: url, options: options)
   }
 }

@@ -326,6 +326,7 @@ class TabletLogin extends GetView<AuthController> {
                                 onPressed: () => controller.signInWithApple(),
                                 backgroundColor: Colors.black,
                                 textColor: Colors.white,
+                                isAppleButton: true,
                               ),
                             ),
                           ],
