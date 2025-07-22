@@ -97,6 +97,7 @@ class SocialLoginButton extends StatelessWidget {
                       tablet: 12.0,
                     ),
                   ),
+                  /*
                   Image.asset(
                     imagePath,
                     height: _responsiveController.responsiveValue(
@@ -108,6 +109,7 @@ class SocialLoginButton extends StatelessWidget {
                       tablet: 32.0,
                     ),
                   ),
+                  */
                   SizedBox(
                     width: _responsiveController.responsiveValue(
                       mobile: 8.0,
