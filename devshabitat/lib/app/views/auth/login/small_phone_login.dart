@@ -4,6 +4,7 @@ import 'package:get/get.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import '../../../controllers/responsive_controller.dart';
 import '../../../controllers/auth_controller.dart';
+import '../../../routes/app_pages.dart';
 import '../widgets/social_login_button.dart';
 
 class SmallPhoneLogin extends GetView<AuthController> {
@@ -104,7 +105,7 @@ class SmallPhoneLogin extends GetView<AuthController> {
               Align(
                 alignment: Alignment.centerRight,
                 child: TextButton(
-                  onPressed: () => Get.toNamed('/auth/forgot-password'),
+                  onPressed: () => Get.toNamed(AppRoutes.forgotPassword),
                   child: Text(AppStrings.forgotPassword),
                 ),
               ),
@@ -213,7 +214,7 @@ class SmallPhoneLogin extends GetView<AuthController> {
                 children: [
                   Text('Hesabınız yok mu?'),
                   TextButton(
-                    onPressed: () => Get.toNamed('/auth/register'),
+                    onPressed: () => Get.toNamed(AppRoutes.register),
                     child: Text('Kayıt Ol'),
                   ),
                 ],

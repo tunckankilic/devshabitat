@@ -19,7 +19,12 @@ class PersonalInfoStep extends GetView<RegistrationController> {
   Future<void> _pickImage() async {
     try {
       final ImagePicker picker = ImagePicker();
-      final XFile? image = await picker.pickImage(source: ImageSource.gallery);
+      final XFile? image = await picker.pickImage(
+        source: ImageSource.gallery,
+        maxWidth: 1024, // Maksimum genişlik
+        maxHeight: 1024, // Maksimum yükseklik
+        imageQuality: 85, // Kalite
+      );
 
       if (image != null) {
         final croppedFile = await ImageCropper().cropImage(
@@ -31,40 +36,106 @@ class PersonalInfoStep extends GetView<RegistrationController> {
         );
 
         if (croppedFile != null) {
+          // Yükleme başlamadan önce loading dialogunu göster
           Get.dialog(
-            const Center(child: CircularProgressIndicator()),
+            WillPopScope(
+              onWillPop: () async => false,
+              child: const Center(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    CircularProgressIndicator(),
+                    SizedBox(height: 16),
+                    Text(
+                      'Profil fotoğrafı yükleniyor...',
+                      style: TextStyle(color: Colors.white),
+                    ),
+                  ],
+                ),
+              ),
+            ),
             barrierDismissible: false,
           );
 
-          final userId = controller.getCurrentUserId();
-          if (userId != null) {
+          try {
+            final userId = controller.getCurrentUserId();
+            if (userId == null) {
+              throw Exception(
+                  'Kullanıcı oturumu bulunamadı. Lütfen tekrar giriş yapın.');
+            }
+
             final downloadUrl = await _storageService.uploadProfileImage(
               userId,
               croppedFile.path,
             );
 
-            if (downloadUrl != null) {
-              controller.photoUrlController.text = downloadUrl;
-              Get.back();
-              Get.snackbar(
-                AppStrings.success,
-                AppStrings.profileImageUpdatedSuccessfully,
-                snackPosition: SnackPosition.BOTTOM,
-                backgroundColor: Colors.green,
-                colorText: Colors.white,
-              );
+            if (downloadUrl == null) {
+              throw Exception(
+                  'Profil fotoğrafı yüklenemedi. Lütfen tekrar deneyin.');
             }
+
+            // Profil URL'ini güncelle
+            controller.photoUrlController.text = downloadUrl;
+
+            // Firestore'da profil resmini güncelle
+            await controller.updateProfilePhoto(downloadUrl);
+
+            // Loading dialogunu kapat
+            if (Get.isDialogOpen ?? false) {
+              Get.back();
+            }
+
+            Get.snackbar(
+              AppStrings.success,
+              AppStrings.profileImageUpdatedSuccessfully,
+              snackPosition: SnackPosition.BOTTOM,
+              backgroundColor: Colors.green,
+              colorText: Colors.white,
+              duration: const Duration(seconds: 3),
+            );
+          } catch (e) {
+            // Loading dialogunu kapat
+            if (Get.isDialogOpen ?? false) {
+              Get.back();
+            }
+
+            String errorMessage =
+                'Profil fotoğrafı güncellenirken bir hata oluştu.';
+            if (e is Exception) {
+              errorMessage = e.toString().replaceAll('Exception: ', '');
+            }
+
+            Get.snackbar(
+              AppStrings.error,
+              errorMessage,
+              snackPosition: SnackPosition.BOTTOM,
+              backgroundColor: Colors.red,
+              colorText: Colors.white,
+              duration: const Duration(seconds: 5),
+              icon: const Icon(Icons.error, color: Colors.white),
+            );
           }
         }
       }
     } catch (e) {
-      Get.back();
+      // Loading dialogunu kapat
+      if (Get.isDialogOpen ?? false) {
+        Get.back();
+      }
+
+      String errorMessage = 'Profil fotoğrafı seçilirken bir hata oluştu.';
+      if (e is Exception) {
+        errorMessage = e.toString().replaceAll('Exception: ', '');
+      }
+
       Get.snackbar(
         AppStrings.error,
-        AppStrings.profileImageUpdateError,
+        errorMessage,
         snackPosition: SnackPosition.BOTTOM,
         backgroundColor: Colors.red,
         colorText: Colors.white,
+        duration: const Duration(seconds: 5),
+        icon: const Icon(Icons.error, color: Colors.white),
       );
     }
   }

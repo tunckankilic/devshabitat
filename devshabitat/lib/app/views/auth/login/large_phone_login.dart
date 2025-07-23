@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../../../controllers/responsive_controller.dart';
 import '../../../controllers/auth_controller.dart';
+import '../../../routes/app_pages.dart';
 import '../widgets/social_login_button.dart';
 
 class LargePhoneLogin extends GetView<AuthController> {
@@ -139,7 +140,7 @@ class LargePhoneLogin extends GetView<AuthController> {
                 Align(
                   alignment: Alignment.centerRight,
                   child: TextButton(
-                    onPressed: () => Get.toNamed('/forgot-password'),
+                    onPressed: () => Get.toNamed(AppRoutes.forgotPassword),
                     child: Text(
                       AppStrings.forgotPassword,
                       style: TextStyle(
@@ -276,7 +277,7 @@ class LargePhoneLogin extends GetView<AuthController> {
                 ),
               ),
               TextButton(
-                onPressed: () => Get.toNamed('/register'),
+                onPressed: () => Get.toNamed(AppRoutes.register),
                 child: Text(
                   AppStrings.register,
                   style: TextStyle(

@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import '../core/services/error_handler_service.dart';
 import '../models/user_profile_model.dart';
+import '../controllers/auth_controller.dart';
 
 enum RegistrationStep {
   basicInfo, // Email, şifre ve isim (zorunlu)
@@ -16,6 +17,7 @@ enum RegistrationStep {
 class RegistrationController extends GetxController {
   final AuthRepository _authRepository;
   final ErrorHandlerService _errorHandler;
+  final AuthController _authController;
 
   // Form keys
   final basicInfoFormKey = GlobalKey<FormState>();
@@ -27,6 +29,16 @@ class RegistrationController extends GetxController {
   final _isEmailValid = false.obs;
   final _isPasswordValid = false.obs;
   final _isDisplayNameValid = false.obs;
+
+  // Password validation states
+  final _hasMinLength = false.obs;
+  final _hasUppercase = false.obs;
+  final _hasLowercase = false.obs;
+  final _hasNumber = false.obs;
+  final _hasSpecialChar = false.obs;
+  final _passwordsMatch = false.obs;
+  final _passwordIsEmpty = true.obs;
+  final _confirmPasswordIsEmpty = true.obs;
 
   // Basic Info Controllers (Zorunlu)
   final emailController = TextEditingController();
@@ -69,6 +81,9 @@ class RegistrationController extends GetxController {
   // Location data
   final Rxn<GeoPoint> location = Rxn<GeoPoint>();
 
+  // Geçici kullanıcı ID'si için
+  final RxString _tempUserId = RxString('');
+
   // Getters
   bool get isLoading => _isLoading.value;
   RegistrationStep get currentStep => _currentStep.value;
@@ -76,13 +91,31 @@ class RegistrationController extends GetxController {
   bool get isEmailValid => _isEmailValid.value;
   bool get isPasswordValid => _isPasswordValid.value;
   bool get isDisplayNameValid => _isDisplayNameValid.value;
+
+  // Password validation getters
+  bool get hasMinLength => _hasMinLength.value;
+  bool get hasUppercase => _hasUppercase.value;
+  bool get hasLowercase => _hasLowercase.value;
+  bool get hasNumber => _hasNumber.value;
+  bool get hasSpecialChar => _hasSpecialChar.value;
+  bool get passwordsMatch => _passwordsMatch.value;
+  bool get passwordIsEmpty => _passwordIsEmpty.value;
+  bool get confirmPasswordIsEmpty => _confirmPasswordIsEmpty.value;
+
+  bool get allPasswordRequirementsMet =>
+      hasMinLength &&
+      hasUppercase &&
+      hasLowercase &&
+      hasNumber &&
+      hasSpecialChar &&
+      passwordsMatch;
+
   bool get canProceedToNextStep {
     switch (_currentStep.value) {
       case RegistrationStep.basicInfo:
         return _isEmailValid.value &&
-            _isPasswordValid.value &&
             _isDisplayNameValid.value &&
-            passwordController.text == confirmPasswordController.text;
+            allPasswordRequirementsMet;
       case RegistrationStep.personalInfo:
       case RegistrationStep.professionalInfo:
       case RegistrationStep.skillsInfo:
@@ -95,45 +128,60 @@ class RegistrationController extends GetxController {
   RegistrationController({
     required AuthRepository authRepository,
     required ErrorHandlerService errorHandler,
+    required AuthController authController,
   })  : _authRepository = authRepository,
-        _errorHandler = errorHandler;
+        _errorHandler = errorHandler,
+        _authController = authController;
 
   @override
   void onInit() {
     super.onInit();
-    _setupValidationListeners();
+
+    // Email validation
+    emailController.addListener(_validateEmail);
+
+    // Display name validation
+    displayNameController.addListener(_validateDisplayName);
+
+    // Password validation
+    passwordController.addListener(_validatePassword);
+    confirmPasswordController.addListener(_validatePasswordConfirmation);
   }
 
-  void _setupValidationListeners() {
-    emailController.addListener(() {
-      _validateEmail(emailController.text);
-    });
-
-    passwordController.addListener(() {
-      _validatePassword(passwordController.text);
-    });
-
-    displayNameController.addListener(() {
-      _validateDisplayName(displayNameController.text);
-    });
+  void _validateEmail() {
+    final email = emailController.text;
+    _isEmailValid.value = email.isNotEmpty && GetUtils.isEmail(email);
   }
 
-  void _validateEmail(String email) {
-    final emailRegex = RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$');
-    _isEmailValid.value = emailRegex.hasMatch(email);
+  void _validateDisplayName() {
+    final name = displayNameController.text;
+    _isDisplayNameValid.value = name.isNotEmpty && name.length >= 3;
   }
 
-  void _validatePassword(String password) {
-    _isPasswordValid.value = password.length >= 8 &&
-        password.contains(RegExp(r'[A-Z]')) &&
-        password.contains(RegExp(r'[a-z]')) &&
-        password.contains(RegExp(r'[0-9]'));
+  void _validatePassword() {
+    final password = passwordController.text;
+
+    _passwordIsEmpty.value = password.isEmpty;
+    _hasMinLength.value = password.length >= 8;
+    _hasUppercase.value = password.contains(RegExp(r'[A-Z]'));
+    _hasLowercase.value = password.contains(RegExp(r'[a-z]'));
+    _hasNumber.value = password.contains(RegExp(r'[0-9]'));
+    _hasSpecialChar.value =
+        password.contains(RegExp(r'[!@#$%^&*(),.?":{}|<>]'));
+
+    _isPasswordValid.value = allPasswordRequirementsMet;
+
+    // Also validate password confirmation when password changes
+    _validatePasswordConfirmation();
   }
 
-  void _validateDisplayName(String displayName) {
-    _isDisplayNameValid.value = displayName.length >= 3 &&
-        displayName.length <= 50 &&
-        RegExp(r'^[a-zA-ZğüşıöçĞÜŞİÖÇ\s]+$').hasMatch(displayName);
+  void _validatePasswordConfirmation() {
+    final password = passwordController.text;
+    final confirmPassword = confirmPasswordController.text;
+
+    _confirmPasswordIsEmpty.value = confirmPassword.isEmpty;
+    _passwordsMatch.value =
+        confirmPassword.isNotEmpty && password == confirmPassword;
   }
 
   Future<void> proceedToNextStep() async {
@@ -141,22 +189,33 @@ class RegistrationController extends GetxController {
 
     switch (_currentStep.value) {
       case RegistrationStep.basicInfo:
-        if (await _registerBasicInfo()) {
-          _currentStep.value = RegistrationStep.personalInfo;
+        // Sadece validasyon yap, kayıt etme
+        if (_validateBasicInfo()) {
+          // Kullanıcıyı oluştur ve geçici ID'yi kaydet
+          final userCredential =
+              await _authRepository.createUserWithEmailAndPassword(
+            emailController.text,
+            passwordController.text,
+            displayNameController.text,
+          );
+
+          if (userCredential.user != null) {
+            _tempUserId.value = userCredential.user!.uid;
+            _currentStep.value = RegistrationStep.personalInfo;
+          }
         }
         break;
       case RegistrationStep.personalInfo:
-        if (await _updatePersonalInfo()) {
-          _currentStep.value = RegistrationStep.professionalInfo;
-        }
+        // Opsiyonel adım, direkt geç
+        _currentStep.value = RegistrationStep.professionalInfo;
         break;
       case RegistrationStep.professionalInfo:
-        if (await _updateProfessionalInfo()) {
-          _currentStep.value = RegistrationStep.skillsInfo;
-        }
+        // Opsiyonel adım, direkt geç
+        _currentStep.value = RegistrationStep.skillsInfo;
         break;
       case RegistrationStep.skillsInfo:
-        if (await _updateSkillsInfo()) {
+        // Son adım - gerçek kayıt işlemini yap
+        if (await _completeRegistration()) {
           _currentStep.value = RegistrationStep.completed;
           Get.offAllNamed('/home');
         }
@@ -166,9 +225,19 @@ class RegistrationController extends GetxController {
     }
   }
 
-  Future<bool> _registerBasicInfo() async {
+  bool _validateBasicInfo() {
+    // Form validasyonunu kontrol et
+    if (basicInfoFormKey.currentState?.validate() ?? false) {
+      return allPasswordRequirementsMet;
+    }
+    return false;
+  }
+
+  Future<bool> _completeRegistration() async {
     try {
       _isLoading.value = true;
+
+      // 1. Önce kullanıcıyı kaydet
       final userCredential =
           await _authRepository.createUserWithEmailAndPassword(
         emailController.text,
@@ -176,50 +245,22 @@ class RegistrationController extends GetxController {
         displayNameController.text,
       );
 
-      if (userCredential.user != null) {
-        // Temel kullanıcı profilini oluştur
-        final userProfile = UserProfile(
-          id: userCredential.user!.uid,
-          email: emailController.text,
-          fullName: displayNameController.text,
-        );
-
-        await _authRepository.updateUserProfile(userProfile.toJson());
-        return true;
+      if (userCredential.user == null) {
+        throw Exception('Kullanıcı oluşturulamadı');
       }
-      return false;
-    } catch (e) {
-      _errorHandler.handleError(e, ErrorHandlerService.AUTH_ERROR);
-      return false;
-    } finally {
-      _isLoading.value = false;
-    }
-  }
 
-  Future<bool> _updatePersonalInfo() async {
-    try {
-      _isLoading.value = true;
-      final updates = {
+      // Geçici ID'yi kaydet
+      _tempUserId.value = userCredential.user!.uid;
+
+      // 2. Tüm ek bilgileri güncelle
+      final updates = <String, dynamic>{
+        // Personal Info
         'bio': bioController.text,
-        'location': location.value,
         'locationName': locationNameController.text,
         'photoUrl': photoUrlController.text,
-      };
+        if (location.value != null) 'location': location.value,
 
-      await _authRepository.updateUserProfile(updates);
-      return true;
-    } catch (e) {
-      _errorHandler.handleError(e, ErrorHandlerService.AUTH_ERROR);
-      return false;
-    } finally {
-      _isLoading.value = false;
-    }
-  }
-
-  Future<bool> _updateProfessionalInfo() async {
-    try {
-      _isLoading.value = true;
-      final updates = {
+        // Professional Info
         'title': titleController.text,
         'company': companyController.text,
         'yearsOfExperience':
@@ -234,22 +275,8 @@ class RegistrationController extends GetxController {
         'education': education,
         'projects': projects,
         'certificates': certificates,
-      };
 
-      await _authRepository.updateUserProfile(updates);
-      return true;
-    } catch (e) {
-      _errorHandler.handleError(e, ErrorHandlerService.AUTH_ERROR);
-      return false;
-    } finally {
-      _isLoading.value = false;
-    }
-  }
-
-  Future<bool> _updateSkillsInfo() async {
-    try {
-      _isLoading.value = true;
-      final updates = {
+        // Skills Info
         'skills': selectedSkills,
         'languages': selectedLanguages,
         'interests': selectedInterests,
@@ -257,7 +284,22 @@ class RegistrationController extends GetxController {
         'portfolioUrls': portfolioUrls,
       };
 
-      await _authRepository.updateUserProfile(updates);
+      // Sadece dolu olan alanları güncelle
+      final filteredUpdates = <String, dynamic>{};
+      updates.forEach((key, value) {
+        if (value != null &&
+            value != '' &&
+            value != 0 &&
+            (value is! List || (value).isNotEmpty) &&
+            (value is! Map || (value).isNotEmpty)) {
+          filteredUpdates[key] = value;
+        }
+      });
+
+      if (filteredUpdates.isNotEmpty) {
+        await _authRepository.updateUserProfile(filteredUpdates);
+      }
+
       return true;
     } catch (e) {
       _errorHandler.handleError(e, ErrorHandlerService.AUTH_ERROR);
@@ -267,30 +309,78 @@ class RegistrationController extends GetxController {
     }
   }
 
+  Future<void> updateProfilePhoto(String photoUrl) async {
+    try {
+      // Eğer kayıt aşamasındaysak sadece controller'ı güncelle
+      if (_currentStep.value == RegistrationStep.personalInfo) {
+        photoUrlController.text = photoUrl;
+        return;
+      }
+
+      // Normal profil güncellemesi
+      final currentUser = _authController.currentUser;
+      if (currentUser == null) {
+        throw Exception(
+            'Kullanıcı oturumu bulunamadı. Lütfen tekrar giriş yapın.');
+      }
+
+      await _authRepository.updateUserProfile({
+        'photoURL': photoUrl,
+      });
+
+      // AuthController'daki profil bilgilerini güncelle
+      await _authController.refreshUserProfile();
+    } catch (e) {
+      _errorHandler.handleError(e, ErrorHandlerService.AUTH_ERROR);
+      throw Exception('Profil fotoğrafı güncellenirken bir hata oluştu');
+    }
+  }
+
   void goBack() {
     if (_currentStep.value == RegistrationStep.basicInfo) {
       Get.back();
     } else {
-      _currentStep.value =
-          RegistrationStep.values[_currentStep.value.index - 1];
+      switch (_currentStep.value) {
+        case RegistrationStep.personalInfo:
+          _currentStep.value = RegistrationStep.basicInfo;
+          break;
+        case RegistrationStep.professionalInfo:
+          _currentStep.value = RegistrationStep.personalInfo;
+          break;
+        case RegistrationStep.skillsInfo:
+          _currentStep.value = RegistrationStep.professionalInfo;
+          break;
+        default:
+          break;
+      }
     }
   }
 
   void skipCurrentStep() {
-    if (_currentStep.value != RegistrationStep.basicInfo &&
-        _currentStep.value != RegistrationStep.completed) {
-      _currentStep.value =
-          RegistrationStep.values[_currentStep.value.index + 1];
-    }
+    proceedToNextStep();
   }
 
   String? getCurrentUserId() {
-    return _authRepository.currentUser?.uid;
+    // Eğer kayıt aşamasındaysak ve geçici ID varsa onu kullan
+    if (_currentStep.value == RegistrationStep.personalInfo &&
+        _tempUserId.isNotEmpty) {
+      return _tempUserId.value;
+    }
+
+    // Değilse normal oturum kontrolü yap
+    final currentUser = _authController.currentUser;
+    if (currentUser == null) {
+      // Sadece kayıt aşamasında değilsek login'e yönlendir
+      if (_currentStep.value != RegistrationStep.personalInfo) {
+        Get.offAllNamed('/login');
+      }
+      return null;
+    }
+    return currentUser.uid;
   }
 
   @override
   void onClose() {
-    // Controllers'ı temizle
     emailController.dispose();
     passwordController.dispose();
     confirmPasswordController.dispose();

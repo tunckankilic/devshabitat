@@ -29,16 +29,29 @@ class AppController extends GetxController {
   }
 
   // Bağlantı durumunu izle
-  void _initConnectivity() {
-    Connectivity()
-        .onConnectivityChanged
-        .listen((List<ConnectivityResult> results) {
-      _isOnline.value = results.first != ConnectivityResult.none;
-      if (!_isOnline.value) {
-        _errorHandler.handleError(
-            AppStrings.errorNetwork, ErrorHandlerService.NETWORK_ERROR);
+  Future<void> _initConnectivity() async {
+    try {
+      final connectivity = await Connectivity().checkConnectivity();
+      if (connectivity == ConnectivityResult.none) {
+        debugPrint(
+            '⚠️ No internet connection detected - app will work in offline mode');
+        // Sadece log yazıp devam ediyoruz, hata fırlatmıyoruz
+        return;
       }
-    });
+
+      // Bağlantı varsa dinlemeye başla
+      Connectivity().onConnectivityChanged.distinct().listen((result) {
+        if (result == ConnectivityResult.none) {
+          debugPrint('⚠️ Connection lost - switching to offline mode');
+        } else {
+          debugPrint('✅ Connection restored');
+        }
+      }, onError: (error) {
+        debugPrint('⚠️ Error monitoring connectivity: $error');
+      });
+    } catch (e) {
+      debugPrint('⚠️ Error initializing connectivity monitoring: $e');
+    }
   }
 
   // Tema durumunu başlat

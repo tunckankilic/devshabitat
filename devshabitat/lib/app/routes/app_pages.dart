@@ -68,8 +68,8 @@ class AppPages {
       name: AppRoutes.home,
       page: () => MainWrapper(),
       bindings: [
-        NavigationBinding(),
         HomeBinding(),
+        NavigationBinding(),
       ],
       middlewares: [AuthMiddleware()],
     ),

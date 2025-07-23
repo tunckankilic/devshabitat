@@ -17,9 +17,9 @@ class HomeController extends GetxController {
   final _authRepository = Get.find<AuthRepository>();
   final _githubService = Get.find<GithubService>();
   final _notificationService = Get.find<NotificationService>();
-  final FeedService _feedService = Get.find();
-  final ConnectionService _connectionService = Get.find();
-  final AuthController _authController = Get.find();
+  late final FeedService _feedService;
+  late final ConnectionService _connectionService;
+  late final AuthController _authController;
 
   final RxBool isLoading = false.obs;
   final RxList activityFeed = [].obs;
@@ -43,6 +43,18 @@ class HomeController extends GetxController {
   @override
   void onInit() {
     super.onInit();
+
+    // Initialize services
+    try {
+      _feedService = Get.find<FeedService>();
+      _connectionService = Get.find<ConnectionService>();
+      _authController = Get.find<AuthController>();
+    } catch (e) {
+      if (kDebugMode) {
+        print('Error initializing services in HomeController: $e');
+      }
+    }
+
     loadDashboardData();
     loadData();
     getNotifications();
@@ -105,8 +117,10 @@ class HomeController extends GetxController {
 
   Future<void> _loadFeedItems() async {
     try {
-      final feedItems = await _feedService.getFeedItems();
-      items.assignAll(feedItems);
+      if (_feedService != null) {
+        final feedItems = await _feedService.getFeedItems();
+        items.assignAll(feedItems);
+      }
     } catch (e) {
       print('Feed yüklenirken hata: $e');
       rethrow;
@@ -115,8 +129,10 @@ class HomeController extends GetxController {
 
   Future<void> _loadConnectionCount() async {
     try {
-      final count = await _connectionService.getConnectionCount();
-      connectionCount.value = count;
+      if (_connectionService != null) {
+        final count = await _connectionService.getConnectionCount();
+        connectionCount.value = count;
+      }
     } catch (e) {
       print('Bağlantı sayısı yüklenirken hata: $e');
       rethrow;
@@ -155,8 +171,10 @@ class HomeController extends GetxController {
 
   void onLike(FeedItem item) async {
     try {
-      await _feedService.likeFeedItem(item.id);
-      await _loadFeedItems(); // Güncel listeyi yükle
+      if (_feedService != null) {
+        await _feedService.likeFeedItem(item.id);
+        await _loadFeedItems(); // Güncel listeyi yükle
+      }
     } catch (e) {
       Get.snackbar(
         'Hata',
@@ -172,8 +190,10 @@ class HomeController extends GetxController {
 
   void onShare(FeedItem item) async {
     try {
-      await _feedService.shareFeedItem(item.id);
-      await _loadFeedItems(); // Güncel listeyi yükle
+      if (_feedService != null) {
+        await _feedService.shareFeedItem(item.id);
+        await _loadFeedItems(); // Güncel listeyi yükle
+      }
     } catch (e) {
       Get.snackbar(
         'Hata',
