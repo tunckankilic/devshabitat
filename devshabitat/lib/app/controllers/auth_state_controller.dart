@@ -3,6 +3,7 @@ import 'package:get/get.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import '../repositories/auth_repository.dart';
 import '../routes/app_pages.dart';
+import '../controllers/registration_controller.dart';
 
 enum AuthState {
   initial,
@@ -41,23 +42,18 @@ class AuthStateController extends GetxController {
       _currentUser.value = user;
       if (user != null) {
         _authState.value = AuthState.authenticated;
-        // Kullanıcı profilini yükle
         _userProfile.value = await _authRepository.getUserProfile(user.uid);
 
-        // Sadece login sayfasındaysa anasayfaya yönlendir
-        if (Get.currentRoute == AppRoutes.login) {
-          Get.offAllNamed(AppRoutes.home);
+        // Register sayfasında hiç müdahale etme
+        final currentRoute = Get.currentRoute;
+        if (currentRoute == AppRoutes.register) {
+          return; // Hiçbir şey yapma
         }
 
-        await _firestore.collection('users').doc(user.uid).set({
-          'id': user.uid,
-          'email': user.email,
-          'displayName': user.displayName,
-          'photoURL': user.photoURL,
-          'createdAt': FieldValue.serverTimestamp(),
-          'updatedAt': FieldValue.serverTimestamp(),
-          'lastSeen': FieldValue.serverTimestamp(),
-        }, SetOptions(merge: true));
+        // Sadece login sayfasındaysa yönlendir
+        if (currentRoute == AppRoutes.login) {
+          Get.offAllNamed(AppRoutes.home);
+        }
       } else {
         _authState.value = AuthState.unauthenticated;
         _userProfile.value = null;

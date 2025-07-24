@@ -44,37 +44,41 @@ class HomeController extends GetxController {
   void onInit() {
     super.onInit();
 
-    // Initialize services
     try {
       _feedService = Get.find<FeedService>();
       _connectionService = Get.find<ConnectionService>();
       _authController = Get.find<AuthController>();
+      loadDashboardData();
+      loadData();
+      getNotifications();
     } catch (e) {
-      if (kDebugMode) {
-        print('Error initializing services in HomeController: $e');
-      }
+      print('Startup data loading: $e');
     }
-
-    loadDashboardData();
-    loadData();
-    getNotifications();
   }
 
   Future<void> loadDashboardData() async {
     try {
       isLoading.value = true;
 
-      // GitHub istatistiklerini yükle
-      final username = _authRepository.currentUser?.providerData
-              .firstWhereOrNull((info) => info.providerId == 'github.com')
-              ?.displayName ??
-          '';
-      final stats = await _githubService.getGithubStats(username);
-      githubStats.value = stats.toJson();
+      // GitHub stats'ı optional yap
+      String? username;
+      try {
+        username = await _authController.getGithubUsername();
+        if (username != null && username.isNotEmpty) {
+          final stats = await _githubService.getGithubStats(username);
+          if (stats != null) {
+            githubStats.value = {'stats': stats}; // Basit assign
+          }
+        }
+      } catch (e) {
+        print('GitHub stats skipped: $e');
+      }
 
       // Aktivite akışını yükle
-      final activities = await _githubService.getUserActivities(username);
-      activityFeed.value = activities;
+      if (username != null) {
+        final activities = await _githubService.getUserActivities(username);
+        activityFeed.value = activities;
+      }
 
       // Bağlantı sayısını yükle
       final connections = await _authRepository.getUserConnections();
@@ -245,5 +249,19 @@ class HomeController extends GetxController {
     notifications.clear();
     lastNotificationDocument = null;
     await getNotifications();
+  }
+
+  Future<void> loadNotifications() async {
+    await refreshNotifications();
+  }
+
+  Future<void> markNotificationAsRead(String notificationId) async {
+    try {
+      await _notificationService.markNotificationAsRead(notificationId);
+      // Bildirimleri yenile
+      await refreshNotifications();
+    } catch (e) {
+      debugPrint('Error marking notification as read: $e');
+    }
   }
 }

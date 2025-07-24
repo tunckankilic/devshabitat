@@ -19,7 +19,7 @@ class StorageService {
       }
 
       final ext = path.extension(localPath);
-      final fileName = 'profile${ext}'; // Sabit bir dosya adı kullan
+      final fileName = 'profile$ext'; // Sabit bir dosya adı kullan
       final ref = _storage.ref().child('profile_images/$userId/$fileName');
 
       _logger.d('Uploading file to: ${ref.fullPath}');

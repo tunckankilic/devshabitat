@@ -1,4 +1,5 @@
 import 'package:devshabitat/app/repositories/auth_repository.dart';
+import 'package:devshabitat/app/services/storage_service.dart';
 import 'package:get/get.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -84,6 +85,9 @@ class RegistrationController extends GetxController {
   // Geçici kullanıcı ID'si için
   final RxString _tempUserId = RxString('');
 
+  // Sayfa indeksi (0: basic, 1: personal, 2: professional, 3: skills)
+  final _currentPageIndex = 0.obs;
+
   // Getters
   bool get isLoading => _isLoading.value;
   RegistrationStep get currentStep => _currentStep.value;
@@ -110,18 +114,47 @@ class RegistrationController extends GetxController {
       hasSpecialChar &&
       passwordsMatch;
 
-  bool get canProceedToNextStep {
-    switch (_currentStep.value) {
-      case RegistrationStep.basicInfo:
+  int get currentPageIndex => _currentPageIndex.value;
+
+  bool get canGoNext {
+    switch (_currentPageIndex.value) {
+      case 0: // Basic info - zorunlu validasyon
         return _isEmailValid.value &&
             _isDisplayNameValid.value &&
             allPasswordRequirementsMet;
-      case RegistrationStep.personalInfo:
-      case RegistrationStep.professionalInfo:
-      case RegistrationStep.skillsInfo:
-        return true; // Opsiyonel adımlar
-      case RegistrationStep.completed:
+      case 1: // Personal info - opsiyonel
+      case 2: // Professional info - opsiyonel
+      case 3: // Skills info - opsiyonel
         return true;
+      default:
+        return false;
+    }
+  }
+
+  bool get isLastPage => _currentPageIndex.value == 3;
+  bool get isFirstPage => _currentPageIndex.value == 0;
+
+  void nextPage() {
+    if (!canGoNext) return;
+
+    if (isLastPage) {
+      // Son sayfa - kayıt işlemini yap
+      _performRegistration();
+    } else {
+      // Sadece sayfa değiştir, auth işlemi yapma
+      _currentPageIndex.value++;
+    }
+  }
+
+  void previousPage() {
+    if (!isFirstPage) {
+      _currentPageIndex.value--;
+    }
+  }
+
+  void skipCurrentPage() {
+    if (!isLastPage) {
+      _currentPageIndex.value++;
     }
   }
 
@@ -185,7 +218,7 @@ class RegistrationController extends GetxController {
   }
 
   Future<void> proceedToNextStep() async {
-    if (!canProceedToNextStep) return;
+    if (!canGoNext) return;
 
     switch (_currentStep.value) {
       case RegistrationStep.basicInfo:
@@ -217,6 +250,8 @@ class RegistrationController extends GetxController {
         // Son adım - gerçek kayıt işlemini yap
         if (await _completeRegistration()) {
           _currentStep.value = RegistrationStep.completed;
+          // Biraz bekle ki state güncellensin, sonra yönlendir
+          await Future.delayed(Duration(milliseconds: 200));
           Get.offAllNamed('/home');
         }
         break;
@@ -377,6 +412,100 @@ class RegistrationController extends GetxController {
       return null;
     }
     return currentUser.uid;
+  }
+
+  // Tüm kayıt işlemini son sayfada yap
+  Future<void> _performRegistration() async {
+    try {
+      _isLoading.value = true;
+
+      // 1. Firebase Authentication'da kullanıcı oluştur
+      final userCredential =
+          await _authRepository.createUserWithEmailAndPassword(
+        emailController.text,
+        passwordController.text,
+        displayNameController.text,
+      );
+
+      if (userCredential.user == null) {
+        throw Exception('Kullanıcı oluşturulamadı');
+      }
+
+      // 2. Kullanıcı profilini güncelle
+      await _updateUserProfile(userCredential.user!.uid);
+
+      // 3. Başarı mesajı göster
+      Get.snackbar(
+        'Başarılı!',
+        'Kayıt işleminiz tamamlandı',
+        backgroundColor: Colors.green,
+        colorText: Colors.white,
+        duration: Duration(seconds: 2),
+      );
+
+      // 4. Auth controller'ların hazır olduğundan emin ol
+      await Future.delayed(Duration(seconds: 2));
+
+      // 5. Ana sayfaya yönlendir
+      Get.offAllNamed('/home');
+    } catch (e) {
+      _errorHandler.handleError(e, ErrorHandlerService.AUTH_ERROR);
+    } finally {
+      _isLoading.value = false;
+    }
+  }
+
+  Future<void> _updateUserProfile(String userId) async {
+    final updates = <String, dynamic>{};
+
+    // Eğer fotoğraf seçildiyse önce yükle
+    if (photoUrlController.text.isNotEmpty &&
+        !photoUrlController.text.startsWith('http')) {
+      try {
+        final uploadedUrl = await Get.find<StorageService>()
+            .uploadProfileImage(userId, photoUrlController.text);
+        if (uploadedUrl != null) {
+          updates['photoUrl'] = uploadedUrl;
+        }
+      } catch (e) {
+        print('Fotoğraf yükleme hatası: $e');
+      }
+    }
+
+    // Diğer bilgiler...
+    if (bioController.text.isNotEmpty) updates['bio'] = bioController.text;
+    if (locationController.text.isNotEmpty)
+      updates['location'] = locationController.text;
+    if (locationNameController.text.isNotEmpty)
+      updates['locationName'] = locationNameController.text;
+    if (titleController.text.isNotEmpty)
+      updates['title'] = titleController.text;
+    if (companyController.text.isNotEmpty)
+      updates['company'] = companyController.text;
+    if (yearsOfExperienceController.text.isNotEmpty)
+      updates['yearsOfExperience'] =
+          int.tryParse(yearsOfExperienceController.text) ?? 0;
+    updates['isAvailableForWork'] = isAvailableForWork.value;
+    updates['isRemote'] = isRemote.value;
+    updates['isFullTime'] = isFullTime.value;
+    updates['isPartTime'] = isPartTime.value;
+    updates['isFreelance'] = isFreelance.value;
+    updates['isInternship'] = isInternship.value;
+    updates['workExperience'] = workExperience;
+    updates['education'] = education;
+    updates['projects'] = projects;
+    updates['certificates'] = certificates;
+    updates['skills'] = selectedSkills;
+    updates['languages'] = selectedLanguages;
+    updates['interests'] = selectedInterests;
+    updates['socialLinks'] = socialLinks;
+    updates['portfolioUrls'] = portfolioUrls;
+
+    if (location.value != null) updates['location'] = location.value;
+
+    if (updates.isNotEmpty) {
+      await _authRepository.updateUserProfile(updates);
+    }
   }
 
   @override

@@ -82,7 +82,9 @@ class DiscoveryScreen extends BaseView<DiscoveryController> {
           ),
         ),
         body: ResponsiveSafeArea(
-          child: ResponsiveOverflowHandler(
+          child: SizedBox(
+            height: MediaQuery.of(Get.context!).size.height -
+                200, // AppBar yüksekliğini çıkar
             child: TabBarView(
               children: [
                 _buildSearchTab(),

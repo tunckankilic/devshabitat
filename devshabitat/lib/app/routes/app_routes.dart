@@ -53,4 +53,6 @@ abstract class AppRoutes {
 
   // Debug routes
   static const memoryDebug = '/memory-debug';
+
+  static const messageSearch = '/message-search';
 }

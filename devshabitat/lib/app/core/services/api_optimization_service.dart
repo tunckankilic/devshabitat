@@ -52,6 +52,12 @@ class ApiOptimizationService extends GetxService {
 
       return result;
     } catch (e) {
+      // GitHub hatalarını sessizce handle et
+      if (e.toString().contains('GitHub kullanıcısı bulunamadı')) {
+        _logger.d('GitHub user not found - expected for new users');
+        rethrow; // Ama snackbar gösterme
+      }
+
       _logger.e('Error in optimized API call: $e');
       rethrow;
     }

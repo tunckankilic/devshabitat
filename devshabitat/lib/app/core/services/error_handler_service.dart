@@ -10,7 +10,10 @@ class ErrorHandlerService extends GetxService {
   static ErrorHandlerService get to => Get.find();
 
   final Logger _logger = Logger();
-  final AppConfig _config = Get.find();
+  final AppConfig? _config =
+      Get.isRegistered<AppConfig>() ? Get.find<AppConfig>() : null;
+
+  // Constructor'da AppConfig'i zorunlu olarak alma
 
   // Hata tipleri
   static const String VALIDATION_ERROR = 'VALIDATION_ERROR';
@@ -53,33 +56,49 @@ class ErrorHandlerService extends GetxService {
   void _showErrorMessage(String errorType, dynamic error) {
     String message;
 
+    // Startup sırasında Firebase index hatalarını gösterme
+    if (error.toString().contains('failed-precondition') ||
+        error.toString().contains('requires an index')) {
+      return; // Sessizce geç
+    }
+
+    // GitHub kullanıcı bulunamadı hatası da gösterme
+    if (error.toString().contains('GitHub kullanıcısı bulunamadı')) {
+      return; // Sessizce geç
+    }
+
     switch (errorType) {
       case VALIDATION_ERROR:
-        message = 'Please check the information you entered';
+        message = 'Lütfen girdiğiniz bilgileri kontrol edin';
         break;
       case NETWORK_ERROR:
-        message = 'Check your internet connection';
+        message = 'İnternet bağlantınızı kontrol edin';
         break;
       case AUTH_ERROR:
-        message = 'Your session may have expired. Please log in again';
+        message = 'Oturumunuz sona ermiş olabilir. Lütfen tekrar giriş yapın';
         break;
       case FILE_ERROR:
-        message = 'File operation failed. Please try again later';
+        message =
+            'Dosya işlemi başarısız oldu. Lütfen daha sonra tekrar deneyin';
         break;
       case SERVER_ERROR:
-        message = 'A server error occurred. Please try again later';
+        message = 'Sunucu hatası oluştu. Lütfen daha sonra tekrar deneyin';
         break;
       case DISCUSSION_ERROR:
-        message = 'A discussion error occurred. Please try again later';
+        message = 'Sohbet hatası oluştu. Lütfen daha sonra tekrar deneyin';
         break;
       case PORTFOLIO_ERROR:
-        message = 'A portfolio error occurred. Please try again later';
+        message = 'Portföy hatası oluştu. Lütfen daha sonra tekrar deneyin';
         break;
       case MATCHING_ERROR:
-        message = 'A matching error occurred. Please try again later';
+        message = 'Eşleştirme hatası oluştu. Lütfen daha sonra tekrar deneyin';
         break;
       default:
-        message = 'An unexpected error occurred. Please try again later';
+        // Startup hatalarını gösterme
+        if (_isStartupError(error)) {
+          return;
+        }
+        message = 'Beklenmedik bir hata oluştu. Lütfen tekrar deneyin';
     }
 
     Get.snackbar(
@@ -90,6 +109,14 @@ class ErrorHandlerService extends GetxService {
     );
   }
 
+  bool _isStartupError(dynamic error) {
+    final errorStr = error.toString();
+    return errorStr.contains('failed-precondition') ||
+        errorStr.contains('requires an index') ||
+        errorStr.contains('index is currently building') ||
+        errorStr.contains('GitHub kullanıcısı bulunamadı');
+  }
+
   // Input validation
   String? validateInput(String input, {bool sanitize = true}) {
     if (input.isEmpty) {
@@ -97,7 +124,7 @@ class ErrorHandlerService extends GetxService {
     }
 
     if (sanitize) {
-      input = _config.sanitizeInput(input);
+      input = _config?.sanitizeInput(input) ?? input;
     }
 
     if (input.length < 3) {
@@ -108,14 +135,14 @@ class ErrorHandlerService extends GetxService {
   }
 
   String? validateEmail(String email) {
-    if (!_config.isValidEmail(email)) {
+    if (_config == null || !_config!.isValidEmail(email)) {
       return 'Please enter a valid email address';
     }
     return null;
   }
 
   String? validatePassword(String password) {
-    if (!_config.isValidPassword(password)) {
+    if (_config == null || !_config!.isValidPassword(password)) {
       return 'Password must be at least 8 characters long and contain uppercase/lowercase letters, numbers, and special characters';
     }
     return null;
@@ -123,11 +150,11 @@ class ErrorHandlerService extends GetxService {
 
   // Dosya validation
   String? validateFile(String fileName, int fileSize) {
-    if (!_config.isValidFileType(fileName)) {
+    if (_config == null || !_config!.isValidFileType(fileName)) {
       return 'This file type is not supported';
     }
 
-    if (!_config.isValidFileSize(fileSize)) {
+    if (_config == null || !_config!.isValidFileSize(fileSize)) {
       return 'File size is too large (max: ${AppConfig.maxFileSize ~/ (1024 * 1024)}MB)';
     }
 
