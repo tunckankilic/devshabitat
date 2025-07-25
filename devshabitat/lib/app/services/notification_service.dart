@@ -11,6 +11,7 @@ import 'package:flutter/foundation.dart';
 import '../models/notification_model.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:package_info_plus/package_info_plus.dart';
+import 'dart:io' show Platform;
 
 class NotificationService extends GetxService {
   static NotificationService get to => Get.find();
@@ -176,36 +177,17 @@ class NotificationService extends GetxService {
 
   Future<void> _initializeFCMToken() async {
     try {
-      isTokenRefreshing.value = true;
-
-      // Önceki token'ı temizle
-      final oldToken = await _firebaseMessaging.getToken();
-      if (oldToken != null) {
-        await _removeOldToken(oldToken);
+      if (Platform.isIOS && !await _firebaseMessaging.isSupported()) {
+        debugPrint('FCM is not supported on this device (probably simulator)');
+        return;
       }
 
-      // Yeni token al
-      String? token = await _firebaseMessaging.getToken();
-      if (token != null) {
-        await _updateFCMToken(token);
-      } else {
-        _logger.w('FCM token alınamadı');
-        // Retry mechanism
-        await Future.delayed(const Duration(seconds: 2));
-        token = await _firebaseMessaging.getToken();
-        if (token != null) {
-          await _updateFCMToken(token);
-        }
+      final fcmToken = await _firebaseMessaging.getToken();
+      if (fcmToken != null) {
+        await _updateFCMToken(fcmToken);
       }
     } catch (e) {
-      _logger.e('Error initializing FCM token: $e');
-      // Fallback: Local token'ı kullan
-      final localToken = _prefs.getString('fcm_token');
-      if (localToken != null) {
-        fcmToken.value = localToken;
-      }
-    } finally {
-      isTokenRefreshing.value = false;
+      debugPrint('⛔ Error initializing FCM token: $e');
     }
   }
 

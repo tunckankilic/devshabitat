@@ -3,6 +3,7 @@ import 'package:devshabitat/app/controllers/auth_controller.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../../../controllers/responsive_controller.dart';
+import '../../../controllers/home_controller.dart';
 
 class ProfileSummaryCard extends GetView<AuthController> {
   const ProfileSummaryCard({super.key});
@@ -107,26 +108,34 @@ class ProfileSummaryCard extends GetView<AuthController> {
             }),
             SizedBox(
                 height: responsive.responsiveValue(mobile: 16, tablet: 20)),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceAround,
-              children: [
-                _buildStatItem(
-                  icon: Icons.code,
-                  label: AppStrings.projects,
-                  value: '12',
-                ),
-                _buildStatItem(
-                  icon: Icons.people,
-                  label: AppStrings.followers,
-                  value: '250',
-                ),
-                _buildStatItem(
-                  icon: Icons.star,
-                  label: AppStrings.stars,
-                  value: '1.2K',
-                ),
-              ],
-            ),
+            // GitHub Stats Row
+            Obx(() {
+              final homeController = Get.find<HomeController>();
+              final githubStats = homeController.githubStats;
+              final userInfo = githubStats['userInfo'] as Map<String, dynamic>?;
+              final repos = githubStats['repos'] as List<dynamic>?;
+
+              return Row(
+                mainAxisAlignment: MainAxisAlignment.spaceAround,
+                children: [
+                  _buildStatItem(
+                    icon: Icons.code,
+                    label: AppStrings.projects,
+                    value: (repos?.length ?? 0).toString(),
+                  ),
+                  _buildStatItem(
+                    icon: Icons.people,
+                    label: AppStrings.followers,
+                    value: _formatNumber(userInfo?['followers'] ?? 0),
+                  ),
+                  _buildStatItem(
+                    icon: Icons.star,
+                    label: AppStrings.stars,
+                    value: _formatNumber(_calculateTotalStars(repos ?? [])),
+                  ),
+                ],
+              );
+            }),
           ],
         ),
       ),
@@ -172,5 +181,24 @@ class ProfileSummaryCard extends GetView<AuthController> {
         ),
       ],
     );
+  }
+
+  String _formatNumber(int number) {
+    if (number >= 1000000) {
+      return '${(number / 1000000).toStringAsFixed(1)}M';
+    } else if (number >= 1000) {
+      return '${(number / 1000).toStringAsFixed(1)}K';
+    }
+    return number.toString();
+  }
+
+  int _calculateTotalStars(List<dynamic> repos) {
+    int totalStars = 0;
+    for (var repo in repos) {
+      if (repo is Map<String, dynamic>) {
+        totalStars += (repo['stargazers_count'] as int?) ?? 0;
+      }
+    }
+    return totalStars;
   }
 }

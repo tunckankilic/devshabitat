@@ -14,6 +14,7 @@ import '../services/lazy_loading_service.dart';
 import '../services/asset_optimization_service.dart';
 import '../services/notification_service.dart';
 import '../services/image_upload_service.dart';
+import '../services/storage_service.dart';
 import '../controllers/app_controller.dart';
 import '../controllers/responsive_controller.dart';
 import '../controllers/auth_state_controller.dart';
@@ -36,6 +37,9 @@ class AppBinding extends Bindings {
     final errorHandler = Get.put(ErrorHandlerService());
     Get.put(MemoryManagerService());
     Get.put(ApiOptimizationService());
+
+    // Storage Service
+    Get.put(StorageService());
 
     // Responsive system (immediately needed for theme)
     Get.put<ResponsiveController>(ResponsiveController(), permanent: true);

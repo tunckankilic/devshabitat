@@ -27,7 +27,7 @@ class RegisterView extends GetView<RegistrationController> {
           ),
         ),
         leading: Obx(() {
-          if (controller.currentStep == RegistrationStep.basicInfo) {
+          if (controller.currentPageIndex == 0) {
             return IconButton(
               icon: Icon(
                 Icons.close,
@@ -47,7 +47,7 @@ class RegisterView extends GetView<RegistrationController> {
                 tablet: 32.0,
               ),
             ),
-            onPressed: () => controller.goBack(),
+            onPressed: () => controller.previousPage(),
           );
         }),
       ),
@@ -58,14 +58,8 @@ class RegisterView extends GetView<RegistrationController> {
 
         return Column(
           children: [
-            // Progress Bar
-            LinearProgressIndicator(
-              value: _getProgressValue(controller.currentStep),
-              backgroundColor: Colors.grey[200],
-              valueColor: AlwaysStoppedAnimation<Color>(
-                Theme.of(context).primaryColor,
-              ),
-            ),
+            // Progress Stepper
+            _buildProgressStepper(),
             SizedBox(
                 height: _responsiveController.responsiveValue(
               mobile: 16.0,
@@ -78,7 +72,7 @@ class RegisterView extends GetView<RegistrationController> {
                 horizontal: 16.0,
               ),
               child: Text(
-                _getStepTitle(controller.currentStep),
+                _getStepTitle(),
                 style: TextStyle(
                   fontSize: _responsiveController.responsiveValue(
                     mobile: 24.0,
@@ -99,36 +93,24 @@ class RegisterView extends GetView<RegistrationController> {
               child: SingleChildScrollView(
                 padding: _responsiveController.responsivePadding(all: 16.0),
                 child: _responsiveController.isTablet
-                    ? _buildTabletLayout(controller.currentStep)
-                    : _buildCurrentStep(controller.currentStep),
+                    ? _buildTabletLayout()
+                    : _buildCurrentStep(),
               ),
             ),
 
             // Bottom Buttons
-            if (controller.currentStep != RegistrationStep.completed)
+            if (!controller.isLastPage || controller.isLastPage)
               Padding(
                 padding: _responsiveController.responsivePadding(all: 16.0),
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    if (controller.currentStep != RegistrationStep.basicInfo)
+                    if (!controller.isFirstPage && !controller.isLastPage)
                       TextButton(
-                        onPressed: () => controller.skipCurrentStep(),
-                        child: Text(
-                          AppStrings.skipStep,
-                          style: TextStyle(
-                            fontSize: _responsiveController.responsiveValue(
-                              mobile: 16.0,
-                              tablet: 18.0,
-                            ),
-                          ),
-                        ),
+                        onPressed: () => controller.skipCurrentPage(),
+                        child: Text(AppStrings.skipStep),
                       ),
-                    SizedBox(
-                        height: _responsiveController.responsiveValue(
-                      mobile: 8.0,
-                      tablet: 12.0,
-                    )),
+                    SizedBox(height: 8.0),
                     SizedBox(
                       width: double.infinity,
                       child: ElevatedButton(
@@ -137,11 +119,11 @@ class RegisterView extends GetView<RegistrationController> {
                             vertical: 16.0,
                           ),
                         ),
-                        onPressed: controller.canProceedToNextStep
-                            ? () => controller.proceedToNextStep()
+                        onPressed: controller.canGoNext
+                            ? () => controller.nextPage()
                             : null,
                         child: Text(
-                          controller.currentStep == RegistrationStep.skillsInfo
+                          controller.isLastPage
                               ? AppStrings.completeRegistration
                               : AppStrings.continueRegistration,
                           style: TextStyle(
@@ -162,7 +144,7 @@ class RegisterView extends GetView<RegistrationController> {
     );
   }
 
-  Widget _buildTabletLayout(RegistrationStep step) {
+  Widget _buildTabletLayout() {
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -197,23 +179,23 @@ class RegisterView extends GetView<RegistrationController> {
                   )),
                   _buildStepIndicator(
                     AppStrings.basicInfo,
-                    RegistrationStep.basicInfo,
-                    step,
+                    0,
+                    controller.currentPageIndex,
                   ),
                   _buildStepIndicator(
                     AppStrings.personalInfo,
-                    RegistrationStep.personalInfo,
-                    step,
+                    1,
+                    controller.currentPageIndex,
                   ),
                   _buildStepIndicator(
                     AppStrings.professionalInfo,
-                    RegistrationStep.professionalInfo,
-                    step,
+                    2,
+                    controller.currentPageIndex,
                   ),
                   _buildStepIndicator(
                     AppStrings.skillsInfo,
-                    RegistrationStep.skillsInfo,
-                    step,
+                    3,
+                    controller.currentPageIndex,
                   ),
                 ],
               ),
@@ -222,7 +204,7 @@ class RegisterView extends GetView<RegistrationController> {
         ),
         Expanded(
           flex: 2,
-          child: _buildCurrentStep(step),
+          child: _buildCurrentStep(),
         ),
       ],
     );
@@ -230,11 +212,11 @@ class RegisterView extends GetView<RegistrationController> {
 
   Widget _buildStepIndicator(
     String title,
-    RegistrationStep stepEnum,
-    RegistrationStep currentStep,
+    int stepIndex,
+    int currentPageIndex,
   ) {
-    final bool isCompleted = stepEnum.index < currentStep.index;
-    final bool isCurrent = stepEnum == currentStep;
+    final bool isCompleted = stepIndex < currentPageIndex;
+    final bool isCurrent = stepIndex == currentPageIndex;
 
     return Container(
       margin: EdgeInsets.symmetric(
@@ -295,47 +277,162 @@ class RegisterView extends GetView<RegistrationController> {
     );
   }
 
-  Widget _buildCurrentStep(RegistrationStep step) {
-    switch (step) {
-      case RegistrationStep.basicInfo:
+  Widget _buildCurrentStep() {
+    switch (controller.currentPageIndex) {
+      case 0:
         return BasicInfoStep();
-      case RegistrationStep.personalInfo:
+      case 1:
         return PersonalInfoStep();
-      case RegistrationStep.professionalInfo:
-        return const ProfessionalInfoStep();
-      case RegistrationStep.skillsInfo:
-        return const SkillsInfoStep();
-      case RegistrationStep.completed:
-        return const SizedBox.shrink();
+      case 2:
+        return ProfessionalInfoStep();
+      case 3:
+        return SkillsInfoStep();
+      default:
+        return BasicInfoStep();
     }
   }
 
-  double _getProgressValue(RegistrationStep step) {
-    switch (step) {
-      case RegistrationStep.basicInfo:
-        return 0.25;
-      case RegistrationStep.personalInfo:
-        return 0.5;
-      case RegistrationStep.professionalInfo:
-        return 0.75;
-      case RegistrationStep.skillsInfo:
-      case RegistrationStep.completed:
-        return 1.0;
-    }
+  Widget _buildProgressStepper() {
+    final steps = [
+      {'title': 'Temel', 'subtitle': 'Email & GitHub'},
+      {'title': 'Kişisel', 'subtitle': 'Profil bilgileri'},
+      {'title': 'Mesleki', 'subtitle': 'İş deneyimi'},
+      {'title': 'Yetenekler', 'subtitle': 'Skills & Projeler'},
+    ];
+
+    return Container(
+      padding: _responsiveController.responsivePadding(
+        horizontal: 16.0,
+        vertical: 12.0,
+      ),
+      child: Row(
+        children: List.generate(steps.length, (index) {
+          final isCompleted = index < controller.currentPageIndex;
+          final isCurrent = index == controller.currentPageIndex;
+
+          return Expanded(
+            child: Row(
+              children: [
+                // Step circle
+                Container(
+                  width: _responsiveController.responsiveValue(
+                    mobile: 32.0,
+                    tablet: 40.0,
+                  ),
+                  height: _responsiveController.responsiveValue(
+                    mobile: 32.0,
+                    tablet: 40.0,
+                  ),
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    color: isCompleted
+                        ? Colors.green
+                        : isCurrent
+                            ? Theme.of(Get.context!).primaryColor
+                            : Colors.grey[300],
+                  ),
+                  child: Center(
+                    child: isCompleted
+                        ? Icon(
+                            Icons.check,
+                            color: Colors.white,
+                            size: _responsiveController.responsiveValue(
+                              mobile: 16.0,
+                              tablet: 20.0,
+                            ),
+                          )
+                        : Text(
+                            '${index + 1}',
+                            style: TextStyle(
+                              color:
+                                  isCurrent ? Colors.white : Colors.grey[600],
+                              fontWeight: FontWeight.bold,
+                              fontSize: _responsiveController.responsiveValue(
+                                mobile: 14.0,
+                                tablet: 16.0,
+                              ),
+                            ),
+                          ),
+                  ),
+                ),
+
+                // Step info
+                if (_responsiveController.responsiveValue(
+                    mobile: false, tablet: true))
+                  Expanded(
+                    child: Padding(
+                      padding: const EdgeInsets.only(left: 8.0),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Text(
+                            steps[index]['title']!,
+                            style: TextStyle(
+                              fontSize: _responsiveController.responsiveValue(
+                                mobile: 12.0,
+                                tablet: 14.0,
+                              ),
+                              fontWeight:
+                                  isCurrent ? FontWeight.bold : FontWeight.w500,
+                              color: isCurrent
+                                  ? Theme.of(Get.context!).primaryColor
+                                  : Colors.grey[700],
+                            ),
+                          ),
+                          Text(
+                            steps[index]['subtitle']!,
+                            style: TextStyle(
+                              fontSize: _responsiveController.responsiveValue(
+                                mobile: 10.0,
+                                tablet: 12.0,
+                              ),
+                              color: Colors.grey[500],
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+
+                // Connector line
+                if (index < steps.length - 1)
+                  Expanded(
+                    child: Container(
+                      height: 2,
+                      margin: EdgeInsets.symmetric(
+                        horizontal: _responsiveController.responsiveValue(
+                          mobile: 4.0,
+                          tablet: 8.0,
+                        ),
+                      ),
+                      color: isCompleted ? Colors.green : Colors.grey[300],
+                    ),
+                  ),
+              ],
+            ),
+          );
+        }),
+      ),
+    );
   }
 
-  String _getStepTitle(RegistrationStep step) {
-    switch (step) {
-      case RegistrationStep.basicInfo:
+  double _getProgressValue() {
+    return (controller.currentPageIndex + 1) / 4;
+  }
+
+  String _getStepTitle() {
+    switch (controller.currentPageIndex) {
+      case 0:
         return AppStrings.basicInfo;
-      case RegistrationStep.personalInfo:
+      case 1:
         return AppStrings.personalInfo;
-      case RegistrationStep.professionalInfo:
+      case 2:
         return AppStrings.professionalInfo;
-      case RegistrationStep.skillsInfo:
+      case 3:
         return AppStrings.skillsInfo;
-      case RegistrationStep.completed:
-        return AppStrings.completed;
+      default:
+        return AppStrings.basicInfo;
     }
   }
 }

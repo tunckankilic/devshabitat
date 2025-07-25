@@ -244,32 +244,44 @@ class GithubService extends GetxService {
     );
   }
 
-  Future<GithubStatsModel> getGithubStats(String username) async {
-    return await _apiOptimizer.optimizeApiCall(
-      apiCall: () async {
-        final userInfo = await getUserInfo(username);
-        final repoStats = await getRepositoryStats(username);
+  Future<GithubStatsModel?> getGithubStats(String username) async {
+    try {
+      // Boş username kontrolü
+      if (username.isEmpty) {
+        return null; // Hata fırlatma, sadece null döndür
+      }
 
-        return GithubStatsModel(
-          username: username,
-          totalRepositories: userInfo['public_repos'] ?? 0,
-          totalContributions: repoStats['contributions'] ?? 0,
-          languageStats:
-              Map<String, int>.from(repoStats['languageStats'] ?? {}),
-          recentRepositories: [],
-          contributionGraph: {},
-          followers: userInfo['followers'] ?? 0,
-          following: userInfo['following'] ?? 0,
-          avatarUrl: userInfo['avatar_url'],
-          bio: userInfo['bio'],
-          location: userInfo['location'],
-          website: userInfo['blog'],
-          company: userInfo['company'],
-        );
-      },
-      cacheKey: 'github_stats_$username',
-      cacheDuration: const Duration(minutes: 20),
-    );
+      // API çağrısı
+      final response = await http.get(
+        Uri.parse('https://api.github.com/users/$username'),
+      );
+
+      if (response.statusCode == 404) {
+        return null; // Kullanıcı bulunamadı, hata fırlatma
+      }
+
+      final userInfo = await getUserInfo(username);
+      final repoStats = await getRepositoryStats(username);
+
+      return GithubStatsModel(
+        username: username,
+        totalRepositories: userInfo['public_repos'] ?? 0,
+        totalContributions: repoStats['contributions'] ?? 0,
+        languageStats: Map<String, int>.from(repoStats['languageStats'] ?? {}),
+        recentRepositories: [],
+        contributionGraph: {},
+        followers: userInfo['followers'] ?? 0,
+        following: userInfo['following'] ?? 0,
+        avatarUrl: userInfo['avatar_url'],
+        bio: userInfo['bio'],
+        location: userInfo['location'],
+        website: userInfo['blog'],
+        company: userInfo['company'],
+      );
+    } catch (e) {
+      print('GitHub stats silent error: $e'); // Sadece log
+      return null; // Hata fırlatma
+    }
   }
 
   Future<List<Map<String, dynamic>>> getUserActivities(String username) async {

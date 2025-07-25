@@ -25,29 +25,30 @@ class SkillsInfoStep extends GetView<RegistrationController> {
             ),
           ),
           SizedBox(height: responsive.responsiveValue(mobile: 8, tablet: 12)),
-          Wrap(
-            spacing: responsive.responsiveValue(mobile: 8, tablet: 12),
-            runSpacing: responsive.responsiveValue(mobile: 8, tablet: 12),
-            children: [
-              ...controller.selectedSkills.map(
-                (skill) => Chip(
-                  label: Text(
-                    skill,
-                    style: TextStyle(
-                        fontSize:
-                            responsive.responsiveValue(mobile: 14, tablet: 16)),
+          Obx(() => Wrap(
+                spacing: responsive.responsiveValue(mobile: 8, tablet: 12),
+                runSpacing: responsive.responsiveValue(mobile: 8, tablet: 12),
+                children: [
+                  ...controller.selectedSkills.map(
+                    (skill) => Chip(
+                      label: Text(
+                        skill,
+                        style: TextStyle(
+                            fontSize: responsive.responsiveValue(
+                                mobile: 14, tablet: 16)),
+                      ),
+                      onDeleted: () => controller.selectedSkills.remove(skill),
+                    ),
                   ),
-                  onDeleted: () => controller.selectedSkills.remove(skill),
-                ),
-              ),
-              ActionChip(
-                label: Icon(Icons.add,
-                    size: responsive.responsiveValue(mobile: 20, tablet: 24)),
-                onPressed: () => _showAddDialog(
-                    context, AppStrings.skill, controller.selectedSkills),
-              ),
-            ],
-          ),
+                  ActionChip(
+                    label: Icon(Icons.add,
+                        size:
+                            responsive.responsiveValue(mobile: 20, tablet: 24)),
+                    onPressed: () => _showAddDialog(
+                        context, AppStrings.skill, controller.selectedSkills),
+                  ),
+                ],
+              )),
           SizedBox(height: responsive.responsiveValue(mobile: 24, tablet: 32)),
 
           // Programlama Dilleri
@@ -59,32 +60,33 @@ class SkillsInfoStep extends GetView<RegistrationController> {
             ),
           ),
           SizedBox(height: responsive.responsiveValue(mobile: 8, tablet: 12)),
-          Wrap(
-            spacing: responsive.responsiveValue(mobile: 8, tablet: 12),
-            runSpacing: responsive.responsiveValue(mobile: 8, tablet: 12),
-            children: [
-              ...controller.selectedLanguages.map(
-                (language) => Chip(
-                  label: Text(
-                    language,
-                    style: TextStyle(
-                        fontSize:
-                            responsive.responsiveValue(mobile: 14, tablet: 16)),
+          Obx(() => Wrap(
+                spacing: responsive.responsiveValue(mobile: 8, tablet: 12),
+                runSpacing: responsive.responsiveValue(mobile: 8, tablet: 12),
+                children: [
+                  ...controller.selectedLanguages.map(
+                    (language) => Chip(
+                      label: Text(
+                        language,
+                        style: TextStyle(
+                            fontSize: responsive.responsiveValue(
+                                mobile: 14, tablet: 16)),
+                      ),
+                      onDeleted: () =>
+                          controller.selectedLanguages.remove(language),
+                    ),
                   ),
-                  onDeleted: () =>
-                      controller.selectedLanguages.remove(language),
-                ),
-              ),
-              ActionChip(
-                label: Icon(Icons.add,
-                    size: responsive.responsiveValue(mobile: 20, tablet: 24)),
-                onPressed: () => _showAddDialog(
-                    context,
-                    AppStrings.programmingLanguage,
-                    controller.selectedLanguages),
-              ),
-            ],
-          ),
+                  ActionChip(
+                    label: Icon(Icons.add,
+                        size:
+                            responsive.responsiveValue(mobile: 20, tablet: 24)),
+                    onPressed: () => _showAddDialog(
+                        context,
+                        AppStrings.programmingLanguage,
+                        controller.selectedLanguages),
+                  ),
+                ],
+              )),
           SizedBox(height: responsive.responsiveValue(mobile: 24, tablet: 32)),
 
           // İlgi Alanları
@@ -96,30 +98,31 @@ class SkillsInfoStep extends GetView<RegistrationController> {
             ),
           ),
           SizedBox(height: responsive.responsiveValue(mobile: 8, tablet: 12)),
-          Wrap(
-            spacing: responsive.responsiveValue(mobile: 8, tablet: 12),
-            runSpacing: responsive.responsiveValue(mobile: 8, tablet: 12),
-            children: [
-              ...controller.selectedInterests.map(
-                (interest) => Chip(
-                  label: Text(
-                    interest,
-                    style: TextStyle(
-                        fontSize:
-                            responsive.responsiveValue(mobile: 14, tablet: 16)),
+          Obx(() => Wrap(
+                spacing: responsive.responsiveValue(mobile: 8, tablet: 12),
+                runSpacing: responsive.responsiveValue(mobile: 8, tablet: 12),
+                children: [
+                  ...controller.selectedInterests.map(
+                    (interest) => Chip(
+                      label: Text(
+                        interest,
+                        style: TextStyle(
+                            fontSize: responsive.responsiveValue(
+                                mobile: 14, tablet: 16)),
+                      ),
+                      onDeleted: () =>
+                          controller.selectedInterests.remove(interest),
+                    ),
                   ),
-                  onDeleted: () =>
-                      controller.selectedInterests.remove(interest),
-                ),
-              ),
-              ActionChip(
-                label: Icon(Icons.add,
-                    size: responsive.responsiveValue(mobile: 20, tablet: 24)),
-                onPressed: () => _showAddDialog(
-                    context, AppStrings.interest, controller.selectedInterests),
-              ),
-            ],
-          ),
+                  ActionChip(
+                    label: Icon(Icons.add,
+                        size:
+                            responsive.responsiveValue(mobile: 20, tablet: 24)),
+                    onPressed: () => _showAddDialog(context,
+                        AppStrings.interest, controller.selectedInterests),
+                  ),
+                ],
+              )),
           SizedBox(height: responsive.responsiveValue(mobile: 24, tablet: 32)),
 
           // Sosyal Medya Bağlantıları
@@ -147,29 +150,30 @@ class SkillsInfoStep extends GetView<RegistrationController> {
             ),
           ),
           SizedBox(height: responsive.responsiveValue(mobile: 8, tablet: 12)),
-          Wrap(
-            spacing: responsive.responsiveValue(mobile: 8, tablet: 12),
-            runSpacing: responsive.responsiveValue(mobile: 8, tablet: 12),
-            children: [
-              ...controller.portfolioUrls.map(
-                (url) => Chip(
-                  label: Text(
-                    url,
-                    style: TextStyle(
-                        fontSize:
-                            responsive.responsiveValue(mobile: 14, tablet: 16)),
+          Obx(() => Wrap(
+                spacing: responsive.responsiveValue(mobile: 8, tablet: 12),
+                runSpacing: responsive.responsiveValue(mobile: 8, tablet: 12),
+                children: [
+                  ...controller.portfolioUrls.map(
+                    (url) => Chip(
+                      label: Text(
+                        url,
+                        style: TextStyle(
+                            fontSize: responsive.responsiveValue(
+                                mobile: 14, tablet: 16)),
+                      ),
+                      onDeleted: () => controller.portfolioUrls.remove(url),
+                    ),
                   ),
-                  onDeleted: () => controller.portfolioUrls.remove(url),
-                ),
-              ),
-              ActionChip(
-                label: Icon(Icons.add,
-                    size: responsive.responsiveValue(mobile: 20, tablet: 24)),
-                onPressed: () => _showAddDialog(
-                    context, AppStrings.portfolioUrl, controller.portfolioUrls),
-              ),
-            ],
-          ),
+                  ActionChip(
+                    label: Icon(Icons.add,
+                        size:
+                            responsive.responsiveValue(mobile: 20, tablet: 24)),
+                    onPressed: () => _showAddDialog(context,
+                        AppStrings.portfolioUrl, controller.portfolioUrls),
+                  ),
+                ],
+              )),
           SizedBox(height: responsive.responsiveValue(mobile: 24, tablet: 32)),
 
           // Bilgilendirme Metni
@@ -180,6 +184,9 @@ class SkillsInfoStep extends GetView<RegistrationController> {
               fontSize: responsive.responsiveValue(mobile: 12, tablet: 14),
             ),
           ),
+
+          // Profile Preview
+          _buildProfilePreview(),
         ],
       ),
     );
@@ -262,6 +269,118 @@ class SkillsInfoStep extends GetView<RegistrationController> {
                   fontSize: responsive.responsiveValue(mobile: 16, tablet: 18)),
             ),
           ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildProfilePreview() {
+    final responsive = Get.find<ResponsiveController>();
+
+    return Container(
+      margin: responsive.responsivePadding(vertical: 24),
+      padding: responsive.responsivePadding(all: 16),
+      decoration: BoxDecoration(
+        color: Colors.blue[50],
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: Colors.blue[200]!),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Icon(Icons.preview, color: Colors.blue[700]),
+              SizedBox(width: 8),
+              Text(
+                'Profil Önizlemesi',
+                style: TextStyle(
+                  fontSize: responsive.responsiveValue(mobile: 18, tablet: 20),
+                  fontWeight: FontWeight.bold,
+                  color: Colors.blue[700],
+                ),
+              ),
+            ],
+          ),
+          SizedBox(height: 16),
+
+          // Basic Info Preview
+          _buildPreviewSection(
+            'Temel Bilgiler',
+            [
+              'Email: ${controller.emailController.text}',
+              'Ad: ${controller.displayNameController.text}',
+              'GitHub: ${controller.githubUsername ?? "Bağlanmış"}',
+            ],
+          ),
+
+          // Personal Info Preview
+          if (controller.bioController.text.isNotEmpty ||
+              controller.locationNameController.text.isNotEmpty)
+            _buildPreviewSection(
+              'Kişisel Bilgiler',
+              [
+                if (controller.bioController.text.isNotEmpty)
+                  'Bio: ${controller.bioController.text}',
+                if (controller.locationNameController.text.isNotEmpty)
+                  'Konum: ${controller.locationNameController.text}',
+              ],
+            ),
+
+          // Professional Info Preview
+          if (controller.titleController.text.isNotEmpty ||
+              controller.companyController.text.isNotEmpty)
+            _buildPreviewSection(
+              'Mesleki Bilgiler',
+              [
+                if (controller.titleController.text.isNotEmpty)
+                  'Pozisyon: ${controller.titleController.text}',
+                if (controller.companyController.text.isNotEmpty)
+                  'Şirket: ${controller.companyController.text}',
+              ],
+            ),
+
+          // Skills Preview
+          if (controller.selectedSkills.isNotEmpty)
+            _buildPreviewSection(
+              'Yetenekler',
+              [
+                'Skills: ${controller.selectedSkills.take(3).join(", ")}${controller.selectedSkills.length > 3 ? "..." : ""}'
+              ],
+            ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildPreviewSection(String title, List<String> items) {
+    final responsive = Get.find<ResponsiveController>();
+
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 12),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            title,
+            style: TextStyle(
+              fontSize: responsive.responsiveValue(mobile: 14, tablet: 16),
+              fontWeight: FontWeight.w600,
+              color: Colors.grey[700],
+            ),
+          ),
+          SizedBox(height: 4),
+          ...items.map((item) => Padding(
+                padding: const EdgeInsets.only(left: 8, bottom: 2),
+                child: Text(
+                  '• $item',
+                  style: TextStyle(
+                    fontSize:
+                        responsive.responsiveValue(mobile: 13, tablet: 15),
+                    color: Colors.grey[600],
+                  ),
+                ),
+              )),
         ],
       ),
     );

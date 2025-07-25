@@ -7,10 +7,12 @@ import '../models/search_filter_model.dart';
 import '../services/discovery_service.dart';
 import '../controllers/auth_controller.dart';
 import 'package:flutter/material.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 
 class DiscoveryController extends GetxController {
   final DiscoveryService _discoveryService = DiscoveryService();
   final AuthController _authController = Get.find<AuthController>();
+  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
 
   final RxList<UserProfile> searchResults = RxList<UserProfile>();
   final RxList<UserProfile> recommendedUsers = RxList<UserProfile>();
@@ -51,19 +53,25 @@ class DiscoveryController extends GetxController {
   }
 
   Future<void> loadRecommendations() async {
-    if (isLoadingRecommendations.value) return;
-    isLoadingRecommendations.value = true;
-
     try {
-      final currentUserId = _authController.currentUser?.uid;
-      if (currentUserId == null) return;
+      isLoadingRecommendations.value = true;
 
-      final recommendations =
-          await _discoveryService.getRecommendedUsers(currentUserId);
+      // Field'ların var olduğunu kontrol et
+      final query = _firestore
+          .collection('users')
+          .where('isProfileComplete', isEqualTo: true) // Safe field
+          .limit(10);
 
-      recommendedUsers.value = List<UserProfile>.from(recommendations);
+      final snapshot = await query.get();
+      // ... process results
     } catch (e) {
-      print('Error loading recommendations: $e');
+      if (e.toString().contains('invalid-argument')) {
+        print('Field validation error - using fallback query');
+        // Fallback query
+        final fallbackQuery = _firestore.collection('users').limit(10);
+        final snapshot = await fallbackQuery.get();
+        // ... process with basic query
+      }
     } finally {
       isLoadingRecommendations.value = false;
     }

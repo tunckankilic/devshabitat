@@ -284,6 +284,16 @@ class AuthController extends GetxController {
       _emailAuth.confirmPasswordController;
   TextEditingController get usernameController => _emailAuth.usernameController;
 
+  Future<void> refreshUserProfile() async {
+    try {
+      if (_firebaseUser.value != null) {
+        await _loadUserProfile();
+      }
+    } catch (e) {
+      _errorHandler.handleError(e, ErrorHandlerService.AUTH_ERROR);
+    }
+  }
+
   @override
   void onClose() {
     _navigationTimer?.cancel();

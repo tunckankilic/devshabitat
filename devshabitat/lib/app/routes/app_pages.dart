@@ -1,9 +1,13 @@
 // ignore_for_file: constant_identifier_names
 
+import 'package:devshabitat/app/controllers/registration_controller.dart';
 import 'package:devshabitat/app/views/auth/register/register_view.dart';
+import 'package:devshabitat/app/views/messaging/message_search_view.dart';
+import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../views/auth/login_view.dart';
 import '../views/auth/forgot_password/forgot_password_view.dart';
+import '../views/auth/email_verification_view.dart';
 import '../views/main_wrapper.dart';
 import '../views/notifications/notifications_view.dart';
 import '../views/settings/settings_view.dart';
@@ -62,21 +66,30 @@ class AppPages {
     GetPage(
       name: AppRoutes.register,
       page: () => RegisterView(),
-      binding: AuthBinding(),
+      bindings: [
+        BindingsBuilder(() {
+          // Sadece RegistrationController ekle, diğerleri zaten global
+          Get.lazyPut(() => RegistrationController(
+                authRepository: Get.find(),
+                errorHandler: Get.find(),
+                authController: Get.find(),
+              ));
+        }),
+      ],
     ),
     GetPage(
       name: AppRoutes.home,
       page: () => MainWrapper(),
-      bindings: [
-        NavigationBinding(),
-        HomeBinding(),
-      ],
       middlewares: [AuthMiddleware()],
     ),
     GetPage(
       name: AppRoutes.forgotPassword,
       page: () => ForgotPasswordView(),
       binding: AuthBinding(),
+    ),
+    GetPage(
+      name: AppRoutes.emailVerification,
+      page: () => EmailVerificationView(),
     ),
     GetPage(
       name: AppRoutes.notifications,
@@ -206,6 +219,24 @@ class AppPages {
       binding: BindingsBuilder(() {
         Get.lazyPut(() => MemoryDebugController());
       }),
+    ),
+    GetPage(
+      name: AppRoutes.messageSearch,
+      page: () => MessageSearchView(),
+      binding: BindingsBuilder(() {
+        // Controller zaten global yüklü, sadece lazy put
+      }),
+    ),
+    GetPage(
+      name: AppRoutes.NEW_CHAT,
+      page: () => Scaffold(
+        appBar: AppBar(title: Text('Yeni Sohbet')),
+        body: Center(
+          child: Text('Yeni sohbet sayfası yakında...',
+              style: TextStyle(fontSize: 18)),
+        ),
+      ),
+      middlewares: [AuthMiddleware()],
     ),
   ];
 }

@@ -54,6 +54,7 @@ class AuthBinding extends Bindings {
       () => RegistrationController(
         authRepository: Get.find(),
         errorHandler: Get.find(),
+        authController: Get.find(),
       ),
     );
   }

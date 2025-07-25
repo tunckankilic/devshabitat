@@ -1,4 +1,7 @@
 import 'package:devshabitat/app/constants/app_strings.dart';
+import 'package:devshabitat/app/routes/app_pages.dart';
+import 'package:devshabitat/app/views/auth/login_view.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../../controllers/home_controller.dart';
@@ -26,6 +29,16 @@ class HomeView extends BaseView<HomeController> {
           )),
         ),
         actions: [
+          IconButton(
+              onPressed: () async {
+                await FirebaseAuth.instance.signOut();
+                Get.offNamed(AppRoutes.login);
+              },
+              icon: Icon(Icons.logout)),
+          IconButton(
+            icon: Icon(Icons.settings, size: responsive.minTouchTarget),
+            onPressed: () => Get.toNamed('/settings'),
+          ),
           IconButton(
             icon:
                 Icon(Icons.notifications_none, size: responsive.minTouchTarget),

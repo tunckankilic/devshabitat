@@ -5,11 +5,7 @@ import 'package:cached_network_image/cached_network_image.dart';
 import '../../controllers/profile_controller.dart';
 import '../base/base_view.dart';
 import 'widgets/github_repo_card.dart';
-import '../../widgets/adaptive_touch_target.dart';
-import '../../widgets/responsive/responsive_safe_area.dart';
 import '../../widgets/responsive/responsive_text.dart';
-import '../../widgets/responsive/responsive_overflow_handler.dart'
-    hide ResponsiveText, ResponsiveSafeArea;
 import '../../widgets/responsive/animated_responsive_layout.dart';
 
 class ProfileView extends BaseView<ProfileController> {
@@ -18,528 +14,753 @@ class ProfileView extends BaseView<ProfileController> {
   @override
   Widget buildView(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: ResponsiveText(
-          AppStrings.profile,
-          style: TextStyle(
-            fontSize: responsive.responsiveValue(
-              mobile: 18,
-              tablet: 22,
+      body: Obx(() {
+        if (controller.isLoading) {
+          return Center(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                CircularProgressIndicator(
+                  strokeWidth: 3,
+                  color: Theme.of(context).primaryColor,
+                ),
+                SizedBox(height: 16),
+                ResponsiveText(
+                  'Profil yükleniyor...',
+                  style: TextStyle(
+                    fontSize: 16,
+                    color: Colors.grey[600],
+                  ),
+                ),
+              ],
+            ),
+          );
+        }
+
+        final user = controller.user;
+        if (user == null) {
+          return Center(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Icon(
+                  Icons.person_off,
+                  size: 64,
+                  color: Colors.grey[400],
+                ),
+                SizedBox(height: 16),
+                ResponsiveText(
+                  AppStrings.profileNotFound,
+                  style: TextStyle(
+                    fontSize: 18,
+                    color: Colors.grey[600],
+                  ),
+                ),
+              ],
+            ),
+          );
+        }
+
+        return AnimatedResponsiveLayout(
+          mobile: _buildMobileProfile(user, context),
+          tablet: _buildTabletProfile(user, context),
+          animationDuration: const Duration(milliseconds: 300),
+        );
+      }),
+    );
+  }
+
+  Widget _buildMobileProfile(dynamic user, BuildContext context) {
+    return RefreshIndicator(
+      onRefresh: () => controller.loadProfile(),
+      color: Theme.of(context).primaryColor,
+      child: CustomScrollView(
+        slivers: [
+          _buildModernAppBar(user, context),
+          SliverToBoxAdapter(
+            child: Padding(
+              padding: const EdgeInsets.all(16),
+              child: Column(
+                children: [
+                  _buildProfileCard(user, context),
+                  SizedBox(height: 16),
+                  if (user.bio != null) ...[
+                    _buildAboutCard(user.bio!, context),
+                    SizedBox(height: 16),
+                  ],
+                  _buildSkillsCard(user, context),
+                  SizedBox(height: 16),
+                  _buildLanguagesCard(user, context),
+                  SizedBox(height: 16),
+                  _buildFrameworksCard(user, context),
+                  SizedBox(height: 16),
+                  _buildGithubCard(user, context),
+                  SizedBox(height: 16),
+                  _buildWorkExperienceCard(user, context),
+                  SizedBox(height: 16),
+                  _buildEducationCard(user, context),
+                  SizedBox(height: 32),
+                ],
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildTabletProfile(dynamic user, BuildContext context) {
+    return RefreshIndicator(
+      onRefresh: () => controller.loadProfile(),
+      color: Theme.of(context).primaryColor,
+      child: CustomScrollView(
+        slivers: [
+          _buildModernAppBar(user, context),
+          SliverToBoxAdapter(
+            child: Padding(
+              padding: const EdgeInsets.all(24),
+              child: Column(
+                children: [
+                  _buildProfileCard(user, context),
+                  SizedBox(height: 24),
+                  Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Expanded(
+                        flex: 2,
+                        child: Column(
+                          children: [
+                            if (user.bio != null) ...[
+                              _buildAboutCard(user.bio!, context),
+                              SizedBox(height: 24),
+                            ],
+                            _buildSkillsCard(user, context),
+                            SizedBox(height: 24),
+                            _buildLanguagesCard(user, context),
+                            SizedBox(height: 24),
+                            _buildFrameworksCard(user, context),
+                          ],
+                        ),
+                      ),
+                      SizedBox(width: 24),
+                      Expanded(
+                        flex: 3,
+                        child: Column(
+                          children: [
+                            _buildGithubCard(user, context),
+                            SizedBox(height: 24),
+                            _buildWorkExperienceCard(user, context),
+                            SizedBox(height: 24),
+                            _buildEducationCard(user, context),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildModernAppBar(dynamic user, BuildContext context) {
+    return SliverAppBar(
+      expandedHeight: 100,
+      floating: false,
+      pinned: true,
+      elevation: 0,
+      backgroundColor: Colors.transparent,
+      flexibleSpace: Container(
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+            colors: [
+              Theme.of(context).primaryColor,
+              Theme.of(context).primaryColor.withOpacity(0.8),
+            ],
+          ),
+        ),
+        child: FlexibleSpaceBar(
+          title: ResponsiveText(
+            AppStrings.profile,
+            style: TextStyle(
+              color: Colors.white,
+              fontWeight: FontWeight.w600,
+              fontSize: 20,
+            ),
+          ),
+          centerTitle: true,
+        ),
+      ),
+      actions: [
+        Padding(
+          padding: const EdgeInsets.only(right: 8),
+          child: IconButton(
+            onPressed: () => Get.toNamed('/edit-profile'),
+            icon: Container(
+              padding: EdgeInsets.all(8),
+              decoration: BoxDecoration(
+                color: Colors.white.withOpacity(0.2),
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: Icon(
+                Icons.edit_outlined,
+                color: Colors.white,
+                size: 20,
+              ),
             ),
           ),
         ),
-        actions: [
-          AdaptiveTouchTarget(
-            onTap: () => Get.toNamed('/edit-profile'),
-            child: Icon(
-              Icons.edit,
-              size: responsive.minTouchTarget,
-            ),
-          ),
-        ],
-      ),
-      body: ResponsiveSafeArea(
-        child: Obx(() {
-          if (controller.isLoading) {
-            return Center(
-              child: CircularProgressIndicator(
-                strokeWidth: responsive.responsiveValue(
-                  mobile: 2,
-                  tablet: 3,
-                ),
-              ),
-            );
-          }
+      ],
+    );
+  }
 
-          final user = controller.user;
-          if (user == null) {
-            return Center(
-              child: ResponsiveText(
-                AppStrings.profileNotFound,
-                style: TextStyle(
-                  fontSize: responsive.responsiveValue(
-                    mobile: 16,
-                    tablet: 18,
+  Widget _buildProfileCard(dynamic user, BuildContext context) {
+    return Card(
+      elevation: 8,
+      shadowColor: Colors.black.withOpacity(0.1),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+      child: Container(
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(20),
+          gradient: LinearGradient(
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+            colors: [
+              Colors.white,
+              Colors.grey[50]!,
+            ],
+          ),
+        ),
+        padding: EdgeInsets.all(24),
+        child: Column(
+          children: [
+            Stack(
+              alignment: Alignment.center,
+              children: [
+                Container(
+                  width: 120,
+                  height: 120,
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    gradient: LinearGradient(
+                      colors: [
+                        Theme.of(context).primaryColor,
+                        Theme.of(context).primaryColor.withOpacity(0.7),
+                      ],
+                    ),
                   ),
                 ),
-              ),
-            );
-          }
-
-          return RefreshIndicator(
-            onRefresh: () => controller.loadProfile(),
-            child: ResponsiveOverflowHandler(
-              child: AnimatedResponsiveLayout(
-                mobile: _buildMobileProfile(user),
-                tablet: _buildTabletProfile(user),
-                animationDuration: const Duration(milliseconds: 300),
-              ),
-            ),
-          );
-        }),
-      ),
-    );
-  }
-
-  Widget _buildMobileProfile(dynamic user) {
-    return SingleChildScrollView(
-      padding: responsive.responsivePadding(
-          all: responsive.responsiveValue(mobile: 16, tablet: 24)),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          _buildProfileHeader(user),
-          SizedBox(height: responsive.responsiveValue(mobile: 24, tablet: 32)),
-          if (user.bio != null) ...[
-            _buildSectionTitle(AppStrings.aboutMe),
-            SizedBox(height: responsive.responsiveValue(mobile: 8, tablet: 12)),
-            _buildBioSection(user.bio!),
-            SizedBox(
-                height: responsive.responsiveValue(mobile: 24, tablet: 32)),
-          ],
-          _buildSkillsSection(user),
-          _buildLanguagesSection(user),
-          _buildFrameworksSection(user),
-          _buildGithubSection(user),
-          _buildWorkExperienceSection(user),
-          _buildEducationSection(user),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildTabletProfile(dynamic user) {
-    return SingleChildScrollView(
-      padding: responsive.responsivePadding(
-          all: responsive.responsiveValue(mobile: 24, tablet: 32)),
-      child: Column(
-        children: [
-          _buildProfileHeader(user),
-          SizedBox(height: responsive.responsiveValue(mobile: 32, tablet: 40)),
-          Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Expanded(
-                flex: 2,
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    if (user.bio != null) ...[
-                      _buildSectionTitle(AppStrings.aboutMe),
-                      SizedBox(
-                          height: responsive.responsiveValue(
-                              mobile: 8, tablet: 12)),
-                      _buildBioSection(user.bio!),
-                      SizedBox(
-                          height: responsive.responsiveValue(
-                              mobile: 24, tablet: 32)),
-                    ],
-                    _buildSkillsSection(user),
-                    _buildLanguagesSection(user),
-                    _buildFrameworksSection(user),
-                  ],
+                CircleAvatar(
+                  radius: 55,
+                  backgroundColor: Colors.white,
+                  child: CircleAvatar(
+                    radius: 50,
+                    backgroundColor: Colors.grey[200],
+                    backgroundImage: user.photoURL != null
+                        ? CachedNetworkImageProvider(user.photoURL!)
+                        : null,
+                    child: user.photoURL == null
+                        ? Icon(
+                            Icons.person,
+                            size: 50,
+                            color: Colors.grey[600],
+                          )
+                        : null,
+                  ),
                 ),
+              ],
+            ),
+            SizedBox(height: 20),
+            ResponsiveText(
+              user.displayName ?? "Kullanıcı",
+              style: TextStyle(
+                fontSize: 24,
+                fontWeight: FontWeight.bold,
+                color: Colors.grey[800],
               ),
-              SizedBox(
-                  width: responsive.responsiveValue(mobile: 24, tablet: 32)),
-              Expanded(
-                flex: 3,
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    _buildGithubSection(user),
-                    _buildWorkExperienceSection(user),
-                    _buildEducationSection(user),
-                  ],
+              textAlign: TextAlign.center,
+            ),
+            if (user.title != null) ...[
+              SizedBox(height: 8),
+              Container(
+                padding: EdgeInsets.symmetric(horizontal: 16, vertical: 6),
+                decoration: BoxDecoration(
+                  color: Theme.of(context).primaryColor.withOpacity(0.1),
+                  borderRadius: BorderRadius.circular(20),
+                ),
+                child: ResponsiveText(
+                  user.title!,
+                  style: TextStyle(
+                    fontSize: 16,
+                    color: Theme.of(context).primaryColor,
+                    fontWeight: FontWeight.w500,
+                  ),
                 ),
               ),
             ],
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildProfileHeader(dynamic user) {
-    final avatarSize = responsive.responsiveValue(
-      mobile: 60.0,
-      tablet: 80.0,
-    );
-
-    return Center(
-      child: Column(
-        children: [
-          CircleAvatar(
-            radius: avatarSize,
-            backgroundColor: Colors.grey[200],
-            backgroundImage: user.photoURL != null
-                ? CachedNetworkImageProvider(user.photoURL!)
-                : null,
-            child: user.photoURL == null
-                ? Icon(
-                    Icons.person,
-                    size: avatarSize,
-                  )
-                : null,
-          ),
-          SizedBox(height: responsive.responsiveValue(mobile: 16, tablet: 24)),
-          ResponsiveText(
-            user.displayName ?? "",
-            style: TextStyle(
-              fontSize: responsive.responsiveValue(
-                mobile: 24,
-                tablet: 28,
+            if (user.company != null) ...[
+              SizedBox(height: 12),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(
+                    Icons.business,
+                    size: 18,
+                    color: Colors.grey[600],
+                  ),
+                  SizedBox(width: 8),
+                  ResponsiveText(
+                    user.company!,
+                    style: TextStyle(
+                      fontSize: 16,
+                      color: Colors.grey[600],
+                    ),
+                  ),
+                ],
               ),
-              fontWeight: FontWeight.bold,
-            ),
-          ),
-          if (user.title != null) ...[
-            SizedBox(height: responsive.responsiveValue(mobile: 4, tablet: 6)),
-            ResponsiveText(
-              user.title!,
-              style: TextStyle(
-                fontSize: responsive.responsiveValue(
-                  mobile: 16,
-                  tablet: 18,
-                ),
-              ),
-            ),
+            ],
           ],
-          if (user.company != null) ...[
-            SizedBox(height: responsive.responsiveValue(mobile: 4, tablet: 6)),
-            ResponsiveText(
-              user.company!,
-              style: TextStyle(
-                fontSize: responsive.responsiveValue(
-                  mobile: 16,
-                  tablet: 18,
+        ),
+      ),
+    );
+  }
+
+  Widget _buildModernCard({
+    required String title,
+    required IconData icon,
+    required Widget child,
+    required BuildContext context,
+    Color? color,
+  }) {
+    return Card(
+      elevation: 6,
+      shadowColor: Colors.black.withOpacity(0.08),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+      child: Container(
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(16),
+          color: Colors.white,
+        ),
+        padding: EdgeInsets.all(20),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                Container(
+                  padding: EdgeInsets.all(8),
+                  decoration: BoxDecoration(
+                    color: (color ?? Theme.of(context).primaryColor)
+                        .withOpacity(0.1),
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                  child: Icon(
+                    icon,
+                    color: color ?? Theme.of(context).primaryColor,
+                    size: 20,
+                  ),
                 ),
-                color: Colors.grey[600],
-              ),
+                SizedBox(width: 12),
+                Expanded(
+                  child: ResponsiveText(
+                    title,
+                    style: TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.w600,
+                      color: Colors.grey[800],
+                    ),
+                  ),
+                ),
+              ],
             ),
+            SizedBox(height: 16),
+            child,
           ],
-        ],
-      ),
-    );
-  }
-
-  Widget _buildSectionTitle(String title) {
-    return ResponsiveText(
-      title,
-      style: TextStyle(
-        fontSize: responsive.responsiveValue(
-          mobile: 18,
-          tablet: 20,
-        ),
-        fontWeight: FontWeight.w600,
-      ),
-    );
-  }
-
-  Widget _buildBioSection(String bio) {
-    return ResponsiveText(
-      bio,
-      style: TextStyle(
-        fontSize: responsive.responsiveValue(
-          mobile: 14,
-          tablet: 16,
         ),
       ),
     );
   }
 
-  Widget _buildSkillsSection(dynamic user) {
-    if (user.skills?.isNotEmpty != true) return const SizedBox.shrink();
-
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        _buildSectionTitle(AppStrings.skills),
-        SizedBox(height: responsive.responsiveValue(mobile: 8, tablet: 12)),
-        Wrap(
-          spacing: responsive.responsiveValue(mobile: 8, tablet: 12),
-          runSpacing: responsive.responsiveValue(mobile: 8, tablet: 12),
-          children: user.skills!
-              .map<Widget>((skill) => Container(
-                    padding: responsive.responsivePadding(
-                        horizontal: 8, vertical: 4),
-                    decoration: BoxDecoration(
-                      color: Theme.of(Get.context!).chipTheme.backgroundColor,
-                      borderRadius: BorderRadius.circular(
-                          responsive.responsiveValue(mobile: 16, tablet: 20)),
-                    ),
-                    child: ResponsiveText(
-                      skill,
-                      style: TextStyle(
-                        fontSize: responsive.responsiveValue(
-                          mobile: 12,
-                          tablet: 14,
-                        ),
-                      ),
-                    ),
-                  ))
-              .toList(),
+  Widget _buildAboutCard(String bio, BuildContext context) {
+    return _buildModernCard(
+      title: AppStrings.aboutMe,
+      icon: Icons.info_outline,
+      color: Colors.blue,
+      context: context,
+      child: ResponsiveText(
+        bio,
+        style: TextStyle(
+          fontSize: 15,
+          height: 1.5,
+          color: Colors.grey[700],
         ),
-        SizedBox(height: responsive.responsiveValue(mobile: 24, tablet: 32)),
-      ],
+      ),
     );
   }
 
-  Widget _buildLanguagesSection(dynamic user) {
-    if (user.languages?.isNotEmpty != true) return const SizedBox.shrink();
+  Widget _buildSkillsCard(dynamic user, BuildContext context) {
+    if (user.skills?.isNotEmpty != true) return SizedBox.shrink();
 
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        _buildSectionTitle(AppStrings.programmingLanguages),
-        SizedBox(height: responsive.responsiveValue(mobile: 8, tablet: 12)),
-        Wrap(
-          spacing: responsive.responsiveValue(mobile: 8, tablet: 12),
-          runSpacing: responsive.responsiveValue(mobile: 8, tablet: 12),
-          children: user.languages!
-              .map<Widget>((lang) => Container(
-                    padding: responsive.responsivePadding(
-                        horizontal: 8, vertical: 4),
-                    decoration: BoxDecoration(
-                      color: Theme.of(Get.context!).chipTheme.backgroundColor,
-                      borderRadius: BorderRadius.circular(
-                          responsive.responsiveValue(mobile: 16, tablet: 20)),
+    return _buildModernCard(
+      title: AppStrings.skills,
+      icon: Icons.star_outline,
+      color: Colors.orange,
+      context: context,
+      child: Wrap(
+        spacing: 8,
+        runSpacing: 8,
+        children: user.skills!
+            .map<Widget>((skill) => Container(
+                  padding: EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                      colors: [
+                        Colors.orange.withOpacity(0.1),
+                        Colors.orange.withOpacity(0.05),
+                      ],
                     ),
-                    child: ResponsiveText(
-                      lang,
-                      style: TextStyle(
-                        fontSize: responsive.responsiveValue(
-                          mobile: 12,
-                          tablet: 14,
-                        ),
-                      ),
+                    borderRadius: BorderRadius.circular(20),
+                    border: Border.all(
+                      color: Colors.orange.withOpacity(0.3),
+                      width: 1,
                     ),
-                  ))
-              .toList(),
-        ),
-        SizedBox(height: responsive.responsiveValue(mobile: 24, tablet: 32)),
-      ],
+                  ),
+                  child: ResponsiveText(
+                    skill,
+                    style: TextStyle(
+                      fontSize: 13,
+                      color: Colors.orange[700],
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+                ))
+            .toList(),
+      ),
     );
   }
 
-  Widget _buildFrameworksSection(dynamic user) {
-    if (user.frameworks?.isNotEmpty != true) return const SizedBox.shrink();
+  Widget _buildLanguagesCard(dynamic user, BuildContext context) {
+    if (user.languages?.isNotEmpty != true) return SizedBox.shrink();
 
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        _buildSectionTitle(AppStrings.frameworks),
-        SizedBox(height: responsive.responsiveValue(mobile: 8, tablet: 12)),
-        Wrap(
-          spacing: responsive.responsiveValue(mobile: 8, tablet: 12),
-          runSpacing: responsive.responsiveValue(mobile: 8, tablet: 12),
-          children: user.frameworks!
-              .map<Widget>((framework) => Container(
-                    padding: responsive.responsivePadding(
-                        horizontal: 8, vertical: 4),
-                    decoration: BoxDecoration(
-                      color: Theme.of(Get.context!).chipTheme.backgroundColor,
-                      borderRadius: BorderRadius.circular(
-                          responsive.responsiveValue(mobile: 16, tablet: 20)),
+    return _buildModernCard(
+      title: AppStrings.programmingLanguages,
+      icon: Icons.code,
+      color: Colors.green,
+      context: context,
+      child: Wrap(
+        spacing: 8,
+        runSpacing: 8,
+        children: user.languages!
+            .map<Widget>((lang) => Container(
+                  padding: EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                      colors: [
+                        Colors.green.withOpacity(0.1),
+                        Colors.green.withOpacity(0.05),
+                      ],
                     ),
-                    child: ResponsiveText(
-                      framework,
-                      style: TextStyle(
-                        fontSize: responsive.responsiveValue(
-                          mobile: 12,
-                          tablet: 14,
-                        ),
-                      ),
+                    borderRadius: BorderRadius.circular(20),
+                    border: Border.all(
+                      color: Colors.green.withOpacity(0.3),
+                      width: 1,
                     ),
-                  ))
-              .toList(),
-        ),
-        SizedBox(height: responsive.responsiveValue(mobile: 24, tablet: 32)),
-      ],
+                  ),
+                  child: ResponsiveText(
+                    lang,
+                    style: TextStyle(
+                      fontSize: 13,
+                      color: Colors.green[700],
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+                ))
+            .toList(),
+      ),
     );
   }
 
-  Widget _buildGithubSection(dynamic user) {
-    if (user.githubUsername == null) return const SizedBox.shrink();
+  Widget _buildFrameworksCard(dynamic user, BuildContext context) {
+    if (user.frameworks?.isNotEmpty != true) return SizedBox.shrink();
 
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        _buildSectionTitle(AppStrings.github),
-        SizedBox(height: responsive.responsiveValue(mobile: 8, tablet: 12)),
-        FutureBuilder<Map<String, dynamic>>(
-          future: controller.fetchGithubRepoData(user.githubUsername!),
-          builder: (context, snapshot) {
-            if (snapshot.connectionState == ConnectionState.waiting) {
-              return Center(
+    return _buildModernCard(
+      title: AppStrings.frameworks,
+      icon: Icons.widgets_outlined,
+      color: Colors.purple,
+      context: context,
+      child: Wrap(
+        spacing: 8,
+        runSpacing: 8,
+        children: user.frameworks!
+            .map<Widget>((framework) => Container(
+                  padding: EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                      colors: [
+                        Colors.purple.withOpacity(0.1),
+                        Colors.purple.withOpacity(0.05),
+                      ],
+                    ),
+                    borderRadius: BorderRadius.circular(20),
+                    border: Border.all(
+                      color: Colors.purple.withOpacity(0.3),
+                      width: 1,
+                    ),
+                  ),
+                  child: ResponsiveText(
+                    framework,
+                    style: TextStyle(
+                      fontSize: 13,
+                      color: Colors.purple[700],
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+                ))
+            .toList(),
+      ),
+    );
+  }
+
+  Widget _buildGithubCard(dynamic user, BuildContext context) {
+    if (user.githubUsername == null) return SizedBox.shrink();
+
+    return _buildModernCard(
+      title: AppStrings.github,
+      icon: Icons.code_outlined,
+      color: Colors.grey[800]!,
+      context: context,
+      child: FutureBuilder<Map<String, dynamic>>(
+        future: controller.fetchGithubRepoData(user.githubUsername!),
+        builder: (context, snapshot) {
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return Center(
+              child: Padding(
+                padding: EdgeInsets.all(20),
                 child: CircularProgressIndicator(
-                  strokeWidth: responsive.responsiveValue(
-                    mobile: 2,
-                    tablet: 3,
-                  ),
+                  strokeWidth: 2,
+                  color: Colors.grey[600],
                 ),
-              );
-            }
-            if (snapshot.hasError) {
-              return ResponsiveText(
-                '${AppStrings.githubDataNotLoaded}: ${snapshot.error}',
-                style: TextStyle(
-                  fontSize: responsive.responsiveValue(
-                    mobile: 14,
-                    tablet: 16,
+              ),
+            );
+          }
+          if (snapshot.hasError) {
+            return Container(
+              padding: EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                color: Colors.red[50],
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(color: Colors.red[200]!),
+              ),
+              child: Row(
+                children: [
+                  Icon(Icons.error_outline, color: Colors.red[600], size: 20),
+                  SizedBox(width: 8),
+                  Expanded(
+                    child: ResponsiveText(
+                      'GitHub verisi yüklenemedi',
+                      style: TextStyle(
+                        fontSize: 14,
+                        color: Colors.red[600],
+                      ),
+                    ),
                   ),
-                ),
-              );
-            }
-            if (!snapshot.hasData) {
-              return ResponsiveText(
+                ],
+              ),
+            );
+          }
+          if (!snapshot.hasData) {
+            return Container(
+              padding: EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                color: Colors.grey[50],
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(color: Colors.grey[200]!),
+              ),
+              child: ResponsiveText(
                 AppStrings.githubDataNotFound,
                 style: TextStyle(
-                  fontSize: responsive.responsiveValue(
-                    mobile: 14,
-                    tablet: 16,
-                  ),
+                  fontSize: 14,
+                  color: Colors.grey[600],
                 ),
-              );
-            }
-            return GithubRepoCard(repo: snapshot.data!);
-          },
-        ),
-        SizedBox(height: responsive.responsiveValue(mobile: 24, tablet: 32)),
-      ],
+              ),
+            );
+          }
+          return GithubRepoCard(repo: snapshot.data!);
+        },
+      ),
     );
   }
 
-  Widget _buildWorkExperienceSection(dynamic user) {
-    if (user.workExperience?.isNotEmpty != true) return const SizedBox.shrink();
+  Widget _buildWorkExperienceCard(dynamic user, BuildContext context) {
+    if (user.workExperience?.isNotEmpty != true) return SizedBox.shrink();
 
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        _buildSectionTitle(AppStrings.workExperience),
-        SizedBox(height: responsive.responsiveValue(mobile: 8, tablet: 12)),
-        ListView.builder(
-          shrinkWrap: true,
-          physics: const NeverScrollableScrollPhysics(),
-          itemCount: user.workExperience!.length,
-          itemBuilder: (context, index) {
-            final experience = user.workExperience![index];
-            return Container(
-              padding: responsive.responsivePadding(vertical: 8),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  ResponsiveText(
-                    experience.title,
-                    style: TextStyle(
-                      fontSize: responsive.responsiveValue(
-                        mobile: 16,
-                        tablet: 18,
-                      ),
+    return _buildModernCard(
+      title: AppStrings.workExperience,
+      icon: Icons.work_outline,
+      color: Colors.indigo,
+      context: context,
+      child: Column(
+        children: user.workExperience!.map<Widget>((experience) {
+          return Container(
+            margin: EdgeInsets.only(bottom: 16),
+            padding: EdgeInsets.all(16),
+            decoration: BoxDecoration(
+              color: Colors.indigo[50],
+              borderRadius: BorderRadius.circular(12),
+              border: Border.all(color: Colors.indigo[100]!),
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  children: [
+                    Icon(
+                      Icons.business_center,
+                      size: 16,
+                      color: Colors.indigo[600],
                     ),
-                  ),
-                  SizedBox(
-                      height: responsive.responsiveValue(mobile: 4, tablet: 6)),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Expanded(
-                        child: ResponsiveText(
-                          experience.company,
-                          style: TextStyle(
-                            fontSize: responsive.responsiveValue(
-                              mobile: 14,
-                              tablet: 16,
-                            ),
-                          ),
+                    SizedBox(width: 8),
+                    Expanded(
+                      child: ResponsiveText(
+                        experience.title,
+                        style: TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.w600,
+                          color: Colors.indigo[800],
                         ),
                       ),
-                      ResponsiveText(
+                    ),
+                  ],
+                ),
+                SizedBox(height: 8),
+                Row(
+                  children: [
+                    Expanded(
+                      child: ResponsiveText(
+                        experience.company,
+                        style: TextStyle(
+                          fontSize: 14,
+                          color: Colors.grey[700],
+                        ),
+                      ),
+                    ),
+                    Container(
+                      padding: EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                      decoration: BoxDecoration(
+                        color: experience.isCurrentRole
+                            ? Colors.green[100]
+                            : Colors.grey[200],
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: ResponsiveText(
                         experience.isCurrentRole
                             ? AppStrings.currently
                             : AppStrings.past,
                         style: TextStyle(
-                          fontSize: responsive.responsiveValue(
-                            mobile: 12,
-                            tablet: 14,
-                          ),
+                          fontSize: 12,
+                          color: experience.isCurrentRole
+                              ? Colors.green[700]
+                              : Colors.grey[600],
+                          fontWeight: FontWeight.w500,
                         ),
                       ),
-                    ],
-                  ),
-                ],
-              ),
-            );
-          },
-        ),
-        SizedBox(height: responsive.responsiveValue(mobile: 24, tablet: 32)),
-      ],
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          );
+        }).toList(),
+      ),
     );
   }
 
-  Widget _buildEducationSection(dynamic user) {
-    if (user.education?.isNotEmpty != true) return const SizedBox.shrink();
+  Widget _buildEducationCard(dynamic user, BuildContext context) {
+    if (user.education?.isNotEmpty != true) return SizedBox.shrink();
 
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        _buildSectionTitle(AppStrings.education),
-        SizedBox(height: responsive.responsiveValue(mobile: 8, tablet: 12)),
-        ListView.builder(
-          shrinkWrap: true,
-          physics: const NeverScrollableScrollPhysics(),
-          itemCount: user.education!.length,
-          itemBuilder: (context, index) {
-            final education = user.education![index];
-            return Container(
-              padding: responsive.responsivePadding(vertical: 8),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  ResponsiveText(
-                    education.school,
-                    style: TextStyle(
-                      fontSize: responsive.responsiveValue(
-                        mobile: 16,
-                        tablet: 18,
-                      ),
+    return _buildModernCard(
+      title: AppStrings.education,
+      icon: Icons.school_outlined,
+      color: Colors.teal,
+      context: context,
+      child: Column(
+        children: user.education!.map<Widget>((education) {
+          return Container(
+            margin: EdgeInsets.only(bottom: 16),
+            padding: EdgeInsets.all(16),
+            decoration: BoxDecoration(
+              color: Colors.teal[50],
+              borderRadius: BorderRadius.circular(12),
+              border: Border.all(color: Colors.teal[100]!),
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  children: [
+                    Icon(
+                      Icons.school,
+                      size: 16,
+                      color: Colors.teal[600],
                     ),
-                  ),
-                  SizedBox(
-                      height: responsive.responsiveValue(mobile: 4, tablet: 6)),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Expanded(
-                        child: ResponsiveText(
-                          '${education.degree} - ${education.field}',
-                          style: TextStyle(
-                            fontSize: responsive.responsiveValue(
-                              mobile: 14,
-                              tablet: 16,
-                            ),
-                          ),
+                    SizedBox(width: 8),
+                    Expanded(
+                      child: ResponsiveText(
+                        education.school,
+                        style: TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.w600,
+                          color: Colors.teal[800],
                         ),
                       ),
-                      ResponsiveText(
+                    ),
+                  ],
+                ),
+                SizedBox(height: 8),
+                Row(
+                  children: [
+                    Expanded(
+                      child: ResponsiveText(
+                        '${education.degree} - ${education.field}',
+                        style: TextStyle(
+                          fontSize: 14,
+                          color: Colors.grey[700],
+                        ),
+                      ),
+                    ),
+                    Container(
+                      padding: EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                      decoration: BoxDecoration(
+                        color: education.isCurrentlyStudying
+                            ? Colors.blue[100]
+                            : Colors.grey[200],
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: ResponsiveText(
                         education.isCurrentlyStudying
                             ? AppStrings.currentlyStudying
                             : AppStrings.graduate,
                         style: TextStyle(
-                          fontSize: responsive.responsiveValue(
-                            mobile: 12,
-                            tablet: 14,
-                          ),
+                          fontSize: 12,
+                          color: education.isCurrentlyStudying
+                              ? Colors.blue[700]
+                              : Colors.grey[600],
+                          fontWeight: FontWeight.w500,
                         ),
                       ),
-                    ],
-                  ),
-                ],
-              ),
-            );
-          },
-        ),
-      ],
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          );
+        }).toList(),
+      ),
     );
   }
 }

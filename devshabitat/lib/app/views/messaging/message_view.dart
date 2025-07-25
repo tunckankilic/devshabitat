@@ -1,4 +1,5 @@
 import 'package:devshabitat/app/constants/app_strings.dart';
+import 'package:devshabitat/app/routes/app_pages.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../../controllers/message/message_chat_controller.dart';
@@ -36,7 +37,7 @@ class MessageView extends BaseView<MessageChatController> {
         ),
         actions: [
           AdaptiveTouchTarget(
-            onTap: () => Get.toNamed('/message-search'),
+            onTap: () => Get.toNamed(AppRoutes.search), // Correct route
             child: Icon(
               Icons.search,
               size: responsive.responsiveValue(mobile: 24, tablet: 32),
@@ -45,49 +46,48 @@ class MessageView extends BaseView<MessageChatController> {
         ],
       ),
       body: ResponsiveSafeArea(
-        child: ResponsiveOverflowHandler(
-          child: Column(
-            children: [
-              Expanded(
-                child: Obx(() {
-                  if (listController.isLoading) {
-                    return Center(
-                      child: CircularProgressIndicator(
-                        strokeWidth: responsive.responsiveValue(
-                          mobile: 2,
-                          tablet: 3,
-                        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Expanded(
+              child: Obx(() {
+                if (listController.isLoading) {
+                  return Center(
+                    child: CircularProgressIndicator(
+                      strokeWidth: responsive.responsiveValue(
+                        mobile: 2,
+                        tablet: 3,
                       ),
-                    );
-                  }
-
-                  if (listController.conversations.isEmpty) {
-                    return Center(
-                      child: ResponsiveText(
-                        AppStrings.noChats,
-                        style: TextStyle(
-                          fontSize: responsive.responsiveValue(
-                            mobile: 16,
-                            tablet: 18,
-                          ),
-                        ),
-                      ),
-                    );
-                  }
-
-                  return AnimatedResponsiveLayout(
-                    mobile: _buildMobileConversationList(),
-                    tablet: _buildTabletConversationList(),
-                    animationDuration: const Duration(milliseconds: 300),
+                    ),
                   );
-                }),
-              ),
-            ],
-          ),
+                }
+
+                if (listController.conversations.isEmpty) {
+                  return Center(
+                    child: ResponsiveText(
+                      AppStrings.noChats,
+                      style: TextStyle(
+                        fontSize: responsive.responsiveValue(
+                          mobile: 16,
+                          tablet: 18,
+                        ),
+                      ),
+                    ),
+                  );
+                }
+
+                return AnimatedResponsiveLayout(
+                  mobile: _buildMobileConversationList(),
+                  tablet: _buildTabletConversationList(),
+                  animationDuration: const Duration(milliseconds: 300),
+                );
+              }),
+            ),
+          ],
         ),
       ),
       floatingActionButton: AdaptiveTouchTarget(
-        onTap: () => Get.toNamed('/new-conversation'),
+        onTap: () => Get.toNamed(AppRoutes.NEW_CHAT),
         child: Icon(
           Icons.message,
           size: responsive.responsiveValue(mobile: 24, tablet: 32),

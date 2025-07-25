@@ -17,9 +17,9 @@ class HomeController extends GetxController {
   final _authRepository = Get.find<AuthRepository>();
   final _githubService = Get.find<GithubService>();
   final _notificationService = Get.find<NotificationService>();
-  final FeedService _feedService = Get.find();
-  final ConnectionService _connectionService = Get.find();
-  final AuthController _authController = Get.find();
+  late final FeedService _feedService;
+  late final ConnectionService _connectionService;
+  late final AuthController _authController;
 
   final RxBool isLoading = false.obs;
   final RxList activityFeed = [].obs;
@@ -43,26 +43,42 @@ class HomeController extends GetxController {
   @override
   void onInit() {
     super.onInit();
-    loadDashboardData();
-    loadData();
-    getNotifications();
+
+    try {
+      _feedService = Get.find<FeedService>();
+      _connectionService = Get.find<ConnectionService>();
+      _authController = Get.find<AuthController>();
+      loadDashboardData();
+      loadData();
+      getNotifications();
+    } catch (e) {
+      print('Startup data loading: $e');
+    }
   }
 
   Future<void> loadDashboardData() async {
     try {
       isLoading.value = true;
 
-      // GitHub istatistiklerini yükle
-      final username = _authRepository.currentUser?.providerData
-              .firstWhereOrNull((info) => info.providerId == 'github.com')
-              ?.displayName ??
-          '';
-      final stats = await _githubService.getGithubStats(username);
-      githubStats.value = stats.toJson();
+      // GitHub stats'ı optional yap
+      String? username;
+      try {
+        username = await _authController.getGithubUsername();
+        if (username != null && username.isNotEmpty) {
+          final stats = await _githubService.getGithubStats(username);
+          if (stats != null) {
+            githubStats.value = {'stats': stats}; // Basit assign
+          }
+        }
+      } catch (e) {
+        print('GitHub stats skipped: $e');
+      }
 
       // Aktivite akışını yükle
-      final activities = await _githubService.getUserActivities(username);
-      activityFeed.value = activities;
+      if (username != null) {
+        final activities = await _githubService.getUserActivities(username);
+        activityFeed.value = activities;
+      }
 
       // Bağlantı sayısını yükle
       final connections = await _authRepository.getUserConnections();
@@ -125,26 +141,48 @@ class HomeController extends GetxController {
 
   Future<void> _loadGithubStats() async {
     try {
-      final username = _authController.currentUser?.displayName;
-      if (username == null) return;
+      // GitHub kullanıcı adını profile'dan al
+      final username = await _authController.getGithubUsername();
+      if (username == null || username.isEmpty) {
+        print('GitHub kullanıcı adı bulunamadı');
+        return;
+      }
 
-      final userInfo = await _githubService.getUserInfo(username);
-      final repos = await _githubService.getUserRepos(username);
-      final contributedRepos =
-          await _githubService.getContributedRepos(username);
-      final starredRepos = await _githubService.getStarredRepos(username);
-      final commitStats = await _githubService.getCommitStats(username);
+      // GitHub verilerini paralel olarak çek
+      final results = await Future.wait([
+        _githubService.getUserInfo(username),
+        _githubService.getUserRepos(username),
+        _githubService.getContributedRepos(username),
+        _githubService.getStarredRepos(username),
+        _githubService.getCommitStats(username),
+      ]);
+
+      final userInfo = results[0] as Map<String, dynamic>;
+      final repos = results[1] as List<dynamic>;
+      final contributedRepos = results[2] as List<dynamic>;
+      final starredRepos = results[3] as List<dynamic>;
+      final commitStats = results[4] as Map<String, dynamic>;
 
       githubStats.assignAll({
+        'totalCommits': commitStats['totalCommits'] ?? 0,
+        'openPRs': repos
+            .where((repo) =>
+                (repo as Map<String, dynamic>)['open_issues_count'] > 0)
+            .length,
+        'contributedRepos': contributedRepos.length,
+        'starredRepos': starredRepos.length,
         'userInfo': userInfo,
         'repos': repos,
-        'contributedRepos': contributedRepos,
-        'starredRepos': starredRepos,
-        'commitStats': commitStats,
       });
     } catch (e) {
       print('GitHub istatistikleri yüklenirken hata: $e');
-      rethrow;
+      // Hata durumunda boş stats göster
+      githubStats.assignAll({
+        'totalCommits': 0,
+        'openPRs': 0,
+        'contributedRepos': 0,
+        'starredRepos': 0,
+      });
     }
   }
 
@@ -155,8 +193,10 @@ class HomeController extends GetxController {
 
   void onLike(FeedItem item) async {
     try {
-      await _feedService.likeFeedItem(item.id);
-      await _loadFeedItems(); // Güncel listeyi yükle
+      if (_feedService != null) {
+        await _feedService.likeFeedItem(item.id);
+        await _loadFeedItems(); // Güncel listeyi yükle
+      }
     } catch (e) {
       Get.snackbar(
         'Hata',
@@ -172,8 +212,10 @@ class HomeController extends GetxController {
 
   void onShare(FeedItem item) async {
     try {
-      await _feedService.shareFeedItem(item.id);
-      await _loadFeedItems(); // Güncel listeyi yükle
+      if (_feedService != null) {
+        await _feedService.shareFeedItem(item.id);
+        await _loadFeedItems(); // Güncel listeyi yükle
+      }
     } catch (e) {
       Get.snackbar(
         'Hata',
@@ -225,5 +267,19 @@ class HomeController extends GetxController {
     notifications.clear();
     lastNotificationDocument = null;
     await getNotifications();
+  }
+
+  Future<void> loadNotifications() async {
+    await refreshNotifications();
+  }
+
+  Future<void> markNotificationAsRead(String notificationId) async {
+    try {
+      await _notificationService.markNotificationAsRead(notificationId);
+      // Bildirimleri yenile
+      await refreshNotifications();
+    } catch (e) {
+      debugPrint('Error marking notification as read: $e');
+    }
   }
 }
