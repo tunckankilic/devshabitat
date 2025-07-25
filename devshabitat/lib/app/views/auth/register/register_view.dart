@@ -58,14 +58,8 @@ class RegisterView extends GetView<RegistrationController> {
 
         return Column(
           children: [
-            // Progress Bar
-            LinearProgressIndicator(
-              value: _getProgressValue(),
-              backgroundColor: Colors.grey[200],
-              valueColor: AlwaysStoppedAnimation<Color>(
-                Theme.of(context).primaryColor,
-              ),
-            ),
+            // Progress Stepper
+            _buildProgressStepper(),
             SizedBox(
                 height: _responsiveController.responsiveValue(
               mobile: 16.0,
@@ -296,6 +290,131 @@ class RegisterView extends GetView<RegistrationController> {
       default:
         return BasicInfoStep();
     }
+  }
+
+  Widget _buildProgressStepper() {
+    final steps = [
+      {'title': 'Temel', 'subtitle': 'Email & GitHub'},
+      {'title': 'Kişisel', 'subtitle': 'Profil bilgileri'},
+      {'title': 'Mesleki', 'subtitle': 'İş deneyimi'},
+      {'title': 'Yetenekler', 'subtitle': 'Skills & Projeler'},
+    ];
+
+    return Container(
+      padding: _responsiveController.responsivePadding(
+        horizontal: 16.0,
+        vertical: 12.0,
+      ),
+      child: Row(
+        children: List.generate(steps.length, (index) {
+          final isCompleted = index < controller.currentPageIndex;
+          final isCurrent = index == controller.currentPageIndex;
+
+          return Expanded(
+            child: Row(
+              children: [
+                // Step circle
+                Container(
+                  width: _responsiveController.responsiveValue(
+                    mobile: 32.0,
+                    tablet: 40.0,
+                  ),
+                  height: _responsiveController.responsiveValue(
+                    mobile: 32.0,
+                    tablet: 40.0,
+                  ),
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    color: isCompleted
+                        ? Colors.green
+                        : isCurrent
+                            ? Theme.of(Get.context!).primaryColor
+                            : Colors.grey[300],
+                  ),
+                  child: Center(
+                    child: isCompleted
+                        ? Icon(
+                            Icons.check,
+                            color: Colors.white,
+                            size: _responsiveController.responsiveValue(
+                              mobile: 16.0,
+                              tablet: 20.0,
+                            ),
+                          )
+                        : Text(
+                            '${index + 1}',
+                            style: TextStyle(
+                              color:
+                                  isCurrent ? Colors.white : Colors.grey[600],
+                              fontWeight: FontWeight.bold,
+                              fontSize: _responsiveController.responsiveValue(
+                                mobile: 14.0,
+                                tablet: 16.0,
+                              ),
+                            ),
+                          ),
+                  ),
+                ),
+
+                // Step info
+                if (_responsiveController.responsiveValue(
+                    mobile: false, tablet: true))
+                  Expanded(
+                    child: Padding(
+                      padding: const EdgeInsets.only(left: 8.0),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Text(
+                            steps[index]['title']!,
+                            style: TextStyle(
+                              fontSize: _responsiveController.responsiveValue(
+                                mobile: 12.0,
+                                tablet: 14.0,
+                              ),
+                              fontWeight:
+                                  isCurrent ? FontWeight.bold : FontWeight.w500,
+                              color: isCurrent
+                                  ? Theme.of(Get.context!).primaryColor
+                                  : Colors.grey[700],
+                            ),
+                          ),
+                          Text(
+                            steps[index]['subtitle']!,
+                            style: TextStyle(
+                              fontSize: _responsiveController.responsiveValue(
+                                mobile: 10.0,
+                                tablet: 12.0,
+                              ),
+                              color: Colors.grey[500],
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+
+                // Connector line
+                if (index < steps.length - 1)
+                  Expanded(
+                    child: Container(
+                      height: 2,
+                      margin: EdgeInsets.symmetric(
+                        horizontal: _responsiveController.responsiveValue(
+                          mobile: 4.0,
+                          tablet: 8.0,
+                        ),
+                      ),
+                      color: isCompleted ? Colors.green : Colors.grey[300],
+                    ),
+                  ),
+              ],
+            ),
+          );
+        }),
+      ),
+    );
   }
 
   double _getProgressValue() {

@@ -121,10 +121,8 @@ class HomeController extends GetxController {
 
   Future<void> _loadFeedItems() async {
     try {
-      if (_feedService != null) {
-        final feedItems = await _feedService.getFeedItems();
-        items.assignAll(feedItems);
-      }
+      final feedItems = await _feedService.getFeedItems();
+      items.assignAll(feedItems);
     } catch (e) {
       print('Feed yüklenirken hata: $e');
       rethrow;
@@ -133,10 +131,8 @@ class HomeController extends GetxController {
 
   Future<void> _loadConnectionCount() async {
     try {
-      if (_connectionService != null) {
-        final count = await _connectionService.getConnectionCount();
-        connectionCount.value = count;
-      }
+      final count = await _connectionService.getConnectionCount();
+      connectionCount.value = count;
     } catch (e) {
       print('Bağlantı sayısı yüklenirken hata: $e');
       rethrow;
@@ -145,26 +141,48 @@ class HomeController extends GetxController {
 
   Future<void> _loadGithubStats() async {
     try {
-      final username = _authController.currentUser?.displayName;
-      if (username == null) return;
+      // GitHub kullanıcı adını profile'dan al
+      final username = await _authController.getGithubUsername();
+      if (username == null || username.isEmpty) {
+        print('GitHub kullanıcı adı bulunamadı');
+        return;
+      }
 
-      final userInfo = await _githubService.getUserInfo(username);
-      final repos = await _githubService.getUserRepos(username);
-      final contributedRepos =
-          await _githubService.getContributedRepos(username);
-      final starredRepos = await _githubService.getStarredRepos(username);
-      final commitStats = await _githubService.getCommitStats(username);
+      // GitHub verilerini paralel olarak çek
+      final results = await Future.wait([
+        _githubService.getUserInfo(username),
+        _githubService.getUserRepos(username),
+        _githubService.getContributedRepos(username),
+        _githubService.getStarredRepos(username),
+        _githubService.getCommitStats(username),
+      ]);
+
+      final userInfo = results[0] as Map<String, dynamic>;
+      final repos = results[1] as List<dynamic>;
+      final contributedRepos = results[2] as List<dynamic>;
+      final starredRepos = results[3] as List<dynamic>;
+      final commitStats = results[4] as Map<String, dynamic>;
 
       githubStats.assignAll({
+        'totalCommits': commitStats['totalCommits'] ?? 0,
+        'openPRs': repos
+            .where((repo) =>
+                (repo as Map<String, dynamic>)['open_issues_count'] > 0)
+            .length,
+        'contributedRepos': contributedRepos.length,
+        'starredRepos': starredRepos.length,
         'userInfo': userInfo,
         'repos': repos,
-        'contributedRepos': contributedRepos,
-        'starredRepos': starredRepos,
-        'commitStats': commitStats,
       });
     } catch (e) {
       print('GitHub istatistikleri yüklenirken hata: $e');
-      rethrow;
+      // Hata durumunda boş stats göster
+      githubStats.assignAll({
+        'totalCommits': 0,
+        'openPRs': 0,
+        'contributedRepos': 0,
+        'starredRepos': 0,
+      });
     }
   }
 

@@ -6,6 +6,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import '../core/services/error_handler_service.dart';
 import '../models/user_profile_model.dart';
 import '../controllers/auth_controller.dart';
+import '../services/github_oauth_service.dart';
 
 enum RegistrationStep {
   basicInfo, // Email, şifre ve isim (zorunlu)
@@ -82,6 +83,13 @@ class RegistrationController extends GetxController {
   // Location data
   final Rxn<GeoPoint> location = Rxn<GeoPoint>();
 
+  // GitHub Integration (Zorunlu)
+  final _isGithubConnected = false.obs;
+  final _githubUsername = RxnString();
+  final _githubToken = RxnString();
+  final _githubUserData = Rxn<Map<String, dynamic>>();
+  final _isGithubLoading = false.obs;
+
   // Geçici kullanıcı ID'si için
   final RxString _tempUserId = RxString('');
 
@@ -98,6 +106,13 @@ class RegistrationController extends GetxController {
 
   // Password validation getters
   bool get hasMinLength => _hasMinLength.value;
+
+  // GitHub getters
+  bool get isGithubConnected => _isGithubConnected.value;
+  String? get githubUsername => _githubUsername.value;
+  String? get githubToken => _githubToken.value;
+  Map<String, dynamic>? get githubUserData => _githubUserData.value;
+  bool get isGithubLoading => _isGithubLoading.value;
   bool get hasUppercase => _hasUppercase.value;
   bool get hasLowercase => _hasLowercase.value;
   bool get hasNumber => _hasNumber.value;
@@ -118,10 +133,11 @@ class RegistrationController extends GetxController {
 
   bool get canGoNext {
     switch (_currentPageIndex.value) {
-      case 0: // Basic info - zorunlu validasyon
+      case 0: // Basic info - zorunlu validasyon + GitHub
         return _isEmailValid.value &&
             _isDisplayNameValid.value &&
-            allPasswordRequirementsMet;
+            allPasswordRequirementsMet &&
+            _isGithubConnected.value;
       case 1: // Personal info - opsiyonel
       case 2: // Professional info - opsiyonel
       case 3: // Skills info - opsiyonel
@@ -191,6 +207,106 @@ class RegistrationController extends GetxController {
     _isDisplayNameValid.value = name.isNotEmpty && name.length >= 3;
   }
 
+  // GitHub OAuth bağlantısı
+  Future<void> connectGithub() async {
+    try {
+      _isGithubLoading.value = true;
+      _lastError.value = null;
+
+      // GitHub OAuth işlemini başlat
+      final accessToken = await _authController.signInWithGithub();
+
+      if (accessToken != null) {
+        _githubToken.value = accessToken;
+
+        // GitHub kullanıcı bilgilerini al
+        final githubService = Get.find<GitHubOAuthService>();
+        final githubUserData = await githubService.getUserInfo(accessToken);
+        final userEmail = githubUserData?['email'];
+
+        if (userEmail != null) {
+          // GitHub bağlantısını başarılı olarak işaretle
+          _isGithubConnected.value = true;
+
+          // GitHub kullanıcı verilerini kaydet
+          if (githubUserData != null) {
+            _githubUsername.value = githubUserData['login'];
+            _githubUserData.value = githubUserData;
+          }
+
+          Get.snackbar(
+            'Başarılı',
+            'GitHub hesabınız başarıyla bağlandı!',
+            backgroundColor: Colors.green.withOpacity(0.8),
+            colorText: Colors.white,
+            snackPosition: SnackPosition.BOTTOM,
+            duration: const Duration(seconds: 3),
+            icon: const Icon(Icons.check_circle, color: Colors.white),
+          );
+        } else {
+          throw Exception('GitHub kullanıcı bilgileri alınamadı');
+        }
+      } else {
+        throw Exception('GitHub erişim izni alınamadı');
+      }
+    } catch (e) {
+      _lastError.value = e.toString();
+      _isGithubConnected.value = false;
+
+      Get.snackbar(
+        'Hata',
+        'GitHub bağlantısı kurulamadı: $e',
+        backgroundColor: Colors.red.withOpacity(0.8),
+        colorText: Colors.white,
+        snackPosition: SnackPosition.BOTTOM,
+        duration: const Duration(seconds: 4),
+        icon: const Icon(Icons.error, color: Colors.white),
+      );
+    } finally {
+      _isGithubLoading.value = false;
+    }
+  }
+
+  // GitHub bağlantısını kaldır
+  void disconnectGithub() {
+    _isGithubConnected.value = false;
+    _githubUsername.value = null;
+    _githubToken.value = null;
+    _githubUserData.value = null;
+
+    Get.snackbar(
+      'Bilgi',
+      'GitHub bağlantısı kaldırıldı',
+      backgroundColor: Colors.orange.withOpacity(0.8),
+      colorText: Colors.white,
+      snackPosition: SnackPosition.BOTTOM,
+      duration: const Duration(seconds: 2),
+    );
+  }
+
+  // Email verification gönder
+  Future<void> _sendEmailVerification() async {
+    try {
+      final user = _authRepository.currentUser;
+      if (user != null && !user.emailVerified) {
+        await user.sendEmailVerification();
+
+        Get.snackbar(
+          'Email Doğrulama',
+          'Doğrulama emaili ${user.email} adresine gönderildi.',
+          backgroundColor: Colors.blue.withOpacity(0.8),
+          colorText: Colors.white,
+          snackPosition: SnackPosition.BOTTOM,
+          duration: const Duration(seconds: 4),
+          icon: const Icon(Icons.email, color: Colors.white),
+        );
+      }
+    } catch (e) {
+      print('Email verification gönderilemedi: $e');
+      // Email verification başarısız olsa bile registration devam etsin
+    }
+  }
+
   void _validatePassword() {
     final password = passwordController.text;
 
@@ -250,9 +366,11 @@ class RegistrationController extends GetxController {
         // Son adım - gerçek kayıt işlemini yap
         if (await _completeRegistration()) {
           _currentStep.value = RegistrationStep.completed;
-          // Biraz bekle ki state güncellensin, sonra yönlendir
+          // Email verification gönder
+          await _sendEmailVerification();
+          // Biraz bekle ki state güncellensin, sonra email verification sayfasına yönlendir
           await Future.delayed(Duration(milliseconds: 200));
-          Get.offAllNamed('/home');
+          Get.offAllNamed('/email-verification');
         }
         break;
       case RegistrationStep.completed:
@@ -317,6 +435,11 @@ class RegistrationController extends GetxController {
         'interests': selectedInterests,
         'socialLinks': socialLinks,
         'portfolioUrls': portfolioUrls,
+
+        // GitHub Info (Zorunlu)
+        'githubUsername': _githubUsername.value,
+        'githubToken': _githubToken.value,
+        'githubUserData': _githubUserData.value,
       };
 
       // Sadece dolu olan alanları güncelle

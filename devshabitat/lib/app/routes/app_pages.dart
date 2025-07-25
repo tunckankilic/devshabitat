@@ -7,6 +7,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../views/auth/login_view.dart';
 import '../views/auth/forgot_password/forgot_password_view.dart';
+import '../views/auth/email_verification_view.dart';
 import '../views/main_wrapper.dart';
 import '../views/notifications/notifications_view.dart';
 import '../views/settings/settings_view.dart';
@@ -85,6 +86,10 @@ class AppPages {
       name: AppRoutes.forgotPassword,
       page: () => ForgotPasswordView(),
       binding: AuthBinding(),
+    ),
+    GetPage(
+      name: AppRoutes.emailVerification,
+      page: () => EmailVerificationView(),
     ),
     GetPage(
       name: AppRoutes.notifications,

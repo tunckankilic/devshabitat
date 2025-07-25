@@ -2,7 +2,6 @@ import 'package:devshabitat/app/core/services/error_handler_service.dart';
 import 'package:get/get.dart';
 import 'package:flutter/material.dart';
 import 'package:connectivity_plus/connectivity_plus.dart';
-import '../constants/app_strings.dart';
 
 class AppController extends GetxController {
   final ErrorHandlerService _errorHandler;

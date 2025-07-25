@@ -3,7 +3,6 @@ import 'package:get/get.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import '../repositories/auth_repository.dart';
 import '../routes/app_pages.dart';
-import '../controllers/registration_controller.dart';
 
 enum AuthState {
   initial,
