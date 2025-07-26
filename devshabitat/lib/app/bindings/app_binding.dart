@@ -33,7 +33,6 @@ class AppBinding extends Bindings {
 
   void initSynchronousDependencies() {
     // Core Services
-    final logger = Get.put(Logger());
     final errorHandler = Get.put(ErrorHandlerService());
     Get.put(MemoryManagerService());
     Get.put(ApiOptimizationService());

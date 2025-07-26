@@ -31,7 +31,7 @@ class AppController extends GetxController {
   Future<void> _initConnectivity() async {
     try {
       final connectivity = await Connectivity().checkConnectivity();
-      if (connectivity == ConnectivityResult.none) {
+      if (connectivity.contains(ConnectivityResult.none)) {
         debugPrint(
             '⚠️ No internet connection detected - app will work in offline mode');
         // Sadece log yazıp devam ediyoruz, hata fırlatmıyoruz
@@ -39,8 +39,8 @@ class AppController extends GetxController {
       }
 
       // Bağlantı varsa dinlemeye başla
-      Connectivity().onConnectivityChanged.distinct().listen((result) {
-        if (result == ConnectivityResult.none) {
+      Connectivity().onConnectivityChanged.distinct().listen((results) {
+        if (results.contains(ConnectivityResult.none)) {
           debugPrint('⚠️ Connection lost - switching to offline mode');
         } else {
           debugPrint('✅ Connection restored');

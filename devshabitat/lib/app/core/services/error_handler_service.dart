@@ -135,14 +135,14 @@ class ErrorHandlerService extends GetxService {
   }
 
   String? validateEmail(String email) {
-    if (_config == null || !_config!.isValidEmail(email)) {
+    if (_config == null || !_config.isValidEmail(email)) {
       return 'Please enter a valid email address';
     }
     return null;
   }
 
   String? validatePassword(String password) {
-    if (_config == null || !_config!.isValidPassword(password)) {
+    if (_config == null || !_config.isValidPassword(password)) {
       return 'Password must be at least 8 characters long and contain uppercase/lowercase letters, numbers, and special characters';
     }
     return null;
@@ -150,11 +150,11 @@ class ErrorHandlerService extends GetxService {
 
   // Dosya validation
   String? validateFile(String fileName, int fileSize) {
-    if (_config == null || !_config!.isValidFileType(fileName)) {
+    if (_config == null || !_config.isValidFileType(fileName)) {
       return 'This file type is not supported';
     }
 
-    if (_config == null || !_config!.isValidFileSize(fileSize)) {
+    if (!_config.isValidFileSize(fileSize)) {
       return 'File size is too large (max: ${AppConfig.maxFileSize ~/ (1024 * 1024)}MB)';
     }
 

@@ -3,8 +3,6 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../../controllers/home_controller.dart';
 import '../base/base_view.dart';
-import '../../widgets/adaptive_touch_target.dart';
-import '../../widgets/responsive/responsive_safe_area.dart';
 import '../../widgets/responsive/responsive_text.dart';
 import '../../widgets/responsive/animated_responsive_layout.dart';
 

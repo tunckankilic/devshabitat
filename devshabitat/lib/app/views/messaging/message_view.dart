@@ -11,8 +11,6 @@ import '../base/base_view.dart';
 import '../../widgets/adaptive_touch_target.dart';
 import '../../widgets/responsive/responsive_safe_area.dart';
 import '../../widgets/responsive/responsive_text.dart';
-import '../../widgets/responsive/responsive_overflow_handler.dart'
-    hide ResponsiveText, ResponsiveSafeArea;
 import '../../widgets/responsive/animated_responsive_layout.dart';
 
 class MessageView extends BaseView<MessageChatController> {

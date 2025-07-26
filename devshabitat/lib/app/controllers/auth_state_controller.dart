@@ -1,6 +1,5 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:get/get.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
 import '../repositories/auth_repository.dart';
 import '../routes/app_pages.dart';
 
@@ -14,7 +13,6 @@ enum AuthState {
 
 class AuthStateController extends GetxController {
   final AuthRepository _authRepository;
-  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
 
   // Reactive state variables
   final _currentUser = Rxn<User>();

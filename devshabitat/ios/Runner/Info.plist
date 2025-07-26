@@ -69,6 +69,8 @@
 	</dict>
 	<key>NSCameraUsageDescription</key>
 	<string>Bu uygulama fotoğraf çekmek için kamera erişimi gerektirir</string>
+	<key>NSMicrophoneUsageDescription</key>
+	<string>Bu uygulama sesli görüşme ve video konferans özellikleri için mikrofon erişimi gerektirir</string>
 	<key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
 	<string>Yakındaki geliştiricileri bulabilmek ve arka planda konum güncellemeleri alabilmek için konumunuza ihtiyacımız var.</string>
 	<key>NSLocationAlwaysUsageDescription</key>

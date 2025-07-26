@@ -226,7 +226,6 @@ class SmallPhoneLogin extends GetView<AuthController> {
     );
   }
 
-  @override
   void dispose() {
     _emailController.dispose();
     _passwordController.dispose();

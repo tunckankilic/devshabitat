@@ -14,7 +14,6 @@ import '../views/settings/settings_view.dart';
 import '../views/settings/notification_settings_view.dart';
 import '../views/search/search_view.dart';
 import '../bindings/auth_binding.dart';
-import '../bindings/navigation_binding.dart';
 import '../bindings/home_binding.dart';
 import '../bindings/settings_binding.dart';
 import '../bindings/notification_binding.dart';

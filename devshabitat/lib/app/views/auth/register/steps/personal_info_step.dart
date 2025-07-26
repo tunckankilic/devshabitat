@@ -7,7 +7,6 @@ import '../../../../controllers/responsive_controller.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:image_cropper/image_cropper.dart';
 import '../../../../controllers/registration_controller.dart';
-import '../../../../services/storage_service.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import '../../../../controllers/location/location_controller.dart';
 import '../../../../services/location/location_tracking_service.dart';
@@ -16,7 +15,6 @@ import '../../../../services/location/geofence_service.dart';
 
 class PersonalInfoStep extends GetView<RegistrationController> {
   final _responsiveController = Get.find<ResponsiveController>();
-  final StorageService _storageService = Get.find<StorageService>();
 
   PersonalInfoStep({super.key});
 
