@@ -341,6 +341,22 @@ class LocationController extends GetxController with MemoryManagementMixin {
     }
   }
 
+  // Get address from current location
+  Future<String?> getAddressFromCurrentLocation() async {
+    try {
+      if (currentLocation.value != null) {
+        return await _mapsService.getAddressFromCoordinates(
+          currentLocation.value!.latitude,
+          currentLocation.value!.longitude,
+        );
+      }
+      return null;
+    } catch (e) {
+      _logger.e('Error getting address from current location: $e');
+      return null;
+    }
+  }
+
   // Refresh all location services
   Future<void> refreshLocationServices() async {
     await stopLocationTracking();

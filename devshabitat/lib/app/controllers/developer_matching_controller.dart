@@ -223,6 +223,7 @@ class DeveloperMatchingController extends GetxController {
   }
 
   // Yenileme - cache temizleyerek
+  @override
   Future<void> refresh() async {
     clearCache();
     await Future.wait([

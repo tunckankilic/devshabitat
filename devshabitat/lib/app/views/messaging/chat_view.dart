@@ -52,7 +52,7 @@ class ChatView extends BaseView<MessageChatController>
             // Mesaj listesi
             Expanded(
               child: Obx(() {
-                if (controller.isLoading) {
+                if (controller.isLoading.value) {
                   return const Center(child: CircularProgressIndicator());
                 }
 

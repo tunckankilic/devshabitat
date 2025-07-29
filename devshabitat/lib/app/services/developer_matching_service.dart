@@ -269,9 +269,4 @@ class DeveloperMatchingService extends GetxService {
       throw Exception('Mentorluk talebi gönderilirken bir hata oluştu: $e');
     }
   }
-
-  // Cache mekanizması için yardımcı fonksiyon
-  String _getCacheKey(String operation, Map<String, dynamic> params) {
-    return '$operation${params.entries.map((e) => '${e.key}:${e.value}').join('_')}';
-  }
 }

@@ -51,7 +51,7 @@ class TechStackVisualizer extends GetView<PortfolioController> {
               }
 
               return Column(
-                children: controller.techStack
+                children: controller.techStackAnalysis
                     .map((tech) => TechStackItem(tech: tech))
                     .toList(),
               );

@@ -68,11 +68,6 @@ class MessageChatController extends GetxController with MemoryManagementMixin {
     }
   }
 
-  void _updatePendingMessages(List<MessageModel> syncQueue) {
-    pendingMessages.clear();
-    pendingMessages.addAll(syncQueue);
-  }
-
   // Enhanced message loading with sync awareness
   Future<void> loadMessages(String conversationId) async {
     try {

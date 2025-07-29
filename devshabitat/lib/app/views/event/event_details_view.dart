@@ -256,7 +256,7 @@ class EventDetailsView extends BaseView<EventController> {
       width: double.infinity,
       child: ElevatedButton(
         onPressed: event.currentParticipants < event.participantLimit
-            ? () => controller.registerForEvent(event.id)
+            ? () => controller.registerForEvent(event)
             : null,
         style: ElevatedButton.styleFrom(
           padding: responsive.responsivePadding(

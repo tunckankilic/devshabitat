@@ -105,7 +105,7 @@ class DevicePerformanceController extends GetxController {
 
       deviceModel.value = '${androidInfo.brand} ${androidInfo.model}';
       deviceOS.value = 'Android ${androidInfo.version.release}';
-      deviceVersion.value = androidInfo.version.release ?? '';
+      deviceVersion.value = androidInfo.version.release;
 
       // Estimate device specs based on known models and Android version
       final specs = _estimateAndroidSpecs(androidInfo);
@@ -124,9 +124,9 @@ class DevicePerformanceController extends GetxController {
     try {
       final iosInfo = await _deviceInfo.iosInfo;
 
-      deviceModel.value = iosInfo.model ?? 'iPhone';
+      deviceModel.value = iosInfo.model;
       deviceOS.value = 'iOS ${iosInfo.systemVersion}';
-      deviceVersion.value = iosInfo.systemVersion ?? '';
+      deviceVersion.value = iosInfo.systemVersion;
 
       // Estimate iOS device specs based on model
       final specs = _estimateIOSSpecs(iosInfo);
@@ -142,9 +142,8 @@ class DevicePerformanceController extends GetxController {
 
   // Estimate Android device specifications
   Map<String, int> _estimateAndroidSpecs(AndroidDeviceInfo info) {
-    final model = info.model?.toLowerCase() ?? '';
-    final brand = info.brand?.toLowerCase() ?? '';
-    final sdkInt = info.version.sdkInt ?? 0;
+    final model = info.model.toLowerCase();
+    final sdkInt = info.version.sdkInt;
 
     // High-end devices
     if (model.contains('s24') ||
@@ -186,8 +185,7 @@ class DevicePerformanceController extends GetxController {
 
   // Estimate iOS device specifications
   Map<String, int> _estimateIOSSpecs(IosDeviceInfo info) {
-    final model = info.model?.toLowerCase() ?? '';
-    final systemVersion = info.systemVersion ?? '';
+    final model = info.model.toLowerCase();
 
     // iPhone 15 series
     if (model.contains('iphone16') || model.contains('iphone15')) {

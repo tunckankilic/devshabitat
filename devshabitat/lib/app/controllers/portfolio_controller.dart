@@ -3,6 +3,8 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:logger/logger.dart';
 import '../models/user_profile_model.dart';
 import '../models/portfolio_project_model.dart';
+import '../models/portfolio/tech_stack_model.dart';
+import '../models/portfolio/project_model.dart';
 import '../controllers/auth_controller.dart';
 import '../services/professional_insights_service.dart';
 export '../services/professional_insights_service.dart'
@@ -31,6 +33,11 @@ class PortfolioController extends GetxController {
   final isLoadingCareerPath = false.obs;
   final errorMessage = ''.obs;
   final insightsStatus = ''.obs;
+
+  // Portfolio visualization data
+  final techStackAnalysis = <TechStackModel>[].obs;
+  final featuredProjects = <ProjectModel>[].obs;
+  final contributionData = <DateTime, int>{}.obs;
 
   // AI Career Coach Features
   final careerSuggestions = <CareerSuggestion>[].obs;
@@ -70,6 +77,7 @@ class PortfolioController extends GetxController {
 
       await _loadUserProfile();
       await _loadPortfolioProjects();
+      await _loadPortfolioVisualizationData();
       await _initializeAICareerCoach();
 
       insightsStatus.value = 'Portfolio initialized successfully';
@@ -125,6 +133,129 @@ class PortfolioController extends GetxController {
       _logger.i('Loaded ${portfolioProjects.length} portfolio projects');
     } catch (e) {
       _logger.e('Load portfolio projects error: $e');
+    }
+  }
+
+  // Load portfolio visualization data
+  Future<void> _loadPortfolioVisualizationData() async {
+    try {
+      await _generateTechStackAnalysis();
+      await _generateFeaturedProjects();
+      await _generateContributionData();
+      _logger.i('Portfolio visualization data loaded');
+    } catch (e) {
+      _logger.e('Load portfolio visualization data error: $e');
+    }
+  }
+
+  // Generate tech stack analysis
+  Future<void> _generateTechStackAnalysis() async {
+    try {
+      // Create tech stack analysis from portfolio projects
+      final techStackMap = <String, TechStackModel>{};
+
+      for (final project in portfolioProjects) {
+        // Use first technology as language, fallback to category or 'Unknown'
+        final language = project.technologies.isNotEmpty
+            ? project.technologies.first
+            : project.category ?? 'Unknown';
+
+        if (techStackMap.containsKey(language)) {
+          techStackMap[language]!.projectCount++;
+          // Use number of technologies as stars indicator
+          techStackMap[language]!.totalStars += project.technologies.length;
+        } else {
+          techStackMap[language] = TechStackModel(
+            name: language,
+            projectCount: 1,
+            totalStars: project.technologies.length,
+            experienceLevel: _determineExperienceLevel(1),
+          );
+        }
+      }
+
+      // Update experience levels based on project count
+      for (final entry in techStackMap.entries) {
+        final projectCount = entry.value.projectCount;
+        techStackMap[entry.key] = TechStackModel(
+          name: entry.value.name,
+          projectCount: entry.value.projectCount,
+          totalStars: entry.value.totalStars,
+          experienceLevel: _determineExperienceLevel(projectCount),
+        );
+      }
+
+      techStackAnalysis.value = techStackMap.values.toList()
+        ..sort((a, b) => b.totalStars.compareTo(a.totalStars));
+    } catch (e) {
+      _logger.e('Generate tech stack analysis error: $e');
+    }
+  }
+
+  // Determine experience level based on project count
+  ExperienceLevel _determineExperienceLevel(int projectCount) {
+    if (projectCount >= 10) return ExperienceLevel.expert;
+    if (projectCount >= 5) return ExperienceLevel.advanced;
+    if (projectCount >= 3) return ExperienceLevel.intermediate;
+    return ExperienceLevel.beginner;
+  }
+
+  // Generate featured projects
+  Future<void> _generateFeaturedProjects() async {
+    try {
+      // Convert portfolio projects to project models and get top ones
+      final projects = portfolioProjects
+          .map((project) => ProjectModel(
+                name: project.title,
+                description: project.description,
+                language: project.technologies.isNotEmpty
+                    ? project.technologies.first
+                    : project.category ?? 'Unknown',
+                stars: project.technologies.length, // Use tech count as stars
+                forks: project.images.length, // Use image count as forks
+                url: project.repositoryUrl ?? '',
+                topics: project.technologies,
+              ))
+          .toList();
+
+      // Sort by featured status first, then by tech count
+      projects.sort((a, b) {
+        final aFeatured =
+            portfolioProjects.firstWhere((p) => p.title == a.name).isFeatured;
+        final bFeatured =
+            portfolioProjects.firstWhere((p) => p.title == b.name).isFeatured;
+
+        if (aFeatured && !bFeatured) return -1;
+        if (!aFeatured && bFeatured) return 1;
+        return b.stars.compareTo(a.stars);
+      });
+
+      featuredProjects.value = projects.take(5).toList();
+    } catch (e) {
+      _logger.e('Generate featured projects error: $e');
+    }
+  }
+
+  // Generate contribution data
+  Future<void> _generateContributionData() async {
+    try {
+      // Generate sample contribution data for the last 12 months
+      final now = DateTime.now();
+      final contributions = <DateTime, int>{};
+
+      for (int i = 11; i >= 0; i--) {
+        final date = DateTime(now.year, now.month - i, 1);
+        // Generate random contribution count based on projects
+        final baseContributions = portfolioProjects.length * 5;
+        final randomVariation = (baseContributions * 0.3).round();
+        final contributionCount =
+            baseContributions + (DateTime.now().millisecond % randomVariation);
+        contributions[date] = contributionCount;
+      }
+
+      contributionData.value = contributions;
+    } catch (e) {
+      _logger.e('Generate contribution data error: $e');
     }
   }
 

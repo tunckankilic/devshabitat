@@ -1,7 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:get/get.dart';
 import 'package:devshabitat/app/models/event/event_model.dart';
-import 'package:devshabitat/app/models/event/event_registration_model.dart';
 import 'package:devshabitat/app/services/event/event_service.dart';
 import 'package:devshabitat/app/services/event/event_registration_service.dart';
 import 'package:devshabitat/app/services/event/event_notification_service.dart';

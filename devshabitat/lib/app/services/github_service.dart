@@ -342,7 +342,7 @@ class GithubService extends GetxService {
             getRepositoryStats(username),
           ]);
 
-          final userInfo = results[0] as Map<String, dynamic>?;
+          final userInfo = results[0];
           final repoStats = results[1] as Map<String, dynamic>;
 
           // Kullanıcı bulunamadı
