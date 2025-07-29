@@ -1,8 +1,11 @@
 import 'package:devshabitat/app/models/user_profile_model.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import '../../models/community/rule_model.dart';
+import '../../models/community/rule_violation_model.dart';
 import '../../services/community/community_service.dart';
 import '../../services/community/membership_service.dart';
+import '../../services/community/rule_service.dart';
 import '../../services/storage_service.dart';
 import '../../routes/app_pages.dart';
 
@@ -10,6 +13,7 @@ class CommunityManageController extends GetxController {
   final CommunityService _communityService = Get.find<CommunityService>();
   final MembershipService _membershipService = Get.find<MembershipService>();
   final StorageService _storageService = Get.find<StorageService>();
+  final RuleService _ruleService = Get.find<RuleService>();
 
   final formKey = GlobalKey<FormState>();
   final nameController = TextEditingController();
@@ -23,6 +27,8 @@ class CommunityManageController extends GetxController {
 
   final members = <UserProfile>[].obs;
   final pendingMembers = <UserProfile>[].obs;
+  final rules = <RuleModel>[].obs;
+  final violations = <RuleViolationModel>[].obs;
 
   String? _selectedImagePath;
   late String communityId;
@@ -60,6 +66,8 @@ class CommunityManageController extends GetxController {
 
       await loadMembers();
       await loadPendingMembers();
+      await loadRules();
+      await loadViolations();
     } catch (e) {
       error.value = 'Topluluk bilgileri yüklenirken bir hata oluştu: $e';
     } finally {
@@ -84,6 +92,24 @@ class CommunityManageController extends GetxController {
       pendingMembers.assignAll(pendingList);
     } catch (e) {
       error.value = 'Bekleyen üyeler yüklenirken bir hata oluştu: $e';
+    }
+  }
+
+  Future<void> loadRules() async {
+    try {
+      final communityRules = await _ruleService.getRules(communityId);
+      rules.assignAll(communityRules);
+    } catch (e) {
+      error.value = 'Kurallar yüklenirken bir hata oluştu: $e';
+    }
+  }
+
+  Future<void> loadViolations() async {
+    try {
+      final ruleViolations = await _ruleService.getViolations(communityId);
+      violations.assignAll(ruleViolations);
+    } catch (e) {
+      error.value = 'İhlaller yüklenirken bir hata oluştu: $e';
     }
   }
 

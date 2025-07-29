@@ -75,6 +75,16 @@ class AuthStateController extends GetxController {
     }
   }
 
+  Future<void> signOutFromAllDevices() async {
+    try {
+      _authState.value = AuthState.loading;
+      await _authRepository.signOutFromAllDevices();
+    } catch (e) {
+      _authState.value = AuthState.error;
+      rethrow;
+    }
+  }
+
   Future<void> deleteAccount() async {
     try {
       _authState.value = AuthState.loading;

@@ -1,56 +1,44 @@
 import 'dart:async';
 import 'package:get/get.dart';
-import 'package:flutter/material.dart';
-import 'package:logger/logger.dart';
+import 'package:battery_plus/battery_plus.dart';
 import '../../models/message_model.dart';
-import '../../models/conversation_model.dart';
-import '../../services/messaging_service.dart';
 import '../../services/background_sync_service.dart';
+import '../../services/audio_service.dart';
 import '../../controllers/auth_controller.dart';
-import '../../core/services/error_handler_service.dart';
-import '../../core/services/memory_manager_service.dart';
+import 'message_base_controller.dart';
 
-class MessageChatController extends GetxController with MemoryManagementMixin {
-  final MessagingService _messagingService;
+/// MessageChatController - Chat ekranı için özelleştirilmiş controller
+/// MessageBaseController'dan extend eder ve chat-specific özellikler ekler
+class MessageChatController extends MessageBaseController {
   final BackgroundSyncService _syncService = Get.find<BackgroundSyncService>();
-  final ErrorHandlerService _errorHandler = Get.find<ErrorHandlerService>();
-  final Logger _logger = Logger();
+  final AudioService _audioService = Get.find<AudioService>();
+  final Battery _battery = Battery();
 
-  // UI Controllers
-  final TextEditingController messageController = TextEditingController();
-  final ScrollController scrollController = ScrollController();
-
-  // Enhanced reactive variables
-  final RxList<MessageModel> messages = <MessageModel>[].obs;
-  final Rx<ConversationModel?> currentConversation =
-      Rx<ConversationModel?>(null);
-  final RxBool isLoading = false.obs;
-  final RxBool isSending = false.obs;
-  final RxBool isTyping = false.obs;
+  // Chat-specific reactive variables
   final RxBool isSyncing = false.obs;
-  final RxString errorMessage = ''.obs;
   final RxString syncStatus = ''.obs;
-
-  // Enhanced message management
-  final RxList<MessageModel> pendingMessages = <MessageModel>[].obs;
-  final RxList<MessageModel> failedMessages = <MessageModel>[].obs;
   final RxInt unseenMessageCount = 0.obs;
   final RxBool batteryOptimized = true.obs;
   final RxInt offlineQueueSize = 0.obs;
 
-  StreamSubscription? _messageStreamSubscription;
-  Timer? _typingTimer;
   Timer? _syncTimer;
 
   MessageChatController({
-    required MessagingService messagingService,
-  }) : _messagingService = messagingService;
+    required super.messagingService,
+    required super.errorHandler,
+  });
 
   @override
   void onInit() {
     super.onInit();
     _initializeSyncIntegration();
     _startPeriodicSync();
+  }
+
+  @override
+  void onClose() {
+    _syncTimer?.cancel();
+    super.onClose();
   }
 
   // Initialize enhanced sync service integration
@@ -62,48 +50,45 @@ class MessageChatController extends GetxController with MemoryManagementMixin {
       // Get sync status updates
       syncStatus.value = _syncService.syncStatus;
 
-      _logger.i('Sync integration initialized');
+      print('Sync integration initialized');
     } catch (e) {
-      _logger.e('Sync integration error: $e');
+      print('Sync integration error: $e');
     }
   }
 
   // Enhanced message loading with sync awareness
+  @override
   Future<void> loadMessages(String conversationId) async {
     try {
-      isLoading.value = true;
-      errorMessage.value = '';
+      startLoading();
+      clearError();
 
       // Load conversation
       final conversation =
-          await _messagingService.fetchConversation(conversationId);
+          await messagingService.fetchConversation(conversationId);
       currentConversation.value = conversation;
 
-      // Setup real-time message listener
-      final messageStream = _messagingService.listenToMessages(conversationId);
-      _messageStreamSubscription = messageStream.listen(
+      // Setup real-time message listener with sync awareness
+      final messageStream = messagingService.listenToMessages(conversationId);
+      final messageStreamSubscription = messageStream.listen(
         (messageList) {
           _processIncomingMessages(messageList);
         },
         onError: (error) {
-          errorMessage.value = 'Message stream error: $error';
-          _logger.e('Message stream error: $error');
-          _errorHandler.handleError(error, ErrorHandlerService.MESSAGE_ERROR);
+          handleError(error);
         },
       );
 
-      registerSubscription(_messageStreamSubscription!);
+      registerSubscription(messageStreamSubscription);
 
       // Mark messages as read
-      await _messagingService.markAsRead(conversationId);
+      await messagingService.markAsRead(conversationId);
 
-      _logger.i('Messages loaded for conversation: $conversationId');
+      print('Messages loaded for conversation: $conversationId');
     } catch (e) {
-      errorMessage.value = 'Failed to load messages: $e';
-      _logger.e('Load messages error: $e');
-      _errorHandler.handleError(e, ErrorHandlerService.MESSAGE_ERROR);
+      handleError(e);
     } finally {
-      isLoading.value = false;
+      stopLoading();
     }
   }
 
@@ -113,7 +98,7 @@ class MessageChatController extends GetxController with MemoryManagementMixin {
       _updateUnseenCount();
       _removeSyncedMessages(messageList);
     } catch (e) {
-      _logger.e('Process incoming messages error: $e');
+      print('Process incoming messages error: $e');
     }
   }
 
@@ -136,16 +121,16 @@ class MessageChatController extends GetxController with MemoryManagementMixin {
   }
 
   // Enhanced message sending with background sync
-  Future<void> sendMessage() async {
+  Future<void> sendChatMessage() async {
     if (messageController.text.trim().isEmpty) return;
     if (currentConversation.value == null) return;
 
     try {
-      isSending.value = true;
-      errorMessage.value = '';
+      startSending();
+      clearError();
 
       // Create message through service
-      final message = await _messagingService.createMessage(
+      final message = await messagingService.createMessage(
         conversationId: currentConversation.value!.id,
         content: messageController.text.trim(),
       );
@@ -153,219 +138,197 @@ class MessageChatController extends GetxController with MemoryManagementMixin {
       // Add to local messages immediately
       messages.add(message);
 
-      // Add to background sync queue for reliability
-      await _syncService.addToSyncQueue(message);
-      pendingMessages.add(message);
-
-      // Clear input and scroll
+      // Clear input
       messageController.clear();
+
+      // Scroll to bottom
       scrollToBottom();
 
-      syncStatus.value = 'Message queued for sync';
-      _logger.i('Message sent and queued for sync: ${message.id}');
+      print('Message sent successfully');
     } catch (e) {
-      errorMessage.value = 'Failed to send message: $e';
-      _logger.e('Send message error: $e');
-      _errorHandler.handleError(e, ErrorHandlerService.MESSAGE_ERROR);
-
-      // Add to failed messages for retry
-      final failedMessage = MessageModel(
-        id: DateTime.now().millisecondsSinceEpoch.toString(),
-        content: messageController.text.trim(),
-        senderId: Get.find<AuthController>().currentUser?.uid ?? '',
-        senderName:
-            Get.find<AuthController>().currentUser?.displayName ?? 'Unknown',
-        conversationId: currentConversation.value!.id,
-        timestamp: DateTime.now(),
-        type: MessageType.text,
-        isRead: false,
-        isEdited: false,
-      );
-      failedMessages.add(failedMessage);
+      handleError(e);
+      print('Message send error: $e');
     } finally {
-      isSending.value = false;
+      stopSending();
     }
   }
 
-  // Enhanced message operations with sync
-  Future<void> deleteMessage(String messageId) async {
-    try {
-      await _messagingService.removeMessage(messageId);
-      messages.removeWhere((message) => message.id == messageId);
-      pendingMessages.removeWhere((message) => message.id == messageId);
-      _logger.i('Message deleted: $messageId');
-    } catch (e) {
-      errorMessage.value = 'Failed to delete message: $e';
-      _logger.e('Delete message error: $e');
-      _errorHandler.handleError(e, ErrorHandlerService.MESSAGE_ERROR);
-    }
-  }
-
-  Future<void> editMessage(String messageId, String newContent) async {
-    try {
-      final updatedMessage = await _messagingService.editMessage(
-        messageId: messageId,
-        newContent: newContent,
-      );
-
-      final index = messages.indexWhere((message) => message.id == messageId);
-      if (index != -1) {
-        messages[index] = updatedMessage;
-      }
-
-      // Add to sync queue for reliability
-      await _syncService.addToSyncQueue(updatedMessage);
-      _logger.i('Message edited: $messageId');
-    } catch (e) {
-      errorMessage.value = 'Failed to edit message: $e';
-      _logger.e('Edit message error: $e');
-      _errorHandler.handleError(e, ErrorHandlerService.MESSAGE_ERROR);
-    }
-  }
-
-  // Typing indicators with reliability
-  void updateTypingStatus(bool typing) {
-    isTyping.value = typing;
-
-    try {
-      if (currentConversation.value != null) {
-        _messagingService.updateTypingStatus(
-          conversationId: currentConversation.value!.id,
-          isTyping: typing,
-        );
-      }
-
-      if (typing) {
-        _typingTimer?.cancel();
-        _typingTimer = Timer(const Duration(seconds: 3), () {
-          updateTypingStatus(false);
-        });
-      }
-    } catch (e) {
-      _logger.e('Update typing status error: $e');
-    }
-  }
-
-  // Retry failed messages
-  Future<void> retryFailedMessages() async {
-    try {
-      for (final failedMessage in failedMessages.toList()) {
-        await _syncService.addToSyncQueue(failedMessage);
-        failedMessages.remove(failedMessage);
-        pendingMessages.add(failedMessage);
-      }
-
-      syncStatus.value = 'Retrying ${failedMessages.length} failed messages';
-      _logger.i('Retried ${failedMessages.length} failed messages');
-    } catch (e) {
-      errorMessage.value = 'Failed to retry messages: $e';
-      _logger.e('Retry failed messages error: $e');
-    }
-  }
-
-  // Manual sync trigger
-  Future<void> triggerSync() async {
-    try {
-      for (final message in pendingMessages.toList()) {
-        await _syncService.addToSyncQueue(message);
-      }
-      syncStatus.value = 'Manual sync triggered';
-      _logger.i('Manual sync triggered for ${pendingMessages.length} messages');
-    } catch (e) {
-      errorMessage.value = 'Failed to trigger sync: $e';
-      _logger.e('Manual sync error: $e');
-    }
-  }
-
-  // Periodic sync for reliability
+  // Background sync integration
   void _startPeriodicSync() {
-    _syncTimer = Timer.periodic(const Duration(minutes: 2), (_) {
-      if (pendingMessages.isNotEmpty) {
-        triggerSync();
-      }
+    _syncTimer = Timer.periodic(const Duration(minutes: 5), (timer) {
+      _performBackgroundSync();
     });
   }
 
-  // Enhanced conversation operations
-  Future<void> deleteConversation(String conversationId) async {
+  Future<void> _performBackgroundSync() async {
     try {
-      isLoading.value = true;
-      await _messagingService.eraseConversation(conversationId);
+      isSyncing.value = true;
+      syncStatus.value = 'Syncing messages...';
 
-      messages.clear();
-      pendingMessages.clear();
-      failedMessages.clear();
-      currentConversation.value = null;
+      // Update offline queue size
+      offlineQueueSize.value = pendingMessages.length;
 
-      Get.back(); // Return to conversation list
-      _logger.i('Conversation deleted: $conversationId');
+      syncStatus.value = 'Sync completed';
+      print('Background sync completed');
     } catch (e) {
-      errorMessage.value = 'Failed to delete conversation: $e';
-      _logger.e('Delete conversation error: $e');
-      _errorHandler.handleError(e, ErrorHandlerService.MESSAGE_ERROR);
+      syncStatus.value = 'Sync failed';
+      handleError(e);
     } finally {
-      isLoading.value = false;
+      isSyncing.value = false;
     }
   }
 
-  // UI helper methods
-  void scrollToBottom() {
-    if (scrollController.hasClients) {
-      scrollController.animateTo(
-        scrollController.position.maxScrollExtent,
-        duration: const Duration(milliseconds: 300),
-        curve: Curves.easeOut,
-      );
+  // Typing indicator management
+  void startTyping() {
+    setTyping(true);
+    _sendTypingIndicator(true);
+  }
+
+  void stopTyping() {
+    setTyping(false);
+    _sendTypingIndicator(false);
+  }
+
+  void _sendTypingIndicator(bool isTyping) {
+    try {
+      final conversationId = currentConversation.value?.id;
+      if (conversationId != null) {
+        messagingService.updateTypingStatus(
+          conversationId: conversationId,
+          isTyping: isTyping,
+        );
+      }
+    } catch (e) {
+      print('Error sending typing indicator: $e');
     }
   }
 
-  // Clear all local state
-  void clearLocalMessages() {
-    messages.clear();
-    pendingMessages.clear();
-    failedMessages.clear();
-    unseenMessageCount.value = 0;
-    messageController.clear();
-  }
+  // Message actions
+  Future<void> retryFailedMessage(MessageModel message) async {
+    try {
+      startLoading();
 
-  // Comprehensive status for debugging
-  Map<String, dynamic> getChatStatus() {
-    return {
-      'conversation_id': currentConversation.value?.id,
-      'total_messages': messages.length,
-      'pending_messages': pendingMessages.length,
-      'failed_messages': failedMessages.length,
-      'unseen_count': unseenMessageCount.value,
-      'is_loading': isLoading.value,
-      'is_sending': isSending.value,
-      'is_syncing': isSyncing.value,
-      'is_typing': isTyping.value,
-      'sync_status': syncStatus.value,
-      'offline_queue_size': offlineQueueSize.value,
-      'battery_optimized': batteryOptimized.value,
-      'error_message': errorMessage.value,
-    };
+      // Remove from failed messages
+      failedMessages.remove(message);
+
+      // Add to pending messages
+      pendingMessages.add(message);
+
+      // Retry sending
+      await messagingService.sendMessage(message);
+
+      // Remove from pending
+      pendingMessages.remove(message);
+
+      print('Failed message retried successfully');
+    } catch (e) {
+      handleError(e);
+      // Move back to failed messages
+      failedMessages.add(message);
+      pendingMessages.remove(message);
+    } finally {
+      stopLoading();
+    }
   }
 
   @override
-  void onClose() {
-    // Clean up UI state
-    isTyping.value = false;
-    updateTypingStatus(false);
+  Future<void> deleteMessage(String messageId) async {
+    try {
+      startLoading();
+      final conversationId = currentConversation.value?.id ?? '';
+      await messagingService.deleteMessage(conversationId, messageId);
+      messages.removeWhere((msg) => msg.id == messageId);
+      print('Message deleted: $messageId');
+    } catch (e) {
+      handleError(e);
+    } finally {
+      stopLoading();
+    }
+  }
 
-    // Clear data
-    currentConversation.value = null;
-    clearLocalMessages();
+  Future<void> deleteConversation(String conversationId) async {
+    try {
+      startLoading();
+      await messagingService.deleteConversation(conversationId);
+      print('Conversation deleted: $conversationId');
+    } catch (e) {
+      handleError(e);
+    } finally {
+      stopLoading();
+    }
+  }
 
-    // Dispose controllers
-    messageController.dispose();
-    scrollController.dispose();
+  Future<void> sendFileMessage(AttachmentData attachment) async {
+    try {
+      startSending();
 
-    // Cancel timers
-    _typingTimer?.cancel();
-    _syncTimer?.cancel();
+      final message = await messagingService.createMessage(
+        conversationId: currentConversation.value!.id,
+        content: attachment.name,
+        attachments: [attachment.url],
+      );
 
-    // MemoryManagementMixin will automatically clean up subscriptions
-    super.onClose();
+      // Add to local messages immediately
+      messages.add(message);
+
+      // Scroll to bottom
+      scrollToBottom();
+
+      print('File message sent: ${attachment.name}');
+    } catch (e) {
+      handleError(e);
+      print('File message send error: $e');
+    } finally {
+      stopSending();
+    }
+  }
+
+  // Battery optimization check
+  Future<void> checkBatteryOptimization() async {
+    try {
+      final batteryLevel = await _battery.batteryLevel;
+      final batteryState = await _battery.batteryState;
+
+      // Battery is optimized if level is above 20% and not charging
+      batteryOptimized.value =
+          batteryLevel > 20 && batteryState != BatteryState.charging;
+
+      print('Battery level: $batteryLevel%, State: $batteryState');
+    } catch (e) {
+      batteryOptimized.value = false;
+      print('Battery optimization check failed: $e');
+    }
+  }
+
+  // Override base methods for chat-specific behavior
+  @override
+  void onMessageReceived(MessageModel message) {
+    super.onMessageReceived(message);
+
+    // Chat-specific message handling
+    if (message.senderId != messagingService.currentUserId) {
+      // Play notification sound
+      _audioService.playMessageSound();
+
+      // Update unseen count
+      _updateUnseenCount();
+    }
+  }
+
+  @override
+  void onConnectionStatusChanged(bool isOnline) {
+    super.onConnectionStatusChanged(isOnline);
+
+    if (isOnline) {
+      // Retry failed messages when back online
+      _retryAllFailedMessages();
+    }
+  }
+
+  void _retryAllFailedMessages() {
+    final failedMessagesCopy = List<MessageModel>.from(failedMessages);
+    for (final message in failedMessagesCopy) {
+      retryFailedMessage(message);
+    }
   }
 }

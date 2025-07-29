@@ -3,11 +3,13 @@ import 'package:get/get.dart';
 import '../services/github_service.dart';
 import '../services/developer_matching_service.dart';
 import '../core/services/error_handler_service.dart';
+import 'networking_controller.dart';
 
 class DeveloperMatchingController extends GetxController {
   final GithubService _githubService = Get.find();
   final DeveloperMatchingService _matchingService = Get.find();
   final ErrorHandlerService _errorHandler = Get.find();
+  final NetworkingController _networkingController = Get.find();
 
   final RxList<UserProfile> similarDevelopers = <UserProfile>[].obs;
   final RxList<Map<String, dynamic>> projectSuggestions =
@@ -18,6 +20,16 @@ class DeveloperMatchingController extends GetxController {
   final RxBool isLoadingProjects = false.obs;
   final RxBool isLoadingMentors = false.obs;
   final RxString error = ''.obs;
+
+  // Skill-based matching preferences
+  final RxList<String> preferredSkills = <String>[].obs;
+  final RxList<String> preferredTechnologies = <String>[].obs;
+  final RxInt minExperienceYears = 0.obs;
+  final RxInt maxDistance = 50.obs; // km
+  final RxBool preferRemote = true.obs;
+  final RxBool preferFullTime = true.obs;
+  final RxBool preferPartTime = false.obs;
+  final RxBool preferFreelance = false.obs;
 
   // Cache mekanizması
   final Map<String, List<UserProfile>> _cache = {};
@@ -53,22 +65,49 @@ class DeveloperMatchingController extends GetxController {
         return;
       }
 
+      // Tercih edilen teknolojileri ekle
+      final allTechStack = [...userTechStack, ...preferredTechnologies];
+
       // Benzer teknolojileri kullanan geliştiricileri bul
       final developers = await _matchingService.findDevelopersByTechStack(
-        techStack: userTechStack,
+        techStack: allTechStack,
         excludeUsername: username,
       );
 
+      // Filtreleme uygula
+      final filteredDevelopers = developers.where((developer) {
+        // Deneyim yılı kontrolü
+        if (developer.yearsOfExperience < minExperienceYears.value) {
+          return false;
+        }
+
+        // Çalışma türü kontrolü
+        if (preferRemote.value && !developer.isRemote) {
+          return false;
+        }
+        if (preferFullTime.value && !developer.isFullTime) {
+          return false;
+        }
+        if (preferPartTime.value && !developer.isPartTime) {
+          return false;
+        }
+        if (preferFreelance.value && !developer.isFreelance) {
+          return false;
+        }
+
+        return true;
+      }).toList();
+
       // Eşleşme skoruna göre sırala
-      developers.sort((a, b) {
-        final scoreA = _matchingService.calculateMatchScore(a);
-        final scoreB = _matchingService.calculateMatchScore(b);
+      filteredDevelopers.sort((a, b) {
+        final scoreA = calculateMatchScore(a);
+        final scoreB = calculateMatchScore(b);
         return scoreB.compareTo(scoreA);
       });
 
       // Cache'e kaydet
-      _updateCache(cacheKey, developers);
-      similarDevelopers.value = developers;
+      _updateCache(cacheKey, filteredDevelopers);
+      similarDevelopers.value = filteredDevelopers;
     } catch (e) {
       error.value = 'Benzer geliştiriciler bulunurken bir hata oluştu: $e';
       _errorHandler.handleError(e, ErrorHandlerService.MATCHING_ERROR);
@@ -148,7 +187,42 @@ class DeveloperMatchingController extends GetxController {
   // Eşleşme skoru hesaplama
   double calculateMatchScore(UserProfile developer) {
     try {
-      return _matchingService.calculateMatchScore(developer);
+      double baseScore = _matchingService.calculateMatchScore(developer);
+
+      // Skill-based bonus
+      double skillBonus = 0.0;
+      if (preferredSkills.isNotEmpty) {
+        final commonSkills = developer.skills
+            .where((skill) => preferredSkills.contains(skill))
+            .length;
+        skillBonus = commonSkills / preferredSkills.length * 0.2;
+      }
+
+      // Technology bonus
+      double techBonus = 0.0;
+      if (preferredTechnologies.isNotEmpty) {
+        final commonTechs = developer.skills
+            .where((tech) => preferredTechnologies.contains(tech))
+            .length;
+        techBonus = commonTechs / preferredTechnologies.length * 0.15;
+      }
+
+      // Experience bonus
+      double expBonus = 0.0;
+      if (developer.yearsOfExperience >= minExperienceYears.value) {
+        expBonus = 0.1;
+      }
+
+      // Work type bonus
+      double workTypeBonus = 0.0;
+      if (preferRemote.value && developer.isRemote) workTypeBonus += 0.05;
+      if (preferFullTime.value && developer.isFullTime) workTypeBonus += 0.05;
+      if (preferPartTime.value && developer.isPartTime) workTypeBonus += 0.05;
+      if (preferFreelance.value && developer.isFreelance) workTypeBonus += 0.05;
+
+      final totalScore =
+          baseScore + skillBonus + techBonus + expBonus + workTypeBonus;
+      return totalScore.clamp(0.0, 1.0);
     } catch (e) {
       _errorHandler.handleError(e, ErrorHandlerService.MATCHING_ERROR);
       return 0.0;
@@ -164,6 +238,9 @@ class DeveloperMatchingController extends GetxController {
       await _matchingService.sendCollaborationRequest(
         targetUserId: developerId,
       );
+
+      // NetworkingController'a da ekle
+      await _networkingController.addConnection(developerId);
 
       Get.snackbar(
         'Başarılı',

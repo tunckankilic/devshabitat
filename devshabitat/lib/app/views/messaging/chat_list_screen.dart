@@ -41,6 +41,11 @@ class ChatListScreen extends GetView<MessagingController> {
               }
             },
           ),
+          IconButton(
+            icon: Icon(Icons.forum),
+            onPressed: () => Get.toNamed(AppRoutes.THREAD_ORGANIZATION),
+            tooltip: 'Thread Organizasyonu',
+          ),
         ],
       ),
       body: RefreshIndicator(

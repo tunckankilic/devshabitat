@@ -8,8 +8,8 @@ class EventService {
 
   // Create event
   Future<EventModel> createEvent(EventModel event) async {
-    final docRef = await _firestore.collection(_collection).add(event.toJson());
-    return event.copyWith(id: docRef.id);
+    final docRef = await _firestore.collection(_collection).add(event.toMap());
+    return EventModel.fromMap({...event.toMap(), 'id': docRef.id});
   }
 
   // Get event by id
@@ -17,7 +17,7 @@ class EventService {
     final docSnapshot =
         await _firestore.collection(_collection).doc(eventId).get();
     if (!docSnapshot.exists) return null;
-    return EventModel.fromFirestore(docSnapshot);
+    return EventModel.fromMap({...docSnapshot.data()!, 'id': docSnapshot.id});
   }
 
   // Get all events with pagination
@@ -31,7 +31,7 @@ class EventService {
     Query query = _firestore.collection(_collection);
 
     if (categoryIds != null && categoryIds.isNotEmpty) {
-      query = query.where('categoryIds', arrayContainsAny: categoryIds);
+      query = query.where('categories', arrayContainsAny: categoryIds);
     }
 
     if (type != null) {
@@ -50,7 +50,9 @@ class EventService {
 
     final querySnapshot = await query.get();
     return querySnapshot.docs
-        .map((doc) => EventModel.fromFirestore(doc))
+        .map((doc) => EventModel.fromMap(
+            Map<String, dynamic>.from(doc.data() as Map<String, dynamic>)
+              ..['id'] = doc.id))
         .toList();
   }
 
@@ -59,7 +61,7 @@ class EventService {
     await _firestore
         .collection(_collection)
         .doc(event.id)
-        .update(event.toJson());
+        .update(event.toMap());
   }
 
   // Delete event
@@ -75,7 +77,7 @@ class EventService {
   }) async {
     Query query = _firestore
         .collection(_collection)
-        .where('organizerId', isEqualTo: organizerId)
+        .where('createdBy', isEqualTo: organizerId)
         .orderBy('startDate', descending: true)
         .limit(limit);
 
@@ -85,7 +87,9 @@ class EventService {
 
     final querySnapshot = await query.get();
     return querySnapshot.docs
-        .map((doc) => EventModel.fromFirestore(doc))
+        .map((doc) => EventModel.fromMap(
+            Map<String, dynamic>.from(doc.data() as Map<String, dynamic>)
+              ..['id'] = doc.id))
         .toList();
   }
 
@@ -108,16 +112,16 @@ class EventService {
 
     final querySnapshot = await query.get();
     return querySnapshot.docs
-        .map((doc) => EventModel.fromFirestore(doc))
+        .map((doc) => EventModel.fromMap(
+            Map<String, dynamic>.from(doc.data() as Map<String, dynamic>)
+              ..['id'] = doc.id))
         .toList();
   }
 
   // Update event participant count
   Future<void> updateParticipantCount(String eventId, int count) async {
-    await _firestore
-        .collection(_collection)
-        .doc(eventId)
-        .update({'currentParticipants': count});
+    await _firestore.collection(_collection).doc(eventId).update(
+        {'participants': List.generate(count, (index) => 'user$index')});
   }
 
   // Update event call status

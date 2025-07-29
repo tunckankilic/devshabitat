@@ -35,6 +35,9 @@ class NotificationService extends GetxService {
     'messages': true.obs,
     'community': true.obs,
     'connections': true.obs,
+    'integration': true.obs,
+    'webhook': true.obs,
+    'service_alert': true.obs,
   };
 
   NotificationService(this._prefs);

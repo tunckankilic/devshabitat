@@ -25,7 +25,7 @@ class EventRegistrationService {
       throw Exception('Event not found');
     }
 
-    if (event.currentParticipants >= event.participantLimit) {
+    if (event.participants.length >= event.participantLimit) {
       throw Exception('Event has reached participant limit');
     }
 
@@ -44,7 +44,7 @@ class EventRegistrationService {
 
     // Update participant count
     await _eventService.updateParticipantCount(
-        eventId, event.currentParticipants + 1);
+        eventId, event.participants.length + 1);
 
     return registration.copyWith(id: docRef.id);
   }
@@ -156,9 +156,9 @@ class EventRegistrationService {
 
     // Update participant count
     final event = await _eventService.getEventById(eventId);
-    if (event != null && event.currentParticipants > 0) {
+    if (event != null && event.participants.isNotEmpty) {
       await _eventService.updateParticipantCount(
-          eventId, event.currentParticipants - 1);
+          eventId, event.participants.length - 1);
     }
   }
 }

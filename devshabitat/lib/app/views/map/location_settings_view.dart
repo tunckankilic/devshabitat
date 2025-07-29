@@ -1,4 +1,5 @@
 import 'package:devshabitat/app/constants/app_strings.dart';
+import 'package:devshabitat/app/routes/app_pages.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:devshabitat/app/controllers/location/map_controller.dart';
@@ -154,7 +155,7 @@ class LocationSettingsView extends GetView<MapController> {
         ListTile(
           title: Text(AppStrings.locationHistory),
           subtitle: Text(AppStrings.manageLocationHistory),
-          onTap: () => Get.toNamed('/location-history'),
+          onTap: () => Get.toNamed(AppRoutes.locationHistory),
           trailing: const Icon(Icons.chevron_right),
         ),
       ],

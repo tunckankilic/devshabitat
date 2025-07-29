@@ -10,6 +10,11 @@ import '../../services/location/geofence_service.dart';
 import '../../services/location/maps_service.dart';
 import '../../core/services/memory_manager_service.dart';
 import 'package:logger/logger.dart';
+import 'package:flutter/material.dart'; // Added for Get.snackbar
+import 'package:cloud_firestore/cloud_firestore.dart'; // Added for Firestore
+import 'package:geocoding/geocoding.dart'
+    hide Location; // Added for placemarkFromCoordinates
+import '../auth_controller.dart'; // Added for AuthController
 
 class LocationController extends GetxController with MemoryManagementMixin {
   final LocationTrackingService _trackingService =
@@ -378,6 +383,293 @@ class LocationController extends GetxController with MemoryManagementMixin {
       'device_type': isLowEndDevice.value ? 'low-end' : 'high-end',
       'status': locationServiceStatus.value,
       'error': locationError.value,
+    };
+  }
+
+  // Location History Management
+  final RxList<Map<String, dynamic>> locationHistory =
+      <Map<String, dynamic>>[].obs;
+  final RxBool isLoadingHistory = false.obs;
+  final RxString historyError = ''.obs;
+  final RxInt historyRetentionDays = 30.obs;
+
+  // Load location history
+  Future<void> loadLocationHistory() async {
+    try {
+      isLoadingHistory.value = true;
+      historyError.value = '';
+
+      final currentUser = Get.find<AuthController>().currentUser;
+      if (currentUser == null) {
+        throw Exception('Kullanıcı oturumu bulunamadı');
+      }
+
+      // Calculate date range
+      final endDate = DateTime.now();
+      final startDate =
+          endDate.subtract(Duration(days: historyRetentionDays.value));
+
+      // Query location history from Firestore
+      final querySnapshot = await FirebaseFirestore.instance
+          .collection('location_history')
+          .where('userId', isEqualTo: currentUser.uid)
+          .where('timestamp',
+              isGreaterThanOrEqualTo: Timestamp.fromDate(startDate))
+          .where('timestamp', isLessThanOrEqualTo: Timestamp.fromDate(endDate))
+          .orderBy('timestamp', descending: true)
+          .limit(100)
+          .get();
+
+      final history = querySnapshot.docs.map((doc) {
+        final data = doc.data();
+        return {
+          'id': doc.id,
+          'latitude': data['latitude'],
+          'longitude': data['longitude'],
+          'address': data['address'],
+          'placeName': data['placeName'],
+          'timestamp': (data['timestamp'] as Timestamp).toDate(),
+          'accuracy': data['accuracy'],
+          'type': data['type'] ?? 'automatic', // automatic, manual, check-in
+        };
+      }).toList();
+
+      locationHistory.value = history;
+      _logger.i('Loaded ${history.length} location history entries');
+    } catch (e) {
+      historyError.value = 'Konum geçmişi yüklenirken hata oluştu: $e';
+      _logger.e('Load location history error: $e');
+    } finally {
+      isLoadingHistory.value = false;
+    }
+  }
+
+  // Save location to history
+  Future<void> saveLocationToHistory(
+    double latitude,
+    double longitude, {
+    String? address,
+    String? placeName,
+    String type = 'automatic',
+  }) async {
+    try {
+      final currentUser = Get.find<AuthController>().currentUser;
+      if (currentUser == null) return;
+
+      // Get address if not provided
+      String finalAddress = address ?? '';
+      String finalPlaceName = placeName ?? '';
+
+      if (finalAddress.isEmpty) {
+        final placemarks = await placemarkFromCoordinates(latitude, longitude);
+        if (placemarks.isNotEmpty) {
+          final placemark = placemarks.first;
+          finalAddress =
+              '${placemark.street}, ${placemark.locality}, ${placemark.country}';
+          finalPlaceName =
+              placemark.name ?? placemark.street ?? 'Unknown Location';
+        }
+      }
+
+      final locationData = {
+        'userId': currentUser.uid,
+        'latitude': latitude,
+        'longitude': longitude,
+        'address': finalAddress,
+        'placeName': finalPlaceName,
+        'timestamp': FieldValue.serverTimestamp(),
+        'accuracy': currentLocation.value?.accuracy ?? 0.0,
+        'type': type,
+      };
+
+      // Save to Firestore
+      await FirebaseFirestore.instance
+          .collection('location_history')
+          .add(locationData);
+
+      // Add to local history
+      final newEntry = {
+        'id': DateTime.now().millisecondsSinceEpoch.toString(),
+        'latitude': latitude,
+        'longitude': longitude,
+        'address': finalAddress,
+        'placeName': finalPlaceName,
+        'timestamp': DateTime.now(),
+        'accuracy': currentLocation.value?.accuracy ?? 0.0,
+        'type': type,
+      };
+
+      locationHistory.insert(0, newEntry);
+
+      _logger.i('Location saved to history: $finalPlaceName');
+    } catch (e) {
+      _logger.e('Save location to history error: $e');
+    }
+  }
+
+  // Clear location history
+  Future<void> clearLocationHistory() async {
+    try {
+      final currentUser = Get.find<AuthController>().currentUser;
+      if (currentUser == null) {
+        throw Exception('Kullanıcı oturumu bulunamadı');
+      }
+
+      // Delete from Firestore
+      final batch = FirebaseFirestore.instance.batch();
+      final querySnapshot = await FirebaseFirestore.instance
+          .collection('location_history')
+          .where('userId', isEqualTo: currentUser.uid)
+          .get();
+
+      for (final doc in querySnapshot.docs) {
+        batch.delete(doc.reference);
+      }
+
+      await batch.commit();
+
+      // Clear local history
+      locationHistory.clear();
+
+      Get.snackbar(
+        'Başarılı',
+        'Konum geçmişi temizlendi',
+        snackPosition: SnackPosition.BOTTOM,
+        backgroundColor: Colors.green,
+        colorText: Colors.white,
+      );
+
+      _logger.i('Location history cleared');
+    } catch (e) {
+      Get.snackbar(
+        'Hata',
+        'Konum geçmişi temizlenirken hata oluştu',
+        snackPosition: SnackPosition.BOTTOM,
+        backgroundColor: Colors.red,
+        colorText: Colors.white,
+      );
+      _logger.e('Clear location history error: $e');
+    }
+  }
+
+  // Delete specific location entry
+  Future<void> deleteLocationEntry(String entryId) async {
+    try {
+      await FirebaseFirestore.instance
+          .collection('location_history')
+          .doc(entryId)
+          .delete();
+
+      locationHistory.removeWhere((entry) => entry['id'] == entryId);
+
+      Get.snackbar(
+        'Başarılı',
+        'Konum girişi silindi',
+        snackPosition: SnackPosition.BOTTOM,
+        backgroundColor: Colors.green,
+        colorText: Colors.white,
+      );
+
+      _logger.i('Location entry deleted: $entryId');
+    } catch (e) {
+      Get.snackbar(
+        'Hata',
+        'Konum girişi silinirken hata oluştu',
+        snackPosition: SnackPosition.BOTTOM,
+        backgroundColor: Colors.red,
+        colorText: Colors.white,
+      );
+      _logger.e('Delete location entry error: $e');
+    }
+  }
+
+  // Navigate to location on map
+  Future<void> navigateToLocation(
+      double latitude, double longitude, String placeName) async {
+    try {
+      // This would open a map application or navigate within the app
+      Get.snackbar(
+        'Harita',
+        '$placeName konumuna yönlendiriliyor...',
+        snackPosition: SnackPosition.BOTTOM,
+        backgroundColor: Colors.blue,
+        colorText: Colors.white,
+      );
+
+      _logger.i('Navigate to location: $placeName ($latitude, $longitude)');
+    } catch (e) {
+      _logger.e('Navigate to location error: $e');
+    }
+  }
+
+  // Check-in to current location manually
+  Future<void> checkInToCurrentLocation(String placeName) async {
+    try {
+      if (currentLocation.value == null) {
+        throw Exception('Mevcut konum bulunamadı');
+      }
+
+      await saveLocationToHistory(
+        currentLocation.value!.latitude,
+        currentLocation.value!.longitude,
+        placeName: placeName,
+        type: 'check-in',
+      );
+
+      Get.snackbar(
+        'Check-in',
+        '$placeName konumuna check-in yapıldı',
+        snackPosition: SnackPosition.BOTTOM,
+        backgroundColor: Colors.green,
+        colorText: Colors.white,
+      );
+
+      _logger.i('Checked in to: $placeName');
+    } catch (e) {
+      Get.snackbar(
+        'Hata',
+        'Check-in yapılırken hata oluştu: $e',
+        snackPosition: SnackPosition.BOTTOM,
+        backgroundColor: Colors.red,
+        colorText: Colors.white,
+      );
+      _logger.e('Check-in error: $e');
+    }
+  }
+
+  // Get location statistics
+  Map<String, dynamic> getLocationStatistics() {
+    final now = DateTime.now();
+    final today = DateTime(now.year, now.month, now.day);
+    final thisWeek = today.subtract(Duration(days: 7));
+    final thisMonth = DateTime(now.year, now.month, 1);
+
+    final todayCount = locationHistory.where((entry) {
+      final timestamp = entry['timestamp'] as DateTime;
+      return timestamp.isAfter(today);
+    }).length;
+
+    final weekCount = locationHistory.where((entry) {
+      final timestamp = entry['timestamp'] as DateTime;
+      return timestamp.isAfter(thisWeek);
+    }).length;
+
+    final monthCount = locationHistory.where((entry) {
+      final timestamp = entry['timestamp'] as DateTime;
+      return timestamp.isAfter(thisMonth);
+    }).length;
+
+    final checkInCount = locationHistory.where((entry) {
+      return entry['type'] == 'check-in';
+    }).length;
+
+    return {
+      'total_entries': locationHistory.length,
+      'today_entries': todayCount,
+      'week_entries': weekCount,
+      'month_entries': monthCount,
+      'check_ins': checkInCount,
+      'retention_days': historyRetentionDays.value,
     };
   }
 

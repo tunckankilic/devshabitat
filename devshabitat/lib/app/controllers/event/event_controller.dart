@@ -92,7 +92,7 @@ class EventController extends GetxController {
     // Apply category filter
     if (selectedCategory.value.isNotEmpty) {
       filtered = filtered
-          .where((event) => event.categoryIds.contains(selectedCategory.value))
+          .where((event) => event.categories.contains(selectedCategory.value))
           .toList();
     }
 
@@ -253,9 +253,8 @@ class EventController extends GetxController {
         await scheduleEventReminder(event, hourReminder, isHourly: true);
       }
 
-      // 15-minute reminder for important events (conferences and hackathons)
-      if (event.type == EventType.conference ||
-          event.type == EventType.hackathon) {
+      // 15-minute reminder for important events (in-person events)
+      if (event.type == EventType.inPerson) {
         final minuteReminder =
             event.startDate.subtract(const Duration(minutes: 15));
         if (minuteReminder.isAfter(DateTime.now())) {

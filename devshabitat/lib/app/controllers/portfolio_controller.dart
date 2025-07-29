@@ -1,6 +1,7 @@
 import 'package:get/get.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:logger/logger.dart';
+import 'package:flutter/material.dart';
 import '../models/user_profile_model.dart';
 import '../models/portfolio_project_model.dart';
 import '../models/portfolio/tech_stack_model.dart';
@@ -61,6 +62,16 @@ class PortfolioController extends GetxController {
   final completedCertifications = <String>[].obs;
   final recommendedCourses = <CourseRecommendation>[].obs;
   final practiceProjects = <ProjectIdea>[].obs;
+
+  // Project creation form state
+  final RxString projectTitle = ''.obs;
+  final RxString projectDescription = ''.obs;
+  final RxString projectTechnologies = ''.obs;
+  final RxString projectRepositoryUrl = ''.obs;
+  final RxString projectLiveUrl = ''.obs;
+  final RxString projectCategory = ''.obs;
+  final RxBool isCreatingProject = false.obs;
+  final RxString projectCreationError = ''.obs;
 
   @override
   void onInit() {
@@ -586,6 +597,116 @@ class PortfolioController extends GetxController {
     } catch (e) {
       _logger.e('Refresh career insights error: $e');
     }
+  }
+
+  // Create new project from form data
+  Future<void> createProjectFromForm() async {
+    try {
+      isCreatingProject.value = true;
+      projectCreationError.value = '';
+
+      // Validation
+      if (projectTitle.value.trim().isEmpty) {
+        throw Exception('Proje adı gereklidir');
+      }
+      if (projectDescription.value.trim().isEmpty) {
+        throw Exception('Proje açıklaması gereklidir');
+      }
+
+      // Parse technologies
+      final technologies = projectTechnologies.value
+          .split(',')
+          .map((tech) => tech.trim())
+          .where((tech) => tech.isNotEmpty)
+          .toList();
+
+      if (technologies.isEmpty) {
+        throw Exception('En az bir teknoloji belirtmelisiniz');
+      }
+
+      // Create project model
+      final project = PortfolioProjectModel(
+        title: projectTitle.value.trim(),
+        description: projectDescription.value.trim(),
+        technologies: technologies,
+        repositoryUrl: projectRepositoryUrl.value.trim().isNotEmpty
+            ? projectRepositoryUrl.value.trim()
+            : null,
+        liveUrl: projectLiveUrl.value.trim().isNotEmpty
+            ? projectLiveUrl.value.trim()
+            : null,
+        category: projectCategory.value.trim().isNotEmpty
+            ? projectCategory.value.trim()
+            : 'Other',
+        createdAt: DateTime.now(),
+        status: 'completed',
+        isFeatured: false,
+      );
+
+      // Add to portfolio
+      await addPortfolioProject(project);
+
+      // Clear form on success
+      clearProjectForm();
+
+      Get.snackbar(
+        'Başarılı',
+        'Proje başarıyla oluşturuldu!',
+        snackPosition: SnackPosition.BOTTOM,
+        backgroundColor: Colors.green,
+        colorText: Colors.white,
+      );
+
+      // Navigate back
+      Get.back();
+
+      _logger.i('Project created from form successfully');
+    } catch (e) {
+      projectCreationError.value = e.toString();
+      _logger.e('Create project from form error: $e');
+
+      Get.snackbar(
+        'Hata',
+        projectCreationError.value,
+        snackPosition: SnackPosition.BOTTOM,
+        backgroundColor: Colors.red,
+        colorText: Colors.white,
+      );
+    } finally {
+      isCreatingProject.value = false;
+    }
+  }
+
+  // Clear project creation form
+  void clearProjectForm() {
+    projectTitle.value = '';
+    projectDescription.value = '';
+    projectTechnologies.value = '';
+    projectRepositoryUrl.value = '';
+    projectLiveUrl.value = '';
+    projectCategory.value = '';
+    projectCreationError.value = '';
+  }
+
+  // Validate project form
+  bool isProjectFormValid() {
+    return projectTitle.value.trim().isNotEmpty &&
+        projectDescription.value.trim().isNotEmpty &&
+        projectTechnologies.value.trim().isNotEmpty;
+  }
+
+  // Get form validation errors
+  String? getProjectFormError() {
+    if (projectTitle.value.trim().isEmpty) {
+      return 'Proje adı gereklidir';
+    }
+    if (projectDescription.value.trim().isEmpty) {
+      return 'Proje açıklaması gereklidir';
+    }
+    if (projectTechnologies.value.trim().isEmpty) {
+      return 'En az bir teknoloji belirtmelisiniz';
+    }
+    return null;
   }
 
   // Get comprehensive portfolio status

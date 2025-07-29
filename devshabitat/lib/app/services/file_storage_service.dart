@@ -1,162 +1,115 @@
 import 'dart:io';
-import 'dart:math' show pow;
 import 'package:firebase_storage/firebase_storage.dart';
-import 'package:get/get.dart';
-import 'package:image/image.dart' as img;
-import 'package:path_provider/path_provider.dart';
 
-class FileStorageService extends GetxService {
+class FileStorageService {
   final FirebaseStorage _storage = FirebaseStorage.instance;
-  final RxDouble uploadProgress = 0.0.obs;
-  final RxBool isUploading = false.obs;
-  final Map<String, UploadTask> _uploadTasks = {};
-  final Map<String, int> _retryAttempts = {};
-  final int maxRetries = 3;
-  final int maxFileSizeBytes = 10 * 1024 * 1024; // 10MB
-  final List<String> allowedImageExtensions = ['jpg', 'jpeg', 'png', 'webp'];
-  final List<String> allowedFileExtensions = ['pdf', 'txt'];
 
-  // Dosya yükleme işlemi
+  // Dosya yükleme
   Future<UploadTask> uploadFile({
     required File file,
     required String userId,
     required String conversationId,
     required String messageId,
   }) async {
-    if (!_validateFileSize(file)) {
-      throw Exception('Dosya boyutu 10MB\'dan büyük olamaz');
-    }
-
-    final fileName = file.path.split('/').last;
-    final ref = _storage.ref().child('messages/$userId/$messageId/$fileName');
-    return ref.putFile(file);
-  }
-
-  // Resim yükleme işlemi
-  Future<UploadTask?> uploadImage({
-    required String userId,
-    required String conversationId,
-    required String messageId,
-    required File imageFile,
-  }) async {
-    final compressedImage = await _compressImage(imageFile);
-    return await uploadFile(
-      userId: userId,
-      conversationId: conversationId,
-      messageId: messageId,
-      file: compressedImage,
-    );
-  }
-
-  // İndirme URL'sini al
-  Future<String?> getDownloadURL(String storagePath) async {
     try {
-      final ref = _storage.ref(storagePath);
+      final fileName = file.path.split('/').last;
+      final timestamp = DateTime.now().millisecondsSinceEpoch;
+      final fileExtension = fileName.split('.').last;
+      final storagePath =
+          'uploads/$userId/$conversationId/$messageId/$timestamp.$fileExtension';
+
+      final ref = _storage.ref().child(storagePath);
+      return ref.putFile(file);
+    } catch (e) {
+      throw 'Dosya yüklenirken bir hata oluştu: $e';
+    }
+  }
+
+  // Dosya URL'sini al
+  Future<String> getDownloadUrl(String storagePath) async {
+    try {
+      final ref = _storage.ref().child(storagePath);
       return await ref.getDownloadURL();
     } catch (e) {
-      print('URL alma hatası: $e');
-      return null;
+      throw 'Dosya URL\'si alınırken bir hata oluştu: $e';
     }
   }
 
-  // Dosya silme işlemi
-  Future<bool> deleteFile(String storagePath) async {
+  // Dosya sil
+  Future<void> deleteFile(String storagePath) async {
     try {
-      final ref = _storage.ref(storagePath);
+      final ref = _storage.ref().child(storagePath);
       await ref.delete();
-      return true;
     } catch (e) {
-      print('Dosya silme hatası: $e');
-      return false;
+      throw 'Dosya silinirken bir hata oluştu: $e';
     }
   }
 
-  // Dosya boyutu kontrolü
-  bool _validateFileSize(File file) {
-    return file.lengthSync() <= maxFileSizeBytes;
+  // Dosya boyutunu kontrol et
+  bool isValidFileSize(File file, {int maxSizeInMB = 10}) {
+    final fileSizeInBytes = file.lengthSync();
+    final fileSizeInMB = fileSizeInBytes / (1024 * 1024);
+    return fileSizeInMB <= maxSizeInMB;
   }
 
-  // Resim sıkıştırma
-  Future<File> _compressImage(File imageFile) async {
-    final img.Image? image = img.decodeImage(await imageFile.readAsBytes());
-    if (image == null) throw Exception('Resim okunamadı');
-
-    // Maksimum 1080p boyutuna ölçekle
-    img.Image resizedImage = image;
-    if (image.width > 1920 || image.height > 1080) {
-      resizedImage = img.copyResize(
-        image,
-        width: image.width > 1920 ? 1920 : null,
-        height: image.height > 1080 ? 1080 : null,
-      );
-    }
-
-    // WebP formatına dönüştür ve sıkıştır
-    final compressedBytes = img.encodeJpg(
-      resizedImage,
-      quality: 80,
-    );
-
-    // Geçici dosya oluştur
-    final tempDir = await getTemporaryDirectory();
-    final tempFile = File(
-        '${tempDir.path}/compressed_${DateTime.now().millisecondsSinceEpoch}.jpg');
-    await tempFile.writeAsBytes(compressedBytes);
-
-    return tempFile;
+  // Dosya türünü kontrol et
+  bool isValidFileType(String fileName, List<String> allowedExtensions) {
+    final extension = fileName.split('.').last.toLowerCase();
+    return allowedExtensions.contains(extension);
   }
 
-  // Firebase Storage'a yükleme
-  Future<UploadTask> _uploadFileToStorage(File file, String storagePath) async {
-    try {
-      isUploading.value = true;
-      uploadProgress.value = 0.0;
-
-      final ref = _storage.ref(storagePath);
-      final UploadTask uploadTask = ref.putFile(file);
-      _uploadTasks[storagePath] = uploadTask;
-      _retryAttempts[storagePath] = 0;
-
-      // İlerleme takibi
-      uploadTask.snapshotEvents.listen(
-        (TaskSnapshot snapshot) {
-          uploadProgress.value =
-              snapshot.bytesTransferred / snapshot.totalBytes;
-        },
-        onError: (error) => _handleUploadError(storagePath, file),
-        cancelOnError: true,
-      );
-
-      return uploadTask;
-    } catch (e) {
-      return await _handleUploadError(storagePath, file);
+  // Dosya türüne göre MIME type al
+  String getMimeType(String fileName) {
+    final extension = fileName.split('.').last.toLowerCase();
+    switch (extension) {
+      case 'pdf':
+        return 'application/pdf';
+      case 'doc':
+        return 'application/msword';
+      case 'docx':
+        return 'application/vnd.openxmlformats-officedocument.wordprocessingml.document';
+      case 'xls':
+        return 'application/vnd.ms-excel';
+      case 'xlsx':
+        return 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet';
+      case 'ppt':
+        return 'application/vnd.ms-powerpoint';
+      case 'pptx':
+        return 'application/vnd.openxmlformats-officedocument.presentationml.presentation';
+      case 'txt':
+        return 'text/plain';
+      case 'zip':
+        return 'application/zip';
+      case 'rar':
+        return 'application/x-rar-compressed';
+      case 'jpg':
+      case 'jpeg':
+        return 'image/jpeg';
+      case 'png':
+        return 'image/png';
+      case 'gif':
+        return 'image/gif';
+      case 'mp4':
+        return 'video/mp4';
+      case 'avi':
+        return 'video/x-msvideo';
+      case 'mov':
+        return 'video/quicktime';
+      default:
+        return 'application/octet-stream';
     }
   }
 
-  // Yükleme hatası yönetimi
-  Future<UploadTask> _handleUploadError(String storagePath, File file) async {
-    final attempts = _retryAttempts[storagePath] ?? 0;
-    if (attempts < maxRetries) {
-      _retryAttempts[storagePath] = attempts + 1;
-      await Future.delayed(Duration(seconds: pow(2, attempts).toInt()));
-      return _uploadFileToStorage(file, storagePath);
+  // Dosya boyutunu formatla
+  String formatFileSize(int bytes) {
+    if (bytes < 1024) {
+      return '$bytes B';
+    } else if (bytes < 1024 * 1024) {
+      return '${(bytes / 1024).toStringAsFixed(1)} KB';
+    } else if (bytes < 1024 * 1024 * 1024) {
+      return '${(bytes / (1024 * 1024)).toStringAsFixed(1)} MB';
     } else {
-      isUploading.value = false;
-      uploadProgress.value = 0.0;
-      _uploadTasks.remove(storagePath);
-      _retryAttempts.remove(storagePath);
-      throw Exception('Yükleme hatası');
+      return '${(bytes / (1024 * 1024 * 1024)).toStringAsFixed(1)} GB';
     }
-  }
-
-  // Servis kapatıldığında
-  @override
-  void onClose() {
-    for (var task in _uploadTasks.values) {
-      task.cancel();
-    }
-    _uploadTasks.clear();
-    _retryAttempts.clear();
-    super.onClose();
   }
 }

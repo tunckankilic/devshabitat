@@ -3,70 +3,138 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import '../../controllers/profile_controller.dart';
+import '../../controllers/github_integration_controller.dart';
 import '../base/base_view.dart';
 import 'widgets/github_repo_card.dart';
 import '../../widgets/responsive/responsive_text.dart';
 import '../../widgets/responsive/animated_responsive_layout.dart';
+import 'github_integration_view.dart';
 
 class ProfileView extends BaseView<ProfileController> {
   const ProfileView({super.key});
 
   @override
   Widget buildView(BuildContext context) {
-    return Scaffold(
-      body: Obx(() {
-        if (controller.isLoading) {
-          return Center(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                CircularProgressIndicator(
-                  strokeWidth: 3,
-                  color: Theme.of(context).primaryColor,
-                ),
-                SizedBox(height: 16),
-                ResponsiveText(
-                  'Profil yükleniyor...',
-                  style: TextStyle(
-                    fontSize: 16,
-                    color: Colors.grey[600],
+    return DefaultTabController(
+      length: 2,
+      child: Scaffold(
+        appBar: AppBar(
+          title: ResponsiveText(
+            AppStrings.profile,
+            style: TextStyle(
+              color: Colors.white,
+              fontWeight: FontWeight.w600,
+              fontSize: 20,
+            ),
+          ),
+          backgroundColor: Theme.of(context).primaryColor,
+          elevation: 0,
+          bottom: TabBar(
+            indicatorColor: Colors.white,
+            labelColor: Colors.white,
+            unselectedLabelColor: Colors.white.withOpacity(0.7),
+            tabs: [
+              Tab(
+                icon: Icon(Icons.person_outline),
+                text: 'Profil',
+              ),
+              Tab(
+                icon: Icon(Icons.code),
+                text: 'GitHub',
+              ),
+            ],
+          ),
+          actions: [
+            Padding(
+              padding: const EdgeInsets.only(right: 8),
+              child: IconButton(
+                onPressed: () => Get.toNamed('/edit-profile'),
+                icon: Container(
+                  padding: EdgeInsets.all(8),
+                  decoration: BoxDecoration(
+                    color: Colors.white.withOpacity(0.2),
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: Icon(
+                    Icons.edit_outlined,
+                    color: Colors.white,
+                    size: 20,
                   ),
                 ),
-              ],
+              ),
             ),
-          );
-        }
+          ],
+        ),
+        body: TabBarView(
+          children: [
+            _buildProfileTab(context),
+            _buildGithubTab(context),
+          ],
+        ),
+      ),
+    );
+  }
 
-        final user = controller.user;
-        if (user == null) {
-          return Center(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Icon(
-                  Icons.person_off,
-                  size: 64,
-                  color: Colors.grey[400],
+  Widget _buildProfileTab(BuildContext context) {
+    return Obx(() {
+      if (controller.isLoading) {
+        return Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              CircularProgressIndicator(
+                strokeWidth: 3,
+                color: Theme.of(context).primaryColor,
+              ),
+              SizedBox(height: 16),
+              ResponsiveText(
+                'Profil yükleniyor...',
+                style: TextStyle(
+                  fontSize: 16,
+                  color: Colors.grey[600],
                 ),
-                SizedBox(height: 16),
-                ResponsiveText(
-                  AppStrings.profileNotFound,
-                  style: TextStyle(
-                    fontSize: 18,
-                    color: Colors.grey[600],
-                  ),
-                ),
-              ],
-            ),
-          );
-        }
-
-        return AnimatedResponsiveLayout(
-          mobile: _buildMobileProfile(user, context),
-          tablet: _buildTabletProfile(user, context),
-          animationDuration: const Duration(milliseconds: 300),
+              ),
+            ],
+          ),
         );
-      }),
+      }
+
+      final user = controller.user;
+      if (user == null) {
+        return Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(
+                Icons.person_off,
+                size: 64,
+                color: Colors.grey[400],
+              ),
+              SizedBox(height: 16),
+              ResponsiveText(
+                AppStrings.profileNotFound,
+                style: TextStyle(
+                  fontSize: 18,
+                  color: Colors.grey[600],
+                ),
+              ),
+            ],
+          ),
+        );
+      }
+
+      return AnimatedResponsiveLayout(
+        mobile: _buildMobileProfile(user, context),
+        tablet: _buildTabletProfile(user, context),
+        animationDuration: const Duration(milliseconds: 300),
+      );
+    });
+  }
+
+  Widget _buildGithubTab(BuildContext context) {
+    return GetBuilder<GithubIntegrationController>(
+      init: GithubIntegrationController(),
+      builder: (controller) => GithubIntegrationView(),
     );
   }
 
@@ -76,7 +144,6 @@ class ProfileView extends BaseView<ProfileController> {
       color: Theme.of(context).primaryColor,
       child: CustomScrollView(
         slivers: [
-          _buildModernAppBar(user, context),
           SliverToBoxAdapter(
             child: Padding(
               padding: const EdgeInsets.all(16),
@@ -115,7 +182,6 @@ class ProfileView extends BaseView<ProfileController> {
       color: Theme.of(context).primaryColor,
       child: CustomScrollView(
         slivers: [
-          _buildModernAppBar(user, context),
           SliverToBoxAdapter(
             child: Padding(
               padding: const EdgeInsets.all(24),
@@ -163,59 +229,6 @@ class ProfileView extends BaseView<ProfileController> {
           ),
         ],
       ),
-    );
-  }
-
-  Widget _buildModernAppBar(dynamic user, BuildContext context) {
-    return SliverAppBar(
-      expandedHeight: 100,
-      floating: false,
-      pinned: true,
-      elevation: 0,
-      backgroundColor: Colors.transparent,
-      flexibleSpace: Container(
-        decoration: BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-            colors: [
-              Theme.of(context).primaryColor,
-              Theme.of(context).primaryColor.withOpacity(0.8),
-            ],
-          ),
-        ),
-        child: FlexibleSpaceBar(
-          title: ResponsiveText(
-            AppStrings.profile,
-            style: TextStyle(
-              color: Colors.white,
-              fontWeight: FontWeight.w600,
-              fontSize: 20,
-            ),
-          ),
-          centerTitle: true,
-        ),
-      ),
-      actions: [
-        Padding(
-          padding: const EdgeInsets.only(right: 8),
-          child: IconButton(
-            onPressed: () => Get.toNamed('/edit-profile'),
-            icon: Container(
-              padding: EdgeInsets.all(8),
-              decoration: BoxDecoration(
-                color: Colors.white.withOpacity(0.2),
-                borderRadius: BorderRadius.circular(12),
-              ),
-              child: Icon(
-                Icons.edit_outlined,
-                color: Colors.white,
-                size: 20,
-              ),
-            ),
-          ),
-        ),
-      ],
     );
   }
 

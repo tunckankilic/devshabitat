@@ -2,10 +2,16 @@ import 'package:devshabitat/app/constants/app_strings.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../../controllers/notification_controller.dart';
+import '../../controllers/integration/notification_controller.dart';
 import '../../widgets/in_app_notification_widget.dart';
+import '../../widgets/integration_notification_widget.dart';
+import '../../models/notification_model.dart';
 
 class NotificationCenterView extends GetView<NotificationController> {
   const NotificationCenterView({super.key});
+
+  IntegrationNotificationController get integrationController =>
+      Get.find<IntegrationNotificationController>();
 
   @override
   Widget build(BuildContext context) {
@@ -27,6 +33,9 @@ class NotificationCenterView extends GetView<NotificationController> {
                 case 'settings':
                   Get.toNamed('/notification-settings');
                   break;
+                case 'integration_settings':
+                  Get.toNamed('/integration-notification-settings');
+                  break;
               }
             },
             itemBuilder: (context) => [
@@ -44,6 +53,13 @@ class NotificationCenterView extends GetView<NotificationController> {
                   title: Text(AppStrings.settings),
                 ),
               ),
+              const PopupMenuItem(
+                value: 'integration_settings',
+                child: ListTile(
+                  leading: Icon(Icons.integration_instructions),
+                  title: Text('Entegrasyon Ayarları'),
+                ),
+              ),
             ],
           ),
         ],
@@ -59,6 +75,24 @@ class NotificationCenterView extends GetView<NotificationController> {
                       itemCount: controller.notifications.length,
                       itemBuilder: (context, index) {
                         final notification = controller.notifications[index];
+
+                        // Integration notifications için özel widget kullan
+                        if (notification.type == NotificationType.integration ||
+                            notification.type == NotificationType.webhook ||
+                            notification.type ==
+                                NotificationType.service_alert) {
+                          return IntegrationNotificationWidget(
+                            notification: notification,
+                            onTap: () {
+                              controller.handleNotificationTap(notification);
+                            },
+                            onDismiss: () {
+                              controller.deleteNotification(notification.id);
+                            },
+                          );
+                        }
+
+                        // Diğer bildirimler için normal widget kullan
                         return InAppNotificationWidget(
                           notification: notification,
                           onTap: () {
@@ -120,6 +154,9 @@ class NotificationCenterView extends GetView<NotificationController> {
             _buildFilterOption(AppStrings.events, 'event'),
             _buildFilterOption(AppStrings.communities, 'community'),
             _buildFilterOption(AppStrings.connections, 'connection'),
+            _buildFilterOption('Entegrasyon', 'integration'),
+            _buildFilterOption('Webhook', 'webhook'),
+            _buildFilterOption('Servis Uyarıları', 'service_alert'),
           ],
         ),
         actions: [

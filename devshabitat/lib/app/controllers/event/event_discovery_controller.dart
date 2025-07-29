@@ -124,13 +124,13 @@ class EventDiscoveryController extends GetxController {
   void _updateVisibleEvents() async {
     await filterAndCreateMarkers();
     visibleEvents.value = events.where((event) {
-      if (event.geoPoint == null) return false;
+      if (event.location == null) return false;
 
       final distance = calculateDistance(
         currentPosition.value.latitude,
         currentPosition.value.longitude,
-        event.geoPoint!.latitude,
-        event.geoPoint!.longitude,
+        event.location!.latitude,
+        event.location!.longitude,
       );
 
       return distance <= searchRadius.value;
@@ -176,10 +176,10 @@ class EventDiscoveryController extends GetxController {
       final now = DateTime.now();
       final filtered = filteredEvents.where((event) {
         // Apply location filter
-        if (showOnlineOnly.value && event.location != EventLocation.online) {
+        if (showOnlineOnly.value && event.type != EventType.online) {
           return false;
         }
-        if (showOfflineOnly.value && event.location != EventLocation.offline) {
+        if (showOfflineOnly.value && event.type != EventType.inPerson) {
           return false;
         }
 
@@ -270,7 +270,7 @@ class EventDiscoveryController extends GetxController {
       final filteredEvents = events.where((event) {
         // Kategori filtresi
         if (selectedEventCategories.isNotEmpty &&
-            !selectedEventCategories.contains(event.categoryIds.first)) {
+            !selectedEventCategories.contains(event.categories.first)) {
           return false;
         }
 
@@ -282,12 +282,12 @@ class EventDiscoveryController extends GetxController {
         }
 
         // Konum filtresi
-        if (event.geoPoint != null) {
+        if (event.location != null) {
           final distance = calculateDistance(
             currentPosition.value.latitude,
             currentPosition.value.longitude,
-            event.geoPoint!.latitude,
-            event.geoPoint!.longitude,
+            event.location!.latitude,
+            event.location!.longitude,
           );
           if (distance > searchRadius.value) {
             return false;
@@ -300,11 +300,11 @@ class EventDiscoveryController extends GetxController {
       // Marker'ları oluştur
       eventMarkers.clear();
       for (final event in filteredEvents) {
-        if (event.geoPoint != null) {
+        if (event.location != null) {
           final marker = Marker(
             markerId: MarkerId(event.id),
             position:
-                LatLng(event.geoPoint!.latitude, event.geoPoint!.longitude),
+                LatLng(event.location!.latitude, event.location!.longitude),
             infoWindow: InfoWindow(
               title: event.title,
               snippet: event.description,

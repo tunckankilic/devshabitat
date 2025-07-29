@@ -18,6 +18,7 @@ abstract class IAuthRepository {
 //  Future<UserCredential> signInWithFacebook();
   Future<UserCredential> signInWithApple();
   Future<void> signOut();
+  Future<void> signOutFromAllDevices();
   Future<void> sendPasswordResetEmail(String email);
   Future<void> verifyEmail();
   Future<void> updatePassword(String newPassword);
@@ -255,6 +256,18 @@ class AuthRepository implements IAuthRepository {
 
   @override
   Future<void> signOut() async {
+    try {
+      await Future.wait([
+        _auth.signOut(),
+        _googleSignIn.signOut(),
+      ]);
+    } catch (e) {
+      throw _handleAuthException(e);
+    }
+  }
+
+  @override
+  Future<void> signOutFromAllDevices() async {
     try {
       await Future.wait([
         _auth.signOut(),

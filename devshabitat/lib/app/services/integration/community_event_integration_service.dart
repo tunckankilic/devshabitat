@@ -42,12 +42,26 @@ class CommunityEventIntegrationService extends GetxService {
         throw Exception('Event not found');
       }
 
-      final updatedCategoryIds = List<String>.from(existingEvent.categoryIds)
+      final updatedCategories = List<String>.from(existingEvent.categories)
         ..add(communityId);
 
-      final updatedEvent = existingEvent.copyWith(
-        categoryIds: updatedCategoryIds,
+      final updatedEvent = EventModel(
+        id: existingEvent.id,
+        title: existingEvent.title,
+        description: existingEvent.description,
+        type: existingEvent.type,
+        onlineMeetingUrl: existingEvent.onlineMeetingUrl,
+        venueAddress: existingEvent.venueAddress,
+        startDate: existingEvent.startDate,
+        endDate: existingEvent.endDate,
+        participantLimit: existingEvent.participantLimit,
+        categories: updatedCategories,
+        participants: existingEvent.participants,
+        communityId: existingEvent.communityId,
+        createdBy: existingEvent.createdBy,
+        createdAt: existingEvent.createdAt,
         updatedAt: DateTime.now(),
+        location: existingEvent.location,
       );
       await _eventService.updateEvent(updatedEvent);
 

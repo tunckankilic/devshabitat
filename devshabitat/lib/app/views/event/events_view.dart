@@ -102,14 +102,14 @@ class EventCard extends StatelessWidget {
               Row(
                 children: [
                   Icon(
-                    event.location == EventLocation.online
+                    event.type == EventType.online
                         ? Icons.computer
                         : Icons.location_on,
                     size: 16,
                   ),
                   const SizedBox(width: 4),
                   Text(
-                    event.location == EventLocation.online
+                    event.type == EventType.online
                         ? AppStrings.online
                         : event.venueAddress ?? AppStrings.noLocation,
                     style: const TextStyle(fontSize: 14),
@@ -139,7 +139,7 @@ class EventCard extends StatelessWidget {
                   const Icon(Icons.person, size: 16),
                   const SizedBox(width: 4),
                   Text(
-                    '${event.currentParticipants}/${event.participantLimit}',
+                    '${event.participants.length}/${event.participantLimit}',
                     style: const TextStyle(fontSize: 14),
                   ),
                 ],
@@ -153,31 +153,19 @@ class EventCard extends StatelessWidget {
 
   IconData _getEventTypeIcon(EventType type) {
     switch (type) {
-      case EventType.meetup:
-        return Icons.groups;
-      case EventType.workshop:
-        return Icons.build;
-      case EventType.hackathon:
-        return Icons.code;
-      case EventType.conference:
-        return Icons.business;
-      case EventType.other:
-        return Icons.event;
+      case EventType.inPerson:
+        return Icons.location_on;
+      case EventType.online:
+        return Icons.computer;
     }
   }
 
   String _getEventTypeText(EventType type) {
     switch (type) {
-      case EventType.meetup:
-        return AppStrings.meetup;
-      case EventType.workshop:
-        return AppStrings.workshop;
-      case EventType.hackathon:
-        return AppStrings.hackathon;
-      case EventType.conference:
-        return AppStrings.conference;
-      case EventType.other:
-        return AppStrings.other;
+      case EventType.inPerson:
+        return AppStrings.inPerson;
+      case EventType.online:
+        return AppStrings.online;
     }
   }
 

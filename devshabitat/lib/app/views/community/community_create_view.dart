@@ -3,6 +3,8 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../../controllers/community/community_create_controller.dart';
 import '../../widgets/image_upload_widget.dart';
+import '../../widgets/advanced_file_upload.dart';
+import '../../repositories/auth_repository.dart';
 
 class CommunityCreateView extends GetView<CommunityCreateController> {
   const CommunityCreateView({super.key});
@@ -122,6 +124,44 @@ class CommunityCreateView extends GetView<CommunityCreateController> {
                   value: controller.isPrivate.value,
                   onChanged: (value) => controller.isPrivate.value = value,
                 ),
+              ),
+              const SizedBox(height: 24),
+
+              // Community Files Section
+              Text(
+                'Topluluk Dosyaları',
+                style: Theme.of(context).textTheme.titleMedium,
+              ),
+              const SizedBox(height: 8),
+              AdvancedFileUpload(
+                userId: Get.find<AuthRepository>().currentUser?.uid ?? '',
+                conversationId:
+                    'community_create_${DateTime.now().millisecondsSinceEpoch}',
+                onFilesSelected: (files) {
+                  // Handle selected files
+                  print('Selected community files: ${files.length}');
+                },
+                onFileUploaded: (attachment) {
+                  // Handle uploaded file
+                  print('Uploaded community file: ${attachment.name}');
+                },
+                onUploadCancelled: (messageId) {
+                  // Handle cancelled upload
+                  print('Cancelled community upload: $messageId');
+                },
+                customTitle: 'Topluluk Dosyası Ekle',
+                customSubtitle:
+                    'Topluluk kuralları, dokümantasyon veya diğer dosyaları yükleyin',
+                allowedExtensions: [
+                  'pdf',
+                  'doc',
+                  'docx',
+                  'txt',
+                  'jpg',
+                  'jpeg',
+                  'png'
+                ],
+                maxFileSizeMB: 10,
               ),
               const SizedBox(height: 32),
 

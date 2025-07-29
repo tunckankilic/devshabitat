@@ -165,16 +165,10 @@ class EventDiscoveryView extends GetView<EventDiscoveryController> {
 
   String _getEventTypeText(EventType type) {
     switch (type) {
-      case EventType.meetup:
-        return AppStrings.meetup;
-      case EventType.workshop:
-        return AppStrings.workshop;
-      case EventType.hackathon:
-        return AppStrings.hackathon;
-      case EventType.conference:
-        return AppStrings.conference;
-      case EventType.other:
-        return AppStrings.other;
+      case EventType.inPerson:
+        return AppStrings.inPerson;
+      case EventType.online:
+        return AppStrings.online;
     }
   }
 }

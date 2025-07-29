@@ -3,9 +3,12 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../../../../controllers/registration_controller.dart';
 import '../../../../controllers/responsive_controller.dart';
+import '../../../../controllers/enhanced_form_validation_controller.dart';
+import '../../../../widgets/enhanced_form_field.dart';
 
 class BasicInfoStep extends GetView<RegistrationController> {
   final _responsiveController = Get.find<ResponsiveController>();
+  final _validationController = Get.find<EnhancedFormValidationController>();
 
   BasicInfoStep({super.key});
 
@@ -16,50 +19,32 @@ class BasicInfoStep extends GetView<RegistrationController> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Email field
-          TextFormField(
+          // Email field with EnhancedFormField
+          EnhancedFormField(
+            fieldType: FieldType.email,
             controller: controller.emailController,
-            keyboardType: TextInputType.emailAddress,
-            decoration: InputDecoration(
-              labelText: AppStrings.email,
-              hintText: AppStrings.emailHint,
-              prefixIcon: Icon(
-                Icons.email,
-                size: _responsiveController.responsiveValue(
-                  mobile: 24.0,
-                  tablet: 32.0,
-                ),
-              ),
-              suffixIcon: Obx(() => controller.isEmailValid
-                  ? Icon(Icons.check_circle, color: Colors.green)
-                  : SizedBox.shrink()),
-              contentPadding: _responsiveController.responsivePadding(
-                horizontal: 16.0,
-                vertical: 16.0,
-              ),
-              border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(
-                  _responsiveController.responsiveValue(
-                    mobile: 8.0,
-                    tablet: 12.0,
-                  ),
+            label: AppStrings.email,
+            hint: AppStrings.emailHint,
+            prefixIcon: Icons.email,
+            iconSize: _responsiveController.responsiveValue(
+              mobile: 24.0,
+              tablet: 32.0,
+            ),
+            contentPadding: _responsiveController.responsivePadding(
+              horizontal: 16.0,
+              vertical: 16.0,
+            ),
+            border: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(
+                _responsiveController.responsiveValue(
+                  mobile: 8.0,
+                  tablet: 12.0,
                 ),
               ),
             ),
-            style: TextStyle(
-              fontSize: _responsiveController.responsiveValue(
-                mobile: 16.0,
-                tablet: 18.0,
-              ),
-            ),
-            validator: (value) {
-              if (value == null || value.isEmpty) {
-                return AppStrings.emailRequired;
-              }
-              if (!GetUtils.isEmail(value)) {
-                return AppStrings.emailInvalid;
-              }
-              return null;
+            onChanged: (value) {
+              // Update registration controller state
+              _validationController.validateEmail(value);
             },
           ),
 
@@ -67,49 +52,32 @@ class BasicInfoStep extends GetView<RegistrationController> {
               height: _responsiveController.responsiveValue(
                   mobile: 16.0, tablet: 24.0)),
 
-          // Display Name field
-          TextFormField(
+          // Display Name field with EnhancedFormField
+          EnhancedFormField(
+            fieldType: FieldType.name,
             controller: controller.displayNameController,
-            decoration: InputDecoration(
-              labelText: AppStrings.displayName,
-              hintText: AppStrings.displayNameHint,
-              prefixIcon: Icon(
-                Icons.person,
-                size: _responsiveController.responsiveValue(
-                  mobile: 24.0,
-                  tablet: 32.0,
-                ),
-              ),
-              suffixIcon: Obx(() => controller.isDisplayNameValid
-                  ? Icon(Icons.check_circle, color: Colors.green)
-                  : SizedBox.shrink()),
-              contentPadding: _responsiveController.responsivePadding(
-                horizontal: 16.0,
-                vertical: 16.0,
-              ),
-              border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(
-                  _responsiveController.responsiveValue(
-                    mobile: 8.0,
-                    tablet: 12.0,
-                  ),
+            label: AppStrings.displayName,
+            hint: AppStrings.displayNameHint,
+            prefixIcon: Icons.person,
+            iconSize: _responsiveController.responsiveValue(
+              mobile: 24.0,
+              tablet: 32.0,
+            ),
+            contentPadding: _responsiveController.responsivePadding(
+              horizontal: 16.0,
+              vertical: 16.0,
+            ),
+            border: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(
+                _responsiveController.responsiveValue(
+                  mobile: 8.0,
+                  tablet: 12.0,
                 ),
               ),
             ),
-            style: TextStyle(
-              fontSize: _responsiveController.responsiveValue(
-                mobile: 16.0,
-                tablet: 18.0,
-              ),
-            ),
-            validator: (value) {
-              if (value == null || value.isEmpty) {
-                return AppStrings.displayNameRequired;
-              }
-              if (value.length < 3) {
-                return AppStrings.displayNameInvalid;
-              }
-              return null;
+            onChanged: (value) {
+              // Update registration controller state
+              _validationController.validateName(value);
             },
           ),
 
@@ -117,66 +85,35 @@ class BasicInfoStep extends GetView<RegistrationController> {
               height: _responsiveController.responsiveValue(
                   mobile: 16.0, tablet: 24.0)),
 
-          // Password field
-          Obx(() => TextFormField(
-                controller: controller.passwordController,
-                obscureText: true,
-                decoration: InputDecoration(
-                  labelText: AppStrings.password,
-                  hintText:
-                      "En az 8 karakter, büyük/küçük harf, sayı ve özel karakter",
-                  prefixIcon: Icon(
-                    Icons.lock,
-                    size: _responsiveController.responsiveValue(
-                      mobile: 24.0,
-                      tablet: 32.0,
-                    ),
-                  ),
-                  suffixIcon: controller.allPasswordRequirementsMet
-                      ? Icon(Icons.check_circle, color: Colors.green)
-                      : SizedBox.shrink(),
-                  contentPadding: _responsiveController.responsivePadding(
-                    horizontal: 16.0,
-                    vertical: 16.0,
-                  ),
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(
-                      _responsiveController.responsiveValue(
-                        mobile: 8.0,
-                        tablet: 12.0,
-                      ),
-                    ),
-                    borderSide: BorderSide(
-                      color: !controller.passwordIsEmpty
-                          ? (controller.allPasswordRequirementsMet
-                              ? Colors.green
-                              : Colors.orange)
-                          : Colors.grey,
-                    ),
-                  ),
-                  enabledBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(
-                      _responsiveController.responsiveValue(
-                        mobile: 8.0,
-                        tablet: 12.0,
-                      ),
-                    ),
-                    borderSide: BorderSide(
-                      color: !controller.passwordIsEmpty
-                          ? (controller.allPasswordRequirementsMet
-                              ? Colors.green
-                              : Colors.orange)
-                          : Colors.grey,
-                    ),
-                  ),
+          // Password field with EnhancedFormField
+          EnhancedFormField(
+            fieldType: FieldType.password,
+            controller: controller.passwordController,
+            label: AppStrings.password,
+            hint: "En az 8 karakter, büyük/küçük harf, sayı ve özel karakter",
+            prefixIcon: Icons.lock,
+            iconSize: _responsiveController.responsiveValue(
+              mobile: 24.0,
+              tablet: 32.0,
+            ),
+            obscureText: true,
+            contentPadding: _responsiveController.responsivePadding(
+              horizontal: 16.0,
+              vertical: 16.0,
+            ),
+            border: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(
+                _responsiveController.responsiveValue(
+                  mobile: 8.0,
+                  tablet: 12.0,
                 ),
-                style: TextStyle(
-                  fontSize: _responsiveController.responsiveValue(
-                    mobile: 16.0,
-                    tablet: 18.0,
-                  ),
-                ),
-              )),
+              ),
+            ),
+            onChanged: (value) {
+              // Update registration controller state
+              _validationController.validatePassword(value);
+            },
+          ),
 
           SizedBox(
               height: _responsiveController.responsiveValue(
@@ -189,71 +126,44 @@ class BasicInfoStep extends GetView<RegistrationController> {
               height: _responsiveController.responsiveValue(
                   mobile: 16.0, tablet: 24.0)),
 
-          // Confirm Password field
-          Obx(() => TextFormField(
-                controller: controller.confirmPasswordController,
-                obscureText: true,
-                decoration: InputDecoration(
-                  labelText: AppStrings.confirmPassword,
-                  hintText: "Şifrenizi tekrar girin",
-                  prefixIcon: Icon(
-                    Icons.lock_outline,
-                    size: _responsiveController.responsiveValue(
-                      mobile: 24.0,
-                      tablet: 32.0,
-                    ),
-                  ),
-                  suffixIcon: controller.passwordsMatch &&
-                          !controller.confirmPasswordIsEmpty
-                      ? Icon(Icons.check_circle, color: Colors.green)
-                      : !controller.confirmPasswordIsEmpty &&
-                              !controller.passwordsMatch
-                          ? Icon(Icons.error, color: Colors.red)
-                          : SizedBox.shrink(),
-                  contentPadding: _responsiveController.responsivePadding(
-                    horizontal: 16.0,
-                    vertical: 16.0,
-                  ),
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(
-                      _responsiveController.responsiveValue(
-                        mobile: 8.0,
-                        tablet: 12.0,
-                      ),
-                    ),
-                  ),
-                  enabledBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(
-                      _responsiveController.responsiveValue(
-                        mobile: 8.0,
-                        tablet: 12.0,
-                      ),
-                    ),
-                    borderSide: BorderSide(
-                      color: !controller.confirmPasswordIsEmpty
-                          ? (controller.passwordsMatch
-                              ? Colors.green
-                              : Colors.red)
-                          : Colors.grey,
-                    ),
-                  ),
+          // Confirm Password field with EnhancedFormField
+          EnhancedFormField(
+            fieldType: FieldType.custom,
+            controller: controller.confirmPasswordController,
+            label: AppStrings.confirmPassword,
+            hint: "Şifrenizi tekrar girin",
+            prefixIcon: Icons.lock_outline,
+            iconSize: _responsiveController.responsiveValue(
+              mobile: 24.0,
+              tablet: 32.0,
+            ),
+            obscureText: true,
+            contentPadding: _responsiveController.responsivePadding(
+              horizontal: 16.0,
+              vertical: 16.0,
+            ),
+            border: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(
+                _responsiveController.responsiveValue(
+                  mobile: 8.0,
+                  tablet: 12.0,
                 ),
-                style: TextStyle(
-                  fontSize: _responsiveController.responsiveValue(
-                    mobile: 16.0,
-                    tablet: 18.0,
-                  ),
-                ),
-                validator: (value) {
-                  if (value == null || value.isEmpty) {
-                    return AppStrings.confirmPasswordRequired;
-                  }
-                  if (value != controller.passwordController.text) {
-                    return AppStrings.confirmPasswordInvalid;
-                  }
-                  return null;
-                },
-              )),
+              ),
+            ),
+            customValidator: (value) {
+              if (value == null || value.isEmpty) {
+                return AppStrings.confirmPasswordRequired;
+              }
+              if (value != controller.passwordController.text) {
+                return AppStrings.confirmPasswordInvalid;
+              }
+              return null;
+            },
+            onChanged: (value) {
+              // Update registration controller state
+              // Password confirmation validation is handled by customValidator
+            },
+          ),
 
           SizedBox(
               height: _responsiveController.responsiveValue(

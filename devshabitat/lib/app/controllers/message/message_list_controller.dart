@@ -1,13 +1,18 @@
+// ignore_for_file: overridden_fields
+
 import 'package:get/get.dart';
 import 'dart:async';
 import '../../models/conversation_model.dart';
 import 'message_base_controller.dart';
 
 class MessageListController extends MessageBaseController {
+  @override
   final RxList<ConversationModel> conversations = <ConversationModel>[].obs;
   final RxList<ConversationModel> filteredConversations =
       <ConversationModel>[].obs;
   final RxList<ConversationModel> _allConversations = <ConversationModel>[].obs;
+  final Rx<ConversationModel?> selectedConversation =
+      Rx<ConversationModel?>(null);
   final RxBool isSearching = false.obs;
   final RxString searchQuery = ''.obs;
 
@@ -31,6 +36,7 @@ class MessageListController extends MessageBaseController {
     super.onClose();
   }
 
+  @override
   Future<void> loadConversations() async {
     try {
       startLoading();
@@ -149,6 +155,14 @@ class MessageListController extends MessageBaseController {
     _searchDebouncer?.cancel();
     conversations.assignAll(_allConversations);
     filteredConversations.clear();
+  }
+
+  void selectConversation(ConversationModel conversation) {
+    selectedConversation.value = conversation;
+  }
+
+  void clearSelectedConversation() {
+    selectedConversation.value = null;
   }
 
   Future<void> refreshConversations() async {

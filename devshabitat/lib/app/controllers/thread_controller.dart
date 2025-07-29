@@ -18,11 +18,14 @@ class ThreadController extends GetxController {
   final RxString currentThreadId = ''.obs;
   final RxBool isLoading = false.obs;
   final RxMap<String, bool> threadNotifications = <String, bool>{}.obs;
+  final RxList<String> topics = <String>[].obs;
+  final RxString selectedTopic = ''.obs;
 
   @override
   void onInit() {
     super.onInit();
     _initializeThreadListener();
+    _loadTopics();
   }
 
   void _initializeThreadListener() {
@@ -160,5 +163,73 @@ class ThreadController extends GetxController {
       _logger.e('Dosya indirilirken hata: $e');
       rethrow;
     }
+  }
+
+  Future<void> _loadTopics() async {
+    try {
+      final doc =
+          await _firestore.collection('thread_topics').doc(currentUserId).get();
+
+      if (doc.exists) {
+        final data = doc.data() as Map<String, dynamic>;
+        final topicList = (data['topics'] as List?)?.cast<String>() ?? [];
+        topics.assignAll(topicList);
+      }
+    } catch (e) {
+      _logger.e('Topic\'lar yüklenirken hata: $e');
+    }
+  }
+
+  Future<void> addTopic(String topic) async {
+    try {
+      if (!topics.contains(topic)) {
+        topics.add(topic);
+        await _firestore.collection('thread_topics').doc(currentUserId).set({
+          'topics': topics.toList(),
+        }, SetOptions(merge: true));
+      }
+    } catch (e) {
+      _logger.e('Topic eklenirken hata: $e');
+    }
+  }
+
+  Future<void> updateTopic(String oldTopic, String newTopic) async {
+    try {
+      final index = topics.indexOf(oldTopic);
+      if (index != -1) {
+        topics[index] = newTopic;
+        await _firestore.collection('thread_topics').doc(currentUserId).set({
+          'topics': topics.toList(),
+        }, SetOptions(merge: true));
+      }
+    } catch (e) {
+      _logger.e('Topic güncellenirken hata: $e');
+    }
+  }
+
+  Future<void> removeTopic(String topic) async {
+    try {
+      topics.remove(topic);
+      await _firestore.collection('thread_topics').doc(currentUserId).set({
+        'topics': topics.toList(),
+      }, SetOptions(merge: true));
+    } catch (e) {
+      _logger.e('Topic silinirken hata: $e');
+    }
+  }
+
+  void setSelectedTopic(String topic) {
+    selectedTopic.value = topic;
+  }
+
+  List<ThreadModel> getFilteredThreads() {
+    var filteredThreads = activeThreads.values.toList();
+
+    if (selectedTopic.value.isNotEmpty) {
+      // Topic filtreleme mantığı burada eklenebilir
+      // Şimdilik tüm thread'leri gösteriyoruz
+    }
+
+    return filteredThreads;
   }
 }

@@ -10,7 +10,6 @@ class EventCreateController extends GetxController {
   final title = ''.obs;
   final description = ''.obs;
   final type = Rx<EventType?>(null);
-  final location = Rx<EventLocation?>(null);
   final venueAddress = Rx<String?>(null);
   final onlineMeetingUrl = Rx<String?>(null);
   final startDate = Rx<DateTime?>(null);
@@ -47,7 +46,6 @@ class EventCreateController extends GetxController {
       title.value.isNotEmpty &&
       description.value.isNotEmpty &&
       type.value != null &&
-      location.value != null &&
       startDate.value != null &&
       endDate.value != null &&
       participantLimit.value > 0 &&
@@ -62,9 +60,9 @@ class EventCreateController extends GetxController {
   }
 
   bool get _isLocationValid {
-    if (location.value == EventLocation.online) {
+    if (type.value == EventType.online) {
       return onlineMeetingUrl.value?.isNotEmpty ?? false;
-    } else if (location.value == EventLocation.offline) {
+    } else if (type.value == EventType.inPerson) {
       return venueAddress.value?.isNotEmpty ?? false;
     }
     return false;
@@ -125,24 +123,22 @@ class EventCreateController extends GetxController {
         id: '', // Will be set by Firestore
         title: title.value.trim(),
         description: description.value.trim(),
-        organizerId: authController.currentUser!.uid,
         type: type.value!,
-        location: location.value!,
-        geoPoint: location.value == EventLocation.offline
-            ? selectedLocation.value
-            : null,
-        venueAddress: location.value == EventLocation.offline
+        venueAddress: type.value == EventType.inPerson
             ? venueAddress.value?.trim()
             : null,
-        onlineMeetingUrl: location.value == EventLocation.online
+        onlineMeetingUrl: type.value == EventType.online
             ? onlineMeetingUrl.value?.trim()
             : null,
         startDate: startDate.value!,
         endDate: endDate.value!,
         participantLimit: participantLimit.value,
-        categoryIds: selectedCategories.toList(),
+        categories: selectedCategories.toList(),
+        participants: [],
+        createdBy: authController.currentUser!.uid,
         createdAt: DateTime.now(),
-        updatedAt: DateTime.now(),
+        location:
+            type.value == EventType.inPerson ? selectedLocation.value : null,
       );
 
       await _eventService.createEvent(event);
@@ -175,11 +171,10 @@ class EventCreateController extends GetxController {
   // Update form fields
   void updateTitle(String value) => title.value = value;
   void updateDescription(String value) => description.value = value;
-  void updateType(EventType value) => type.value = value;
-  void updateLocation(EventLocation value) {
-    location.value = value;
+  void updateType(EventType value) {
+    type.value = value;
     // Reset location specific fields
-    if (value == EventLocation.online) {
+    if (value == EventType.online) {
       venueAddress.value = null;
     } else {
       onlineMeetingUrl.value = null;
@@ -206,7 +201,6 @@ class EventCreateController extends GetxController {
     title.value = '';
     description.value = '';
     type.value = null;
-    location.value = null;
     venueAddress.value = null;
     onlineMeetingUrl.value = null;
     startDate.value = null;

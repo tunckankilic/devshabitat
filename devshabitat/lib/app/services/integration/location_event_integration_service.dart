@@ -18,13 +18,13 @@ class LocationEventIntegrationService extends GetxService {
       final allEvents = await _eventService.getUpcomingEvents();
       return allEvents.where((event) {
         // Sadece offline etkinlikleri kontrol et
-        if (event.location != EventLocation.offline || event.geoPoint == null) {
+        if (event.type != EventType.inPerson || event.location == null) {
           return false;
         }
 
         // Etkinlik ve kullanıcı konumu arasındaki mesafeyi hesapla
         final eventLatLng =
-            LatLng(event.geoPoint!.latitude, event.geoPoint!.longitude);
+            LatLng(event.location!.latitude, event.location!.longitude);
         final userLatLng =
             LatLng(userLocation.latitude, userLocation.longitude);
 
