@@ -2,6 +2,7 @@ import 'package:devshabitat/app/constants/app_strings.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../../controllers/community/community_controller.dart';
+import '../../controllers/community/resource_controller.dart';
 import '../../controllers/responsive_controller.dart';
 import '../../services/responsive_performance_service.dart';
 import '../../widgets/community/community_stats_widget.dart';
@@ -15,96 +16,109 @@ import '../../widgets/responsive/responsive_text.dart';
 import '../../widgets/responsive/responsive_overflow_handler.dart'
     hide ResponsiveSafeArea, ResponsiveText;
 import '../../widgets/responsive/animated_responsive_layout.dart';
+import 'community_events_view.dart';
+import 'community_resources_view.dart';
+import '../../repositories/auth_repository.dart';
 
 class CommunityDetailView extends BaseView<CommunityController> {
   const CommunityDetailView({super.key});
 
   @override
   Widget buildView(BuildContext context) {
-    final responsive = Get.find<ResponsiveController>();
-    final performanceService = Get.find<ResponsivePerformanceService>();
-
-    return Scaffold(
-      body: ResponsiveSafeArea(
-        child: Obx(
-          () {
-            if (controller.isLoading.value) {
-              return Center(
-                child: CircularProgressIndicator(
-                  strokeWidth: responsive.responsiveValue(
-                    mobile: 2,
-                    tablet: 3,
-                  ),
-                ),
-              );
-            }
-
-            if (controller.error.value.isNotEmpty) {
-              return Center(
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    ResponsiveText(
-                      'Error: ${controller.error.value}',
-                      textAlign: TextAlign.center,
-                      style: TextStyle(
-                        fontSize: performanceService.getOptimizedTextSize(
-                          cacheKey: 'community_detail_error',
-                          mobileSize: 16,
-                          tabletSize: 18,
-                        ),
-                      ),
-                    ),
-                    SizedBox(
-                        height: responsive.responsiveValue(
-                      mobile: 16,
-                      tablet: 20,
-                    )),
-                    ElevatedButton(
-                      onPressed: () => controller
-                          .loadCommunity(controller.community.value?.id ?? ''),
-                      child: ResponsiveText(
-                        AppStrings.retry,
-                        style: TextStyle(
-                          fontSize: performanceService.getOptimizedTextSize(
-                            cacheKey: 'community_detail_retry',
-                            mobileSize: 14,
-                            tabletSize: 16,
-                          ),
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              );
-            }
-
-            final community = controller.community.value;
-            if (community == null) {
-              return Center(
-                child: ResponsiveText(
-                  AppStrings.communityNotFound,
-                  style: TextStyle(
-                    fontSize: performanceService.getOptimizedTextSize(
-                      cacheKey: 'community_detail_not_found',
-                      mobileSize: 16,
-                      tabletSize: 18,
-                    ),
-                  ),
-                ),
-              );
-            }
-
-            return ResponsiveOverflowHandler(
-              child: AnimatedResponsiveLayout(
-                mobile: _buildMobileCommunityDetail(community, context),
-                tablet: _buildTabletCommunityDetail(community, context),
-                animationDuration: const Duration(milliseconds: 300),
-              ),
-            );
-          },
+    return DefaultTabController(
+      length: 4,
+      child: Scaffold(
+        appBar: AppBar(
+          bottom: TabBar(
+            tabs: [
+              Tab(text: AppStrings.about),
+              Tab(text: AppStrings.members),
+              Tab(text: AppStrings.events),
+              Tab(text: 'Kaynaklar'),
+            ],
+          ),
+        ),
+        body: TabBarView(
+          children: [
+            _buildAboutTab(context),
+            _buildMembersTab(context),
+            const CommunityEventsView(),
+            _buildResourcesTab(context),
+          ],
         ),
       ),
+    );
+  }
+
+  Widget _buildAboutTab(BuildContext context) {
+    return ResponsiveSafeArea(
+      child: Obx(
+        () {
+          if (controller.isLoading.value) {
+            return const Center(child: CircularProgressIndicator());
+          }
+
+          if (controller.error.value.isNotEmpty) {
+            return Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Text(controller.error.value),
+                  ElevatedButton(
+                    onPressed: () =>
+                        controller.loadCommunity(Get.arguments as String),
+                    child: Text(AppStrings.retry),
+                  ),
+                ],
+              ),
+            );
+          }
+
+          final community = controller.community.value;
+          if (community == null) {
+            return Center(
+              child: Text(AppStrings.communityNotFound),
+            );
+          }
+
+          return ResponsiveOverflowHandler(
+            child: AnimatedResponsiveLayout(
+              mobile: _buildMobileCommunityDetail(community, context),
+              tablet: _buildTabletCommunityDetail(community, context),
+              animationDuration: const Duration(milliseconds: 300),
+            ),
+          );
+        },
+      ),
+    );
+  }
+
+  Widget _buildMembersTab(BuildContext context) {
+    return Column(
+      children: [
+        _buildMembershipRequests(),
+        Expanded(child: _buildMembersList(context)),
+      ],
+    );
+  }
+
+  Widget _buildResourcesTab(BuildContext context) {
+    final communityId = Get.arguments as String;
+    final userId = Get.find<AuthRepository>().currentUser?.uid ?? '';
+
+    // ResourceController'ı başlat
+    return GetBuilder<ResourceController>(
+      init: ResourceController(),
+      initState: (_) {
+        final controller = Get.find<ResourceController>();
+        // Controller'ın communityId ve userId değerlerini ayarla
+        controller.communityId = communityId;
+        controller.userId = userId;
+        controller.onInit();
+      },
+      builder: (resourceController) {
+        return const CommunityResourcesView();
+      },
     );
   }
 

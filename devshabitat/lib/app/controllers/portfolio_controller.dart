@@ -1,170 +1,757 @@
 import 'package:get/get.dart';
-import '../services/github_service.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:logger/logger.dart';
+import 'package:flutter/material.dart';
+import '../models/user_profile_model.dart';
+import '../models/portfolio_project_model.dart';
 import '../models/portfolio/tech_stack_model.dart';
 import '../models/portfolio/project_model.dart';
-import '../core/services/error_handler_service.dart';
+import '../controllers/auth_controller.dart';
+import '../services/professional_insights_service.dart';
+export '../services/professional_insights_service.dart'
+    show
+        CareerSuggestion,
+        SkillGapAnalysis,
+        CertificationRecommendation,
+        PortfolioRecommendation,
+        InterviewPreparation,
+        MarketAnalytics,
+        NetworkingRecommendation,
+        IndustryTrend,
+        CourseRecommendation,
+        ProjectIdea;
 
 class PortfolioController extends GetxController {
-  final GithubService _githubService = Get.find();
-  final ErrorHandlerService _errorHandler = Get.find();
+  final ProfessionalInsightsService _insightsService =
+      Get.find<ProfessionalInsightsService>();
+  final Logger _logger = Logger();
 
-  final RxList<ProjectModel> featuredProjects = <ProjectModel>[].obs;
-  final RxList<TechStackModel> techStack = <TechStackModel>[].obs;
-  final RxMap<String, int> contributionData = <String, int>{}.obs;
-  final RxBool isLoading = false.obs;
-  final RxString error = ''.obs;
+  // Enhanced reactive variables
+  final userProfile = Rxn<UserProfile>();
+  final portfolioProjects = <PortfolioProjectModel>[].obs;
+  final isLoading = false.obs;
+  final isLoadingInsights = false.obs;
+  final isLoadingCareerPath = false.obs;
+  final errorMessage = ''.obs;
+  final insightsStatus = ''.obs;
+
+  // Portfolio visualization data
+  final techStackAnalysis = <TechStackModel>[].obs;
+  final featuredProjects = <ProjectModel>[].obs;
+  final contributionData = <DateTime, int>{}.obs;
+
+  // AI Career Coach Features
+  final careerSuggestions = <CareerSuggestion>[].obs;
+  final skillGapAnalysis = <SkillGapAnalysis>[].obs;
+  final certificationRecommendations = <CertificationRecommendation>[].obs;
+  final portfolioRecommendations = <PortfolioRecommendation>[].obs;
+  final interviewPreparation = <InterviewPreparation>[].obs;
+  final marketAnalytics = Rxn<MarketAnalytics>();
+  final networkingStrategies = <NetworkingRecommendation>[].obs;
+  final industryTrends = <IndustryTrend>[].obs;
+
+  // Career Path Management
+  final selectedCareerPath = ''.obs;
+  final careerProgressScore = 0.0.obs;
+  final nextMilestones = <String>[].obs;
+  final estimatedTimeToGoal = 0.obs; // months
+  final salaryProjections = <String, dynamic>{}.obs;
+
+  // Learning and Development
+  final learningRoadmap = <LearningStep>[].obs;
+  final completedCertifications = <String>[].obs;
+  final recommendedCourses = <CourseRecommendation>[].obs;
+  final practiceProjects = <ProjectIdea>[].obs;
+
+  // Project creation form state
+  final RxString projectTitle = ''.obs;
+  final RxString projectDescription = ''.obs;
+  final RxString projectTechnologies = ''.obs;
+  final RxString projectRepositoryUrl = ''.obs;
+  final RxString projectLiveUrl = ''.obs;
+  final RxString projectCategory = ''.obs;
+  final RxBool isCreatingProject = false.obs;
+  final RxString projectCreationError = ''.obs;
 
   @override
   void onInit() {
     super.onInit();
-    loadPortfolioData();
+    _initializePortfolio();
   }
 
-  Future<void> loadPortfolioData() async {
-    await Future.wait([
-      selectFeaturedProjects(),
-      extractTechStack(),
-      showContributionGraph(),
-    ]);
-  }
-
-  // Öne çıkan projeleri seçme
-  Future<void> selectFeaturedProjects() async {
+  // Initialize comprehensive portfolio system
+  Future<void> _initializePortfolio() async {
     try {
       isLoading.value = true;
-      error.value = '';
+      errorMessage.value = '';
+      insightsStatus.value = 'Initializing portfolio...';
 
-      final username = await _githubService.getCurrentUsername();
-      if (username == null) {
-        throw Exception('GitHub kullanıcı adı bulunamadı');
+      await _loadUserProfile();
+      await _loadPortfolioProjects();
+      await _loadPortfolioVisualizationData();
+      await _initializeAICareerCoach();
+
+      insightsStatus.value = 'Portfolio initialized successfully';
+      _logger.i('Portfolio system initialized');
+    } catch (e) {
+      errorMessage.value = 'Failed to initialize portfolio: $e';
+      _logger.e('Portfolio initialization error: $e');
+    } finally {
+      isLoading.value = false;
+    }
+  }
+
+  // Load user profile with enhanced data
+  Future<void> _loadUserProfile() async {
+    try {
+      final currentUser = Get.find<AuthController>().currentUser;
+      if (currentUser == null) {
+        throw Exception('User not authenticated');
       }
 
-      final repos = await _githubService.getUserRepos(username);
-      final sortedRepos = repos
-        ..sort((a, b) =>
-            (b['stargazers_count'] ?? 0).compareTo(a['stargazers_count'] ?? 0));
+      // Load from Firestore - this would be implemented in a UserService
+      final userDoc = await FirebaseFirestore.instance
+          .collection('users')
+          .doc(currentUser.uid)
+          .get();
 
-      featuredProjects.value = sortedRepos.take(5).map((repo) {
-        return ProjectModel(
-          name: repo['name'] ?? '',
-          description: repo['description'] ?? '',
-          language: repo['language'] ?? '',
-          stars: repo['stargazers_count'] ?? 0,
-          forks: repo['forks_count'] ?? 0,
-          url: repo['html_url'] ?? '',
-          topics: List<String>.from(repo['topics'] ?? []),
+      if (userDoc.exists) {
+        userProfile.value = UserProfile.fromFirestore(userDoc);
+        _logger.i('User profile loaded');
+      }
+    } catch (e) {
+      _logger.e('Load user profile error: $e');
+      throw Exception('Failed to load user profile');
+    }
+  }
+
+  // Load portfolio projects
+  Future<void> _loadPortfolioProjects() async {
+    try {
+      final currentUser = Get.find<AuthController>().currentUser;
+      if (currentUser == null) return;
+
+      final projectsSnapshot = await FirebaseFirestore.instance
+          .collection('portfolio_projects')
+          .where('userId', isEqualTo: currentUser.uid)
+          .orderBy('createdAt', descending: true)
+          .get();
+
+      portfolioProjects.value = projectsSnapshot.docs
+          .map((doc) => PortfolioProjectModel.fromFirestore(doc))
+          .toList();
+
+      _logger.i('Loaded ${portfolioProjects.length} portfolio projects');
+    } catch (e) {
+      _logger.e('Load portfolio projects error: $e');
+    }
+  }
+
+  // Load portfolio visualization data
+  Future<void> _loadPortfolioVisualizationData() async {
+    try {
+      await _generateTechStackAnalysis();
+      await _generateFeaturedProjects();
+      await _generateContributionData();
+      _logger.i('Portfolio visualization data loaded');
+    } catch (e) {
+      _logger.e('Load portfolio visualization data error: $e');
+    }
+  }
+
+  // Generate tech stack analysis
+  Future<void> _generateTechStackAnalysis() async {
+    try {
+      // Create tech stack analysis from portfolio projects
+      final techStackMap = <String, TechStackModel>{};
+
+      for (final project in portfolioProjects) {
+        // Use first technology as language, fallback to category or 'Unknown'
+        final language = project.technologies.isNotEmpty
+            ? project.technologies.first
+            : project.category ?? 'Unknown';
+
+        if (techStackMap.containsKey(language)) {
+          techStackMap[language]!.projectCount++;
+          // Use number of technologies as stars indicator
+          techStackMap[language]!.totalStars += project.technologies.length;
+        } else {
+          techStackMap[language] = TechStackModel(
+            name: language,
+            projectCount: 1,
+            totalStars: project.technologies.length,
+            experienceLevel: _determineExperienceLevel(1),
+          );
+        }
+      }
+
+      // Update experience levels based on project count
+      for (final entry in techStackMap.entries) {
+        final projectCount = entry.value.projectCount;
+        techStackMap[entry.key] = TechStackModel(
+          name: entry.value.name,
+          projectCount: entry.value.projectCount,
+          totalStars: entry.value.totalStars,
+          experienceLevel: _determineExperienceLevel(projectCount),
         );
-      }).toList();
+      }
+
+      techStackAnalysis.value = techStackMap.values.toList()
+        ..sort((a, b) => b.totalStars.compareTo(a.totalStars));
     } catch (e) {
-      error.value = 'Projeler yüklenirken bir hata oluştu: $e';
-      _errorHandler.handleError(e, ErrorHandlerService.PORTFOLIO_ERROR);
-    } finally {
-      isLoading.value = false;
+      _logger.e('Generate tech stack analysis error: $e');
     }
   }
 
-  // Teknoloji stack'ini otomatik çıkarma
-  Future<void> extractTechStack() async {
+  // Determine experience level based on project count
+  ExperienceLevel _determineExperienceLevel(int projectCount) {
+    if (projectCount >= 10) return ExperienceLevel.expert;
+    if (projectCount >= 5) return ExperienceLevel.advanced;
+    if (projectCount >= 3) return ExperienceLevel.intermediate;
+    return ExperienceLevel.beginner;
+  }
+
+  // Generate featured projects
+  Future<void> _generateFeaturedProjects() async {
     try {
-      isLoading.value = true;
-      error.value = '';
+      // Convert portfolio projects to project models and get top ones
+      final projects = portfolioProjects
+          .map((project) => ProjectModel(
+                name: project.title,
+                description: project.description,
+                language: project.technologies.isNotEmpty
+                    ? project.technologies.first
+                    : project.category ?? 'Unknown',
+                stars: project.technologies.length, // Use tech count as stars
+                forks: project.images.length, // Use image count as forks
+                url: project.repositoryUrl ?? '',
+                topics: project.technologies,
+              ))
+          .toList();
 
-      final username = await _githubService.getCurrentUsername();
-      if (username == null) {
-        throw Exception('GitHub kullanıcı adı bulunamadı');
-      }
+      // Sort by featured status first, then by tech count
+      projects.sort((a, b) {
+        final aFeatured =
+            portfolioProjects.firstWhere((p) => p.title == a.name).isFeatured;
+        final bFeatured =
+            portfolioProjects.firstWhere((p) => p.title == b.name).isFeatured;
 
-      final repos = await _githubService.getUserRepos(username);
-      final Map<String, TechStackModel> techStackMap = {};
+        if (aFeatured && !bFeatured) return -1;
+        if (!aFeatured && bFeatured) return 1;
+        return b.stars.compareTo(a.stars);
+      });
 
-      for (final repo in repos) {
-        final language = repo['language'];
-        if (language != null) {
-          if (techStackMap.containsKey(language)) {
-            techStackMap[language]!.projectCount++;
-            techStackMap[language]!.totalStars +=
-                (repo['stargazers_count'] ?? 0) as int;
-          } else {
-            techStackMap[language] = TechStackModel(
-              name: language,
-              projectCount: 1,
-              totalStars: (repo['stargazers_count'] ?? 0) as int,
-              experienceLevel: _calculateExperienceLevel(
-                repo['created_at'] as String?,
-                repo['updated_at'] as String?,
-              ),
-            );
-          }
-        }
-
-        // Proje etiketlerini de teknoloji stack'ine ekle
-        final topics = List<String>.from(repo['topics'] ?? []);
-        for (final topic in topics) {
-          if (techStackMap.containsKey(topic)) {
-            techStackMap[topic]!.projectCount++;
-          } else {
-            techStackMap[topic] = TechStackModel(
-              name: topic,
-              projectCount: 1,
-              totalStars: 0,
-              experienceLevel: ExperienceLevel.intermediate,
-            );
-          }
-        }
-      }
-
-      techStack.value = techStackMap.values.toList()
-        ..sort((a, b) => b.projectCount.compareTo(a.projectCount));
+      featuredProjects.value = projects.take(5).toList();
     } catch (e) {
-      error.value = 'Teknoloji stack\'i çıkarılırken bir hata oluştu: $e';
-      _errorHandler.handleError(e, ErrorHandlerService.PORTFOLIO_ERROR);
-    } finally {
-      isLoading.value = false;
+      _logger.e('Generate featured projects error: $e');
     }
   }
 
-  // Katkı grafiklerini gösterme
-  Future<void> showContributionGraph() async {
+  // Generate contribution data
+  Future<void> _generateContributionData() async {
     try {
-      isLoading.value = true;
-      error.value = '';
+      // Generate sample contribution data for the last 12 months
+      final now = DateTime.now();
+      final contributions = <DateTime, int>{};
 
-      final username = await _githubService.getCurrentUsername();
-      if (username == null) {
-        throw Exception('GitHub kullanıcı adı bulunamadı');
+      for (int i = 11; i >= 0; i--) {
+        final date = DateTime(now.year, now.month - i, 1);
+        // Generate random contribution count based on projects
+        final baseContributions = portfolioProjects.length * 5;
+        final randomVariation = (baseContributions * 0.3).round();
+        final contributionCount =
+            baseContributions + (DateTime.now().millisecond % randomVariation);
+        contributions[date] = contributionCount;
       }
 
-      final contributions = await _githubService.getContributionData(username);
       contributionData.value = contributions;
     } catch (e) {
-      error.value = 'Katkı grafiği yüklenirken bir hata oluştu: $e';
-      _errorHandler.handleError(e, ErrorHandlerService.PORTFOLIO_ERROR);
+      _logger.e('Generate contribution data error: $e');
+    }
+  }
+
+  // Initialize AI Career Coach with comprehensive analysis
+  Future<void> _initializeAICareerCoach() async {
+    try {
+      if (userProfile.value == null) return;
+
+      isLoadingInsights.value = true;
+      insightsStatus.value = 'Analyzing career profile...';
+
+      // Generate comprehensive career insights
+      await Future.wait([
+        _generateCareerSuggestions(),
+        _analyzeSkillGaps(),
+        _generateCertificationRoadmap(),
+        _generatePortfolioRecommendations(),
+        _prepareInterviewGuidance(),
+        _analyzeMarketTrends(),
+        _generateNetworkingStrategies(),
+      ]);
+
+      insightsStatus.value = 'AI Career Coach ready';
+      _logger.i('AI Career Coach initialized successfully');
+    } catch (e) {
+      errorMessage.value = 'Failed to initialize AI Career Coach: $e';
+      _logger.e('AI Career Coach initialization error: $e');
     } finally {
-      isLoading.value = false;
+      isLoadingInsights.value = false;
     }
   }
 
-  // Deneyim seviyesini hesapla
-  ExperienceLevel _calculateExperienceLevel(
-    String? createdAt,
-    String? updatedAt,
-  ) {
-    if (createdAt == null || updatedAt == null) {
-      return ExperienceLevel.beginner;
-    }
+  // Generate personalized career suggestions
+  Future<void> _generateCareerSuggestions() async {
+    try {
+      final suggestions =
+          _insightsService.generateCareerSuggestions(userProfile.value!);
+      careerSuggestions.value = suggestions;
 
-    final created = DateTime.parse(createdAt);
-    final updated = DateTime.parse(updatedAt);
-    final duration = updated.difference(created);
+      // Automatically select best match if none selected
+      if (selectedCareerPath.value.isEmpty && suggestions.isNotEmpty) {
+        await selectCareerPath(suggestions.first.title);
+      }
 
-    if (duration.inDays > 365 * 2) {
-      return ExperienceLevel.expert;
-    } else if (duration.inDays > 365) {
-      return ExperienceLevel.advanced;
-    } else if (duration.inDays > 180) {
-      return ExperienceLevel.intermediate;
-    } else {
-      return ExperienceLevel.beginner;
+      _logger.i('Generated ${suggestions.length} career suggestions');
+    } catch (e) {
+      _logger.e('Generate career suggestions error: $e');
     }
   }
+
+  // Analyze skill gaps with detailed recommendations
+  Future<void> _analyzeSkillGaps() async {
+    try {
+      // Create industry benchmarks for common skills
+      final industryBenchmarks = <String, double>{
+        'flutter': 0.8,
+        'dart': 0.7,
+        'react': 0.8,
+        'javascript': 0.7,
+        'typescript': 0.8,
+        'node.js': 0.7,
+        'python': 0.8,
+        'aws': 0.9,
+        'docker': 0.8,
+        'kubernetes': 0.9,
+      };
+
+      final analysis = _insightsService.analyzeSkillGaps(
+          userProfile.value!, industryBenchmarks);
+      skillGapAnalysis.value = analysis;
+      _logger.i('Analyzed ${analysis.length} skill gaps');
+    } catch (e) {
+      _logger.e('Analyze skill gaps error: $e');
+    }
+  }
+
+  // Generate certification roadmap
+  Future<void> _generateCertificationRoadmap() async {
+    try {
+      final roadmap =
+          _insightsService.generateCertificationRoadmap(userProfile.value!);
+      certificationRecommendations.value = roadmap;
+      _logger.i('Generated ${roadmap.length} certification recommendations');
+    } catch (e) {
+      _logger.e('Generate certification roadmap error: $e');
+    }
+  }
+
+  // Generate portfolio recommendations
+  Future<void> _generatePortfolioRecommendations() async {
+    try {
+      final recommendations =
+          _insightsService.generatePortfolioRecommendations(userProfile.value!);
+      portfolioRecommendations.value = recommendations;
+      _logger
+          .i('Generated ${recommendations.length} portfolio recommendations');
+    } catch (e) {
+      _logger.e('Generate portfolio recommendations error: $e');
+    }
+  }
+
+  // Prepare interview guidance
+  Future<void> _prepareInterviewGuidance() async {
+    try {
+      final preparation =
+          _insightsService.generateInterviewPreparation(userProfile.value!);
+      interviewPreparation.value = preparation;
+      _logger.i('Generated ${preparation.length} interview preparation items');
+    } catch (e) {
+      _logger.e('Prepare interview guidance error: $e');
+    }
+  }
+
+  // Analyze market trends with Turkish market data
+  Future<void> _analyzeMarketTrends() async {
+    try {
+      final analytics =
+          _insightsService.generateMarketAnalytics(userProfile.value!);
+      marketAnalytics.value = analytics;
+
+      final trends =
+          _insightsService.generateIndustryTrends(userProfile.value!);
+      industryTrends.value = trends;
+
+      _logger.i('Market analytics and trends generated');
+    } catch (e) {
+      _logger.e('Analyze market trends error: $e');
+    }
+  }
+
+  // Generate networking strategies
+  Future<void> _generateNetworkingStrategies() async {
+    try {
+      final strategies =
+          _insightsService.generateNetworkingStrategies(userProfile.value!);
+      networkingStrategies.value = strategies;
+      _logger.i('Generated ${strategies.length} networking strategies');
+    } catch (e) {
+      _logger.e('Generate networking strategies error: $e');
+    }
+  }
+
+  // Select and configure career path
+  Future<void> selectCareerPath(String careerTitle) async {
+    try {
+      isLoadingCareerPath.value = true;
+      selectedCareerPath.value = careerTitle;
+
+      // Find the selected career suggestion
+      final selectedCareer =
+          careerSuggestions.firstWhere((career) => career.title == careerTitle);
+
+      // Calculate progress and projections
+      await _calculateCareerProgress(selectedCareer);
+      await _generateLearningRoadmap(selectedCareer);
+      await _projectSalaryGrowth(selectedCareer);
+
+      insightsStatus.value = 'Career path selected: $careerTitle';
+      _logger.i('Career path selected: $careerTitle');
+    } catch (e) {
+      errorMessage.value = 'Failed to select career path: $e';
+      _logger.e('Select career path error: $e');
+    } finally {
+      isLoadingCareerPath.value = false;
+    }
+  }
+
+  // Calculate career progress and milestones
+  Future<void> _calculateCareerProgress(CareerSuggestion career) async {
+    try {
+      final currentSkills = userProfile.value!.skills;
+      final requiredSkills = career.requiredSkills;
+
+      final matchingSkills =
+          currentSkills.where((skill) => requiredSkills.contains(skill)).length;
+
+      careerProgressScore.value = matchingSkills / requiredSkills.length;
+      estimatedTimeToGoal.value = career.timeToAchieve;
+
+      // Generate next milestones
+      final missingSkills = requiredSkills
+          .where((skill) => !currentSkills.contains(skill))
+          .take(3)
+          .toList();
+
+      nextMilestones.value = missingSkills;
+      _logger.i(
+          'Career progress calculated: ${(careerProgressScore.value * 100).toStringAsFixed(1)}%');
+    } catch (e) {
+      _logger.e('Calculate career progress error: $e');
+    }
+  }
+
+  // Generate personalized learning roadmap
+  Future<void> _generateLearningRoadmap(CareerSuggestion career) async {
+    try {
+      final roadmap = career.learningPath
+          .map((step) => LearningStep(
+                title: step,
+                description: 'Master $step to advance in your career path',
+                estimatedHours: 40, // Default estimation
+                priority:
+                    career.learningPath.indexOf(step) < 3 ? 'High' : 'Medium',
+                resources: [], // Would be populated with actual resources
+              ))
+          .toList();
+
+      learningRoadmap.value = roadmap;
+      _logger.i('Learning roadmap generated with ${roadmap.length} steps');
+    } catch (e) {
+      _logger.e('Generate learning roadmap error: $e');
+    }
+  }
+
+  // Project salary growth based on career path
+  Future<void> _projectSalaryGrowth(CareerSuggestion career) async {
+    try {
+      final salaryRange = career.salaryRange;
+
+      salaryProjections.value = {
+        'current_min': salaryRange['min'],
+        'current_max': salaryRange['max'],
+        'projected_1_year': (salaryRange['max'] * 1.1).round(),
+        'projected_3_years': (salaryRange['max'] * 1.35).round(),
+        'projected_5_years': (salaryRange['max'] * 1.6).round(),
+        'currency': salaryRange['currency'] ?? 'TL',
+        'market_demand': career.marketDemand,
+      };
+
+      _logger.i('Salary projections calculated');
+    } catch (e) {
+      _logger.e('Project salary growth error: $e');
+    }
+  }
+
+  // Add new portfolio project
+  Future<void> addPortfolioProject(PortfolioProjectModel project) async {
+    try {
+      final currentUser = Get.find<AuthController>().currentUser;
+      if (currentUser == null) {
+        throw Exception('User not authenticated');
+      }
+
+      final projectData = project.copyWith(userId: currentUser.uid).toJson();
+
+      final docRef = await FirebaseFirestore.instance
+          .collection('portfolio_projects')
+          .add(projectData);
+
+      final newProject =
+          project.copyWith(id: docRef.id, userId: currentUser.uid);
+      portfolioProjects.add(newProject);
+
+      // Refresh career insights based on new project
+      await _refreshCareerInsights();
+
+      _logger.i('Portfolio project added: ${project.title}');
+    } catch (e) {
+      errorMessage.value = 'Failed to add project: $e';
+      _logger.e('Add portfolio project error: $e');
+    }
+  }
+
+  // Update portfolio project
+  Future<void> updatePortfolioProject(PortfolioProjectModel project) async {
+    try {
+      await FirebaseFirestore.instance
+          .collection('portfolio_projects')
+          .doc(project.id)
+          .update(project.toJson());
+
+      final index = portfolioProjects.indexWhere((p) => p.id == project.id!);
+      if (index != -1) {
+        portfolioProjects[index] = project;
+      }
+
+      await _refreshCareerInsights();
+      _logger.i('Portfolio project updated: ${project.title}');
+    } catch (e) {
+      errorMessage.value = 'Failed to update project: $e';
+      _logger.e('Update portfolio project error: $e');
+    }
+  }
+
+  // Delete portfolio project
+  Future<void> deletePortfolioProject(String projectId) async {
+    try {
+      await FirebaseFirestore.instance
+          .collection('portfolio_projects')
+          .doc(projectId)
+          .delete();
+
+      portfolioProjects.removeWhere((project) => project.id! == projectId);
+
+      await _refreshCareerInsights();
+      _logger.i('Portfolio project deleted: $projectId');
+    } catch (e) {
+      errorMessage.value = 'Failed to delete project: $e';
+      _logger.e('Delete portfolio project error: $e');
+    }
+  }
+
+  // Mark certification as completed
+  Future<void> markCertificationCompleted(String certificationName) async {
+    try {
+      if (!completedCertifications.contains(certificationName)) {
+        completedCertifications.add(certificationName);
+
+        // Update user profile with new certification
+        // This would update the actual user profile in Firestore
+
+        await _refreshCareerInsights();
+        _logger.i('Certification marked completed: $certificationName');
+      }
+    } catch (e) {
+      _logger.e('Mark certification completed error: $e');
+    }
+  }
+
+  // Refresh career insights based on current data
+  Future<void> _refreshCareerInsights() async {
+    try {
+      await _initializeAICareerCoach();
+
+      if (selectedCareerPath.value.isNotEmpty) {
+        await selectCareerPath(selectedCareerPath.value);
+      }
+    } catch (e) {
+      _logger.e('Refresh career insights error: $e');
+    }
+  }
+
+  // Create new project from form data
+  Future<void> createProjectFromForm() async {
+    try {
+      isCreatingProject.value = true;
+      projectCreationError.value = '';
+
+      // Validation
+      if (projectTitle.value.trim().isEmpty) {
+        throw Exception('Proje adı gereklidir');
+      }
+      if (projectDescription.value.trim().isEmpty) {
+        throw Exception('Proje açıklaması gereklidir');
+      }
+
+      // Parse technologies
+      final technologies = projectTechnologies.value
+          .split(',')
+          .map((tech) => tech.trim())
+          .where((tech) => tech.isNotEmpty)
+          .toList();
+
+      if (technologies.isEmpty) {
+        throw Exception('En az bir teknoloji belirtmelisiniz');
+      }
+
+      // Create project model
+      final project = PortfolioProjectModel(
+        title: projectTitle.value.trim(),
+        description: projectDescription.value.trim(),
+        technologies: technologies,
+        repositoryUrl: projectRepositoryUrl.value.trim().isNotEmpty
+            ? projectRepositoryUrl.value.trim()
+            : null,
+        liveUrl: projectLiveUrl.value.trim().isNotEmpty
+            ? projectLiveUrl.value.trim()
+            : null,
+        category: projectCategory.value.trim().isNotEmpty
+            ? projectCategory.value.trim()
+            : 'Other',
+        createdAt: DateTime.now(),
+        status: 'completed',
+        isFeatured: false,
+      );
+
+      // Add to portfolio
+      await addPortfolioProject(project);
+
+      // Clear form on success
+      clearProjectForm();
+
+      Get.snackbar(
+        'Başarılı',
+        'Proje başarıyla oluşturuldu!',
+        snackPosition: SnackPosition.BOTTOM,
+        backgroundColor: Colors.green,
+        colorText: Colors.white,
+      );
+
+      // Navigate back
+      Get.back();
+
+      _logger.i('Project created from form successfully');
+    } catch (e) {
+      projectCreationError.value = e.toString();
+      _logger.e('Create project from form error: $e');
+
+      Get.snackbar(
+        'Hata',
+        projectCreationError.value,
+        snackPosition: SnackPosition.BOTTOM,
+        backgroundColor: Colors.red,
+        colorText: Colors.white,
+      );
+    } finally {
+      isCreatingProject.value = false;
+    }
+  }
+
+  // Clear project creation form
+  void clearProjectForm() {
+    projectTitle.value = '';
+    projectDescription.value = '';
+    projectTechnologies.value = '';
+    projectRepositoryUrl.value = '';
+    projectLiveUrl.value = '';
+    projectCategory.value = '';
+    projectCreationError.value = '';
+  }
+
+  // Validate project form
+  bool isProjectFormValid() {
+    return projectTitle.value.trim().isNotEmpty &&
+        projectDescription.value.trim().isNotEmpty &&
+        projectTechnologies.value.trim().isNotEmpty;
+  }
+
+  // Get form validation errors
+  String? getProjectFormError() {
+    if (projectTitle.value.trim().isEmpty) {
+      return 'Proje adı gereklidir';
+    }
+    if (projectDescription.value.trim().isEmpty) {
+      return 'Proje açıklaması gereklidir';
+    }
+    if (projectTechnologies.value.trim().isEmpty) {
+      return 'En az bir teknoloji belirtmelisiniz';
+    }
+    return null;
+  }
+
+  // Get comprehensive portfolio status
+  Map<String, dynamic> getPortfolioStatus() {
+    return {
+      'user_authenticated': userProfile.value != null,
+      'total_projects': portfolioProjects.length,
+      'career_suggestions': careerSuggestions.length,
+      'skill_gaps': skillGapAnalysis.length,
+      'certifications_recommended': certificationRecommendations.length,
+      'certifications_completed': completedCertifications.length,
+      'selected_career_path': selectedCareerPath.value,
+      'career_progress':
+          '${(careerProgressScore.value * 100).toStringAsFixed(1)}%',
+      'estimated_time_to_goal': '${estimatedTimeToGoal.value} months',
+      'next_milestones': nextMilestones.length,
+      'learning_steps': learningRoadmap.length,
+      'is_loading': isLoading.value,
+      'is_loading_insights': isLoadingInsights.value,
+      'insights_status': insightsStatus.value,
+      'error_message': errorMessage.value,
+    };
+  }
+
+  // Refresh all data
+  Future<void> refreshPortfolio() async {
+    await _initializePortfolio();
+  }
+
+  // Override onClose if needed for cleanup
+}
+
+// Supporting model classes for the expanded features
+class LearningStep {
+  final String title;
+  final String description;
+  final int estimatedHours;
+  final String priority;
+  final List<String> resources;
+
+  LearningStep({
+    required this.title,
+    required this.description,
+    required this.estimatedHours,
+    required this.priority,
+    required this.resources,
+  });
 }

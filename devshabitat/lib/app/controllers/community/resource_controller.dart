@@ -18,15 +18,15 @@ class ResourceController extends GetxController {
   final isLoading = false.obs;
   final error = ''.obs;
 
-  late final String communityId;
-  late final String userId;
+  String communityId = '';
+  String userId = '';
 
   @override
   void onInit() {
     super.onInit();
-    communityId = Get.arguments['communityId'] as String;
-    userId = Get.arguments['userId'] as String;
-    loadResources();
+    if (communityId.isNotEmpty && userId.isNotEmpty) {
+      loadResources();
+    }
   }
 
   // Kaynakları yükle

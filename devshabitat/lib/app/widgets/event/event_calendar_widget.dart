@@ -133,9 +133,7 @@ class EventCalendarWidget extends StatelessWidget {
         style: const TextStyle(fontSize: 12),
       ),
       trailing: Icon(
-        event.location == EventLocation.online
-            ? Icons.computer
-            : Icons.location_on,
+        event.type == EventType.online ? Icons.computer : Icons.location_on,
         size: 16,
         color: Colors.grey,
       ),
@@ -144,31 +142,19 @@ class EventCalendarWidget extends StatelessWidget {
 
   Color _getEventTypeColor(EventType type) {
     switch (type) {
-      case EventType.meetup:
+      case EventType.inPerson:
         return Colors.purple;
-      case EventType.workshop:
-        return Colors.orange;
-      case EventType.hackathon:
+      case EventType.online:
         return Colors.blue;
-      case EventType.conference:
-        return Colors.green;
-      case EventType.other:
-        return Colors.grey;
     }
   }
 
   IconData _getEventTypeIcon(EventType type) {
     switch (type) {
-      case EventType.meetup:
+      case EventType.inPerson:
         return Icons.groups;
-      case EventType.workshop:
-        return Icons.build;
-      case EventType.hackathon:
-        return Icons.code;
-      case EventType.conference:
-        return Icons.business;
-      case EventType.other:
-        return Icons.event;
+      case EventType.online:
+        return Icons.computer;
     }
   }
 

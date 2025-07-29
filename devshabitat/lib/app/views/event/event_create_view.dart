@@ -73,31 +73,9 @@ class EventCreateView extends GetView<EventCreateController> {
               },
             ),
             const SizedBox(height: 16),
-            DropdownButtonFormField<EventLocation>(
-              decoration: const InputDecoration(
-                labelText: AppStrings.eventLocation,
-                border: OutlineInputBorder(),
-              ),
-              value: controller.location.value,
-              items: EventLocation.values.map((location) {
-                return DropdownMenuItem(
-                  value: location,
-                  child: Text(
-                    location == EventLocation.online
-                        ? AppStrings.online
-                        : AppStrings.inPerson,
-                  ),
-                );
-              }).toList(),
-              onChanged: (value) {
-                if (value != null) {
-                  controller.updateLocation(value);
-                }
-              },
-            ),
             const SizedBox(height: 16),
             Obx(
-              () => controller.location.value == EventLocation.online
+              () => controller.type.value == EventType.online
                   ? TextFormField(
                       decoration: const InputDecoration(
                         labelText: AppStrings.onlineMeetingUrl,
@@ -233,16 +211,10 @@ class EventCreateView extends GetView<EventCreateController> {
 
   String _getEventTypeText(EventType type) {
     switch (type) {
-      case EventType.meetup:
-        return AppStrings.meetup;
-      case EventType.workshop:
-        return AppStrings.workshop;
-      case EventType.hackathon:
-        return AppStrings.hackathon;
-      case EventType.conference:
-        return AppStrings.conference;
-      case EventType.other:
-        return AppStrings.other;
+      case EventType.inPerson:
+        return AppStrings.inPerson;
+      case EventType.online:
+        return AppStrings.online;
     }
   }
 

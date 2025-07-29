@@ -56,21 +56,47 @@ class DiscoveryController extends GetxController {
     try {
       isLoadingRecommendations.value = true;
 
+      final currentUserId = _authController.currentUser?.uid;
+      if (currentUserId == null) return;
+
       // Field'ların var olduğunu kontrol et
       final query = _firestore
           .collection('users')
-          .where('isProfileComplete', isEqualTo: true) // Safe field
+          .where('isProfileComplete', isEqualTo: true)
+          .where('uid',
+              isNotEqualTo: currentUserId) // Kendi profilini hariç tut
           .limit(10);
 
       final snapshot = await query.get();
-      // ... process results
+
+      final users = snapshot.docs.map((doc) {
+        return UserProfile.fromFirestore(doc);
+      }).toList();
+
+      recommendedUsers.value = users;
     } catch (e) {
       if (e.toString().contains('invalid-argument')) {
         print('Field validation error - using fallback query');
+
+        final currentUserId = _authController.currentUser?.uid;
+        if (currentUserId == null) return;
+
         // Fallback query
-        final fallbackQuery = _firestore.collection('users').limit(10);
+        final fallbackQuery = _firestore
+            .collection('users')
+            .where('uid', isNotEqualTo: currentUserId)
+            .limit(10);
+
         final snapshot = await fallbackQuery.get();
-        // ... process with basic query
+
+        final users = snapshot.docs.map((doc) {
+          return UserProfile.fromFirestore(doc);
+        }).toList();
+
+        recommendedUsers.value = users;
+      } else {
+        print('Error loading recommendations: $e');
+        recommendedUsers.clear();
       }
     } finally {
       isLoadingRecommendations.value = false;

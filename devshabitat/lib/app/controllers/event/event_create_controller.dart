@@ -10,7 +10,6 @@ class EventCreateController extends GetxController {
   final title = ''.obs;
   final description = ''.obs;
   final type = Rx<EventType?>(null);
-  final location = Rx<EventLocation?>(null);
   final venueAddress = Rx<String?>(null);
   final onlineMeetingUrl = Rx<String?>(null);
   final startDate = Rx<DateTime?>(null);
@@ -47,17 +46,23 @@ class EventCreateController extends GetxController {
       title.value.isNotEmpty &&
       description.value.isNotEmpty &&
       type.value != null &&
-      location.value != null &&
       startDate.value != null &&
       endDate.value != null &&
       participantLimit.value > 0 &&
       selectedCategories.isNotEmpty &&
-      _isLocationValid;
+      _isLocationValid &&
+      _isDateValid;
+
+  bool get _isDateValid {
+    if (startDate.value == null || endDate.value == null) return false;
+    return startDate.value!.isBefore(endDate.value!) &&
+        startDate.value!.isAfter(DateTime.now());
+  }
 
   bool get _isLocationValid {
-    if (location.value == EventLocation.online) {
+    if (type.value == EventType.online) {
       return onlineMeetingUrl.value?.isNotEmpty ?? false;
-    } else if (location.value == EventLocation.offline) {
+    } else if (type.value == EventType.inPerson) {
       return venueAddress.value?.isNotEmpty ?? false;
     }
     return false;
@@ -70,8 +75,44 @@ class EventCreateController extends GetxController {
 
   // Create event
   Future<void> createEvent() async {
+    // Kullanıcı doğrulama
+    final authController = Get.find<AuthController>();
+    if (authController.currentUser == null) {
+      Get.snackbar(
+        'Hata',
+        'Etkinlik oluşturmak için giriş yapmalısınız',
+        snackPosition: SnackPosition.BOTTOM,
+      );
+      return;
+    }
+
+    // Form validasyonu
     if (!isFormValid) {
-      Get.snackbar('Hata', 'Lütfen tüm alanları doldurun');
+      Get.snackbar(
+        'Hata',
+        'Lütfen tüm alanları doldurun',
+        snackPosition: SnackPosition.BOTTOM,
+      );
+      return;
+    }
+
+    // Tarih validasyonu
+    if (startDate.value!.isAfter(endDate.value!)) {
+      Get.snackbar(
+        'Hata',
+        'Başlangıç tarihi bitiş tarihinden önce olmalıdır',
+        snackPosition: SnackPosition.BOTTOM,
+      );
+      return;
+    }
+
+    // Geçmiş tarih kontrolü
+    if (startDate.value!.isBefore(DateTime.now())) {
+      Get.snackbar(
+        'Hata',
+        'Etkinlik tarihi gelecekte olmalıdır',
+        snackPosition: SnackPosition.BOTTOM,
+      );
       return;
     }
 
@@ -80,30 +121,48 @@ class EventCreateController extends GetxController {
 
       final event = EventModel(
         id: '', // Will be set by Firestore
-        title: title.value,
-        description: description.value,
-        organizerId: Get.find<AuthController>().currentUser?.uid ?? '',
+        title: title.value.trim(),
+        description: description.value.trim(),
         type: type.value!,
-        location: location.value!,
-        geoPoint: location.value == EventLocation.offline
-            ? selectedLocation.value
+        venueAddress: type.value == EventType.inPerson
+            ? venueAddress.value?.trim()
             : null,
-        venueAddress: venueAddress.value,
-        onlineMeetingUrl: onlineMeetingUrl.value,
+        onlineMeetingUrl: type.value == EventType.online
+            ? onlineMeetingUrl.value?.trim()
+            : null,
         startDate: startDate.value!,
         endDate: endDate.value!,
         participantLimit: participantLimit.value,
-        categoryIds: selectedCategories,
+        categories: selectedCategories.toList(),
+        participants: [],
+        createdBy: authController.currentUser!.uid,
         createdAt: DateTime.now(),
-        updatedAt: DateTime.now(),
+        location:
+            type.value == EventType.inPerson ? selectedLocation.value : null,
       );
 
       await _eventService.createEvent(event);
-      Get.snackbar('Başarılı', 'Etkinlik başarıyla oluşturuldu');
+
+      Get.snackbar(
+        'Başarılı',
+        'Etkinlik başarıyla oluşturuldu',
+        snackPosition: SnackPosition.BOTTOM,
+      );
+
       _resetForm();
       Get.back(); // Return to previous screen
+    } on FirebaseException catch (e) {
+      Get.snackbar(
+        'Hata',
+        'Firebase hatası: ${e.message}',
+        snackPosition: SnackPosition.BOTTOM,
+      );
     } catch (e) {
-      Get.snackbar('Hata', 'Etkinlik oluşturulurken bir hata oluştu');
+      Get.snackbar(
+        'Hata',
+        'Etkinlik oluşturulurken beklenmeyen bir hata oluştu: $e',
+        snackPosition: SnackPosition.BOTTOM,
+      );
     } finally {
       isLoading.value = false;
     }
@@ -112,11 +171,10 @@ class EventCreateController extends GetxController {
   // Update form fields
   void updateTitle(String value) => title.value = value;
   void updateDescription(String value) => description.value = value;
-  void updateType(EventType value) => type.value = value;
-  void updateLocation(EventLocation value) {
-    location.value = value;
+  void updateType(EventType value) {
+    type.value = value;
     // Reset location specific fields
-    if (value == EventLocation.online) {
+    if (value == EventType.online) {
       venueAddress.value = null;
     } else {
       onlineMeetingUrl.value = null;
@@ -143,7 +201,6 @@ class EventCreateController extends GetxController {
     title.value = '';
     description.value = '';
     type.value = null;
-    location.value = null;
     venueAddress.value = null;
     onlineMeetingUrl.value = null;
     startDate.value = null;

@@ -6,6 +6,7 @@ import '../models/network_stats_model.dart';
 import '../models/user_profile_model.dart';
 import '../services/network_analytics_service.dart';
 import '../core/services/api_optimization_service.dart';
+import 'package:flutter/material.dart'; // Added for Get.snackbar
 
 class NetworkingController extends GetxController {
   // Servisler
@@ -231,6 +232,129 @@ class NetworkingController extends GetxController {
       _logger.e('Bağlantı kaldırılırken hata: $e');
       rethrow;
     }
+  }
+
+  // Suggested connections state
+  final RxList<UserProfile> suggestedConnections = <UserProfile>[].obs;
+  final RxBool isLoadingSuggestions = false.obs;
+  final RxString suggestionsError = ''.obs;
+  final RxList<String> pendingRequests = <String>[].obs;
+
+  // Load suggested connections
+  Future<void> loadSuggestedConnections() async {
+    try {
+      isLoadingSuggestions.value = true;
+      suggestionsError.value = '';
+
+      // Mock data for now - in real app, this would be API call
+      await Future.delayed(Duration(milliseconds: 500));
+
+      final suggestions = [
+        UserProfile(
+          id: 'user1',
+          fullName: 'Ahmet Yılmaz',
+          email: 'ahmet@example.com',
+          bio: 'Flutter Developer | 5 yıl deneyim',
+          locationName: 'Istanbul, Turkey',
+          skills: ['Flutter', 'Dart', 'Firebase'],
+          interests: ['Mobile Development', 'UI/UX'],
+          githubUsername: 'ahmetyilmaz',
+          yearsOfExperience: 5,
+        ),
+        UserProfile(
+          id: 'user2',
+          fullName: 'Elif Özkan',
+          email: 'elif@example.com',
+          bio: 'Backend Developer | Node.js & Python',
+          locationName: 'Ankara, Turkey',
+          skills: ['Node.js', 'Python', 'MongoDB'],
+          interests: ['Backend Development', 'API Design'],
+          githubUsername: 'elifozkan',
+          yearsOfExperience: 3,
+        ),
+        UserProfile(
+          id: 'user3',
+          fullName: 'Mehmet Demir',
+          email: 'mehmet@example.com',
+          bio: 'UI/UX Designer | Digital Product Design',
+          locationName: 'Izmir, Turkey',
+          skills: ['Figma', 'Sketch', 'Adobe XD'],
+          interests: ['Design Systems', 'User Research'],
+          githubUsername: 'mehmetdemir',
+          yearsOfExperience: 4,
+        ),
+      ];
+
+      suggestedConnections.value = suggestions;
+      _logger.i('Suggested connections loaded: ${suggestions.length}');
+    } catch (e) {
+      suggestionsError.value =
+          'Önerilen bağlantılar yüklenirken hata oluştu: $e';
+      _logger.e('Load suggested connections error: $e');
+    } finally {
+      isLoadingSuggestions.value = false;
+    }
+  }
+
+  // Send connection request
+  Future<void> sendConnectionRequest(String userId) async {
+    try {
+      // Add to pending requests immediately for UI feedback
+      pendingRequests.add(userId);
+
+      // Mock API call - in real app, this would be actual request
+      await Future.delayed(Duration(milliseconds: 300));
+
+      Get.snackbar(
+        'Bağlantı Talebi',
+        'Bağlantı talebi başarıyla gönderildi',
+        snackPosition: SnackPosition.BOTTOM,
+        backgroundColor: Colors.green,
+        colorText: Colors.white,
+      );
+
+      _logger.i('Connection request sent to user: $userId');
+    } catch (e) {
+      // Remove from pending if failed
+      pendingRequests.remove(userId);
+
+      Get.snackbar(
+        'Hata',
+        'Bağlantı talebi gönderilirken hata oluştu',
+        snackPosition: SnackPosition.BOTTOM,
+        backgroundColor: Colors.red,
+        colorText: Colors.white,
+      );
+
+      _logger.e('Send connection request error: $e');
+      rethrow;
+    }
+  }
+
+  // Check if connection request is pending
+  bool isRequestPending(String userId) {
+    return pendingRequests.contains(userId);
+  }
+
+  // Search suggested connections
+  List<UserProfile> get filteredSuggestedConnections {
+    if (searchQuery.value.isEmpty) {
+      return suggestedConnections.toList();
+    }
+
+    final query = searchQuery.value.toLowerCase();
+    return suggestedConnections.where((user) {
+      return user.fullName.toLowerCase().contains(query) ||
+          (user.bio?.toLowerCase().contains(query) ?? false) ||
+          user.skills.any((skill) => skill.toLowerCase().contains(query)) ||
+          (user.locationName?.toLowerCase().contains(query) ?? false);
+    }).toList();
+  }
+
+  // Refresh suggested connections
+  Future<void> refreshSuggestedConnections() async {
+    suggestedConnections.clear();
+    await loadSuggestedConnections();
   }
 
   // Controller dispose edildiğinde

@@ -21,7 +21,7 @@ class RegistrationButtonWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final bool isFull = event.currentParticipants >= event.participantLimit;
+    final bool isFull = event.participants.length >= event.participantLimit;
     final bool isPast = event.endDate.isBefore(DateTime.now());
 
     if (isPast) {
@@ -63,7 +63,7 @@ class RegistrationButtonWidget extends StatelessWidget {
         const Icon(Icons.people_outline, size: 20),
         const SizedBox(width: 8),
         Text(
-          '${event.currentParticipants}/${event.participantLimit} ${AppStrings.participants}',
+          '${event.participants.length}/${event.participantLimit} ${AppStrings.participants}',
           style: const TextStyle(
             fontSize: 16,
             fontWeight: FontWeight.w500,

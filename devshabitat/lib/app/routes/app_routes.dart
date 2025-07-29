@@ -8,14 +8,23 @@ abstract class AppRoutes {
   static const register = '/register';
   static const forgotPassword = '/forgot-password';
   static const emailVerification = '/email-verification';
+  static const emailVerificationAdvanced = '/email-verification-advanced';
+  static const authSecurity = '/auth-security';
 
   // Main routes
   static const home = '/home';
   static const profile = '/profile';
+  static const editProfile = '/edit-profile';
   static const settings = '/settings';
+  static const appInfo = '/app-info';
   static const notifications = '/notifications';
   static const notificationSettings = '/notification-settings';
   static const search = '/search';
+
+  // Quick Action routes
+  static const newProject = '/new-project';
+  static const connections = '/connections';
+  static const newBlog = '/new-blog';
 
   // Event routes
   static const events = '/events';
@@ -38,6 +47,7 @@ abstract class AppRoutes {
   static const MY_COMMUNITIES = '/my-communities';
   static const COMMUNITY_MANAGE = '/community-manage';
   static const COMMUNITY_EVENT = '/community-event';
+  static const COMMUNITY_RULES = '/community/rules';
 
   // Map routes
   static const developerMap = '/developer-map';
@@ -48,12 +58,24 @@ abstract class AppRoutes {
   // Chat routes
   static const CHAT = '/chat';
   static const NEW_CHAT = '/new-chat';
+  static const THREAD_ORGANIZATION = '/thread-organization';
 
   // Comments routes
   static const comments = '/comments';
 
   // Debug routes
   static const memoryDebug = '/memory-debug';
+  static const performanceMonitor = '/debug/performance';
+  static const enhancedFormTest = '/debug/enhanced-form-test';
+
+  // GitHub Integration routes
+  static const githubIntegration = '/github-integration';
+
+  // Integration routes
+  static const integrations = '/integrations';
+
+  // Network routes
+  static const networkStatus = '/network-status';
 
   static const messageSearch = '/message-search';
 }

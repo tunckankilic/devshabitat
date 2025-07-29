@@ -1,6 +1,8 @@
 import 'package:devshabitat/app/repositories/auth_repository.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_core/firebase_core.dart';
 import '../../models/community/community_model.dart';
 import '../../services/community/community_service.dart';
 import '../../services/storage_service.dart';
@@ -36,7 +38,17 @@ class CommunityCreateController extends GetxController {
   }
 
   Future<void> createCommunity() async {
-    if (!formKey.currentState!.validate()) return;
+    // Form validasyonu ve güvenlik kontrolleri
+    if (formKey.currentState == null || !formKey.currentState!.validate()) {
+      Get.snackbar(
+        'Hata',
+        'Form verilerinde hata var, lütfen kontrol edin',
+        snackPosition: SnackPosition.BOTTOM,
+      );
+      return;
+    }
+
+    // Kategori kontrolü
     if (selectedCategories.isEmpty) {
       Get.snackbar(
         'Hata',
@@ -46,13 +58,68 @@ class CommunityCreateController extends GetxController {
       return;
     }
 
+    // Kullanıcı doğrulama
+    final currentUser = _authService.currentUser;
+    if (currentUser == null) {
+      Get.snackbar(
+        'Hata',
+        'Oturum açmanız gerekmektedir',
+        snackPosition: SnackPosition.BOTTOM,
+      );
+      return;
+    }
+
+    // Input validasyonu
+    final name = nameController.text.trim();
+    final description = descriptionController.text.trim();
+
+    if (name.isEmpty) {
+      Get.snackbar(
+        'Hata',
+        'Topluluk adı boş olamaz',
+        snackPosition: SnackPosition.BOTTOM,
+      );
+      return;
+    }
+
+    if (name.length < 3) {
+      Get.snackbar(
+        'Hata',
+        'Topluluk adı en az 3 karakter olmalıdır',
+        snackPosition: SnackPosition.BOTTOM,
+      );
+      return;
+    }
+
+    if (name.length > 50) {
+      Get.snackbar(
+        'Hata',
+        'Topluluk adı en fazla 50 karakter olabilir',
+        snackPosition: SnackPosition.BOTTOM,
+      );
+      return;
+    }
+
+    if (description.isEmpty) {
+      Get.snackbar(
+        'Hata',
+        'Topluluk açıklaması boş olamaz',
+        snackPosition: SnackPosition.BOTTOM,
+      );
+      return;
+    }
+
+    if (description.length > 500) {
+      Get.snackbar(
+        'Hata',
+        'Topluluk açıklaması en fazla 500 karakter olabilir',
+        snackPosition: SnackPosition.BOTTOM,
+      );
+      return;
+    }
+
     try {
       isLoading.value = true;
-
-      final currentUser = _authService.currentUser;
-      if (currentUser == null) {
-        throw Exception('Oturum açmanız gerekmektedir');
-      }
 
       String? coverImageUrl;
       if (_selectedImagePath != null) {
@@ -64,8 +131,8 @@ class CommunityCreateController extends GetxController {
 
       final community = CommunityModel(
         id: '', // Firestore tarafından otomatik oluşturulacak
-        name: nameController.text,
-        description: descriptionController.text,
+        name: name,
+        description: description,
         coverImageUrl: coverImageUrl,
         creatorId: currentUser.uid,
         moderatorIds: [currentUser.uid],
@@ -96,10 +163,22 @@ class CommunityCreateController extends GetxController {
         AppRoutes.COMMUNITY_DETAIL,
         arguments: createdCommunity.id,
       );
+    } on FirebaseException catch (e) {
+      Get.snackbar(
+        'Hata',
+        'Firebase hatası: ${e.message}',
+        snackPosition: SnackPosition.BOTTOM,
+      );
+    } on Exception catch (e) {
+      Get.snackbar(
+        'Hata',
+        'Bir hata oluştu: $e',
+        snackPosition: SnackPosition.BOTTOM,
+      );
     } catch (e) {
       Get.snackbar(
         'Hata',
-        'Topluluk oluşturulurken bir hata oluştu: $e',
+        'Topluluk oluşturulurken beklenmeyen bir hata oluştu: $e',
         snackPosition: SnackPosition.BOTTOM,
       );
     } finally {

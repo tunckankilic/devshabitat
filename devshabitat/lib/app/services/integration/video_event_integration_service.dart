@@ -15,7 +15,7 @@ class VideoEventIntegrationService extends GetxService {
       final organizerName = await getOrganizerName(event.id);
       await _callManagerService.initiateCall(
         participantIds: [], // Boş liste ile başlat
-        initiatorId: event.organizerId,
+        initiatorId: event.createdBy,
         initiatorName: organizerName,
         type: CallType.video,
       );

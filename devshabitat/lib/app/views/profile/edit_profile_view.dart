@@ -5,9 +5,15 @@ import 'package:image_picker/image_picker.dart';
 import 'package:image_cropper/image_cropper.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import '../../controllers/profile_controller.dart';
+import '../../controllers/enhanced_form_validation_controller.dart';
+import '../../widgets/enhanced_form_field.dart';
+import '../../widgets/advanced_file_upload.dart';
 
 class EditProfileView extends GetView<ProfileController> {
   const EditProfileView({super.key});
+
+  EnhancedFormValidationController get _validationController =>
+      Get.find<EnhancedFormValidationController>();
 
   @override
   Widget build(BuildContext context) {
@@ -15,55 +21,45 @@ class EditProfileView extends GetView<ProfileController> {
       appBar: AppBar(
         title: Text(AppStrings.editProfile),
         actions: [
-          TextButton(
-            onPressed: () async {
-              await controller.updateProfile();
-              Get.back();
-            },
-            child: Text(AppStrings.save),
-          ),
+          Obx(() => TextButton(
+                onPressed: controller.isLoading
+                    ? null
+                    : () async {
+                        await controller.updateProfile();
+                        Get.back();
+                      },
+                child: controller.isLoading
+                    ? SizedBox(
+                        width: 20,
+                        height: 20,
+                        child: CircularProgressIndicator(
+                          strokeWidth: 2,
+                          valueColor:
+                              AlwaysStoppedAnimation<Color>(Colors.white),
+                        ),
+                      )
+                    : Text(AppStrings.save),
+              )),
         ],
       ),
       body: SingleChildScrollView(
-        padding: const EdgeInsets.all(16),
+        padding: const EdgeInsets.all(16.0),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Profil Fotoğrafı
+            // Profile Image Section
             Center(
               child: Stack(
                 children: [
-                  Obx(() {
-                    final photoUrl = controller.user?.photoURL;
-                    return Container(
-                      width: 120,
-                      height: 120,
-                      decoration: BoxDecoration(
-                        color: Colors.grey[200],
-                        shape: BoxShape.circle,
-                        border: Border.all(
-                          color: Theme.of(context).primaryColor,
-                          width: 2,
-                        ),
-                      ),
-                      child: photoUrl == null
-                          ? const Icon(
-                              Icons.person,
-                              size: 60,
-                              color: Colors.grey,
-                            )
-                          : ClipOval(
-                              child: CachedNetworkImage(
-                                imageUrl: photoUrl,
-                                fit: BoxFit.cover,
-                                placeholder: (context, url) =>
-                                    const CircularProgressIndicator(),
-                                errorWidget: (context, url, error) =>
-                                    const Icon(Icons.error),
-                              ),
-                            ),
-                    );
-                  }),
+                  CircleAvatar(
+                    radius: 60,
+                    backgroundImage: controller.user?.photoURL != null
+                        ? CachedNetworkImageProvider(controller.user!.photoURL!)
+                        : null,
+                    child: controller.user?.photoURL == null
+                        ? Icon(Icons.person, size: 60, color: Colors.grey[400])
+                        : null,
+                  ),
                   Positioned(
                     bottom: 0,
                     right: 0,
@@ -86,77 +82,119 @@ class EditProfileView extends GetView<ProfileController> {
             ),
             const SizedBox(height: 24),
 
-            // Ad Soyad
-            TextFormField(
+            // Portfolio Files Section
+            Text(
+              'Portfolio Dosyaları',
+              style: Theme.of(context).textTheme.titleMedium,
+            ),
+            const SizedBox(height: 8),
+            AdvancedFileUpload(
+              userId: controller.user?.uid ?? '',
+              conversationId: 'profile_${controller.user?.uid ?? ''}',
+              onFilesSelected: (files) {
+                // Handle selected files
+                print('Selected files: ${files.length}');
+              },
+              onFileUploaded: (attachment) {
+                // Handle uploaded file
+                print('Uploaded file: ${attachment.name}');
+              },
+              onUploadCancelled: (messageId) {
+                // Handle cancelled upload
+                print('Cancelled upload: $messageId');
+              },
+              customTitle: 'Portfolio Dosyası Ekle',
+              customSubtitle:
+                  'Proje dosyalarınızı, CV\'nizi veya diğer belgelerinizi yükleyin',
+              allowedExtensions: ['pdf', 'doc', 'docx', 'jpg', 'jpeg', 'png'],
+              maxFileSizeMB: 5,
+            ),
+            const SizedBox(height: 24),
+
+            // Name field with EnhancedFormField
+            EnhancedFormField(
+              fieldType: FieldType.name,
               controller: controller.nameController,
-              decoration: InputDecoration(
-                labelText: AppStrings.name,
-                hintText: AppStrings.nameHint,
-                prefixIcon: Icon(Icons.person),
-                border: OutlineInputBorder(),
-              ),
+              label: AppStrings.name,
+              hint: AppStrings.nameHint,
+              prefixIcon: Icons.person,
+              onChanged: (value) {
+                _validationController.validateName(value);
+              },
             ),
             const SizedBox(height: 16),
 
-            // Ünvan
-            TextFormField(
+            // Title field with EnhancedFormField
+            EnhancedFormField(
+              fieldType: FieldType.title,
               controller: controller.titleController,
-              decoration: InputDecoration(
-                labelText: AppStrings.title,
-                hintText: AppStrings.titleHint,
-                prefixIcon: Icon(Icons.work),
-                border: OutlineInputBorder(),
-              ),
+              label: AppStrings.title,
+              hint: AppStrings.titleHint,
+              prefixIcon: Icons.work,
+              required: false,
+              onChanged: (value) {
+                _validationController.validateTitle(value);
+              },
             ),
             const SizedBox(height: 16),
 
-            // Şirket
-            TextFormField(
+            // Company field with EnhancedFormField
+            EnhancedFormField(
+              fieldType: FieldType.company,
               controller: controller.companyController,
-              decoration: const InputDecoration(
-                labelText: AppStrings.company,
-                hintText: AppStrings.companyHint,
-                prefixIcon: Icon(Icons.business),
-                border: OutlineInputBorder(),
-              ),
+              label: AppStrings.company,
+              hint: AppStrings.companyHint,
+              prefixIcon: Icons.business,
+              required: false,
+              onChanged: (value) {
+                _validationController.validateCompany(value);
+              },
             ),
             const SizedBox(height: 16),
 
-            // Bio
-            TextFormField(
+            // Bio field with EnhancedFormField
+            EnhancedFormField(
+              fieldType: FieldType.bio,
               controller: controller.bioController,
+              label: AppStrings.bio,
+              hint: AppStrings.bioHint,
+              prefixIcon: Icons.description,
               maxLines: 3,
-              decoration: const InputDecoration(
-                labelText: AppStrings.bio,
-                hintText: AppStrings.bioHint,
-                prefixIcon: Icon(Icons.description),
-                border: OutlineInputBorder(),
-                alignLabelWithHint: true,
-              ),
+              required: false,
+              onChanged: (value) {
+                _validationController.validateBio(value);
+              },
             ),
             const SizedBox(height: 16),
 
-            // Konum
-            TextFormField(
+            // Location field with EnhancedFormField
+            EnhancedFormField(
+              fieldType: FieldType.custom,
               controller: controller.locationController,
-              decoration: InputDecoration(
-                labelText: AppStrings.location,
-                hintText: AppStrings.locationHint,
-                prefixIcon: Icon(Icons.location_on),
-                border: OutlineInputBorder(),
-              ),
+              label: AppStrings.location,
+              hint: AppStrings.locationHint,
+              prefixIcon: Icons.location_on,
+              required: false,
+              customValidator: (value) {
+                if (value != null && value.length > 100) {
+                  return 'Konum en fazla 100 karakter olabilir';
+                }
+                return null;
+              },
             ),
             const SizedBox(height: 16),
 
-            // GitHub Kullanıcı Adı
-            TextFormField(
+            // GitHub Username field with EnhancedFormField
+            EnhancedFormField(
+              fieldType: FieldType.githubUsername,
               controller: controller.githubUsernameController,
-              decoration: InputDecoration(
-                labelText: AppStrings.githubUsername,
-                hintText: AppStrings.githubUsernameHint,
-                prefixIcon: Icon(Icons.code),
-                border: OutlineInputBorder(),
-              ),
+              label: AppStrings.githubUsername,
+              hint: AppStrings.githubUsernameHint,
+              prefixIcon: Icons.code,
+              required: false,
+              onChanged: (value) {
+                _validationController.validateGithubUsername(value);
+              },
             ),
           ],
         ),
@@ -197,37 +235,39 @@ class EditProfileView extends GetView<ProfileController> {
   Future<void> _pickImage(ImageSource source) async {
     try {
       final picker = ImagePicker();
-      final pickedFile = await picker.pickImage(source: source);
+      final pickedFile = await picker.pickImage(
+        source: source,
+        maxWidth: 512,
+        maxHeight: 512,
+        imageQuality: 85,
+      );
 
       if (pickedFile != null) {
         final croppedFile = await ImageCropper().cropImage(
           sourcePath: pickedFile.path,
           aspectRatio: const CropAspectRatio(ratioX: 1, ratioY: 1),
-          compressQuality: 80,
-          uiSettings: [
-            AndroidUiSettings(
-              toolbarTitle: AppStrings.editProfileImage,
-              toolbarColor: Get.theme.primaryColor,
-              toolbarWidgetColor: Colors.white,
-              initAspectRatio: CropAspectRatioPreset.square,
-              lockAspectRatio: true,
-            ),
-            IOSUiSettings(
-              title: AppStrings.editProfileImage,
-              aspectRatioLockEnabled: true,
-              minimumAspectRatio: 1.0,
-            ),
-          ],
+          compressQuality: 85,
+          maxWidth: 512,
+          maxHeight: 512,
         );
 
         if (croppedFile != null) {
-          await controller.updateProfilePhoto(croppedFile.path);
+          // Update the photo URL in the controller
+          controller.photoUrlController.text = croppedFile.path;
+
+          Get.snackbar(
+            'Başarılı',
+            'Profil fotoğrafı güncellendi',
+            snackPosition: SnackPosition.BOTTOM,
+            backgroundColor: Colors.green,
+            colorText: Colors.white,
+          );
         }
       }
     } catch (e) {
       Get.snackbar(
-        AppStrings.error,
-        AppStrings.errorOccurredWhileSelectingImage,
+        'Hata',
+        'Fotoğraf seçilirken bir hata oluştu: $e',
         snackPosition: SnackPosition.BOTTOM,
         backgroundColor: Colors.red,
         colorText: Colors.white,

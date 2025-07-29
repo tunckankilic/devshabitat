@@ -13,13 +13,24 @@ import '../services/post_service.dart';
 import '../services/lazy_loading_service.dart';
 import '../services/asset_optimization_service.dart';
 import '../services/notification_service.dart';
+import '../services/audio_service.dart';
 import '../services/image_upload_service.dart';
 import '../services/storage_service.dart';
+import '../services/community/resource_service.dart';
+import '../services/file_storage_service.dart';
 import '../controllers/app_controller.dart';
 import '../controllers/responsive_controller.dart';
 import '../controllers/auth_state_controller.dart';
 import '../controllers/email_auth_controller.dart';
+import '../controllers/developer_matching_controller.dart';
+import '../controllers/networking_controller.dart';
 import '../services/responsive_performance_service.dart';
+import '../controllers/enhanced_form_validation_controller.dart';
+import '../controllers/file_upload_controller.dart';
+import '../controllers/integration/notification_controller.dart';
+import '../controllers/location/nearby_developers_controller.dart';
+import '../controllers/network_controller.dart';
+import 'message_binding.dart';
 
 class AppBinding extends Bindings {
   @override
@@ -33,7 +44,6 @@ class AppBinding extends Bindings {
 
   void initSynchronousDependencies() {
     // Core Services
-    final logger = Get.put(Logger());
     final errorHandler = Get.put(ErrorHandlerService());
     Get.put(MemoryManagerService());
     Get.put(ApiOptimizationService());
@@ -50,6 +60,11 @@ class AppBinding extends Bindings {
     final performanceService = Get.find<ResponsivePerformanceService>();
     performanceService.preCalculateCommonValues();
 
+    // Enhanced Form Validation Controller
+    Get.put<EnhancedFormValidationController>(
+        EnhancedFormValidationController(),
+        permanent: true);
+
     // Image Upload Service
     Get.put(ImageUploadService(errorHandler: errorHandler));
 
@@ -59,6 +74,13 @@ class AppBinding extends Bindings {
     // Other Services
     Get.put(LazyLoadingService());
     Get.put(AssetOptimizationService());
+
+    // Community Services
+    Get.put(ResourceService());
+    Get.put(FileStorageService());
+
+    // File Upload Controller
+    Get.put(FileUploadController());
   }
 
   Future<void> _initAsynchronousDependencies() async {
@@ -73,6 +95,9 @@ class AppBinding extends Bindings {
       // Notification Service
       final notificationService = Get.put(NotificationService(prefs));
       await notificationService.init();
+
+      // Audio Service
+      Get.put(AudioService());
 
       // Auth Related Services
       final githubOAuthService = Get.put(GitHubOAuthService(
@@ -109,10 +134,28 @@ class AppBinding extends Bindings {
         errorHandler: errorHandler,
       ));
 
+      // Developer Matching Controller
+      Get.put(DeveloperMatchingController());
+
+      // Networking Controller
+      Get.put(NetworkingController());
+
+      // Integration Notification Controller
+      Get.put(IntegrationNotificationController());
+
+      // Nearby Developers Controller
+      Get.put(NearbyDevelopersController());
+
+      // Network Controller
+      Get.put(NetworkController());
+
       // Post Service
       Get.put(PostService(
         errorHandler: errorHandler,
       ));
+
+      // Message Binding
+      MessageBinding().dependencies();
     } catch (e) {
       errorHandler.handleError('Bağımlılıklar başlatılırken hata oluştu: $e',
           ErrorHandlerService.AUTH_ERROR);

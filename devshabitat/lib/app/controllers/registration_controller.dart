@@ -4,7 +4,6 @@ import 'package:get/get.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import '../core/services/error_handler_service.dart';
-import '../models/user_profile_model.dart';
 import '../controllers/auth_controller.dart';
 import '../services/github_oauth_service.dart';
 
@@ -597,17 +596,22 @@ class RegistrationController extends GetxController {
 
     // Diğer bilgiler...
     if (bioController.text.isNotEmpty) updates['bio'] = bioController.text;
-    if (locationController.text.isNotEmpty)
+    if (locationController.text.isNotEmpty) {
       updates['location'] = locationController.text;
-    if (locationNameController.text.isNotEmpty)
+    }
+    if (locationNameController.text.isNotEmpty) {
       updates['locationName'] = locationNameController.text;
-    if (titleController.text.isNotEmpty)
+    }
+    if (titleController.text.isNotEmpty) {
       updates['title'] = titleController.text;
-    if (companyController.text.isNotEmpty)
+    }
+    if (companyController.text.isNotEmpty) {
       updates['company'] = companyController.text;
-    if (yearsOfExperienceController.text.isNotEmpty)
+    }
+    if (yearsOfExperienceController.text.isNotEmpty) {
       updates['yearsOfExperience'] =
           int.tryParse(yearsOfExperienceController.text) ?? 0;
+    }
     updates['isAvailableForWork'] = isAvailableForWork.value;
     updates['isRemote'] = isRemote.value;
     updates['isFullTime'] = isFullTime.value;

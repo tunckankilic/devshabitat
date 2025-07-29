@@ -35,6 +35,9 @@ class NotificationService extends GetxService {
     'messages': true.obs,
     'community': true.obs,
     'connections': true.obs,
+    'integration': true.obs,
+    'webhook': true.obs,
+    'service_alert': true.obs,
   };
 
   NotificationService(this._prefs);
@@ -191,29 +194,24 @@ class NotificationService extends GetxService {
     }
   }
 
-  Future<void> _removeOldToken(String oldToken) async {
-    try {
-      final String? userId = Get.find<AuthRepository>().currentUser?.uid;
-      if (userId != null) {
-        await _firestore.collection('users').doc(userId).update({
-          'fcmTokens': FieldValue.arrayRemove([oldToken]),
-        });
-      }
-    } catch (e) {
-      _logger.e('Error removing old FCM token: $e');
-    }
-  }
-
   Future<void> _updateFCMToken(String token) async {
     try {
       final String? userId = Get.find<AuthRepository>().currentUser?.uid;
       if (userId != null) {
+        // Eski token'ı al ve kaldır
+        final oldToken = _prefs.getString('fcm_token');
+        if (oldToken != null && oldToken != token) {
+          await _firestore.collection('users').doc(userId).update({
+            'fcmTokens': FieldValue.arrayRemove([oldToken]),
+          });
+        }
+
         // Uygulama versiyonunu al
         final PackageInfo packageInfo = await PackageInfo.fromPlatform();
         final String appVersion =
             '${packageInfo.version}+${packageInfo.buildNumber}';
 
-        // Token'ı Firestore'a kaydet
+        // Yeni token'ı Firestore'a kaydet
         await _firestore.collection('users').doc(userId).update({
           'fcmTokens': FieldValue.arrayUnion([token]),
           'lastTokenUpdate': FieldValue.serverTimestamp(),

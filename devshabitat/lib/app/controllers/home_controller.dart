@@ -193,10 +193,8 @@ class HomeController extends GetxController {
 
   void onLike(FeedItem item) async {
     try {
-      if (_feedService != null) {
-        await _feedService.likeFeedItem(item.id);
-        await _loadFeedItems(); // Güncel listeyi yükle
-      }
+      await _feedService.likeFeedItem(item.id);
+      await _loadFeedItems(); // Güncel listeyi yükle
     } catch (e) {
       Get.snackbar(
         'Hata',
@@ -212,10 +210,8 @@ class HomeController extends GetxController {
 
   void onShare(FeedItem item) async {
     try {
-      if (_feedService != null) {
-        await _feedService.shareFeedItem(item.id);
-        await _loadFeedItems(); // Güncel listeyi yükle
-      }
+      await _feedService.shareFeedItem(item.id);
+      await _loadFeedItems(); // Güncel listeyi yükle
     } catch (e) {
       Get.snackbar(
         'Hata',

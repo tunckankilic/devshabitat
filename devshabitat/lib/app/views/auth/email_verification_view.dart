@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import '../../controllers/responsive_controller.dart';
-import '../../constants/app_strings.dart';
 
 class EmailVerificationView extends StatefulWidget {
   const EmailVerificationView({super.key});

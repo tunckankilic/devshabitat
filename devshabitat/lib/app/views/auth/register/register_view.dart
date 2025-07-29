@@ -417,10 +417,6 @@ class RegisterView extends GetView<RegistrationController> {
     );
   }
 
-  double _getProgressValue() {
-    return (controller.currentPageIndex + 1) / 4;
-  }
-
   String _getStepTitle() {
     switch (controller.currentPageIndex) {
       case 0:

@@ -5,14 +5,17 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../../controllers/message/message_chat_controller.dart';
 import '../../controllers/message/message_interaction_controller.dart';
+import '../../controllers/thread_controller.dart';
 import '../../models/message_model.dart';
 import '../base/base_view.dart';
 import '../../utils/performance_optimizer.dart';
 import '../../repositories/auth_repository.dart';
+import '../../widgets/advanced_file_upload.dart';
 
 class ChatView extends BaseView<MessageChatController>
     with PerformanceOptimizer {
   final MessageInteractionController interactionController = Get.find();
+  final ThreadController threadController = Get.find<ThreadController>();
   final String conversationId = Get.parameters['id']!;
 
   ChatView({super.key});
@@ -103,7 +106,7 @@ class ChatView extends BaseView<MessageChatController>
                           size: responsive.responsiveValue(
                               mobile: 24, tablet: 28)),
                       onPressed: () {
-                        // Dosya ekleme
+                        _showFileUploadDialog();
                       },
                     ),
                     Expanded(
@@ -132,7 +135,7 @@ class ChatView extends BaseView<MessageChatController>
                           ),
                         ),
                         onChanged: (value) {
-                          controller.updateTypingStatus(value.isNotEmpty);
+                          controller.setTyping(value.isNotEmpty);
                         },
                       ),
                     ),
@@ -141,7 +144,7 @@ class ChatView extends BaseView<MessageChatController>
                           size: responsive.responsiveValue(
                               mobile: 24, tablet: 28)),
                       onPressed: () {
-                        controller.sendMessage();
+                        controller.sendChatMessage();
                       },
                     ),
                   ],
@@ -270,6 +273,17 @@ class ChatView extends BaseView<MessageChatController>
                                   mobile: 16, tablet: 18),
                               color: Colors.white70,
                             ),
+                          SizedBox(width: 8),
+                          IconButton(
+                            icon: Icon(
+                              Icons.forum_outlined,
+                              size: responsive.responsiveValue(
+                                  mobile: 16, tablet: 18),
+                              color: isMe ? Colors.white70 : Colors.black54,
+                            ),
+                            onPressed: () => _createThreadFromMessage(message),
+                            tooltip: 'Thread oluştur',
+                          ),
                         ],
                       ),
                     ],
@@ -530,10 +544,23 @@ class ChatView extends BaseView<MessageChatController>
             ),
           ),
           TextButton(
-            onPressed: () {
+            onPressed: () async {
               Get.back();
-              Get.back(); // Konuşma listesine dön
-              controller.deleteConversation(conversationId);
+              try {
+                await controller.deleteConversation(conversationId);
+                Get.back(); // Konuşma listesine dön
+                Get.snackbar(
+                  'Başarılı',
+                  'Konuşma silindi',
+                  snackPosition: SnackPosition.BOTTOM,
+                );
+              } catch (e) {
+                Get.snackbar(
+                  'Hata',
+                  'Konuşma silinirken hata oluştu',
+                  snackPosition: SnackPosition.BOTTOM,
+                );
+              }
             },
             child: Text(
               AppStrings.delete,
@@ -563,5 +590,136 @@ class ChatView extends BaseView<MessageChatController>
     } else {
       return AppStrings.now;
     }
+  }
+
+  void _showFileUploadDialog() {
+    final authService = Get.find<AuthRepository>();
+    final currentUser = authService.currentUser;
+
+    if (currentUser == null) {
+      Get.snackbar(
+        'Hata',
+        'Oturum açmanız gerekmektedir',
+        snackPosition: SnackPosition.BOTTOM,
+      );
+      return;
+    }
+
+    Get.bottomSheet(
+      Container(
+        padding: const EdgeInsets.all(20),
+        decoration: const BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Container(
+              width: 40,
+              height: 4,
+              decoration: BoxDecoration(
+                color: Colors.grey.shade300,
+                borderRadius: BorderRadius.circular(2),
+              ),
+            ),
+            const SizedBox(height: 20),
+            Text(
+              'Dosya Gönder',
+              style: TextStyle(
+                fontSize: 20,
+                fontWeight: FontWeight.bold,
+                color: Colors.grey.shade800,
+              ),
+            ),
+            const SizedBox(height: 20),
+            AdvancedFileUpload(
+              userId: currentUser.uid,
+              conversationId: conversationId,
+              onFilesSelected: (files) {
+                // Handle selected files
+                print('Selected files for chat: ${files.length}');
+              },
+              onFileUploaded: (attachment) async {
+                // Send file as message
+                try {
+                  await controller.sendFileMessage(attachment);
+                  Get.back();
+                } catch (e) {
+                  Get.snackbar(
+                    'Hata',
+                    'Dosya gönderilirken hata oluştu',
+                    snackPosition: SnackPosition.BOTTOM,
+                  );
+                }
+              },
+              onUploadCancelled: (messageId) {
+                // Handle cancelled upload
+                print('Cancelled file upload: $messageId');
+              },
+              customTitle: 'Dosya Seç',
+              customSubtitle: 'Resim, video, ses veya belge gönderin',
+              allowMultiple: false,
+              showPreview: false,
+            ),
+            const SizedBox(height: 20),
+          ],
+        ),
+      ),
+    );
+  }
+
+  void _createThreadFromMessage(MessageModel message) {
+    final contentController = TextEditingController();
+
+    Get.dialog(
+      AlertDialog(
+        title: Text('Thread Oluştur'),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text('Bu mesajdan thread oluşturmak istiyor musunuz?'),
+            SizedBox(height: 16),
+            TextField(
+              controller: contentController,
+              maxLines: 3,
+              decoration: InputDecoration(
+                hintText: 'Thread içeriğini yazın...',
+                border: OutlineInputBorder(),
+              ),
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Get.back(),
+            child: Text('İptal'),
+          ),
+          TextButton(
+            onPressed: () async {
+              if (contentController.text.isNotEmpty) {
+                try {
+                  await threadController.createThread(
+                      message.id, contentController.text);
+                  Get.back();
+                  Get.snackbar(
+                    'Başarılı',
+                    'Thread oluşturuldu',
+                    snackPosition: SnackPosition.BOTTOM,
+                  );
+                } catch (e) {
+                  Get.snackbar(
+                    'Hata',
+                    'Thread oluşturulurken hata oluştu',
+                    snackPosition: SnackPosition.BOTTOM,
+                  );
+                }
+              }
+            },
+            child: Text('Oluştur'),
+          ),
+        ],
+      ),
+    );
   }
 }

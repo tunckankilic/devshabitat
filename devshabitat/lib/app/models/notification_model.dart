@@ -1,3 +1,5 @@
+// ignore_for_file: constant_identifier_names
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 
 enum NotificationType {
@@ -6,6 +8,9 @@ enum NotificationType {
   event, // Event invites, reminders
   community, // Community updates, mentions
   project, // Project updates, mentions
+  integration, // Integration notifications, webhooks
+  webhook, // Webhook notifications
+  service_alert, // Service alerts, system issues
   system // System notifications, updates
 }
 
@@ -55,6 +60,12 @@ class NotificationModel {
         return 'groups';
       case NotificationType.project:
         return 'code';
+      case NotificationType.integration:
+        return 'integration';
+      case NotificationType.webhook:
+        return 'webhook';
+      case NotificationType.service_alert:
+        return 'warning';
       case NotificationType.system:
         return 'info';
     }
@@ -72,6 +83,12 @@ class NotificationModel {
         return 'Community';
       case NotificationType.project:
         return 'Project';
+      case NotificationType.integration:
+        return 'Integration';
+      case NotificationType.webhook:
+        return 'Webhook';
+      case NotificationType.service_alert:
+        return 'Service Alert';
       case NotificationType.system:
         return 'System';
     }

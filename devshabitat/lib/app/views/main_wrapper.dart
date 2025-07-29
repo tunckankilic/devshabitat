@@ -7,6 +7,7 @@ import 'home/home_view.dart';
 import 'discovery/discovery_screen.dart';
 import 'messaging/message_view.dart';
 import 'profile/profile_view.dart';
+import 'networking/developer_matching_view.dart';
 
 class MainWrapper extends StatelessWidget {
   final NavigationController navigationController = Get.find();
@@ -55,6 +56,16 @@ class MainWrapper extends StatelessWidget {
                       selectedIcon: Icon(Icons.explore,
                           size: responsiveController.minTouchTarget),
                       label: Text(AppStrings.discover,
+                          style: TextStyle(
+                              fontSize: responsiveController.responsiveValue(
+                                  mobile: 12, tablet: 14))),
+                    ),
+                    NavigationRailDestination(
+                      icon: Icon(Icons.favorite_outline,
+                          size: responsiveController.minTouchTarget),
+                      selectedIcon: Icon(Icons.favorite,
+                          size: responsiveController.minTouchTarget),
+                      label: Text('Eşleştirme',
                           style: TextStyle(
                               fontSize: responsiveController.responsiveValue(
                                   mobile: 12, tablet: 14))),
@@ -121,6 +132,15 @@ class MainWrapper extends StatelessWidget {
                 label: 'Keşfet',
               ),
               NavigationDestination(
+                icon: Icon(Icons.favorite_outline,
+                    size: responsiveController.responsiveValue(
+                        mobile: 24, tablet: 28)),
+                selectedIcon: Icon(Icons.favorite,
+                    size: responsiveController.responsiveValue(
+                        mobile: 24, tablet: 28)),
+                label: 'Eşleştirme',
+              ),
+              NavigationDestination(
                 icon: Icon(Icons.message_outlined,
                     size: responsiveController.responsiveValue(
                         mobile: 24, tablet: 28)),
@@ -151,8 +171,10 @@ class MainWrapper extends StatelessWidget {
         case 1:
           return const DiscoveryScreen();
         case 2:
-          return MessageView();
+          return const DeveloperMatchingView();
         case 3:
+          return MessageView();
+        case 4:
           return const ProfileView();
         default:
           return const HomeView();

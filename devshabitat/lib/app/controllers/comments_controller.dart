@@ -18,12 +18,53 @@ class CommentsController extends GetxController {
   @override
   void onInit() {
     super.onInit();
-    // Route'dan gelen feed item'ı al
-    final arguments = Get.arguments;
-    if (arguments is FeedItem) {
+    _initializeFromArguments();
+  }
+
+  void _initializeFromArguments() {
+    try {
+      // Route'dan gelen feed item'ı al ve validate et
+      final arguments = Get.arguments;
+
+      if (arguments == null) {
+        _handleInvalidArguments('Geçersiz feed öğesi: Argüman bulunamadı');
+        return;
+      }
+
+      if (arguments is! FeedItem) {
+        _handleInvalidArguments('Geçersiz feed öğesi: Yanlış veri tipi');
+        return;
+      }
+
+      // Valid FeedItem - initialize
       currentFeedItem.value = arguments;
       loadComments();
+    } catch (e) {
+      _handleInvalidArguments('Feed öğesi yüklenirken bir hata oluştu: $e');
     }
+  }
+
+  void _handleInvalidArguments(String errorMessage) {
+    error.value = errorMessage;
+
+    Get.snackbar(
+      'Hata',
+      errorMessage,
+      snackPosition: SnackPosition.BOTTOM,
+      backgroundColor: Get.theme.colorScheme.error,
+      colorText: Get.theme.colorScheme.onError,
+      duration: const Duration(seconds: 3),
+    );
+
+    // Navigate back after a short delay
+    Future.delayed(const Duration(seconds: 2), () {
+      try {
+        Get.back();
+      } catch (e) {
+        // If back navigation fails, go to home
+        Get.offAllNamed('/home');
+      }
+    });
   }
 
   Future<void> loadComments() async {

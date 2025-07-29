@@ -31,17 +31,7 @@ class EventCard extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            if (event.coverImageUrl != null)
-              ClipRRect(
-                borderRadius:
-                    const BorderRadius.vertical(top: Radius.circular(12)),
-                child: Image.network(
-                  event.coverImageUrl!,
-                  height: 150,
-                  width: double.infinity,
-                  fit: BoxFit.cover,
-                ),
-              ),
+            // Cover image removed as it's not available in EventModel
             Padding(
               padding: const EdgeInsets.all(16),
               child: Column(
@@ -76,10 +66,10 @@ class EventCard extends StatelessWidget {
                   ],
                   const SizedBox(height: 16),
                   _buildInfoRow(
-                    icon: event.location == EventLocation.online
+                    icon: event.type == EventType.online
                         ? Icons.computer
                         : Icons.location_on,
-                    text: event.location == EventLocation.online
+                    text: event.type == EventType.online
                         ? AppStrings.online
                         : event.venueAddress ?? AppStrings.locationNotSet,
                   ),
@@ -92,7 +82,7 @@ class EventCard extends StatelessWidget {
                   _buildInfoRow(
                     icon: Icons.person,
                     text:
-                        '${event.currentParticipants}/${event.participantLimit} ${AppStrings.participants}',
+                        '${event.participants.length}/${event.participantLimit} ${AppStrings.participants}',
                   ),
                 ],
               ),
@@ -188,46 +178,28 @@ class EventCard extends StatelessWidget {
 
   Color _getEventTypeColor(EventType type) {
     switch (type) {
-      case EventType.meetup:
+      case EventType.inPerson:
         return Colors.purple;
-      case EventType.workshop:
-        return Colors.orange;
-      case EventType.hackathon:
+      case EventType.online:
         return Colors.blue;
-      case EventType.conference:
-        return Colors.green;
-      case EventType.other:
-        return Colors.grey;
     }
   }
 
   IconData _getEventTypeIcon(EventType type) {
     switch (type) {
-      case EventType.meetup:
+      case EventType.inPerson:
         return Icons.groups;
-      case EventType.workshop:
-        return Icons.build;
-      case EventType.hackathon:
-        return Icons.code;
-      case EventType.conference:
-        return Icons.business;
-      case EventType.other:
-        return Icons.event;
+      case EventType.online:
+        return Icons.computer;
     }
   }
 
   String _getEventTypeText(EventType type) {
     switch (type) {
-      case EventType.meetup:
-        return 'Meetup';
-      case EventType.workshop:
-        return 'Workshop';
-      case EventType.hackathon:
-        return 'Hackathon';
-      case EventType.conference:
-        return 'Konferans';
-      case EventType.other:
-        return 'Diğer';
+      case EventType.inPerson:
+        return 'Yüz Yüze';
+      case EventType.online:
+        return 'Çevrimiçi';
     }
   }
 

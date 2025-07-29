@@ -4,6 +4,7 @@ import 'package:get/get.dart';
 import '../../controllers/community/community_manage_controller.dart';
 import '../../widgets/community/member_list_widget.dart';
 import '../../widgets/community/membership_request_widget.dart';
+import '../../widgets/community/rule_violation_tracker_widget.dart';
 import '../../widgets/image_upload_widget.dart';
 
 class CommunityManageView extends GetView<CommunityManageController> {
@@ -206,6 +207,34 @@ class CommunityManageView extends GetView<CommunityManageController> {
                     onMemberTap: controller.showMemberProfile,
                     onRemoveMember: controller.removeMember,
                     onPromoteToModerator: controller.promoteToModerator,
+                  ),
+                  const SizedBox(height: 32),
+
+                  // Kurallar Yönetimi
+                  Text(
+                    'Topluluk Kuralları',
+                    style: Theme.of(context).textTheme.titleMedium,
+                  ),
+                  const SizedBox(height: 16),
+                  Obx(
+                    () => RuleViolationTrackerWidget(
+                      communityId: controller.communityId,
+                      userId: Get.arguments['userId'] ?? '',
+                      violations: controller.violations,
+                      rules: controller.rules,
+                      onViolationAction: (violation) {
+                        // Violation action handled - refresh violations list
+                        controller.loadViolations();
+                        Get.snackbar(
+                          'İşlem Tamamlandı',
+                          'Kural ihlali işlemi gerçekleştirildi',
+                          backgroundColor: Colors.green.withOpacity(0.8),
+                          colorText: Colors.white,
+                        );
+                      },
+                      isModerator:
+                          true, // Community manage view'da sadece admin/moderator erişebilir
+                    ),
                   ),
                 ],
               ),

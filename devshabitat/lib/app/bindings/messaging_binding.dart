@@ -4,6 +4,7 @@ import '../controllers/message/message_chat_controller.dart';
 import '../controllers/message/message_list_controller.dart';
 import '../controllers/message/message_search_controller.dart';
 import '../controllers/message/message_interaction_controller.dart';
+import '../controllers/chat_management_controller.dart';
 import '../services/messaging_service.dart';
 import '../core/services/error_handler_service.dart';
 
@@ -48,6 +49,10 @@ class MessagingBinding extends Bindings {
         messagingService: Get.find<MessagingService>(),
         errorHandler: Get.find<ErrorHandlerService>(),
       ),
+    );
+
+    Get.lazyPut<ChatManagementController>(
+      () => ChatManagementController(),
     );
   }
 }

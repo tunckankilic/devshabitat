@@ -4,6 +4,8 @@
 
 list(APPEND FLUTTER_PLUGIN_LIST
   app_links
+  audioplayers_windows
+  battery_plus
   cloud_firestore
   connectivity_plus
   file_selector_windows

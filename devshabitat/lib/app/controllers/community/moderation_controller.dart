@@ -1,12 +1,16 @@
 import 'package:get/get.dart';
 import '../../models/community/moderation_model.dart';
 import '../../models/community/role_model.dart';
+import '../../models/community/rule_model.dart';
+import '../../models/community/rule_violation_model.dart';
 import '../../services/community/moderation_service.dart';
 import '../../services/community/role_service.dart';
+import '../../services/community/rule_service.dart';
 
 class ModerationController extends GetxController {
   final ModerationService _moderationService = Get.find<ModerationService>();
   final RoleService _roleService = Get.find<RoleService>();
+  final RuleService _ruleService = Get.find<RuleService>();
 
   final pendingModerations = <ModerationModel>[].obs;
   final resolvedModerations = <ModerationModel>[].obs;
@@ -285,6 +289,186 @@ class ModerationController extends GetxController {
         return 'Onaylama';
       case ModerationAction.reject:
         return 'Reddetme';
+    }
+  }
+
+  // İçerik için kural ihlali kontrolü
+  Future<List<RuleViolationModel>> checkRuleViolations({
+    required String contentId,
+    required String contentType,
+    required String userId,
+    required Map<String, dynamic> content,
+  }) async {
+    try {
+      final violations = <RuleViolationModel>[];
+
+      // Topluluk kurallarını al
+      final rules = await _ruleService.getRules(communityId, onlyEnabled: true);
+
+      for (final rule in rules) {
+        if (rule.enforcement == RuleEnforcement.automatic ||
+            rule.enforcement == RuleEnforcement.hybrid) {
+          // İçerik kontrolü
+          if (_checkContentAgainstRule(content, rule)) {
+            final violation = RuleViolationModel(
+              id: '',
+              communityId: communityId,
+              ruleId: rule.id,
+              userId: userId,
+              contentId: contentId,
+              contentType: contentType,
+              reporterId: 'system',
+              status: ViolationStatus.pending,
+              description: 'Otomatik kural ihlali tespit edildi: ${rule.title}',
+              evidence: {
+                'rule': rule.toJson(),
+                'content': content,
+                'detectedAt': DateTime.now().toIso8601String(),
+              },
+              createdAt: DateTime.now(),
+            );
+
+            violations.add(violation);
+          }
+        }
+      }
+
+      return violations;
+    } catch (e) {
+      error.value = 'Kural ihlali kontrolü yapılırken bir hata oluştu: $e';
+      return [];
+    }
+  }
+
+  // İçeriği kurala göre kontrol et
+  bool _checkContentAgainstRule(Map<String, dynamic> content, RuleModel rule) {
+    try {
+      // Anahtar kelime kontrolü
+      if (rule.keywords.isNotEmpty) {
+        final contentText = content['text']?.toString().toLowerCase() ?? '';
+        final hasKeyword = rule.keywords
+            .any((keyword) => contentText.contains(keyword.toLowerCase()));
+
+        if (hasKeyword) {
+          return true;
+        }
+      }
+
+      // Otomatik moderasyon konfigürasyonu kontrolü
+      if (rule.autoModConfig.isNotEmpty) {
+        // Spam kontrolü
+        if (rule.autoModConfig['checkSpam'] == true) {
+          if (_isSpamContent(content)) {
+            return true;
+          }
+        }
+
+        // Uygunsuz içerik kontrolü
+        if (rule.autoModConfig['checkInappropriate'] == true) {
+          if (_isInappropriateContent(content)) {
+            return true;
+          }
+        }
+
+        // Çoklu gönderim kontrolü
+        if (rule.autoModConfig['checkDuplicate'] == true) {
+          if (_isDuplicateContent(content)) {
+            return true;
+          }
+        }
+      }
+
+      return false;
+    } catch (e) {
+      error.value = 'İçerik kontrolü yapılırken bir hata oluştu: $e';
+      return false;
+    }
+  }
+
+  // Spam içerik kontrolü
+  bool _isSpamContent(Map<String, dynamic> content) {
+    final text = content['text']?.toString() ?? '';
+
+    // Basit spam kontrolü
+    final spamIndicators = [
+      'buy now',
+      'click here',
+      'free money',
+      'make money fast',
+      'earn money',
+      'work from home',
+      'get rich quick',
+    ];
+
+    final lowerText = text.toLowerCase();
+    final spamCount = spamIndicators
+        .where((indicator) => lowerText.contains(indicator))
+        .length;
+
+    return spamCount >= 2;
+  }
+
+  // Uygunsuz içerik kontrolü
+  bool _isInappropriateContent(Map<String, dynamic> content) {
+    final text = content['text']?.toString() ?? '';
+
+    // Basit uygunsuz içerik kontrolü
+    final inappropriateWords = [
+      'küfür',
+      'hakaret',
+      'taciz',
+      'şiddet',
+    ];
+
+    final lowerText = text.toLowerCase();
+    return inappropriateWords.any((word) => lowerText.contains(word));
+  }
+
+  // Çoklu gönderim kontrolü
+  bool _isDuplicateContent(Map<String, dynamic> content) {
+    // Bu metod daha gelişmiş bir implementasyon gerektirir
+    // Şimdilik basit bir kontrol yapıyoruz
+    return false;
+  }
+
+  // Kural ihlali bildir
+  Future<void> reportRuleViolation(RuleViolationModel violation) async {
+    try {
+      await _ruleService.reportViolation(violation);
+
+      Get.snackbar(
+        'Başarılı',
+        'Kural ihlali bildirildi',
+        snackPosition: SnackPosition.BOTTOM,
+      );
+    } catch (e) {
+      error.value = 'Kural ihlali bildirilirken bir hata oluştu: $e';
+      Get.snackbar(
+        'Hata',
+        'Kural ihlali bildirilirken bir hata oluştu',
+        snackPosition: SnackPosition.BOTTOM,
+      );
+    }
+  }
+
+  // Kullanıcının ihlal geçmişini getir
+  Future<List<RuleViolationModel>> getUserViolationHistory(
+      String userId) async {
+    try {
+      return await _ruleService.getUserViolations(communityId, userId);
+    } catch (e) {
+      error.value = 'Kullanıcı ihlal geçmişi yüklenirken bir hata oluştu: $e';
+      return [];
+    }
+  }
+
+  // İhlal istatistiklerini getir
+  Future<Map<String, dynamic>> getViolationStatistics() async {
+    try {
+      return await _ruleService.getViolationStats(communityId);
+    } catch (e) {
+      error.value = 'İhlal istatistikleri yüklenirken bir hata oluştu: $e';
+      return {};
     }
   }
 }

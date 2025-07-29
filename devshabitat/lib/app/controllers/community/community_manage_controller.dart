@@ -1,9 +1,11 @@
 import 'package:devshabitat/app/models/user_profile_model.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import '../../models/community/community_model.dart';
+import '../../models/community/rule_model.dart';
+import '../../models/community/rule_violation_model.dart';
 import '../../services/community/community_service.dart';
 import '../../services/community/membership_service.dart';
+import '../../services/community/rule_service.dart';
 import '../../services/storage_service.dart';
 import '../../routes/app_pages.dart';
 
@@ -11,6 +13,7 @@ class CommunityManageController extends GetxController {
   final CommunityService _communityService = Get.find<CommunityService>();
   final MembershipService _membershipService = Get.find<MembershipService>();
   final StorageService _storageService = Get.find<StorageService>();
+  final RuleService _ruleService = Get.find<RuleService>();
 
   final formKey = GlobalKey<FormState>();
   final nameController = TextEditingController();
@@ -24,6 +27,8 @@ class CommunityManageController extends GetxController {
 
   final members = <UserProfile>[].obs;
   final pendingMembers = <UserProfile>[].obs;
+  final rules = <RuleModel>[].obs;
+  final violations = <RuleViolationModel>[].obs;
 
   String? _selectedImagePath;
   late String communityId;
@@ -61,6 +66,8 @@ class CommunityManageController extends GetxController {
 
       await loadMembers();
       await loadPendingMembers();
+      await loadRules();
+      await loadViolations();
     } catch (e) {
       error.value = 'Topluluk bilgileri yüklenirken bir hata oluştu: $e';
     } finally {
@@ -88,6 +95,24 @@ class CommunityManageController extends GetxController {
     }
   }
 
+  Future<void> loadRules() async {
+    try {
+      final communityRules = await _ruleService.getRules(communityId);
+      rules.assignAll(communityRules);
+    } catch (e) {
+      error.value = 'Kurallar yüklenirken bir hata oluştu: $e';
+    }
+  }
+
+  Future<void> loadViolations() async {
+    try {
+      final ruleViolations = await _ruleService.getViolations(communityId);
+      violations.assignAll(ruleViolations);
+    } catch (e) {
+      error.value = 'İhlaller yüklenirken bir hata oluştu: $e';
+    }
+  }
+
   void onCoverImageSelected(String imagePath) {
     _selectedImagePath = imagePath;
   }
@@ -106,6 +131,10 @@ class CommunityManageController extends GetxController {
     try {
       isLoading.value = true;
 
+      // Önce mevcut community verisini alalım
+      final currentCommunity =
+          await _communityService.getCommunity(communityId);
+
       String? newCoverImageUrl = coverImageUrl.value;
       if (_selectedImagePath != null) {
         newCoverImageUrl = await _storageService.uploadCommunityImage(
@@ -114,28 +143,21 @@ class CommunityManageController extends GetxController {
         );
       }
 
-      final community = CommunityModel(
-        id: communityId,
+      // copyWith kullanarak sadece değişen alanları güncelleyelim
+      final updatedCommunity = currentCommunity.copyWith(
         name: nameController.text,
         description: descriptionController.text,
         coverImageUrl: newCoverImageUrl,
-        creatorId: '', // Mevcut değeri koru
-        moderatorIds: [], // Mevcut değeri koru
-        memberIds: [], // Mevcut değeri koru
-        pendingMemberIds: [], // Mevcut değeri koru
         settings: {
+          ...currentCommunity.settings, // Mevcut ayarları koru
           'requiresApproval': requiresApproval.value,
           'isPrivate': isPrivate.value,
           'categories': selectedCategories.toList(),
         },
-        createdAt: DateTime.now(), // Mevcut değeri koru
-        updatedAt: DateTime.now(),
-        memberCount: 0, // Mevcut değeri koru
-        eventCount: 0, // Mevcut değeri koru
-        postCount: 0, // Mevcut değeri koru
+        updatedAt: DateTime.now(), // Sadece güncelleme tarihini değiştir
       );
 
-      await _communityService.updateCommunity(community);
+      await _communityService.updateCommunity(updatedCommunity);
 
       Get.snackbar(
         'Başarılı',

@@ -21,6 +21,7 @@ class AppStrings {
   static const String username = 'Username';
   static const String logout = 'Logout';
   static const String continueWithGithub = 'Continue with GitHub';
+  static const String security = 'Güvenlik';
 
   // Profile
   static const String profile = 'Profile';
@@ -1063,4 +1064,46 @@ class AppStrings {
   static const String record = 'Record';
   static const String recording = 'Recording';
   static const String reconnecting = 'Reconnecting';
+
+  // App Info
+  static const String appInfo = 'Uygulama Bilgileri';
+  static const String appVersion = 'Uygulama Sürümü';
+  static const String developerInfo = 'Geliştirici Bilgileri';
+  static const String systemStatus = 'Sistem Durumu';
+  static const String networkStatus = 'Bağlantı Durumu';
+  static const String themeMode = 'Tema Modu';
+  static const String lastUpdate = 'Son Güncelleme';
+  static const String buildNumber = 'Build Numarası';
+  static const String packageName = 'Paket Adı';
+  static const String deviceInfo = 'Cihaz Bilgileri';
+  static const String operatingSystem = 'İşletim Sistemi';
+  static const String deviceModel = 'Cihaz Modeli';
+  static const String screenResolution = 'Ekran Çözünürlüğü';
+  static const String memoryUsage = 'Bellek Kullanımı';
+  static const String storageUsage = 'Depolama Kullanımı';
+
+  // Chat Management
+  static const String archiveChats = 'Sohbetleri Arşivle';
+  static const String archiveChatsDesc = 'Seçili sohbetleri arşivle ve yedekle';
+  static const String exportChats = 'Sohbetleri Dışa Aktar';
+  static const String exportChatsDesc =
+      'Sohbet geçmişini farklı formatlarda dışa aktar';
+  static const String deleteChats = 'Sohbetleri Sil';
+  static const String deleteChatsDesc = 'Seçili sohbetleri kalıcı olarak sil';
+  static const String chatArchived = 'Sohbet başarıyla arşivlendi';
+  static const String chatExported = 'Sohbet başarıyla dışa aktarıldı';
+  static const String chatDeleted = 'Sohbet başarıyla silindi';
+  static const String confirmArchive =
+      'Bu sohbeti arşivlemek istediğinize emin misiniz?';
+  static const String confirmExport =
+      'Bu sohbeti dışa aktarmak istediğinize emin misiniz?';
+  static const String confirmDelete =
+      'Bu sohbeti silmek istediğinize emin misiniz?';
+  static const String processing = 'İşleniyor...';
+  static const String selectExportFormat = 'Dışa aktarma formatını seçin';
+  static const String archiveInProgress = 'Arşivleme devam ediyor...';
+  static const String exportInProgress = 'Dışa aktarma devam ediyor...';
+  static const String deleteInProgress = 'Silme işlemi devam ediyor...';
+  static const String operationSuccess = 'İşlem başarılı';
+  static const String operationFailed = 'İşlem başarısız';
 }

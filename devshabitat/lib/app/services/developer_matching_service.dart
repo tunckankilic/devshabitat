@@ -3,6 +3,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import '../models/user_profile_model.dart';
 import '../controllers/auth_controller.dart';
 import 'package:logger/logger.dart';
+import '../services/user_service.dart'; // Added import for UserService
 
 class DeveloperMatchingService extends GetxService {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
@@ -92,18 +93,19 @@ class DeveloperMatchingService extends GetxService {
           .limit(20) // Limit ekle
           .get();
 
-      // Client-side'da collaborator kontrolü yap
+      // Client-side'da collaborator kontrolü yap - düzeltildi
       return querySnapshot.docs
           .where((doc) {
             final data = doc.data();
             final collaborators =
                 List<String>.from(data['collaborators'] ?? []);
-            return collaborators.contains(username);
+            return !collaborators
+                .contains(username); // NOT operatörü düzeltildi
           })
           .map((doc) => doc.data())
           .toList();
     } catch (e) {
-      print('Proje önerileri hatası: $e');
+      _logger.e('Proje önerileri hatası: $e');
       return [];
     }
   }
@@ -128,18 +130,69 @@ class DeveloperMatchingService extends GetxService {
           .map((doc) => UserProfile.fromFirestore(doc))
           .toList();
     } catch (e) {
-      print('Mentor bulma hatası: $e');
+      _logger.e('Mentor bulma hatası: $e');
       return [];
     }
   }
 
-  // Eşleşme skoru hesapla
+  // Gelişmiş eşleşme skoru hesaplama algoritması
   double calculateMatchScore(UserProfile developer) {
     try {
-      // Burada daha karmaşık bir algoritma kullanılabilir
-      return 0.8; // Örnek skor
+      // UserService'ten EnhancedUserModel al
+      final userService = Get.find<UserService>();
+      final currentUser = userService.currentUser;
+
+      if (currentUser == null) return 0.0;
+
+      double score = 0.0;
+      int factors = 0;
+
+      // Skills match (40% ağırlık)
+      if (developer.skills.isNotEmpty && currentUser.skills != null) {
+        final currentUserSkills = currentUser.skills!;
+        final commonSkills = developer.skills
+            .where((skill) => currentUserSkills.contains(skill))
+            .length;
+        if (currentUserSkills.isNotEmpty && developer.skills.isNotEmpty) {
+          final skillScore = commonSkills /
+              (currentUserSkills.length +
+                  developer.skills.length -
+                  commonSkills);
+          score += skillScore * 0.4;
+          factors++;
+        }
+      }
+
+      // Experience level match (20% ağırlık)
+      if (developer.yearsOfExperience > 0 &&
+          currentUser.yearsOfExperience > 0) {
+        final currentExp = currentUser.yearsOfExperience;
+        final expDiff = (developer.yearsOfExperience - currentExp).abs();
+        final expScore = 1.0 - (expDiff / 20.0); // 20 yıl max fark
+        score += (expScore > 0 ? expScore : 0) * 0.2;
+        factors++;
+      }
+
+      // Location proximity (20% ağırlık)
+      if (developer.location != null && currentUser.location != null) {
+        // Basit konum skorlaması - gerçek uygulamada haversine kullanılabilir
+        final locationScore =
+            0.7; // Sabit orta değer - gerçek uygulamada mesafe hesabı yapılacak
+        score += locationScore * 0.2;
+        factors++;
+      }
+
+      // Interest overlap (20% ağırlık) - Bu kısmı basitleştir çünkü model uyumsuzluğu var
+      if (developer.interests.isNotEmpty) {
+        // Basit bir skorlama yapıyoruz
+        score += 0.5 * 0.2; // Sabit orta değer
+        factors++;
+      }
+
+      return factors > 0 ? score / factors : 0.0;
     } catch (e) {
-      throw Exception('Eşleşme skoru hesaplanırken bir hata oluştu: $e');
+      _logger.e('Eşleşme skoru hesaplama hatası: $e');
+      return 0.0;
     }
   }
 
@@ -155,11 +208,25 @@ class DeveloperMatchingService extends GetxService {
         throw Exception('Kullanıcı oturumu bulunamadı');
       }
 
+      // Aynı kişiye tekrar istek gönderilmesini önle
+      final existingRequest = await _firestore
+          .collection('collaboration_requests')
+          .where('fromUserId', isEqualTo: currentUserId)
+          .where('toUserId', isEqualTo: targetUserId)
+          .where('status', isEqualTo: 'pending')
+          .limit(1)
+          .get();
+
+      if (existingRequest.docs.isNotEmpty) {
+        throw Exception('Bu kullanıcıya zaten bekleyen bir talebiniz var');
+      }
+
       await _firestore.collection('collaboration_requests').add({
         'fromUserId': currentUserId,
         'toUserId': targetUserId,
         'status': 'pending',
         'createdAt': FieldValue.serverTimestamp(),
+        'type': 'collaboration',
       });
     } catch (e) {
       throw Exception('İşbirliği talebi gönderilirken bir hata oluştu: $e');
@@ -178,11 +245,25 @@ class DeveloperMatchingService extends GetxService {
         throw Exception('Kullanıcı oturumu bulunamadı');
       }
 
+      // Aynı mentora tekrar istek gönderilmesini önle
+      final existingRequest = await _firestore
+          .collection('mentorship_requests')
+          .where('fromUserId', isEqualTo: currentUserId)
+          .where('toUserId', isEqualTo: mentorId)
+          .where('status', isEqualTo: 'pending')
+          .limit(1)
+          .get();
+
+      if (existingRequest.docs.isNotEmpty) {
+        throw Exception('Bu mentora zaten bekleyen bir talebiniz var');
+      }
+
       await _firestore.collection('mentorship_requests').add({
         'fromUserId': currentUserId,
         'toUserId': mentorId,
         'status': 'pending',
         'createdAt': FieldValue.serverTimestamp(),
+        'type': 'mentorship',
       });
     } catch (e) {
       throw Exception('Mentorluk talebi gönderilirken bir hata oluştu: $e');
