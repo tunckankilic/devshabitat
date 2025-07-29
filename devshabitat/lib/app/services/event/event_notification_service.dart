@@ -27,10 +27,57 @@ class EventNotificationService {
     // Initialize local notifications
     const initializationSettings = InitializationSettings(
       android: AndroidInitializationSettings('@mipmap/ic_launcher'),
-      iOS: DarwinInitializationSettings(),
+      iOS: DarwinInitializationSettings(
+        requestAlertPermission: true,
+        requestBadgePermission: true,
+        requestSoundPermission: true,
+      ),
     );
 
     await _localNotifications.initialize(initializationSettings);
+
+    // Create notification channels for Android
+    await _createEventNotificationChannels();
+  }
+
+  Future<void> _createEventNotificationChannels() async {
+    const channels = [
+      AndroidNotificationChannel(
+        'event_channel',
+        'Etkinlik Bildirimleri',
+        description: 'Etkinlik bildirimleri için kanal',
+        importance: Importance.defaultImportance,
+        enableVibration: true,
+        playSound: true,
+        showBadge: true,
+      ),
+      AndroidNotificationChannel(
+        'event_reminder_channel',
+        'Etkinlik Hatırlatmaları',
+        description: 'Etkinlik hatırlatmaları için özel kanal',
+        importance: Importance.high,
+        enableVibration: true,
+        playSound: true,
+        showBadge: true,
+        enableLights: true,
+      ),
+      AndroidNotificationChannel(
+        'event_updates_channel',
+        'Etkinlik Güncellemeleri',
+        description: 'Etkinlik güncellemeleri için kanal',
+        importance: Importance.defaultImportance,
+        enableVibration: true,
+        playSound: true,
+        showBadge: true,
+      ),
+    ];
+
+    for (var channel in channels) {
+      await _localNotifications
+          .resolvePlatformSpecificImplementation<
+              AndroidFlutterLocalNotificationsPlugin>()
+          ?.createNotificationChannel(channel);
+    }
   }
 
   // Subscribe to event notifications
@@ -50,7 +97,7 @@ class EventNotificationService {
     required String body,
     Map<String, dynamic>? data,
   }) async {
-    // Store notification in Firestore
+    // 1. Firestore'a kaydet
     await _firestore.collection('event_notifications').add({
       'eventId': eventId,
       'title': title,
@@ -59,9 +106,98 @@ class EventNotificationService {
       'sentAt': DateTime.now(),
     });
 
-    // Send FCM notification using admin SDK
-    // Note: This should be handled by Cloud Functions
-    // Here we'll just store in Firestore and let Cloud Functions handle FCM
+    // 2. Topic'e bildirim gönder (katılımcılara)
+    await _messaging.subscribeToTopic('event_$eventId');
+
+    // 3. Local notification ekle
+    await _localNotifications.show(
+      eventId.hashCode,
+      title,
+      body,
+      const NotificationDetails(
+        android: AndroidNotificationDetails(
+          'event_channel',
+          'Etkinlik Bildirimleri',
+          channelDescription: 'Etkinlik bildirimleri için kanal',
+          importance: Importance.defaultImportance,
+          priority: Priority.defaultPriority,
+        ),
+        iOS: DarwinNotificationDetails(
+          presentAlert: true,
+          presentBadge: true,
+          presentSound: true,
+        ),
+      ),
+    );
+  }
+
+  // Schedule event reminder notification
+  Future<void> scheduleEventReminder({
+    required String eventId,
+    required String title,
+    required String body,
+    required DateTime scheduledTime,
+    Map<String, dynamic>? data,
+  }) async {
+    await _localNotifications.zonedSchedule(
+      eventId.hashCode + 1000, // Farklı ID için offset
+      'Etkinlik Hatırlatması: $title',
+      body,
+      tz.TZDateTime.from(scheduledTime, tz.local),
+      const NotificationDetails(
+        android: AndroidNotificationDetails(
+          'event_reminder_channel',
+          'Etkinlik Hatırlatmaları',
+          channelDescription: 'Etkinlik hatırlatmaları için özel kanal',
+          importance: Importance.high,
+          priority: Priority.high,
+          enableVibration: true,
+          playSound: true,
+          enableLights: true,
+        ),
+        iOS: DarwinNotificationDetails(
+          presentAlert: true,
+          presentBadge: true,
+          presentSound: true,
+          interruptionLevel: InterruptionLevel.active,
+        ),
+      ),
+      androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
+      payload: eventId,
+    );
+  }
+
+  // Send event update notification
+  Future<void> sendEventUpdate({
+    required String eventId,
+    required String title,
+    required String body,
+    Map<String, dynamic>? data,
+  }) async {
+    await _localNotifications.show(
+      eventId.hashCode + 2000, // Farklı ID için offset
+      title,
+      body,
+      const NotificationDetails(
+        android: AndroidNotificationDetails(
+          'event_updates_channel',
+          'Etkinlik Güncellemeleri',
+          channelDescription: 'Etkinlik güncellemeleri için kanal',
+          importance: Importance.defaultImportance,
+          priority: Priority.defaultPriority,
+        ),
+        iOS: DarwinNotificationDetails(
+          presentAlert: true,
+          presentBadge: true,
+          presentSound: true,
+        ),
+      ),
+    );
+  }
+
+  // Cancel scheduled reminder
+  Future<void> cancelEventReminder(String eventId) async {
+    await _localNotifications.cancel(eventId.hashCode + 1000);
   }
 
   // Send registration status notification
@@ -121,34 +257,6 @@ class EventNotificationService {
         'type': 'reminder',
         'startDate': event.startDate.toIso8601String(),
       },
-    );
-  }
-
-  // Schedule event reminder
-  Future<void> scheduleEventReminder(EventModel event) async {
-    final scheduledDate = event.startDate.subtract(const Duration(hours: 1));
-
-    if (scheduledDate.isBefore(DateTime.now())) return;
-
-    final zonedScheduleTime = tz.TZDateTime.from(scheduledDate, tz.local);
-
-    await _localNotifications.zonedSchedule(
-      event.hashCode,
-      'Etkinlik Hatırlatması',
-      '${event.title} etkinliği 1 saat içinde başlayacak!',
-      zonedScheduleTime,
-      const NotificationDetails(
-        android: AndroidNotificationDetails(
-          'event_reminder_channel',
-          'Event Reminders',
-          channelDescription: 'Notifications for upcoming events',
-          importance: Importance.high,
-          priority: Priority.high,
-        ),
-        iOS: DarwinNotificationDetails(),
-      ),
-      androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
-      matchDateTimeComponents: DateTimeComponents.time,
     );
   }
 }

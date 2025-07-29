@@ -52,7 +52,14 @@ class EventCreateController extends GetxController {
       endDate.value != null &&
       participantLimit.value > 0 &&
       selectedCategories.isNotEmpty &&
-      _isLocationValid;
+      _isLocationValid &&
+      _isDateValid;
+
+  bool get _isDateValid {
+    if (startDate.value == null || endDate.value == null) return false;
+    return startDate.value!.isBefore(endDate.value!) &&
+        startDate.value!.isAfter(DateTime.now());
+  }
 
   bool get _isLocationValid {
     if (location.value == EventLocation.online) {
@@ -70,8 +77,44 @@ class EventCreateController extends GetxController {
 
   // Create event
   Future<void> createEvent() async {
+    // Kullanıcı doğrulama
+    final authController = Get.find<AuthController>();
+    if (authController.currentUser == null) {
+      Get.snackbar(
+        'Hata',
+        'Etkinlik oluşturmak için giriş yapmalısınız',
+        snackPosition: SnackPosition.BOTTOM,
+      );
+      return;
+    }
+
+    // Form validasyonu
     if (!isFormValid) {
-      Get.snackbar('Hata', 'Lütfen tüm alanları doldurun');
+      Get.snackbar(
+        'Hata',
+        'Lütfen tüm alanları doldurun',
+        snackPosition: SnackPosition.BOTTOM,
+      );
+      return;
+    }
+
+    // Tarih validasyonu
+    if (startDate.value!.isAfter(endDate.value!)) {
+      Get.snackbar(
+        'Hata',
+        'Başlangıç tarihi bitiş tarihinden önce olmalıdır',
+        snackPosition: SnackPosition.BOTTOM,
+      );
+      return;
+    }
+
+    // Geçmiş tarih kontrolü
+    if (startDate.value!.isBefore(DateTime.now())) {
+      Get.snackbar(
+        'Hata',
+        'Etkinlik tarihi gelecekte olmalıdır',
+        snackPosition: SnackPosition.BOTTOM,
+      );
       return;
     }
 
@@ -80,30 +123,50 @@ class EventCreateController extends GetxController {
 
       final event = EventModel(
         id: '', // Will be set by Firestore
-        title: title.value,
-        description: description.value,
-        organizerId: Get.find<AuthController>().currentUser?.uid ?? '',
+        title: title.value.trim(),
+        description: description.value.trim(),
+        organizerId: authController.currentUser!.uid,
         type: type.value!,
         location: location.value!,
         geoPoint: location.value == EventLocation.offline
             ? selectedLocation.value
             : null,
-        venueAddress: venueAddress.value,
-        onlineMeetingUrl: onlineMeetingUrl.value,
+        venueAddress: location.value == EventLocation.offline
+            ? venueAddress.value?.trim()
+            : null,
+        onlineMeetingUrl: location.value == EventLocation.online
+            ? onlineMeetingUrl.value?.trim()
+            : null,
         startDate: startDate.value!,
         endDate: endDate.value!,
         participantLimit: participantLimit.value,
-        categoryIds: selectedCategories,
+        categoryIds: selectedCategories.toList(),
         createdAt: DateTime.now(),
         updatedAt: DateTime.now(),
       );
 
       await _eventService.createEvent(event);
-      Get.snackbar('Başarılı', 'Etkinlik başarıyla oluşturuldu');
+
+      Get.snackbar(
+        'Başarılı',
+        'Etkinlik başarıyla oluşturuldu',
+        snackPosition: SnackPosition.BOTTOM,
+      );
+
       _resetForm();
       Get.back(); // Return to previous screen
+    } on FirebaseException catch (e) {
+      Get.snackbar(
+        'Hata',
+        'Firebase hatası: ${e.message}',
+        snackPosition: SnackPosition.BOTTOM,
+      );
     } catch (e) {
-      Get.snackbar('Hata', 'Etkinlik oluşturulurken bir hata oluştu');
+      Get.snackbar(
+        'Hata',
+        'Etkinlik oluşturulurken beklenmeyen bir hata oluştu: $e',
+        snackPosition: SnackPosition.BOTTOM,
+      );
     } finally {
       isLoading.value = false;
     }

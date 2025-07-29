@@ -25,7 +25,6 @@ class MessagingBinding extends Bindings {
     Get.lazyPut<MessageChatController>(
       () => MessageChatController(
         messagingService: Get.find<MessagingService>(),
-        errorHandler: Get.find<ErrorHandlerService>(),
       ),
     );
 

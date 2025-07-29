@@ -14,13 +14,29 @@ class DeveloperMatchingController extends GetxController {
       <Map<String, dynamic>>[].obs;
   final RxList<UserProfile> potentialMentors = <UserProfile>[].obs;
   final RxBool isLoading = false.obs;
+  final RxBool isLoadingSimilar = false.obs;
+  final RxBool isLoadingProjects = false.obs;
+  final RxBool isLoadingMentors = false.obs;
   final RxString error = ''.obs;
+
+  // Cache mekanizması
+  final Map<String, List<UserProfile>> _cache = {};
+  final Map<String, DateTime> _cacheTimestamps = {};
+  final Duration _cacheTimeout = const Duration(minutes: 10);
 
   // Benzer geliştiricileri bulma
   Future<void> findSimilarDevelopers() async {
     try {
       isLoading.value = true;
+      isLoadingSimilar.value = true;
       error.value = '';
+
+      // Cache kontrolü
+      const cacheKey = 'similar_developers';
+      if (_isCacheValid(cacheKey)) {
+        similarDevelopers.value = _cache[cacheKey]!;
+        return;
+      }
 
       final username = await _githubService.getCurrentUsername();
       if (username == null) {
@@ -43,12 +59,22 @@ class DeveloperMatchingController extends GetxController {
         excludeUsername: username,
       );
 
+      // Eşleşme skoruna göre sırala
+      developers.sort((a, b) {
+        final scoreA = _matchingService.calculateMatchScore(a);
+        final scoreB = _matchingService.calculateMatchScore(b);
+        return scoreB.compareTo(scoreA);
+      });
+
+      // Cache'e kaydet
+      _updateCache(cacheKey, developers);
       similarDevelopers.value = developers;
     } catch (e) {
       error.value = 'Benzer geliştiriciler bulunurken bir hata oluştu: $e';
       _errorHandler.handleError(e, ErrorHandlerService.MATCHING_ERROR);
     } finally {
       isLoading.value = false;
+      isLoadingSimilar.value = false;
     }
   }
 
@@ -56,6 +82,7 @@ class DeveloperMatchingController extends GetxController {
   Future<void> suggestCollaborations() async {
     try {
       isLoading.value = true;
+      isLoadingProjects.value = true;
       error.value = '';
 
       final username = await _githubService.getCurrentUsername();
@@ -76,6 +103,7 @@ class DeveloperMatchingController extends GetxController {
       _errorHandler.handleError(e, ErrorHandlerService.MATCHING_ERROR);
     } finally {
       isLoading.value = false;
+      isLoadingProjects.value = false;
     }
   }
 
@@ -83,7 +111,15 @@ class DeveloperMatchingController extends GetxController {
   Future<void> findMentors() async {
     try {
       isLoading.value = true;
+      isLoadingMentors.value = true;
       error.value = '';
+
+      // Cache kontrolü
+      const cacheKey = 'mentors';
+      if (_isCacheValid(cacheKey)) {
+        potentialMentors.value = _cache[cacheKey]!;
+        return;
+      }
 
       final username = await _githubService.getCurrentUsername();
       if (username == null) {
@@ -97,12 +133,15 @@ class DeveloperMatchingController extends GetxController {
         username: username,
       );
 
+      // Cache'e kaydet
+      _updateCache(cacheKey, mentors);
       potentialMentors.value = mentors;
     } catch (e) {
       error.value = 'Mentor önerileri alınırken bir hata oluştu: $e';
       _errorHandler.handleError(e, ErrorHandlerService.MATCHING_ERROR);
     } finally {
       isLoading.value = false;
+      isLoadingMentors.value = false;
     }
   }
 
@@ -160,5 +199,36 @@ class DeveloperMatchingController extends GetxController {
     } finally {
       isLoading.value = false;
     }
+  }
+
+  // Cache yardımcı methodları
+  bool _isCacheValid(String key) {
+    if (!_cache.containsKey(key) || !_cacheTimestamps.containsKey(key)) {
+      return false;
+    }
+
+    final cacheTime = _cacheTimestamps[key]!;
+    return DateTime.now().difference(cacheTime) < _cacheTimeout;
+  }
+
+  void _updateCache(String key, List<UserProfile> data) {
+    _cache[key] = data;
+    _cacheTimestamps[key] = DateTime.now();
+  }
+
+  // Cache temizleme
+  void clearCache() {
+    _cache.clear();
+    _cacheTimestamps.clear();
+  }
+
+  // Yenileme - cache temizleyerek
+  Future<void> refresh() async {
+    clearCache();
+    await Future.wait([
+      findSimilarDevelopers(),
+      suggestCollaborations(),
+      findMentors(),
+    ]);
   }
 }

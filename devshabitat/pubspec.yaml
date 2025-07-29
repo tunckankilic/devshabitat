@@ -28,8 +28,8 @@ environment:
 # the latest version available on pub.dev. To see which dependencies have newer
 # versions available, run `flutter pub outdated`.
 dependencies:
-  app_links: ^3.5.1 # Mevcut en son versiyon
-  # uni_links: ^0.5.1  # app_links alternatifi - daha stabil
+  app_links: ^3.5.1
+  battery_plus: ^6.2.2
   cached_network_image: ^3.3.1
   cloud_firestore: ^5.4.0
   connectivity_plus: ^6.1.4
@@ -65,7 +65,7 @@ dependencies:
   get: ^4.6.6
   get_storage: ^2.1.1
   google_fonts: ^6.1.0
-  google_maps_flutter: 2.2.8 # Daha stabil versiyon
+  google_maps_flutter: 2.2.8
   google_sign_in: ^7.1.0
   http: ^1.2.0
   image: ^4.1.3

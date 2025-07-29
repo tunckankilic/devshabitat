@@ -24,6 +24,7 @@ class ErrorHandlerService extends GetxService {
   static const String DISCUSSION_ERROR = 'DISCUSSION_ERROR';
   static const String PORTFOLIO_ERROR = 'PORTFOLIO_ERROR';
   static const String MATCHING_ERROR = 'MATCHING_ERROR';
+  static const String MESSAGE_ERROR = 'MESSAGE_ERROR';
 
   Future<void> handleError(
     dynamic error,

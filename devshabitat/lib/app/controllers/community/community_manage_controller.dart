@@ -1,7 +1,6 @@
 import 'package:devshabitat/app/models/user_profile_model.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import '../../models/community/community_model.dart';
 import '../../services/community/community_service.dart';
 import '../../services/community/membership_service.dart';
 import '../../services/storage_service.dart';
@@ -106,6 +105,10 @@ class CommunityManageController extends GetxController {
     try {
       isLoading.value = true;
 
+      // Önce mevcut community verisini alalım
+      final currentCommunity =
+          await _communityService.getCommunity(communityId);
+
       String? newCoverImageUrl = coverImageUrl.value;
       if (_selectedImagePath != null) {
         newCoverImageUrl = await _storageService.uploadCommunityImage(
@@ -114,28 +117,21 @@ class CommunityManageController extends GetxController {
         );
       }
 
-      final community = CommunityModel(
-        id: communityId,
+      // copyWith kullanarak sadece değişen alanları güncelleyelim
+      final updatedCommunity = currentCommunity.copyWith(
         name: nameController.text,
         description: descriptionController.text,
         coverImageUrl: newCoverImageUrl,
-        creatorId: '', // Mevcut değeri koru
-        moderatorIds: [], // Mevcut değeri koru
-        memberIds: [], // Mevcut değeri koru
-        pendingMemberIds: [], // Mevcut değeri koru
         settings: {
+          ...currentCommunity.settings, // Mevcut ayarları koru
           'requiresApproval': requiresApproval.value,
           'isPrivate': isPrivate.value,
           'categories': selectedCategories.toList(),
         },
-        createdAt: DateTime.now(), // Mevcut değeri koru
-        updatedAt: DateTime.now(),
-        memberCount: 0, // Mevcut değeri koru
-        eventCount: 0, // Mevcut değeri koru
-        postCount: 0, // Mevcut değeri koru
+        updatedAt: DateTime.now(), // Sadece güncelleme tarihini değiştir
       );
 
-      await _communityService.updateCommunity(community);
+      await _communityService.updateCommunity(updatedCommunity);
 
       Get.snackbar(
         'Başarılı',

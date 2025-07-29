@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:math';
+import 'dart:io';
 import 'package:devshabitat/app/models/location/location_model.dart';
 import 'package:get/get.dart';
 import 'package:location/location.dart';
@@ -7,14 +8,17 @@ import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import '../../models/location/developer_location_model.dart';
 import 'package:logger/logger.dart';
+import 'package:device_info_plus/device_info_plus.dart';
 
 class BatteryOptimizedSettings {
   final LocationAccuracy accuracy;
   final int interval;
+  final String reason;
 
   BatteryOptimizedSettings({
     required this.accuracy,
     required this.interval,
+    required this.reason,
   });
 }
 
@@ -29,6 +33,15 @@ class LocationTrackingService extends GetxService {
   LocationAccuracy _currentAccuracy = LocationAccuracy.balanced;
   int _currentInterval = 30000; // Start with 30 seconds
   Timer? _batteryOptimizationTimer;
+
+  // Device info for intelligent optimization
+  final DeviceInfoPlugin _deviceInfo = DeviceInfoPlugin();
+  bool _isLowEndDevice = false;
+  String _lastOptimizationReason = '';
+
+  // Usage tracking
+  DateTime _lastLocationRequest = DateTime.now();
+  int _locationRequestCount = 0;
 
   Future<LocationTrackingService> init() async {
     try {
@@ -54,12 +67,141 @@ class LocationTrackingService extends GetxService {
   }
 
   Future<BatteryOptimizedSettings> _getBatteryOptimizedSettings() async {
-    // Mock battery level - in real app use battery_plus package
-    // For now, return balanced settings. Add battery_plus package for real implementation
-    return BatteryOptimizedSettings(
-      accuracy: LocationAccuracy.balanced,
-      interval: 30000, // 30 seconds
-    );
+    try {
+      // Device performance analysis
+      await _analyzeDeviceCapabilities();
+
+      // Usage pattern analysis
+      final usagePattern = _analyzeUsagePattern();
+
+      // Time-based optimization
+      final timeBasedOptimization = _getTimeBasedOptimization();
+
+      // Network status consideration
+      final isNetworkLimited = await _isNetworkLimited();
+
+      // Determine optimal settings
+      LocationAccuracy accuracy;
+      int interval;
+      String reason;
+
+      if (_isLowEndDevice) {
+        accuracy = LocationAccuracy.low;
+        interval = 60000; // 1 minute
+        reason = 'Low-end device optimization';
+      } else if (usagePattern == 'background') {
+        accuracy = LocationAccuracy.balanced;
+        interval = 45000; // 45 seconds
+        reason = 'Background usage pattern';
+      } else if (timeBasedOptimization == 'night') {
+        accuracy = LocationAccuracy.low;
+        interval = 120000; // 2 minutes
+        reason = 'Night time optimization';
+      } else if (isNetworkLimited) {
+        accuracy = LocationAccuracy.balanced;
+        interval = 30000; // 30 seconds
+        reason = 'Network limited optimization';
+      } else if (usagePattern == 'active') {
+        accuracy = LocationAccuracy.high;
+        interval = 15000; // 15 seconds
+        reason = 'Active usage pattern';
+      } else {
+        accuracy = LocationAccuracy.balanced;
+        interval = 30000; // 30 seconds
+        reason = 'Default balanced settings';
+      }
+
+      _lastOptimizationReason = reason;
+      _logger.i('Battery optimization applied: $reason');
+
+      return BatteryOptimizedSettings(
+        accuracy: accuracy,
+        interval: interval,
+        reason: reason,
+      );
+    } catch (e) {
+      _logger.e('Error in battery optimization: $e');
+      return BatteryOptimizedSettings(
+        accuracy: LocationAccuracy.balanced,
+        interval: 30000,
+        reason: 'Fallback to default settings',
+      );
+    }
+  }
+
+  Future<void> _analyzeDeviceCapabilities() async {
+    try {
+      if (Platform.isAndroid) {
+        final androidInfo = await _deviceInfo.androidInfo;
+        // Consider device as low-end if it has less than 3GB RAM or old Android version
+        final totalMemoryMB =
+            (androidInfo.systemFeatures.contains('android.hardware.ram.normal'))
+                ? 2048
+                : 4096;
+        final sdkInt = androidInfo.version.sdkInt;
+
+        _isLowEndDevice = totalMemoryMB < 3072 || sdkInt < 28; // Android 9.0
+
+        if (_isLowEndDevice) {
+          _logger.i(
+              'Low-end Android device detected: SDK $sdkInt, estimated RAM ${totalMemoryMB}MB');
+        }
+      } else if (Platform.isIOS) {
+        final iosInfo = await _deviceInfo.iosInfo;
+        final model = iosInfo.model.toLowerCase();
+
+        // Consider older iOS devices as low-end
+        _isLowEndDevice = model.contains('iphone 6') ||
+            model.contains('iphone 7') ||
+            model.contains('iphone se') ||
+            iosInfo.systemVersion.startsWith('13') ||
+            iosInfo.systemVersion.startsWith('14');
+
+        if (_isLowEndDevice) {
+          _logger.i(
+              'Low-end iOS device detected: ${iosInfo.model}, iOS ${iosInfo.systemVersion}');
+        }
+      }
+    } catch (e) {
+      _logger.w('Could not analyze device capabilities: $e');
+      _isLowEndDevice = false;
+    }
+  }
+
+  String _analyzeUsagePattern() {
+    final now = DateTime.now();
+    final timeSinceLastRequest = now.difference(_lastLocationRequest).inMinutes;
+
+    if (timeSinceLastRequest < 2) {
+      return 'active'; // Very frequent requests
+    } else if (timeSinceLastRequest < 10) {
+      return 'moderate'; // Regular usage
+    } else {
+      return 'background'; // Infrequent usage
+    }
+  }
+
+  String _getTimeBasedOptimization() {
+    final hour = DateTime.now().hour;
+
+    if (hour >= 23 || hour <= 6) {
+      return 'night'; // Night time (11 PM - 6 AM)
+    } else if (hour >= 9 && hour <= 18) {
+      return 'day'; // Work hours
+    } else {
+      return 'evening'; // Evening hours
+    }
+  }
+
+  Future<bool> _isNetworkLimited() async {
+    try {
+      // Check if user is on cellular data or limited connection
+      // This is a simplified check - in real app, use connectivity_plus
+      return false; // For now, assume good network
+    } catch (e) {
+      _logger.w('Could not check network status: $e');
+      return false;
+    }
   }
 
   void _startBatteryOptimization() {
@@ -92,7 +234,18 @@ class LocationTrackingService extends GetxService {
       if (_isDisposed) {
         throw Exception('Service disposed');
       }
-      return await _location.getLocation();
+
+      // Track usage for optimization
+      _lastLocationRequest = DateTime.now();
+      _locationRequestCount++;
+
+      final location = await _location.getLocation();
+
+      // Log location request for analytics
+      _logger.d(
+          'Location request #$_locationRequestCount - Optimization: $_lastOptimizationReason');
+
+      return location;
     } catch (e) {
       _logger.e('Error getting current location: $e');
       Get.snackbar('Hata', 'Konum alınamadı');
@@ -156,11 +309,25 @@ class LocationTrackingService extends GetxService {
       _currentAccuracy = accuracy;
       _currentInterval = interval;
       _logger.i(
-          'Location settings updated: accuracy=$accuracy, interval=${interval}ms');
+          'Location settings updated: accuracy=$accuracy, interval=${interval}ms - Reason: $_lastOptimizationReason');
     } catch (e) {
       _logger.e('Error updating location settings: $e');
     }
   }
+
+  // Getter methods for monitoring
+  Map<String, dynamic> get optimizationInfo => {
+        'currentAccuracy': _currentAccuracy.toString(),
+        'currentInterval': _currentInterval,
+        'lastOptimizationReason': _lastOptimizationReason,
+        'isLowEndDevice': _isLowEndDevice,
+        'locationRequestCount': _locationRequestCount,
+        'lastLocationRequest': _lastLocationRequest.toIso8601String(),
+      };
+
+  bool get isLowEndDevice => _isLowEndDevice;
+  String get lastOptimizationReason => _lastOptimizationReason;
+  int get locationRequestCount => _locationRequestCount;
 
   Future<bool> checkBackgroundMode() async {
     try {

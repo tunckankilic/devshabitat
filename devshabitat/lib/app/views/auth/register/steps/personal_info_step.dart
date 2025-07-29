@@ -173,7 +173,7 @@ class PersonalInfoStep extends GetView<RegistrationController> {
         locationController = Get.put(LocationController());
       }
 
-      await locationController.updateCurrentLocation();
+      await locationController.refreshLocationServices();
 
       if (locationController.currentLocation.value != null) {
         final loc = locationController.currentLocation.value!;
