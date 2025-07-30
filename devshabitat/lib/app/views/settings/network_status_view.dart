@@ -202,6 +202,30 @@ class NetworkStatusView extends BaseView<NetworkController> {
                 connectionType == ConnectivityResult.none,
                 Colors.red,
               ),
+              SizedBox(height: 12),
+              Container(
+                padding: EdgeInsets.all(8),
+                decoration: BoxDecoration(
+                  color: Colors.grey[100],
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: Row(
+                  children: [
+                    Icon(Icons.info_outline, size: 16, color: Colors.grey[600]),
+                    SizedBox(width: 8),
+                    Expanded(
+                      child: ResponsiveText(
+                        'Aktif Bağlantı: ${_getConnectionTypeText()}',
+                        style: TextStyle(
+                          fontSize: responsive.responsiveValue(
+                              mobile: 12, tablet: 14),
+                          color: Colors.grey[600],
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
             ],
           );
         }),

@@ -363,6 +363,7 @@ class _EnhancedFormFieldState extends State<EnhancedFormField> {
       final error = _getFieldError();
       final hasError = error != null && _hasInteracted;
       final hasValue = widget.controller.text.isNotEmpty;
+      final isValid = _isFieldValid();
 
       return Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -405,21 +406,24 @@ class _EnhancedFormFieldState extends State<EnhancedFormField> {
                   OutlineInputBorder(
                     borderRadius: BorderRadius.circular(12),
                     borderSide: BorderSide(
-                      color: _getBorderColor(hasError, isSuccess, _isFocused),
+                      color: _getBorderColor(
+                          hasError, isSuccess, _isFocused, isValid),
                     ),
                   ),
               enabledBorder: widget.border ??
                   OutlineInputBorder(
                     borderRadius: BorderRadius.circular(12),
                     borderSide: BorderSide(
-                      color: _getBorderColor(hasError, isSuccess, _isFocused),
+                      color: _getBorderColor(
+                          hasError, isSuccess, _isFocused, isValid),
                     ),
                   ),
               focusedBorder: widget.border ??
                   OutlineInputBorder(
                     borderRadius: BorderRadius.circular(12),
                     borderSide: BorderSide(
-                      color: _getBorderColor(hasError, isSuccess, true),
+                      color:
+                          _getBorderColor(hasError, isSuccess, true, isValid),
                       width: 2,
                     ),
                   ),
@@ -491,7 +495,8 @@ class _EnhancedFormFieldState extends State<EnhancedFormField> {
     return null;
   }
 
-  Color _getBorderColor(bool hasError, bool isSuccess, bool isFocused) {
+  Color _getBorderColor(
+      bool hasError, bool isSuccess, bool isFocused, bool isValid) {
     if (hasError) {
       return widget.errorColor ?? Colors.red;
     }
@@ -500,6 +505,9 @@ class _EnhancedFormFieldState extends State<EnhancedFormField> {
     }
     if (isFocused) {
       return Theme.of(context).primaryColor;
+    }
+    if (isValid) {
+      return Colors.blue;
     }
     return Colors.grey[400]!;
   }
