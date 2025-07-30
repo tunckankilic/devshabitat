@@ -6,6 +6,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:mockito/mockito.dart';
 import 'package:mockito/annotations.dart';
 import 'package:plugin_platform_interface/plugin_platform_interface.dart';
+import 'package:devshabitat/app/controllers/responsive_controller.dart';
 
 @GenerateNiceMocks([
   MockSpec<FirebaseAppPlatform>(),
@@ -62,4 +63,7 @@ Future<void> setupTestEnvironment() async {
   // Firebase App mock'u
   final mockApp = mocks.MockFirebaseAppPlatform();
   when(mockPlatform.app()).thenReturn(mockApp);
+
+  // ResponsiveController'ı test için yükle
+  Get.put(ResponsiveController());
 }
