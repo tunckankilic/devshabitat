@@ -60,6 +60,9 @@ abstract class AppRoutes {
   static const NEW_CHAT = '/new-chat';
   static const THREAD_ORGANIZATION = '/thread-organization';
 
+  // Register routes
+  static const registerCompleteProfile = '/register/complete-profile';
+
   // Comments routes
   static const comments = '/comments';
 
