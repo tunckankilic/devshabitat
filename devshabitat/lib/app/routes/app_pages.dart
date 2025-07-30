@@ -74,6 +74,9 @@ import '../views/settings/network_status_view.dart';
 import 'package:devshabitat/app/views/settings/app_info_view.dart';
 import '../views/messaging/thread_organization_view.dart';
 import '../bindings/message_binding.dart';
+import '../bindings/registration_binding.dart';
+import '../views/messaging/message_view.dart';
+import '../bindings/messaging_binding.dart';
 
 part 'app_routes.dart';
 
@@ -356,6 +359,18 @@ class AppPages {
       name: AppRoutes.THREAD_ORGANIZATION,
       page: () => ThreadOrganizationView(),
       binding: MessageBinding(),
+      middlewares: [AuthMiddleware()],
+    ),
+    GetPage(
+      name: AppRoutes.registerCompleteProfile,
+      page: () => RegisterView(),
+      binding: RegistrationBinding(),
+      middlewares: [AuthMiddleware()],
+    ),
+    GetPage(
+      name: AppRoutes.CHAT,
+      page: () => MessageView(),
+      binding: MessagingBinding(),
       middlewares: [AuthMiddleware()],
     ),
   ];
