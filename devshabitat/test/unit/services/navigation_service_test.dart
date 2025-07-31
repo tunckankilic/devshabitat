@@ -1,3 +1,5 @@
+// ignore_for_file: avoid_unnecessary_containers
+
 import 'package:flutter_test/flutter_test.dart';
 import 'package:get/get.dart';
 import 'package:mockito/mockito.dart';
@@ -101,7 +103,7 @@ void main() {
     });
 
     test('goBack return value ile', () {
-      when(mockNavigatorState.pop()).thenReturn('return_value');
+      when(mockNavigatorState.pop()).thenAnswer((_) {});
       service.goBack();
       verify(mockNavigatorState.pop()).called(1);
     });
@@ -343,7 +345,7 @@ void main() {
 
   group('NavigationService - Edge Cases', () {
     test('çok uzun route string', () async {
-      final longRoute = '/' + 'a' * 1000;
+      final longRoute = '/${'a' * 1000}';
       when(mockNavigatorState.pushNamed(any, arguments: anyNamed('arguments')))
           .thenAnswer((_) async => null);
 

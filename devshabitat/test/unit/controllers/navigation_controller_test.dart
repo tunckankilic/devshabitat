@@ -1,3 +1,5 @@
+// ignore_for_file: avoid_unnecessary_containers
+
 import 'package:flutter_test/flutter_test.dart';
 import 'package:get/get.dart';
 import 'package:mockito/mockito.dart';
@@ -383,7 +385,7 @@ void main() {
     });
 
     test('çok uzun route string', () async {
-      final longRoute = '/' + 'a' * 1000;
+      final longRoute = '/${'a' * 1000}';
       when(mockNavigationService.navigateTo(any,
               arguments: anyNamed('arguments')))
           .thenAnswer((_) async => null);

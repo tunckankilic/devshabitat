@@ -23,7 +23,6 @@ import 'package:devshabitat/app/core/services/error_handler_service.dart';
   MockSpec<GlobalKey<NavigatorState>>(),
   MockSpec<ErrorHandlerService>(),
 ])
-import 'test_helper.mocks.dart';
 
 // Mock sınıflarını import et
 import 'test_helper.mocks.dart' as mocks;

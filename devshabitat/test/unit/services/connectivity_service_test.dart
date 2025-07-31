@@ -2,7 +2,6 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:get/get.dart';
 import 'package:mockito/mockito.dart';
 import 'package:connectivity_plus/connectivity_plus.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import 'package:devshabitat/app/services/connectivity_service.dart';
 import 'package:devshabitat/app/core/services/error_handler_service.dart';
 import '../../../test/test_helper.mocks.dart';

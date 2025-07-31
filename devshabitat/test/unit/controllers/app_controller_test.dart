@@ -4,8 +4,6 @@ import 'package:devshabitat/app/core/services/error_handler_service.dart';
 import 'package:mockito/mockito.dart';
 import 'package:mockito/annotations.dart';
 import 'package:get/get.dart';
-import 'package:connectivity_plus/connectivity_plus.dart';
-import 'package:flutter/material.dart';
 import '../../../test/test_helper.dart';
 
 @GenerateNiceMocks([MockSpec<ErrorHandlerService>()])

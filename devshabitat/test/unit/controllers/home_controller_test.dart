@@ -46,11 +46,11 @@ void main() {
     mockAuthController = MockAuthController();
 
     // onStart metodlarını mock'la
-    when(mockGithubService.onStart()).thenAnswer((_) async => null);
-    when(mockNotificationService.onStart()).thenAnswer((_) async => null);
-    when(mockFeedService.onStart()).thenAnswer((_) async => null);
-    when(mockConnectionService.onStart()).thenAnswer((_) async => null);
-    when(mockAuthController.onStart()).thenAnswer((_) async => null);
+    when(mockGithubService.onStart()).thenAnswer((_) async {});
+    when(mockNotificationService.onStart()).thenAnswer((_) async {});
+    when(mockFeedService.onStart()).thenAnswer((_) async {});
+    when(mockConnectionService.onStart()).thenAnswer((_) async {});
+    when(mockAuthController.onStart()).thenAnswer((_) async {});
 
     // Get.put ile mock'ları kaydet
     Get.put<GithubService>(mockGithubService);

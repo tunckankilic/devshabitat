@@ -4,7 +4,6 @@ import 'package:mockito/mockito.dart';
 import 'package:mockito/annotations.dart';
 import 'package:http/http.dart' as http;
 import 'package:logger/logger.dart';
-import 'package:url_launcher/url_launcher.dart';
 import 'package:devshabitat/app/services/github_oauth_service.dart';
 import 'package:devshabitat/app/core/services/error_handler_service.dart';
 import 'package:devshabitat/app/services/deep_linking_service.dart';
