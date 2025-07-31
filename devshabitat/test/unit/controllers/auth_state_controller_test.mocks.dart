@@ -442,6 +442,16 @@ class MockAuthRepository extends _i1.Mock implements _i7.AuthRepository {
       ) as _i6.Future<void>);
 
   @override
+  _i6.Future<void> signOutFromAllDevices() => (super.noSuchMethod(
+        Invocation.method(
+          #signOutFromAllDevices,
+          [],
+        ),
+        returnValue: _i6.Future<void>.value(),
+        returnValueForMissingStub: _i6.Future<void>.value(),
+      ) as _i6.Future<void>);
+
+  @override
   _i6.Future<void> sendPasswordResetEmail(String? email) => (super.noSuchMethod(
         Invocation.method(
           #sendPasswordResetEmail,
@@ -2205,6 +2215,10 @@ class MockFirebaseFirestore extends _i1.Mock implements _i5.FirebaseFirestore {
       ) as _i6.Future<void>);
 }
 
+/// A class which mocks [CollectionReference].
+///
+/// See the documentation for Mockito's code generation for more information.
+// ignore: must_be_immutable
 class MockCollectionReference extends _i1.Mock
     implements _i5.CollectionReference<Map<String, dynamic>> {
   @override
@@ -2897,6 +2911,10 @@ class MockCollectionReference extends _i1.Mock
       ) as _i5.AggregateQuery);
 }
 
+/// A class which mocks [DocumentReference].
+///
+/// See the documentation for Mockito's code generation for more information.
+// ignore: must_be_immutable
 class MockDocumentReference extends _i1.Mock
     implements _i5.DocumentReference<Map<String, dynamic>> {
   @override

@@ -7,12 +7,21 @@ import 'package:mockito/mockito.dart';
 import 'package:mockito/annotations.dart';
 import 'package:plugin_platform_interface/plugin_platform_interface.dart';
 import 'package:devshabitat/app/controllers/responsive_controller.dart';
+import 'package:connectivity_plus/connectivity_plus.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:flutter/material.dart';
+import 'package:devshabitat/app/core/services/error_handler_service.dart';
 
 @GenerateNiceMocks([
   MockSpec<FirebaseAppPlatform>(),
-  MockSpec<DocumentReference<Map<String, dynamic>>>(),
-  MockSpec<CollectionReference<Map<String, dynamic>>>(),
+  MockSpec<DocumentReference>(),
+  MockSpec<CollectionReference>(),
   MockSpec<FirebaseFirestore>(),
+  MockSpec<Connectivity>(),
+  MockSpec<SharedPreferences>(),
+  MockSpec<NavigatorState>(),
+  MockSpec<GlobalKey<NavigatorState>>(),
+  MockSpec<ErrorHandlerService>(),
 ])
 import 'test_helper.mocks.dart';
 
@@ -24,7 +33,7 @@ class MockFirebasePlatform extends Mock
     implements FirebasePlatform {
   @override
   FirebaseAppPlatform app([String name = '[DEFAULT]']) {
-    return MockFirebaseAppPlatform();
+    return mocks.MockFirebaseAppPlatform();
   }
 
   @override
@@ -35,7 +44,7 @@ class MockFirebasePlatform extends Mock
     String? name,
     FirebaseOptions? options,
   }) async {
-    return MockFirebaseAppPlatform();
+    return mocks.MockFirebaseAppPlatform();
   }
 }
 
@@ -60,10 +69,39 @@ Future<void> setupTestEnvironment() async {
   final mockPlatform = MockFirebasePlatform();
   FirebasePlatform.instance = mockPlatform;
 
-  // Firebase App mock'u
-  final mockApp = mocks.MockFirebaseAppPlatform();
-  when(mockPlatform.app()).thenReturn(mockApp);
-
   // ResponsiveController'ı test için yükle
   Get.put(ResponsiveController());
+}
+
+// Test için yardımcı fonksiyonlar
+class TestHelpers {
+  static void setupConnectivityMock(mocks.MockConnectivity mockConnectivity) {
+    when(mockConnectivity.checkConnectivity()).thenAnswer(
+      (_) async => [ConnectivityResult.wifi],
+    );
+    when(mockConnectivity.onConnectivityChanged).thenAnswer(
+      (_) => Stream.value([ConnectivityResult.wifi]),
+    );
+  }
+
+  static void setupSharedPreferencesMock(
+      mocks.MockSharedPreferences mockPrefs) {
+    when(mockPrefs.getBool(any)).thenReturn(false);
+    when(mockPrefs.setBool(any, any)).thenAnswer((_) async => true);
+    when(mockPrefs.getString(any)).thenReturn(null);
+    when(mockPrefs.setString(any, any)).thenAnswer((_) async => true);
+  }
+
+  static void setupNavigatorMock(mocks.MockNavigatorState mockNavigator) {
+    when(mockNavigator.pushNamed(any, arguments: anyNamed('arguments')))
+        .thenAnswer((_) async => null);
+    when(mockNavigator.pushReplacementNamed(any,
+            arguments: anyNamed('arguments')))
+        .thenAnswer((_) async => null);
+    when(mockNavigator.pushNamedAndRemoveUntil(any, any,
+            arguments: anyNamed('arguments')))
+        .thenAnswer((_) async => null);
+    when(mockNavigator.pop()).thenReturn(null);
+    when(mockNavigator.popUntil(any)).thenReturn(null);
+  }
 }

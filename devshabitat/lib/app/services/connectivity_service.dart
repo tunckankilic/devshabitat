@@ -4,7 +4,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import '../core/services/error_handler_service.dart';
 
 class ConnectivityService extends GetxService {
-  final Connectivity _connectivity = Connectivity();
+  final Connectivity _connectivity;
   final ErrorHandlerService _errorHandler;
   final SharedPreferences _prefs;
   final RxBool isOnline = true.obs;
@@ -13,8 +13,10 @@ class ConnectivityService extends GetxService {
   ConnectivityService({
     required SharedPreferences prefs,
     required ErrorHandlerService errorHandler,
+    Connectivity? connectivity,
   })  : _prefs = prefs,
-        _errorHandler = errorHandler;
+        _errorHandler = errorHandler,
+        _connectivity = connectivity ?? Get.find<Connectivity>();
 
   @override
   void onInit() {

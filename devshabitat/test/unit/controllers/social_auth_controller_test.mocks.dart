@@ -340,6 +340,16 @@ class MockAuthRepository extends _i1.Mock implements _i7.AuthRepository {
       ) as _i5.Future<void>);
 
   @override
+  _i5.Future<void> signOutFromAllDevices() => (super.noSuchMethod(
+        Invocation.method(
+          #signOutFromAllDevices,
+          [],
+        ),
+        returnValue: _i5.Future<void>.value(),
+        returnValueForMissingStub: _i5.Future<void>.value(),
+      ) as _i5.Future<void>);
+
+  @override
   _i5.Future<void> sendPasswordResetEmail(String? email) => (super.noSuchMethod(
         Invocation.method(
           #sendPasswordResetEmail,
@@ -923,6 +933,33 @@ class MockEmailAuthController extends _i1.Mock
       ) as String);
 
   @override
+  bool get isEmailValid => (super.noSuchMethod(
+        Invocation.getter(#isEmailValid),
+        returnValue: false,
+        returnValueForMissingStub: false,
+      ) as bool);
+
+  @override
+  String get emailVerificationStatus => (super.noSuchMethod(
+        Invocation.getter(#emailVerificationStatus),
+        returnValue: _i9.dummyValue<String>(
+          this,
+          Invocation.getter(#emailVerificationStatus),
+        ),
+        returnValueForMissingStub: _i9.dummyValue<String>(
+          this,
+          Invocation.getter(#emailVerificationStatus),
+        ),
+      ) as String);
+
+  @override
+  List<String> get additionalEmails => (super.noSuchMethod(
+        Invocation.getter(#additionalEmails),
+        returnValue: <String>[],
+        returnValueForMissingStub: <String>[],
+      ) as List<String>);
+
+  @override
   _i4.InternalFinalCallback<void> get onStart => (super.noSuchMethod(
         Invocation.getter(#onStart),
         returnValue: _FakeInternalFinalCallback_3<void>(
@@ -1007,6 +1044,26 @@ class MockEmailAuthController extends _i1.Mock
       ) as _i5.Future<void>);
 
   @override
+  _i5.Future<void> sendEmailVerification() => (super.noSuchMethod(
+        Invocation.method(
+          #sendEmailVerification,
+          [],
+        ),
+        returnValue: _i5.Future<void>.value(),
+        returnValueForMissingStub: _i5.Future<void>.value(),
+      ) as _i5.Future<void>);
+
+  @override
+  _i5.Future<void> resendEmailVerification() => (super.noSuchMethod(
+        Invocation.method(
+          #resendEmailVerification,
+          [],
+        ),
+        returnValue: _i5.Future<void>.value(),
+        returnValueForMissingStub: _i5.Future<void>.value(),
+      ) as _i5.Future<void>);
+
+  @override
   _i5.Future<void> updatePassword(String? newPassword) => (super.noSuchMethod(
         Invocation.method(
           #updatePassword,
@@ -1038,6 +1095,75 @@ class MockEmailAuthController extends _i1.Mock
             email,
             password,
           ],
+        ),
+        returnValue: _i5.Future<void>.value(),
+        returnValueForMissingStub: _i5.Future<void>.value(),
+      ) as _i5.Future<void>);
+
+  @override
+  _i5.Future<void> addAdditionalEmail(String? email) => (super.noSuchMethod(
+        Invocation.method(
+          #addAdditionalEmail,
+          [email],
+        ),
+        returnValue: _i5.Future<void>.value(),
+        returnValueForMissingStub: _i5.Future<void>.value(),
+      ) as _i5.Future<void>);
+
+  @override
+  _i5.Future<void> removeAdditionalEmail(String? email) => (super.noSuchMethod(
+        Invocation.method(
+          #removeAdditionalEmail,
+          [email],
+        ),
+        returnValue: _i5.Future<void>.value(),
+        returnValueForMissingStub: _i5.Future<void>.value(),
+      ) as _i5.Future<void>);
+
+  @override
+  _i5.Future<List<String>> getAdditionalEmails() => (super.noSuchMethod(
+        Invocation.method(
+          #getAdditionalEmails,
+          [],
+        ),
+        returnValue: _i5.Future<List<String>>.value(<String>[]),
+        returnValueForMissingStub: _i5.Future<List<String>>.value(<String>[]),
+      ) as _i5.Future<List<String>>);
+
+  @override
+  _i5.Future<bool> isEmailVerified() => (super.noSuchMethod(
+        Invocation.method(
+          #isEmailVerified,
+          [],
+        ),
+        returnValue: _i5.Future<bool>.value(false),
+        returnValueForMissingStub: _i5.Future<bool>.value(false),
+      ) as _i5.Future<bool>);
+
+  @override
+  void validateEmailOnChange(String? email) => super.noSuchMethod(
+        Invocation.method(
+          #validateEmailOnChange,
+          [email],
+        ),
+        returnValueForMissingStub: null,
+      );
+
+  @override
+  _i5.Future<void> checkEmailAvailability(String? email) => (super.noSuchMethod(
+        Invocation.method(
+          #checkEmailAvailability,
+          [email],
+        ),
+        returnValue: _i5.Future<void>.value(),
+        returnValueForMissingStub: _i5.Future<void>.value(),
+      ) as _i5.Future<void>);
+
+  @override
+  _i5.Future<void> sendVerificationEmail() => (super.noSuchMethod(
+        Invocation.method(
+          #sendVerificationEmail,
+          [],
         ),
         returnValue: _i5.Future<void>.value(),
         returnValueForMissingStub: _i5.Future<void>.value(),
@@ -1273,6 +1399,16 @@ class MockAuthStateController extends _i1.Mock
   _i5.Future<void> signOut() => (super.noSuchMethod(
         Invocation.method(
           #signOut,
+          [],
+        ),
+        returnValue: _i5.Future<void>.value(),
+        returnValueForMissingStub: _i5.Future<void>.value(),
+      ) as _i5.Future<void>);
+
+  @override
+  _i5.Future<void> signOutFromAllDevices() => (super.noSuchMethod(
+        Invocation.method(
+          #signOutFromAllDevices,
           [],
         ),
         returnValue: _i5.Future<void>.value(),
