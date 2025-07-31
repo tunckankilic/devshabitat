@@ -2,6 +2,7 @@ import 'package:devshabitat/app/constants/app_strings.dart';
 import 'package:devshabitat/app/controllers/email_auth_controller.dart';
 import 'package:devshabitat/app/core/services/api_optimization_service.dart';
 import 'package:devshabitat/app/core/services/error_handler_service.dart';
+import 'package:devshabitat/app/core/services/memory_manager_service.dart';
 import 'package:devshabitat/firebase_options.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -33,6 +34,7 @@ import 'app/services/notification_service.dart';
 import 'app/controllers/message/message_list_controller.dart';
 import 'app/controllers/message/message_search_controller.dart';
 import 'app/controllers/message/message_interaction_controller.dart';
+import 'package:flutter/foundation.dart' show kIsWeb;
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -41,6 +43,27 @@ void main() async {
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
   );
+
+  // Web platformunda Firebase Auth persistence ayarını yap
+  if (kIsWeb) {
+    try {
+      await FirebaseAuth.instance.setPersistence(Persistence.SESSION);
+      print('Web Firebase Auth persistence set to SESSION');
+
+      // Web için redirect sonucunu dinle
+      FirebaseAuth.instance.getRedirectResult().then((result) {
+        if (result.user != null) {
+          print('Web redirect login successful: ${result.user?.email}');
+        } else if (result.credential != null) {
+          print('Web redirect login with credential');
+        }
+      }).catchError((error) {
+        print('Web redirect login error: $error');
+      });
+    } catch (e) {
+      print('Error setting web persistence: $e');
+    }
+  }
 
   // Sadece temel servisleri yükle, auth'u sonra
   await initBasicDependencies();
@@ -51,6 +74,7 @@ void main() async {
 Future<void> initBasicDependencies() async {
   // Temel servisler
   Get.put(Logger(), permanent: true);
+  Get.put(MemoryManagerService(), permanent: true);
   Get.put(ResponsiveController(), permanent: true);
   Get.put(StorageService(), permanent: true);
   Get.put(ErrorHandlerService(), permanent: true);
@@ -61,6 +85,7 @@ Future<void> initBasicDependencies() async {
       GitHubOAuthService(
         logger: Get.find(),
         errorHandler: Get.find(),
+        auth: FirebaseAuth.instance,
       ),
       permanent: true);
 
@@ -157,24 +182,25 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
+    return GetMaterialApp(
+      title: AppStrings.appName,
+      theme: DevHabitatTheme.lightTheme,
+      darkTheme: DevHabitatTheme.darkTheme,
+      initialRoute: _getInitialRoute(),
+      getPages: AppPages.routes,
+      initialBinding: AppBinding(),
+      defaultTransition: Transition.fade,
       debugShowCheckedModeBanner: false,
-      home: GetMaterialApp(
-        title: AppStrings.appName,
-        theme: DevHabitatTheme.lightTheme,
-        darkTheme: DevHabitatTheme.darkTheme,
-        initialRoute: _getInitialRoute(),
-        getPages: AppPages.routes,
-        initialBinding: AppBinding(),
-        defaultTransition: Transition.fade,
-        debugShowCheckedModeBanner: false,
-        builder: (context, child) {
-          return MediaQuery(
-            data: MediaQuery.of(context).copyWith(textScaleFactor: 1.0),
-            child: child ?? const SizedBox(),
-          );
-        },
-      ),
+      navigatorKey: Get.key,
+      builder: (context, child) {
+        return MediaQuery(
+          data: MediaQuery.of(context).copyWith(textScaleFactor: 1.0),
+          child: child ?? const SizedBox(),
+        );
+      },
+      onInit: () {
+        Get.put(Get.find<AuthStateController>(), permanent: true);
+      },
     );
   }
 

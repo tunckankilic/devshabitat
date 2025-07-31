@@ -18,6 +18,7 @@ import '../services/image_upload_service.dart';
 import '../services/storage_service.dart';
 import '../services/community/resource_service.dart';
 import '../services/file_storage_service.dart';
+import '../services/deep_linking_service.dart';
 import '../controllers/app_controller.dart';
 import '../controllers/responsive_controller.dart';
 import '../controllers/auth_state_controller.dart';
@@ -31,6 +32,9 @@ import '../controllers/integration/notification_controller.dart';
 import '../controllers/location/nearby_developers_controller.dart';
 import '../controllers/network_controller.dart';
 import 'message_binding.dart';
+import '../services/network_analytics_service.dart';
+import '../services/location/maps_service.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 
 class AppBinding extends Bindings {
   @override
@@ -47,6 +51,11 @@ class AppBinding extends Bindings {
     final errorHandler = Get.put(ErrorHandlerService());
     Get.put(MemoryManagerService());
     Get.put(ApiOptimizationService());
+    Get.put(DeepLinkingService());
+    Get.put(NetworkAnalyticsService());
+
+    // Location Services
+    Get.put(MapsService());
 
     // Storage Service
     Get.put(StorageService());
@@ -81,6 +90,9 @@ class AppBinding extends Bindings {
 
     // File Upload Controller
     Get.put(FileUploadController());
+
+    // Networking Controller
+    Get.put(NetworkingController());
   }
 
   Future<void> _initAsynchronousDependencies() async {
@@ -100,13 +112,16 @@ class AppBinding extends Bindings {
       Get.put(AudioService());
 
       // Auth Related Services
-      final githubOAuthService = Get.put(GitHubOAuthService(
-        logger: logger,
-        errorHandler: errorHandler,
-      ));
+      Get.lazyPut<GitHubOAuthService>(
+        () => GitHubOAuthService(
+          logger: Get.find(),
+          errorHandler: Get.find(),
+          auth: FirebaseAuth.instance,
+        ),
+      );
 
       final authRepository = Get.put(AuthRepository(
-        githubOAuthService: githubOAuthService,
+        githubOAuthService: Get.find(),
       ));
 
       // GitHub Services (after AuthRepository)
@@ -136,9 +151,6 @@ class AppBinding extends Bindings {
 
       // Developer Matching Controller
       Get.put(DeveloperMatchingController());
-
-      // Networking Controller
-      Get.put(NetworkingController());
 
       // Integration Notification Controller
       Get.put(IntegrationNotificationController());

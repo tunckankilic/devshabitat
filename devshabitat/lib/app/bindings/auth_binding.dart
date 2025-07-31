@@ -1,3 +1,4 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:get/get.dart';
 import 'package:logger/logger.dart';
 import '../controllers/auth_controller.dart';
@@ -16,6 +17,7 @@ class AuthBinding extends Bindings {
     Get.lazyPut<ErrorHandlerService>(() => ErrorHandlerService());
     Get.lazyPut<GitHubOAuthService>(
       () => GitHubOAuthService(
+        auth: FirebaseAuth.instance,
         logger: Get.find<Logger>(),
         errorHandler: Get.find<ErrorHandlerService>(),
       ),

@@ -2,6 +2,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:get/get.dart';
 import '../repositories/auth_repository.dart';
 import '../routes/app_pages.dart';
+import 'package:flutter/material.dart';
 
 enum AuthState {
   initial,
@@ -41,6 +42,11 @@ class AuthStateController extends GetxController {
         _authState.value = AuthState.authenticated;
         _userProfile.value = await _authRepository.getUserProfile(user.uid);
 
+        // GetMaterialApp başlatılmış mı kontrol et
+        if (!Get.isRegistered<GetMaterialApp>()) {
+          return; // GetMaterialApp başlatılmamışsa navigasyon yapma
+        }
+
         // Register sayfasında hiç müdahale etme
         final currentRoute = Get.currentRoute;
         if (currentRoute == AppRoutes.register) {
@@ -54,6 +60,11 @@ class AuthStateController extends GetxController {
       } else {
         _authState.value = AuthState.unauthenticated;
         _userProfile.value = null;
+
+        // GetMaterialApp başlatılmış mı kontrol et
+        if (!Get.isRegistered<GetMaterialApp>()) {
+          return; // GetMaterialApp başlatılmamışsa navigasyon yapma
+        }
 
         // Sadece korumalı sayfalardaysa login sayfasına yönlendir
         if (Get.currentRoute != AppRoutes.login &&

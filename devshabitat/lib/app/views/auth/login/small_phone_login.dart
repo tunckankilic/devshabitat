@@ -196,19 +196,6 @@ class SmallPhoneLogin extends GetView<AuthController> {
                   tablet: 16.0,
                 ),
               ),
-              SocialLoginButton(
-                text: AppStrings.continueWithGithub,
-                imagePath: 'assets/icons/github-mark.png',
-                onPressed: () => controller.signInWithGithub(),
-                backgroundColor: Colors.black87,
-                textColor: Colors.white,
-              ),
-              SizedBox(
-                height: _responsiveController.responsiveValue(
-                  mobile: 24.0,
-                  tablet: 32.0,
-                ),
-              ),
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [

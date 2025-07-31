@@ -206,55 +206,37 @@ class RegistrationController extends GetxController {
     _isDisplayNameValid.value = name.isNotEmpty && name.length >= 3;
   }
 
-  // GitHub OAuth bağlantısı
+  // GitHub bağlantısını başlat
   Future<void> connectGithub() async {
     try {
       _isGithubLoading.value = true;
-      _lastError.value = null;
 
-      // GitHub OAuth işlemini başlat
-      final accessToken = await _authController.signInWithGithub();
-
-      if (accessToken != null) {
-        _githubToken.value = accessToken;
-
-        // GitHub kullanıcı bilgilerini al
-        final githubService = Get.find<GitHubOAuthService>();
-        final githubUserData = await githubService.getUserInfo(accessToken);
-        final userEmail = githubUserData?['email'];
-
-        if (userEmail != null) {
-          // GitHub bağlantısını başarılı olarak işaretle
-          _isGithubConnected.value = true;
-
-          // GitHub kullanıcı verilerini kaydet
-          if (githubUserData != null) {
-            _githubUsername.value = githubUserData['login'];
-            _githubUserData.value = githubUserData;
-          }
-
-          Get.snackbar(
-            'Başarılı',
-            'GitHub hesabınız başarıyla bağlandı!',
-            backgroundColor: Colors.green.withOpacity(0.8),
-            colorText: Colors.white,
-            snackPosition: SnackPosition.BOTTOM,
-            duration: const Duration(seconds: 3),
-            icon: const Icon(Icons.check_circle, color: Colors.white),
-          );
-        } else {
-          throw Exception('GitHub kullanıcı bilgileri alınamadı');
-        }
-      } else {
-        throw Exception('GitHub erişim izni alınamadı');
+      final userCredential = await _authRepository.signInWithGitHub();
+      if (userCredential.user == null) {
+        throw Exception('GitHub bağlantısı başarısız oldu');
       }
+
+      // GitHub bilgilerini al
+      final additionalData = userCredential.additionalUserInfo?.profile;
+      if (additionalData != null) {
+        setGithubUserData({
+          'email': additionalData['email'],
+          'displayName': additionalData['name'],
+          'githubUsername': additionalData['login'],
+          'githubToken': userCredential.credential?.accessToken,
+          'githubUserData': additionalData,
+          'isGithubConnected': true,
+        });
+      }
+
+      // Kullanıcıyı çıkış yaptır (kayıt işlemi için)
+      await _authRepository.signOut();
     } catch (e) {
       _lastError.value = e.toString();
       _isGithubConnected.value = false;
-
       Get.snackbar(
         'Hata',
-        'GitHub bağlantısı kurulamadı: $e',
+        'GitHub bağlantısı sırasında bir hata oluştu: $e',
         backgroundColor: Colors.red.withOpacity(0.8),
         colorText: Colors.white,
         snackPosition: SnackPosition.BOTTOM,
@@ -263,6 +245,62 @@ class RegistrationController extends GetxController {
       );
     } finally {
       _isGithubLoading.value = false;
+    }
+  }
+
+  // GitHub bilgilerini form alanlarına aktar
+  void setGithubUserData(Map<String, dynamic> githubData) {
+    try {
+      // Email ve isim bilgilerini aktar
+      if (githubData['email'] != null && emailController.text.isEmpty) {
+        emailController.text = githubData['email'];
+        _validateEmail();
+      }
+
+      if (githubData['displayName'] != null &&
+          displayNameController.text.isEmpty) {
+        displayNameController.text = githubData['displayName'];
+        _validateDisplayName();
+      }
+
+      // GitHub kullanıcı adını kaydet
+      _githubUsername.value = githubData['githubUsername'];
+
+      // GitHub token'ı kaydet
+      _githubToken.value = githubData['githubToken'];
+
+      // GitHub kullanıcı verilerini sakla
+      _githubUserData.value = githubData['githubUserData'];
+
+      // GitHub bağlantısını başarılı olarak işaretle
+      _isGithubConnected.value = githubData['isGithubConnected'] ?? true;
+
+      // GitHub yükleme durumunu güncelle
+      _isGithubLoading.value = false;
+
+      Get.snackbar(
+        'Başarılı',
+        'GitHub hesabınız otomatik olarak bağlandı!',
+        backgroundColor: Colors.green.withOpacity(0.8),
+        colorText: Colors.white,
+        snackPosition: SnackPosition.BOTTOM,
+        duration: const Duration(seconds: 3),
+        icon: const Icon(Icons.check_circle, color: Colors.white),
+      );
+    } catch (e) {
+      _lastError.value = e.toString();
+      _isGithubConnected.value = false;
+      _isGithubLoading.value = false;
+
+      Get.snackbar(
+        'Hata',
+        'GitHub bilgileri aktarılırken bir hata oluştu: $e',
+        backgroundColor: Colors.red.withOpacity(0.8),
+        colorText: Colors.white,
+        snackPosition: SnackPosition.BOTTOM,
+        duration: const Duration(seconds: 4),
+        icon: const Icon(Icons.error, color: Colors.white),
+      );
     }
   }
 

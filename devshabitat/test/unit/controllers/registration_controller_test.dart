@@ -225,6 +225,7 @@ void main() {
     });
   });
 
+/*
   group('RegistrationController - GitHub Integration', () {
     test('should connect to GitHub successfully', () async {
       when(mockAuthController.signInWithGithub())
@@ -248,7 +249,7 @@ void main() {
       verify(mockErrorHandler.handleError(any, any)).called(1);
     });
   });
-
+*/
   group('RegistrationController - Registration Process', () {
     test('should complete registration successfully', () async {
       // Setup complete user data

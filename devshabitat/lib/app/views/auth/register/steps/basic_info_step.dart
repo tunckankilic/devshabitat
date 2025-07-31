@@ -5,6 +5,7 @@ import '../../../../controllers/registration_controller.dart';
 import '../../../../controllers/responsive_controller.dart';
 import '../../../../controllers/enhanced_form_validation_controller.dart';
 import '../../../../widgets/enhanced_form_field.dart';
+import '../../../../controllers/auth_controller.dart';
 
 class BasicInfoStep extends GetView<RegistrationController> {
   final _responsiveController = Get.find<ResponsiveController>();
@@ -424,7 +425,25 @@ class BasicInfoStep extends GetView<RegistrationController> {
                       ? controller.disconnectGithub
                       : (controller.isGithubLoading
                           ? null
-                          : controller.connectGithub),
+                          : () async {
+                              print('GitHub login butonu tıklandı');
+                              try {
+                                final authController =
+                                    Get.find<AuthController>();
+                                print('AuthController bulundu');
+                                await authController.signInWithGithub();
+                                print('GitHub login tamamlandı');
+                              } catch (e) {
+                                print('GitHub login hatası: $e');
+                                Get.snackbar(
+                                  'Hata',
+                                  'GitHub bağlantısı sırasında bir hata oluştu: $e',
+                                  backgroundColor: Colors.red.withOpacity(0.8),
+                                  colorText: Colors.white,
+                                  snackPosition: SnackPosition.BOTTOM,
+                                );
+                              }
+                            }),
                   icon: controller.isGithubLoading
                       ? SizedBox(
                           width: _responsiveController.responsiveValue(

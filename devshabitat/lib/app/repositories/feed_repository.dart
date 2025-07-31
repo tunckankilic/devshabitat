@@ -6,6 +6,7 @@ import '../services/github_oauth_service.dart';
 import '../core/services/error_handler_service.dart';
 import 'package:get/get.dart';
 import 'package:logger/logger.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 
 class FeedRepository {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
@@ -13,6 +14,7 @@ class FeedRepository {
     githubOAuthService: GitHubOAuthService(
       logger: Get.find<Logger>(),
       errorHandler: Get.find<ErrorHandlerService>(),
+      auth: FirebaseAuth.instance,
     ),
   );
 

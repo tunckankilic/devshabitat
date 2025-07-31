@@ -7,6 +7,7 @@ import 'package:logger/logger.dart';
 import 'package:get/get.dart';
 import '../services/github_oauth_service.dart';
 import '../constants/app_strings.dart';
+import 'package:flutter/foundation.dart' show kIsWeb;
 
 abstract class IAuthRepository {
   Future<UserCredential> signInWithEmailAndPassword(
@@ -217,42 +218,56 @@ class AuthRepository implements IAuthRepository {
   }
 
   @override
-  Future<UserCredential> signInWithGithub() async {
+  Future<UserCredential> signInWithGitHub() async {
     try {
       final accessToken = await _githubOAuthService.getAccessToken();
 
       if (accessToken == null) {
-        _logger.w('GitHub OAuth flow failed or was cancelled by user');
-        throw Exception(AppStrings.githubLoginFailed);
+        _logger.w(
+            'GitHub OAuth akışı başarısız oldu veya kullanıcı tarafından iptal edildi');
+        throw Exception('GitHub girişi başarısız oldu');
       }
 
       // GitHub'dan kullanıcı bilgilerini al
       final userInfo = await _githubOAuthService.getUserInfo(accessToken);
-      final email = userInfo?['email'] as String?;
-
-      if (email != null) {
-        // Email çakışmasını kontrol et
-        await _checkEmailBeforeSocialSignIn(email, 'github.com');
-      }
 
       final githubAuthCredential = GithubAuthProvider.credential(accessToken);
       final userCredential =
           await _auth.signInWithCredential(githubAuthCredential);
 
       if (userCredential.user == null) {
-        _logger.e('Firebase authentication failed');
-        throw Exception(AppStrings.errorAuth);
+        _logger.e('Firebase kimlik doğrulaması başarısız oldu');
+        throw Exception('Kimlik doğrulama hatası');
       }
 
-      await handleSocialSignIn(userCredential.user!);
+      // GitHub bilgilerini ek veri olarak geç
+      final additionalData = userInfo != null
+          ? {
+              'githubUsername': userInfo['login'],
+              'githubId': userInfo['id'].toString(),
+              'githubBio': userInfo['bio'],
+              'githubLocation': userInfo['location'],
+              'githubCompany': userInfo['company'],
+              'githubBlog': userInfo['blog'],
+              'githubFollowers': userInfo['followers'].toString(),
+              'githubFollowing': userInfo['following'].toString(),
+              'githubPublicRepos': userInfo['public_repos'].toString(),
+              'githubCreatedAt': userInfo['created_at'],
+              'githubUpdatedAt': userInfo['updated_at'],
+            }
+          : null;
 
-      _logger.i('GitHub login successful: ${userCredential.user?.email}');
+      await handleSocialSignIn(userCredential.user!,
+          additionalData: additionalData);
       return userCredential;
     } catch (e) {
-      _logger.e('Error during GitHub login: $e');
+      _logger.e('GitHub girişi sırasında hata: $e');
       throw _handleAuthException(e);
     }
   }
+
+  @override
+  Future<UserCredential> signInWithGithub() => signInWithGitHub();
 
   @override
   Future<void> signOut() async {
@@ -511,8 +526,29 @@ class AuthRepository implements IAuthRepository {
   Future<void> handleSocialSignIn(User user,
       {Map<String, dynamic>? additionalData}) async {
     try {
+      // Kullanıcı dokümanını kontrol et
       final userDoc = await _firestore.collection('users').doc(user.uid).get();
-      final Map<String, dynamic> userData = {
+
+      if (!userDoc.exists) {
+        // Yeni kullanıcı - profil oluştur
+        await _createUserProfile(user, additionalData: additionalData);
+      } else {
+        // Mevcut kullanıcı - GitHub bilgilerini güncelle
+        if (additionalData != null &&
+            additionalData.containsKey('githubUsername')) {
+          await _updateGithubInfo(user.uid, additionalData);
+        }
+      }
+    } catch (e) {
+      _logger.e('Social sign in error: $e');
+      throw _handleAuthException(e);
+    }
+  }
+
+  Future<void> _createUserProfile(User user,
+      {Map<String, dynamic>? additionalData}) async {
+    try {
+      final userData = {
         'id': user.uid,
         'email': user.email,
         'displayName': user.displayName,
@@ -521,62 +557,40 @@ class AuthRepository implements IAuthRepository {
         'updatedAt': FieldValue.serverTimestamp(),
       };
 
-      if (!userDoc.exists) {
-        // Yeni kullanıcı - ilk profil oluşturma
-        userData.addAll({
-          'createdAt': FieldValue.serverTimestamp(),
-          'isProfileComplete': false,
-          'registrationStep': 'basicInfo',
-          'authProvider': _determineAuthProvider(user),
-          'skills': [],
-          'interests': [],
-          'connections': [],
-          'notifications': {
-            'email': true,
-            'push': true,
-            'marketing': false,
-          },
-          'privacySettings': {
-            'profileVisibility': 'public',
-            'showEmail': false,
-            'showLocation': true,
-          },
-          ...?additionalData,
-        });
+      userData.addAll({
+        'createdAt': FieldValue.serverTimestamp(),
+        'isProfileComplete': false,
+        'registrationStep': 'basicInfo',
+        'authProvider': _determineAuthProvider(user),
+        'skills': [],
+        'interests': [],
+        'connections': [],
+        'notifications': {
+          'email': true,
+          'push': true,
+          'marketing': false,
+        },
+        'privacySettings': {
+          'profileVisibility': 'public',
+          'showEmail': false,
+          'showLocation': true,
+        },
+        ...?additionalData,
+      });
 
-        // Sağlayıcıya özel varsayılan ayarlar
-        _addProviderSpecificDefaults(userData, user);
+      // Sağlayıcıya özel varsayılan ayarlar
+      _addProviderSpecificDefaults(userData, user);
 
-        await _firestore.collection('users').doc(user.uid).set(userData);
+      await _firestore.collection('users').doc(user.uid).set(userData);
 
-        // Yeni kullanıcı için profil tamamlama yönlendirmesi
-        Get.offAllNamed('/register/complete-profile', arguments: {
-          'userId': user.uid,
-          'isNewUser': true,
-          'authProvider': userData['authProvider'],
-        });
-      } else {
-        // Mevcut kullanıcı - sadece son görülme ve güncelleme zamanını güncelle
-        await _firestore.collection('users').doc(user.uid).update({
-          'lastSeen': FieldValue.serverTimestamp(),
-          'updatedAt': FieldValue.serverTimestamp(),
-        });
-
-        // Profil tamamlanmamışsa yönlendir
-        final existingData = userDoc.data() ?? {};
-        if (existingData['isProfileComplete'] == false) {
-          Get.offAllNamed('/register/complete-profile', arguments: {
-            'userId': user.uid,
-            'isNewUser': false,
-            'authProvider': existingData['authProvider'],
-            'currentStep': existingData['registrationStep'],
-          });
-        } else {
-          Get.offAllNamed('/home');
-        }
-      }
+      // Yeni kullanıcı için profil tamamlama yönlendirmesi
+      Get.offAllNamed('/register/complete-profile', arguments: {
+        'userId': user.uid,
+        'isNewUser': true,
+        'authProvider': userData['authProvider'],
+      });
     } catch (e) {
-      _logger.e('Error handling social sign in: $e');
+      _logger.e('Error creating user profile: $e');
       throw _handleAuthException(e);
     }
   }
@@ -748,6 +762,29 @@ class AuthRepository implements IAuthRepository {
         'showLocation': true,
       },
     });
+  }
+
+  Future<void> _updateGithubInfo(
+      String userId, Map<String, dynamic> githubData) async {
+    try {
+      await _firestore.collection('users').doc(userId).update({
+        'githubUsername': githubData['githubUsername'],
+        'githubId': githubData['githubId'],
+        'githubBio': githubData['githubBio'],
+        'githubLocation': githubData['githubLocation'],
+        'githubCompany': githubData['githubCompany'],
+        'githubBlog': githubData['githubBlog'],
+        'githubFollowers': githubData['githubFollowers'],
+        'githubFollowing': githubData['githubFollowing'],
+        'githubPublicRepos': githubData['githubPublicRepos'],
+        'githubCreatedAt': githubData['githubCreatedAt'],
+        'githubUpdatedAt': githubData['githubUpdatedAt'],
+        'lastGithubSync': FieldValue.serverTimestamp(),
+      });
+    } catch (e) {
+      _logger.e('GitHub info update error: $e');
+      throw _handleAuthException(e);
+    }
   }
 
   Future<void> _updateLastSeen() async {

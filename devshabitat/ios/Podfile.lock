@@ -1200,6 +1200,10 @@ PODS:
     - GoogleUtilities/Environment (~> 8.0)
     - GoogleUtilities/UserDefaults (~> 8.0)
     - PromisesObjC (~> 2.4)
+  - audioplayers_darwin (0.0.1):
+    - Flutter
+  - battery_plus (1.0.0):
+    - Flutter
   - BoringSSL-GRPC (0.0.37):
     - BoringSSL-GRPC/Implementation (= 0.0.37)
     - BoringSSL-GRPC/Interface (= 0.0.37)
@@ -1601,6 +1605,8 @@ PODS:
 
 DEPENDENCIES:
   - app_links (from `.symlinks/plugins/app_links/ios`)
+  - audioplayers_darwin (from `.symlinks/plugins/audioplayers_darwin/ios`)
+  - battery_plus (from `.symlinks/plugins/battery_plus/ios`)
   - cloud_firestore (from `.symlinks/plugins/cloud_firestore/ios`)
   - connectivity_plus (from `.symlinks/plugins/connectivity_plus/ios`)
   - device_info_plus (from `.symlinks/plugins/device_info_plus/ios`)
@@ -1684,6 +1690,10 @@ SPEC REPOS:
 EXTERNAL SOURCES:
   app_links:
     :path: ".symlinks/plugins/app_links/ios"
+  audioplayers_darwin:
+    :path: ".symlinks/plugins/audioplayers_darwin/ios"
+  battery_plus:
+    :path: ".symlinks/plugins/battery_plus/ios"
   cloud_firestore:
     :path: ".symlinks/plugins/cloud_firestore/ios"
   connectivity_plus:
@@ -1756,6 +1766,8 @@ SPEC CHECKSUMS:
   app_links: e70ca16b4b0f88253b3b3660200d4a10b4ea9795
   AppAuth: 1c1a8afa7e12f2ec3a294d9882dfa5ab7d3cb063
   AppCheckCore: cc8fd0a3a230ddd401f326489c99990b013f0c4f
+  audioplayers_darwin: 877d9a4d06331c5c374595e46e16453ac7eafa40
+  battery_plus: 34f72fa2afeeea83bbae306c72a25828d3ec727a
   BoringSSL-GRPC: dded2a44897e45f28f08ae87a55ee4bcd19bc508
   cloud_firestore: 97e42181866db3cba3fe3935895ab779b6acacd6
   connectivity_plus: 2a701ffec2c0ae28a48cf7540e279787e77c447d

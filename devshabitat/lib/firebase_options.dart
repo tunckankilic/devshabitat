@@ -3,7 +3,6 @@
 import 'package:firebase_core/firebase_core.dart' show FirebaseOptions;
 import 'package:flutter/foundation.dart'
     show defaultTargetPlatform, kIsWeb, TargetPlatform;
-import 'package:devshabitat/app/core/config/env.dart';
 
 /// Default [FirebaseOptions] for use with your Firebase apps.
 ///
@@ -18,10 +17,7 @@ import 'package:devshabitat/app/core/config/env.dart';
 class DefaultFirebaseOptions {
   static FirebaseOptions get currentPlatform {
     if (kIsWeb) {
-      throw UnsupportedError(
-        'DefaultFirebaseOptions have not been configured for web - '
-        'you can reconfigure this by running the FlutterFire CLI again.',
-      );
+      return web;
     }
     switch (defaultTargetPlatform) {
       case TargetPlatform.android:
@@ -50,22 +46,33 @@ class DefaultFirebaseOptions {
     }
   }
 
-  static final FirebaseOptions android = FirebaseOptions(
-    apiKey: Env.firebaseAndroidApiKey,
-    appId: Env.firebaseAndroidAppId,
-    messagingSenderId: Env.firebaseAndroidMessagingSenderId,
-    projectId: Env.firebaseAndroidProjectId,
-    storageBucket: Env.firebaseAndroidStorageBucket,
-    androidClientId: Env.firebaseAndroidClientId,
+  static const FirebaseOptions ios = FirebaseOptions(
+    apiKey: 'AIzaSyB09Z8AgKxILUROe8VHDf9ehHoTWuHL7yg',
+    appId: '1:163730674615:ios:238f8af5d72883b7730e32',
+    messagingSenderId: '163730674615',
+    projectId: 'devshabitat-23119',
+    storageBucket: 'devshabitat-23119.firebasestorage.app',
+    androidClientId: '163730674615-s33b8j0mk30p1djg1jp14tai8ir3fekt.apps.googleusercontent.com',
+    iosClientId: '163730674615-mmjbadbppjvsua7qr0ph4hnmrprhraqb.apps.googleusercontent.com',
+    iosBundleId: 'site.tunckankilic.devshabitat',
   );
 
-  static final FirebaseOptions ios = FirebaseOptions(
-    apiKey: Env.firebaseIosApiKey,
-    appId: Env.firebaseIosAppId,
-    messagingSenderId: Env.firebaseIosMessagingSenderId,
-    projectId: Env.firebaseIosProjectId,
-    storageBucket: Env.firebaseIosStorageBucket,
-    iosClientId: Env.firebaseIosClientId,
-    iosBundleId: Env.firebaseIosBundleId,
+  static const FirebaseOptions web = FirebaseOptions(
+    apiKey: 'AIzaSyC9EAUDH9K8hm96NLh9CmQpyyaAmU_UKsQ',
+    appId: '1:163730674615:web:d1ba409f7c975448730e32',
+    messagingSenderId: '163730674615',
+    projectId: 'devshabitat-23119',
+    authDomain: 'devshabitat-23119.firebaseapp.com',
+    storageBucket: 'devshabitat-23119.firebasestorage.app',
+    measurementId: 'G-XH6QMMHLCL',
   );
+
+  static const FirebaseOptions android = FirebaseOptions(
+    apiKey: 'AIzaSyBmYcsHh8AiS7YWEB-TupyGL_STUvcteUc',
+    appId: '1:163730674615:android:2c10ee25c9a71f73730e32',
+    messagingSenderId: '163730674615',
+    projectId: 'devshabitat-23119',
+    storageBucket: 'devshabitat-23119.firebasestorage.app',
+  );
+
 }

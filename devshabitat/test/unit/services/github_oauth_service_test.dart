@@ -4,6 +4,7 @@ import 'package:mockito/mockito.dart';
 import 'package:mockito/annotations.dart';
 import 'package:http/http.dart' as http;
 import 'package:logger/logger.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:devshabitat/app/services/github_oauth_service.dart';
 import 'package:devshabitat/app/core/services/error_handler_service.dart';
 import 'package:devshabitat/app/services/deep_linking_service.dart';
@@ -14,6 +15,7 @@ import '../../test_helper.dart';
   MockSpec<ErrorHandlerService>(),
   MockSpec<DeepLinkingService>(),
   MockSpec<http.Client>(),
+  MockSpec<FirebaseAuth>(),
 ])
 import 'github_oauth_service_test.mocks.dart';
 
@@ -22,6 +24,7 @@ void main() {
   late MockLogger mockLogger;
   late MockErrorHandlerService mockErrorHandler;
   late MockDeepLinkingService mockDeepLinkingService;
+  late MockFirebaseAuth mockFirebaseAuth;
 
   setUpAll(() async {
     await setupTestEnvironment();
@@ -31,10 +34,12 @@ void main() {
     mockLogger = MockLogger();
     mockErrorHandler = MockErrorHandlerService();
     mockDeepLinkingService = MockDeepLinkingService();
+    mockFirebaseAuth = MockFirebaseAuth();
 
     service = GitHubOAuthService(
       logger: mockLogger,
       errorHandler: mockErrorHandler,
+      auth: mockFirebaseAuth,
     );
 
     // DeepLinkingService'i Get'e ekle
