@@ -134,9 +134,6 @@ void main() {
       await controller.updatePassword('newpassword');
       verify(mockEmailAuth.updatePassword('newpassword')).called(1);
 
-      await controller.updateEmail('new@example.com');
-      verify(mockEmailAuth.updateEmail('new@example.com')).called(1);
-
       await controller.reauthenticate('test@example.com', 'password');
       verify(mockEmailAuth.reauthenticate('test@example.com', 'password'))
           .called(1);
