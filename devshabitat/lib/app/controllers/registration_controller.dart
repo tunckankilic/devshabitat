@@ -6,6 +6,8 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import '../core/services/error_handler_service.dart';
 import '../controllers/auth_controller.dart';
 import '../services/github_oauth_service.dart';
+import '../services/github_service.dart';
+import 'package:logger/logger.dart';
 
 enum RegistrationStep {
   basicInfo, // Email, şifre ve isim (zorunlu)
@@ -19,6 +21,7 @@ class RegistrationController extends GetxController {
   final AuthRepository _authRepository;
   final ErrorHandlerService _errorHandler;
   final AuthController _authController;
+  final Logger _logger = Get.find<Logger>();
 
   // Form keys
   final basicInfoFormKey = GlobalKey<FormState>();
@@ -227,6 +230,9 @@ class RegistrationController extends GetxController {
           'githubUserData': additionalData,
           'isGithubConnected': true,
         });
+
+        // GitHub bağlantısı başarılı olduktan sonra otomatik olarak bir sonraki adıma geç
+        await _proceedAfterGithubConnection();
       }
 
       // Kullanıcıyı çıkış yaptır (kayıt işlemi için)
@@ -248,10 +254,123 @@ class RegistrationController extends GetxController {
     }
   }
 
+  // GitHub bağlantısı sonrası otomatik ilerleme
+  Future<void> _proceedAfterGithubConnection() async {
+    try {
+      // GitHub verilerini çek ve form alanlarını doldur
+      await _fetchAndPopulateGithubData();
+
+      // GitHub bağlantısı başarılı olduktan sonra kullanıcıyı basic info step'e döndür
+      // ve diğer bilgileri doldurması için yönlendir
+      Get.snackbar(
+        'GitHub Bağlantısı Başarılı',
+        'GitHub hesabınız bağlandı! Şimdi diğer bilgilerinizi doldurun ve devam edin.',
+        backgroundColor: Colors.green.withOpacity(0.8),
+        colorText: Colors.white,
+        snackPosition: SnackPosition.BOTTOM,
+        duration: const Duration(seconds: 4),
+        icon: const Icon(Icons.check_circle, color: Colors.white),
+      );
+
+      // Kullanıcıyı basic info step'te tut, otomatik ilerleme yapma
+      // Kullanıcı manuel olarak "Devam Et" butonuna basarak ilerleyecek
+    } catch (e) {
+      _logger.e('GitHub bağlantısı sonrası işlem hatası: $e');
+    }
+  }
+
+  // GitHub verilerini çek ve form alanlarını doldur
+  Future<void> _fetchAndPopulateGithubData() async {
+    try {
+      if (_githubUsername.value != null && _githubUsername.value!.isNotEmpty) {
+        final githubService = Get.find<GithubService>();
+
+        // GitHub stats'ları çek
+        final githubStats =
+            await githubService.getGithubStats(_githubUsername.value!);
+
+        if (githubStats != null) {
+          // Bio bilgisini GitHub'dan al
+          if (githubStats.bio != null &&
+              githubStats.bio!.isNotEmpty &&
+              bioController.text.isEmpty) {
+            bioController.text = githubStats.bio!;
+          }
+
+          // Location bilgisini GitHub'dan al
+          if (githubStats.location != null &&
+              githubStats.location!.isNotEmpty &&
+              locationController.text.isEmpty) {
+            locationController.text = githubStats.location!;
+          }
+
+          // Company bilgisini GitHub'dan al
+          if (githubStats.company != null &&
+              githubStats.company!.isNotEmpty &&
+              companyController.text.isEmpty) {
+            companyController.text = githubStats.company!;
+          }
+
+          // Tech stack'i skills olarak ekle
+          final techStack =
+              await githubService.getTechStack(_githubUsername.value!);
+          if (techStack.isNotEmpty) {
+            for (final tech in techStack.take(10)) {
+              // İlk 10 teknolojiyi al
+              if (!selectedSkills.contains(tech)) {
+                selectedSkills.add(tech);
+              }
+            }
+          }
+
+          // GitHub verilerini güncelle
+          _githubUserData.value = {
+            ..._githubUserData.value ?? {},
+            'stats': githubStats.toJson(),
+            'techStack': techStack,
+            'lastSync': DateTime.now().toIso8601String(),
+          };
+        }
+      }
+    } catch (e) {
+      _logger.e('GitHub verilerini çekerken hata: $e');
+    }
+  }
+
+  // Düzenli GitHub veri güncellemesi için metod
+  Future<void> updateGithubData() async {
+    try {
+      if (_githubUsername.value != null && _githubUsername.value!.isNotEmpty) {
+        await _fetchAndPopulateGithubData();
+
+        Get.snackbar(
+          'Güncelleme Başarılı',
+          'GitHub verileriniz güncellendi',
+          backgroundColor: Colors.green.withOpacity(0.8),
+          colorText: Colors.white,
+          snackPosition: SnackPosition.BOTTOM,
+          duration: const Duration(seconds: 2),
+          icon: const Icon(Icons.refresh, color: Colors.white),
+        );
+      }
+    } catch (e) {
+      _logger.e('GitHub veri güncelleme hatası: $e');
+      Get.snackbar(
+        'Güncelleme Hatası',
+        'GitHub verileri güncellenirken bir hata oluştu',
+        backgroundColor: Colors.red.withOpacity(0.8),
+        colorText: Colors.white,
+        snackPosition: SnackPosition.BOTTOM,
+        duration: const Duration(seconds: 3),
+        icon: const Icon(Icons.error, color: Colors.white),
+      );
+    }
+  }
+
   // GitHub bilgilerini form alanlarına aktar
   void setGithubUserData(Map<String, dynamic> githubData) {
     try {
-      // Email ve isim bilgilerini aktar
+      // Email ve isim bilgilerini aktar (eğer boşsa)
       if (githubData['email'] != null && emailController.text.isEmpty) {
         emailController.text = githubData['email'];
         _validateEmail();
@@ -278,13 +397,14 @@ class RegistrationController extends GetxController {
       // GitHub yükleme durumunu güncelle
       _isGithubLoading.value = false;
 
+      // Kullanıcıya bilgilendirme mesajı göster
       Get.snackbar(
-        'Başarılı',
-        'GitHub hesabınız otomatik olarak bağlandı!',
+        'GitHub Bağlantısı Başarılı',
+        'GitHub hesabınız bağlandı! Şimdi diğer bilgilerinizi doldurun ve devam edin.',
         backgroundColor: Colors.green.withOpacity(0.8),
         colorText: Colors.white,
         snackPosition: SnackPosition.BOTTOM,
-        duration: const Duration(seconds: 3),
+        duration: const Duration(seconds: 4),
         icon: const Icon(Icons.check_circle, color: Colors.white),
       );
     } catch (e) {

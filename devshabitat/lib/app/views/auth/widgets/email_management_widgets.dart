@@ -124,10 +124,6 @@ class EmailChangeDialog extends StatelessWidget {
                             passwordController.text,
                           );
 
-                          // Sonra email'i güncelle
-                          await emailAuthController
-                              .updateEmail(newEmailController.text);
-
                           Get.back();
                           if (onEmailChanged != null) {
                             onEmailChanged!();

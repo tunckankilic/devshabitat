@@ -8,12 +8,14 @@ class GitHubAuthChecker extends StatelessWidget {
   final Widget child;
   final Widget? fallbackWidget;
   final String? customMessage;
+  final bool showConnectButton;
 
   const GitHubAuthChecker({
     super.key,
     required this.child,
     this.fallbackWidget,
     this.customMessage,
+    this.showConnectButton = true,
   });
 
   @override
@@ -30,7 +32,7 @@ class GitHubAuthChecker extends StatelessWidget {
         }
 
         final username = snapshot.data;
-        if (username == null) {
+        if (username == null || username.isEmpty) {
           return fallbackWidget ?? _buildAuthRequiredWidget(context);
         }
 
@@ -51,27 +53,40 @@ class GitHubAuthChecker extends StatelessWidget {
           ),
           const SizedBox(height: 16),
           Text(
-            customMessage ?? AppStrings.githubAuthRequired,
+            customMessage ?? 'GitHub Hesabı Gerekli',
             style: Theme.of(context).textTheme.headlineSmall,
             textAlign: TextAlign.center,
           ),
           const SizedBox(height: 8),
           Text(
-            AppStrings.githubAuthRequired,
+            'Bu özelliği kullanmak için GitHub hesabınızın bağlı olması gerekiyor.',
             style: Theme.of(context).textTheme.bodyMedium,
             textAlign: TextAlign.center,
           ),
           const SizedBox(height: 24),
-          ElevatedButton.icon(
-            onPressed: () {
-              // AuthController'da GitHub sign in metodunu çağır
-              final authController = Get.find<AuthController>();
-              // GitHub sign in metodunu çağır
-              authController.signInWithGithub();
-            },
-            icon: const Icon(Icons.login),
-            label: const Text(AppStrings.githubAuthRequired),
-          ),
+          if (showConnectButton) ...[
+            ElevatedButton.icon(
+              onPressed: () {
+                // Profil sayfasına yönlendir
+                Get.toNamed('/profile');
+              },
+              icon: const Icon(Icons.settings),
+              label: const Text('Profil Ayarlarına Git'),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.blue,
+                foregroundColor: Colors.white,
+              ),
+            ),
+            const SizedBox(height: 12),
+            TextButton(
+              onPressed: () {
+                // AuthController'da GitHub sign in metodunu çağır
+                final authController = Get.find<AuthController>();
+                authController.signInWithGithub();
+              },
+              child: const Text('GitHub ile Bağlan'),
+            ),
+          ],
         ],
       ),
     );
@@ -89,7 +104,7 @@ class GitHubAuthChecker extends StatelessWidget {
           ),
           const SizedBox(height: 16),
           Text(
-            AppStrings.error,
+            'Bir Hata Oluştu',
             style: Theme.of(context).textTheme.headlineSmall,
             textAlign: TextAlign.center,
           ),
@@ -105,7 +120,7 @@ class GitHubAuthChecker extends StatelessWidget {
               // Sayfayı yenile
               Get.forceAppUpdate();
             },
-            child: const Text(AppStrings.tryAgain),
+            child: const Text('Tekrar Dene'),
           ),
         ],
       ),

@@ -35,6 +35,7 @@ import 'message_binding.dart';
 import '../services/network_analytics_service.dart';
 import '../services/location/maps_service.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import '../services/fcm_service.dart';
 
 class AppBinding extends Bindings {
   @override
@@ -93,6 +94,9 @@ class AppBinding extends Bindings {
 
     // Networking Controller
     Get.put(NetworkingController());
+
+    // FCM Service
+    Get.put(FCMService());
   }
 
   Future<void> _initAsynchronousDependencies() async {

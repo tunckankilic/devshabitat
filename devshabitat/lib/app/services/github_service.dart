@@ -20,13 +20,40 @@ class GithubService extends GetxService {
   static final RegExp _usernameRegex =
       RegExp(r'^[a-zA-Z0-9]([a-zA-Z0-9\-]{0,37}[a-zA-Z0-9])?$');
 
-  // GitHub token'ı güvenli şekilde al
+  // GitHub token'ı güvenli şekilde al (sadece environment'dan)
   String? get _token {
     try {
-      // GitHubConfig'den token'ı al veya environment'dan
-      final token =
+      // Sadece environment'dan token'ı kontrol et
+      final envToken =
           const String.fromEnvironment('GITHUB_TOKEN', defaultValue: '');
-      return token.isNotEmpty ? token : null;
+      return envToken.isNotEmpty ? envToken : null;
+    } catch (e) {
+      _logger.e('GitHub token alınırken hata: $e');
+      return null;
+    }
+  }
+
+  // GitHub token'ı async olarak al (auth repository'den)
+  Future<String?> _getTokenAsync() async {
+    try {
+      // Önce environment'dan token'ı kontrol et
+      final envToken =
+          const String.fromEnvironment('GITHUB_TOKEN', defaultValue: '');
+      if (envToken.isNotEmpty) return envToken;
+
+      // Eğer environment'da yoksa, kullanıcının profilinden al
+      final currentUser = _authRepository.currentUser;
+      if (currentUser != null) {
+        try {
+          // Auth repository'den GitHub access token'ı al
+          return await _authRepository.getGithubAccessToken();
+        } catch (e) {
+          _logger.w('GitHub token auth repository\'den alınamadı: $e');
+          return null;
+        }
+      }
+
+      return null;
     } catch (e) {
       _logger.e('GitHub token alınırken hata: $e');
       return null;
@@ -132,9 +159,14 @@ class GithubService extends GetxService {
         ...?additionalHeaders,
       };
 
-      // Token varsa ekle
-      if (_token != null && _token!.isNotEmpty) {
-        headers['Authorization'] = 'Bearer $_token';
+      // Token varsa ekle (önce environment'dan, sonra auth repository'den)
+      String? token = _token;
+      if (token == null || token.isEmpty) {
+        token = await _getTokenAsync();
+      }
+
+      if (token != null && token.isNotEmpty) {
+        headers['Authorization'] = 'Bearer $token';
       }
 
       final response = await http

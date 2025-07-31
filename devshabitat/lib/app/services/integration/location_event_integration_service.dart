@@ -1,15 +1,16 @@
 // ignore_for_file: constant_identifier_names
 
+import 'dart:math';
 import 'package:get/get.dart';
 import '../event/event_service.dart';
 import '../../models/event/event_model.dart';
 import '../../models/location/location_model.dart';
-import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
-import 'dart:math';
+import '../fcm_service.dart';
 
 class LocationEventIntegrationService extends GetxService {
   final EventService _eventService = Get.find();
+  final FCMService _fcmService = Get.find();
 
   static const double NEARBY_THRESHOLD_KM = 5.0; // 5 km yarıçap
 
@@ -53,20 +54,18 @@ class LocationEventIntegrationService extends GetxService {
   Future<void> sendNearbyEventNotification(
       EventModel event, String userToken) async {
     try {
-      final message = {
-        'data': {
+      await _fcmService.sendNotification(
+        token: userToken,
+        title: 'Yakınınızda Bir Etkinlik',
+        body: 'Yakınınızda yeni bir etkinlik: ${event.title}',
+        data: {
           'type': 'nearby_event',
           'eventId': event.id,
           'route': '/event/detail/${event.id}'
-        }
-      };
-
-      await FirebaseMessaging.instance.sendMessage(
-        to: userToken,
-        data: message['data'] as Map<String, String>,
+        },
       );
     } catch (e) {
-      print('Error sending nearby event notification: $e');
+      print('Bildirim gönderme hatası: $e');
       rethrow;
     }
   }

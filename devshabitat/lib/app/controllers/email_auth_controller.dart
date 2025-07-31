@@ -145,19 +145,6 @@ class EmailAuthController extends GetxController {
     }
   }
 
-  Future<void> updateEmail(String newEmail) async {
-    try {
-      _isLoading.value = true;
-      await _authRepository.updateEmail(newEmail);
-      _errorHandler.handleSuccess('E-posta güncellendi');
-    } catch (e) {
-      _lastError.value = e.toString();
-      _errorHandler.handleError(e, ErrorHandlerService.AUTH_ERROR);
-    } finally {
-      _isLoading.value = false;
-    }
-  }
-
   Future<void> reauthenticate(String email, String password) async {
     try {
       _isLoading.value = true;

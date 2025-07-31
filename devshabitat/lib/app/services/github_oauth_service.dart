@@ -2,16 +2,19 @@ import 'dart:convert';
 import 'dart:async';
 import 'package:get/get.dart';
 import 'package:logger/logger.dart';
-import 'package:github_signin_promax/github_signin_promax.dart';
 import '../core/services/error_handler_service.dart';
 import '../core/config/github_config.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
+
+import '../packages/github_signin_promax/github_signin_promax.dart';
 
 class GitHubOAuthService extends GetxService {
   final Logger _logger;
   final ErrorHandlerService _errorHandler;
   final FirebaseAuth _auth;
-  late final GithubSignInPzz _githubSignIn;
+  late final GithubSignInParams _githubSignInParams;
 
   GitHubOAuthService({
     required Logger logger,
@@ -20,11 +23,11 @@ class GitHubOAuthService extends GetxService {
   })  : _logger = logger,
         _errorHandler = errorHandler,
         _auth = auth {
-    _githubSignIn = GithubSignInPromax(
+    _githubSignInParams = GithubSignInParams(
       clientId: GitHubConfig.clientId,
       clientSecret: GitHubConfig.clientSecret,
       redirectUrl: GitHubConfig.redirectUrl,
-      scope: GitHubConfig.scope,
+      scopes: GitHubConfig.scope,
     );
   }
 
@@ -36,7 +39,7 @@ class GitHubOAuthService extends GetxService {
     }
 
     try {
-      final result = await _githubSignIn.signIn();
+      final result = await _showGitHubSignInScreen();
       if (result == null) return null;
 
       return result.accessToken;
@@ -50,7 +53,7 @@ class GitHubOAuthService extends GetxService {
 
   Future<String?> getAccessToken() async {
     try {
-      final result = await _githubSignIn.signIn();
+      final result = await _showGitHubSignInScreen();
       return result?.accessToken;
     } catch (e) {
       _logger.e('GitHub access token error: $e');
@@ -62,13 +65,35 @@ class GitHubOAuthService extends GetxService {
 
   Future<Map<String, dynamic>?> getUserInfo(String accessToken) async {
     try {
-      final userInfo = await _githubSignIn.getUserData(accessToken);
-      return userInfo;
+      final response = await http.get(
+        Uri.parse('https://api.github.com/user'),
+        headers: {
+          'Authorization': 'Bearer $accessToken',
+          'Accept': 'application/vnd.github.v3+json',
+        },
+      );
+
+      if (response.statusCode == 200) {
+        return json.decode(response.body);
+      } else {
+        throw Exception('Failed to get user info: ${response.statusCode}');
+      }
     } catch (e) {
       _logger.e('GitHub user info error: $e');
       _errorHandler.handleError('GitHub kullanıcı bilgileri alınamadı',
           ErrorHandlerService.AUTH_ERROR);
       return null;
     }
+  }
+
+  Future<GithubSignInResponse?> _showGitHubSignInScreen() async {
+    final result = await Get.to<GithubSignInResponse>(
+      () => GithubSigninScreen(
+        params: _githubSignInParams,
+        headerColor: Colors.green,
+        title: 'GitHub ile Giriş Yap',
+      ),
+    );
+    return result;
   }
 }

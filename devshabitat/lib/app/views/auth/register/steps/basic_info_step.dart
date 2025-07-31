@@ -325,20 +325,15 @@ class BasicInfoStep extends GetView<RegistrationController> {
 
   Widget _buildGithubSection() {
     return Container(
-      padding: _responsiveController.responsivePadding(
-        horizontal: 16.0,
-        vertical: 16.0,
-      ),
+      padding: _responsiveController.responsivePadding(all: 16.0),
       decoration: BoxDecoration(
         color: Colors.grey[50],
-        borderRadius: BorderRadius.circular(
-          _responsiveController.responsiveValue(mobile: 12.0, tablet: 16.0),
-        ),
+        borderRadius: BorderRadius.circular(12.0),
         border: Border.all(
           color: controller.isGithubConnected
               ? Colors.green[300]!
               : Colors.orange[300]!,
-          width: 2,
+          width: 1.5,
         ),
       ),
       child: Column(
@@ -348,19 +343,12 @@ class BasicInfoStep extends GetView<RegistrationController> {
             children: [
               Icon(
                 Icons.code,
-                size: _responsiveController.responsiveValue(
-                  mobile: 24.0,
-                  tablet: 28.0,
-                ),
+                size: 24.0,
                 color: controller.isGithubConnected
                     ? Colors.green[700]
                     : Colors.orange[700],
               ),
-              SizedBox(
-                  width: _responsiveController.responsiveValue(
-                mobile: 8.0,
-                tablet: 12.0,
-              )),
+              const SizedBox(width: 8.0),
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -368,10 +356,7 @@ class BasicInfoStep extends GetView<RegistrationController> {
                     Text(
                       'GitHub Hesabı',
                       style: TextStyle(
-                        fontSize: _responsiveController.responsiveValue(
-                          mobile: 16.0,
-                          tablet: 18.0,
-                        ),
+                        fontSize: 16.0,
                         fontWeight: FontWeight.w600,
                         color: controller.isGithubConnected
                             ? Colors.green[800]
@@ -383,10 +368,7 @@ class BasicInfoStep extends GetView<RegistrationController> {
                           ? '✅ GitHub hesabınız bağlandı'
                           : '⚠️ GitHub hesabı bağlanması zorunludur',
                       style: TextStyle(
-                        fontSize: _responsiveController.responsiveValue(
-                          mobile: 12.0,
-                          tablet: 14.0,
-                        ),
+                        fontSize: 12.0,
                         color: controller.isGithubConnected
                             ? Colors.green[600]
                             : Colors.orange[600],
@@ -397,112 +379,135 @@ class BasicInfoStep extends GetView<RegistrationController> {
               ),
             ],
           ),
-          SizedBox(
-              height: _responsiveController.responsiveValue(
-            mobile: 12.0,
-            tablet: 16.0,
-          )),
-          Text(
-            'DevsHabitat yazılımcı topluluğuna katılmak için GitHub hesabınızla bağlantı kurmanız gerekmektedir. Bu sayede profillerinizi ve projelerinizi paylaşabilirsiniz.',
-            style: TextStyle(
-              fontSize: _responsiveController.responsiveValue(
-                mobile: 13.0,
-                tablet: 15.0,
+          if (!controller.isGithubConnected) ...[
+            const SizedBox(height: 12.0),
+            Text(
+              'DevsHabitat\'a katılmak için GitHub hesabınızı bağlamanız gerekmektedir.',
+              style: TextStyle(
+                fontSize: 13.0,
+                color: Colors.grey[700],
+                height: 1.4,
               ),
-              color: Colors.grey[700],
-              height: 1.4,
+            ),
+          ],
+          const SizedBox(height: 16.0),
+          // GitHub bağlantısı sonrası bilgilendirme
+          Obx(() => controller.isGithubConnected
+              ? Container(
+                  padding: const EdgeInsets.all(12.0),
+                  decoration: BoxDecoration(
+                    color: Colors.green[50],
+                    borderRadius: BorderRadius.circular(8.0),
+                    border: Border.all(color: Colors.green[200]!),
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      // Sadece boş olan alanları göster
+                      if (controller.emailController.text.isEmpty)
+                        _buildRequirementItem('Email adresinizi girin', false),
+                      if (controller.displayNameController.text.isEmpty)
+                        _buildRequirementItem('Görünen adınızı girin', false),
+                      if (!controller.allPasswordRequirementsMet)
+                        _buildRequirementItem(
+                            'Güçlü bir şifre oluşturun', false),
+                      if (!controller.passwordsMatch &&
+                          !controller.confirmPasswordIsEmpty)
+                        _buildRequirementItem('Şifrenizi tekrar girin', false),
+                      if (controller.canGoNext) ...[
+                        const SizedBox(height: 8.0),
+                        Container(
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 8.0, vertical: 6.0),
+                          decoration: BoxDecoration(
+                            color: Colors.blue[50],
+                            borderRadius: BorderRadius.circular(4.0),
+                            border: Border.all(color: Colors.blue[200]!),
+                          ),
+                          child: Row(
+                            children: [
+                              Icon(Icons.check_circle,
+                                  size: 14.0, color: Colors.blue[700]),
+                              const SizedBox(width: 6.0),
+                              Expanded(
+                                child: Text(
+                                  'Tüm bilgiler tamamlandı! "Devam Et" butonuna basabilirsiniz.',
+                                  style: TextStyle(
+                                    fontSize: 11.0,
+                                    color: Colors.blue[700],
+                                    fontWeight: FontWeight.w500,
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ],
+                  ),
+                )
+              : const SizedBox.shrink()),
+          const SizedBox(height: 16.0),
+          SizedBox(
+            width: double.infinity,
+            child: ElevatedButton.icon(
+              onPressed: controller.isGithubConnected
+                  ? controller.disconnectGithub
+                  : (controller.isGithubLoading
+                      ? null
+                      : () async {
+                          try {
+                            final authController = Get.find<AuthController>();
+                            await authController.signInWithGithub();
+                          } catch (e) {
+                            Get.snackbar(
+                              'Hata',
+                              'GitHub bağlantısı sırasında bir hata oluştu: $e',
+                              backgroundColor: Colors.red.withOpacity(0.8),
+                              colorText: Colors.white,
+                              snackPosition: SnackPosition.BOTTOM,
+                            );
+                          }
+                        }),
+              icon: controller.isGithubLoading
+                  ? SizedBox(
+                      width: 16.0,
+                      height: 16.0,
+                      child: CircularProgressIndicator(
+                        strokeWidth: 2,
+                        valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                      ),
+                    )
+                  : Icon(
+                      controller.isGithubConnected
+                          ? Icons.link_off
+                          : Icons.code,
+                      size: 20.0,
+                    ),
+              label: Text(
+                controller.isGithubLoading
+                    ? 'GitHub\'a bağlanıyor...'
+                    : (controller.isGithubConnected
+                        ? 'GitHub Bağlantısını Kaldır'
+                        : 'GitHub ile Bağlan'),
+                style: const TextStyle(
+                  fontSize: 16.0,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: controller.isGithubConnected
+                    ? Colors.red[600]
+                    : Colors.orange[600],
+                foregroundColor: Colors.white,
+                padding: const EdgeInsets.symmetric(
+                    horizontal: 24.0, vertical: 16.0),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(8.0),
+                ),
+              ),
             ),
           ),
-          SizedBox(
-              height: _responsiveController.responsiveValue(
-            mobile: 16.0,
-            tablet: 20.0,
-          )),
-          Obx(() => SizedBox(
-                width: double.infinity,
-                child: ElevatedButton.icon(
-                  onPressed: controller.isGithubConnected
-                      ? controller.disconnectGithub
-                      : (controller.isGithubLoading
-                          ? null
-                          : () async {
-                              print('GitHub login butonu tıklandı');
-                              try {
-                                final authController =
-                                    Get.find<AuthController>();
-                                print('AuthController bulundu');
-                                await authController.signInWithGithub();
-                                print('GitHub login tamamlandı');
-                              } catch (e) {
-                                print('GitHub login hatası: $e');
-                                Get.snackbar(
-                                  'Hata',
-                                  'GitHub bağlantısı sırasında bir hata oluştu: $e',
-                                  backgroundColor: Colors.red.withOpacity(0.8),
-                                  colorText: Colors.white,
-                                  snackPosition: SnackPosition.BOTTOM,
-                                );
-                              }
-                            }),
-                  icon: controller.isGithubLoading
-                      ? SizedBox(
-                          width: _responsiveController.responsiveValue(
-                            mobile: 16.0,
-                            tablet: 20.0,
-                          ),
-                          height: _responsiveController.responsiveValue(
-                            mobile: 16.0,
-                            tablet: 20.0,
-                          ),
-                          child: CircularProgressIndicator(
-                            strokeWidth: 2,
-                            valueColor:
-                                AlwaysStoppedAnimation<Color>(Colors.white),
-                          ),
-                        )
-                      : Icon(
-                          controller.isGithubConnected
-                              ? Icons.link_off
-                              : Icons.link,
-                          size: _responsiveController.responsiveValue(
-                            mobile: 20.0,
-                            tablet: 24.0,
-                          ),
-                        ),
-                  label: Text(
-                    controller.isGithubLoading
-                        ? 'GitHub\'a bağlanıyor...'
-                        : (controller.isGithubConnected
-                            ? 'GitHub Bağlantısını Kaldır'
-                            : 'GitHub ile Bağlan'),
-                    style: TextStyle(
-                      fontSize: _responsiveController.responsiveValue(
-                        mobile: 16.0,
-                        tablet: 18.0,
-                      ),
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: controller.isGithubConnected
-                        ? Colors.red[600]
-                        : Colors.black,
-                    foregroundColor: Colors.white,
-                    padding: _responsiveController.responsivePadding(
-                      horizontal: 24.0,
-                      vertical: 16.0,
-                    ),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(
-                        _responsiveController.responsiveValue(
-                          mobile: 8.0,
-                          tablet: 12.0,
-                        ),
-                      ),
-                    ),
-                  ),
-                ),
-              )),
         ],
       ),
     );

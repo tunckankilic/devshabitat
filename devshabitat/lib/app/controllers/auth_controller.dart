@@ -251,7 +251,6 @@ class AuthController extends GetxController {
   Future<void> sendPasswordResetEmail() => _emailAuth.sendPasswordResetEmail();
   Future<void> updatePassword(String newPassword) =>
       _emailAuth.updatePassword(newPassword);
-  Future<void> updateEmail(String newEmail) => _emailAuth.updateEmail(newEmail);
   Future<void> reauthenticate(String email, String password) =>
       _emailAuth.reauthenticate(email, password);
 

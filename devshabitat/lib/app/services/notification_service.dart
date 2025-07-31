@@ -12,6 +12,8 @@ import '../models/notification_model.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'dart:io' show Platform;
+import 'package:http/http.dart' as http;
+import '../core/config/env.dart';
 
 class NotificationService extends GetxService {
   static NotificationService get to => Get.find();

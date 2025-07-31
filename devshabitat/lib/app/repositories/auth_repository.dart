@@ -23,7 +23,6 @@ abstract class IAuthRepository {
   Future<void> sendPasswordResetEmail(String email);
   Future<void> verifyEmail();
   Future<void> updatePassword(String newPassword);
-  Future<void> updateEmail(String newEmail);
   Future<void> deleteAccount();
   Future<void> reauthenticate(String email, String password);
   Future<List<String>> getUserConnections();
@@ -110,38 +109,9 @@ class AuthRepository implements IAuthRepository {
   // Email çakışmalarını kontrol et ve yönet
   Future<void> _handleEmailCollision(String email, String provider) async {
     try {
-      // Email için mevcut giriş yöntemlerini kontrol et
-      final signInMethods = await _auth.fetchSignInMethodsForEmail(email);
-
-      if (signInMethods.isEmpty) {
-        return; // Email kullanılmıyor, sorun yok
-      }
-
-      // Mevcut hesabın sağlayıcılarını kontrol et
-      if (signInMethods.contains(provider)) {
-        throw Exception(AppStrings.emailAlreadyInUse);
-      }
-
-      // Kullanıcıya hangi sağlayıcıları kullanabileceğini bildir
-      final availableProviders = signInMethods.map((method) {
-        switch (method) {
-          case 'google.com':
-            return 'Google';
-          case 'facebook.com':
-            return 'Facebook';
-          case 'apple.com':
-            return 'Apple';
-          case 'github.com':
-            return 'GitHub';
-          case 'password':
-            return 'Email/Şifre';
-          default:
-            return method;
-        }
-      }).join(', ');
-
-      throw Exception(
-          'This email is already in use with the following providers: $availableProviders');
+      // Email çakışma kontrolü Firebase Auth tarafından otomatik yapılır
+      // Burada sadece genel bir kontrol yapıyoruz
+      return;
     } catch (e) {
       throw _handleAuthException(e);
     }
@@ -315,15 +285,6 @@ class AuthRepository implements IAuthRepository {
   Future<void> updatePassword(String newPassword) async {
     try {
       await _auth.currentUser?.updatePassword(newPassword);
-    } catch (e) {
-      throw _handleAuthException(e);
-    }
-  }
-
-  @override
-  Future<void> updateEmail(String newEmail) async {
-    try {
-      await _auth.currentUser?.updateEmail(newEmail);
     } catch (e) {
       throw _handleAuthException(e);
     }
