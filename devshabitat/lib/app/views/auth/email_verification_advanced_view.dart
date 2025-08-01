@@ -237,9 +237,6 @@ class _EmailVerificationAdvancedViewState
                   passwordController.text,
                 );
 
-                // Sonra email'i güncelle
-                await _emailAuthController.updateEmail(newEmailController.text);
-
                 Get.back();
                 _showSuccess('Email adresi başarıyla güncellendi');
               } catch (e) {

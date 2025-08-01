@@ -2,6 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:get/get.dart';
 import 'location/location_model.dart';
+import 'profile_completion_model.dart';
 
 class WorkExperience {
   final String title;
@@ -89,6 +90,11 @@ class EnhancedUserModel {
   final LocationModel? location;
   final int yearsOfExperience;
 
+  // Profile completion fields
+  final ProfileCompletionLevel completionLevel;
+  final double completionPercentage;
+  final List<String> missingFields;
+
   // Reactive properties
   final RxString id;
   final RxString emailRx;
@@ -139,6 +145,9 @@ class EnhancedUserModel {
     this.education,
     this.location,
     this.yearsOfExperience = 0,
+    this.completionLevel = ProfileCompletionLevel.minimal,
+    this.completionPercentage = 15.0,
+    this.missingFields = const [],
   })  : id = uid.obs,
         emailRx = email.obs,
         displayNameRx = displayName?.obs,
@@ -215,6 +224,16 @@ class EnhancedUserModel {
           ? LocationModel.fromJson(json['location'] as Map<String, dynamic>)
           : null,
       yearsOfExperience: json['yearsOfExperience'] as int? ?? 0,
+      completionLevel: json['completionLevel'] != null
+          ? ProfileCompletionLevel.values.firstWhere(
+              (e) => e.name == json['completionLevel'],
+              orElse: () => ProfileCompletionLevel.minimal,
+            )
+          : ProfileCompletionLevel.minimal,
+      completionPercentage:
+          (json['completionPercentage'] as num?)?.toDouble() ?? 15.0,
+      missingFields:
+          (json['missingFields'] as List<dynamic>?)?.cast<String>() ?? [],
     );
   }
 
@@ -244,6 +263,9 @@ class EnhancedUserModel {
       'education': education,
       'location': location?.toJson(),
       'yearsOfExperience': yearsOfExperience,
+      'completionLevel': completionLevel.name,
+      'completionPercentage': completionPercentage,
+      'missingFields': missingFields,
     };
   }
 
@@ -272,6 +294,9 @@ class EnhancedUserModel {
     List<Education>? education,
     LocationModel? location,
     int? yearsOfExperience,
+    ProfileCompletionLevel? completionLevel,
+    double? completionPercentage,
+    List<String>? missingFields,
   }) {
     return EnhancedUserModel(
       uid: uid ?? this.uid,
@@ -298,6 +323,9 @@ class EnhancedUserModel {
       education: education ?? this.education,
       location: location ?? this.location,
       yearsOfExperience: yearsOfExperience ?? this.yearsOfExperience,
+      completionLevel: completionLevel ?? this.completionLevel,
+      completionPercentage: completionPercentage ?? this.completionPercentage,
+      missingFields: missingFields ?? this.missingFields,
     );
   }
 

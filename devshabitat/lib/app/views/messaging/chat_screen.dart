@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../../controllers/messaging_controller.dart';
 import '../../widgets/message_bubble.dart';
+import '../../widgets/feature_gate_widget.dart';
 import '../../models/message_model.dart';
 
 class ChatScreen extends GetView<MessagingController> {
@@ -94,63 +95,67 @@ class ChatScreen extends GetView<MessagingController> {
   Widget _buildMessageInput(String conversationId, BuildContext context) {
     final textController = TextEditingController();
 
-    return Container(
-      padding: EdgeInsets.only(
-        left: 16.0,
-        right: 16.0,
-        top: 8.0,
-        bottom: MediaQuery.of(context).padding.bottom + 8.0,
-      ),
-      decoration: BoxDecoration(
-        color: Theme.of(context).colorScheme.surface,
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.05),
-            blurRadius: 4.0,
-            offset: const Offset(0, -2),
-          ),
-        ],
-      ),
-      child: Row(
-        children: [
-          Expanded(
-            child: TextField(
-              controller: textController,
-              decoration: InputDecoration(
-                hintText: AppStrings.writeYourMessage,
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(24.0),
-                  borderSide: BorderSide.none,
+    return FeatureGate.wrap(
+      feature: 'commenting',
+      displayMode: FeatureGateDisplayMode.banner,
+      child: Container(
+        padding: EdgeInsets.only(
+          left: 16.0,
+          right: 16.0,
+          top: 8.0,
+          bottom: MediaQuery.of(context).padding.bottom + 8.0,
+        ),
+        decoration: BoxDecoration(
+          color: Theme.of(context).colorScheme.surface,
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.05),
+              blurRadius: 4.0,
+              offset: const Offset(0, -2),
+            ),
+          ],
+        ),
+        child: Row(
+          children: [
+            Expanded(
+              child: TextField(
+                controller: textController,
+                decoration: InputDecoration(
+                  hintText: AppStrings.writeYourMessage,
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(24.0),
+                    borderSide: BorderSide.none,
+                  ),
+                  filled: true,
+                  fillColor:
+                      Theme.of(context).colorScheme.surfaceContainerHighest,
+                  contentPadding: const EdgeInsets.symmetric(
+                    horizontal: 16.0,
+                    vertical: 8.0,
+                  ),
                 ),
-                filled: true,
-                fillColor:
-                    Theme.of(context).colorScheme.surfaceContainerHighest,
-                contentPadding: const EdgeInsets.symmetric(
-                  horizontal: 16.0,
-                  vertical: 8.0,
-                ),
+                maxLines: null,
+                textCapitalization: TextCapitalization.sentences,
               ),
-              maxLines: null,
-              textCapitalization: TextCapitalization.sentences,
             ),
-          ),
-          const SizedBox(width: 8.0),
-          FloatingActionButton(
-            onPressed: () {
-              final message = textController.text.trim();
-              if (message.isNotEmpty) {
-                controller.sendMessage(conversationId, message);
-                textController.clear();
-              }
-            },
-            elevation: 0,
-            backgroundColor: Theme.of(context).colorScheme.primaryContainer,
-            child: Icon(
-              Icons.send,
-              color: Theme.of(context).colorScheme.onPrimaryContainer,
+            const SizedBox(width: 8.0),
+            FloatingActionButton(
+              onPressed: () {
+                final message = textController.text.trim();
+                if (message.isNotEmpty) {
+                  controller.sendMessage(conversationId, message);
+                  textController.clear();
+                }
+              },
+              elevation: 0,
+              backgroundColor: Theme.of(context).colorScheme.primaryContainer,
+              child: Icon(
+                Icons.send,
+                color: Theme.of(context).colorScheme.onPrimaryContainer,
+              ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }

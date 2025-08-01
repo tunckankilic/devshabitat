@@ -104,6 +104,14 @@
                 <data android:scheme="devshabitat" android:host="oauth" android:pathPrefix="/redirect" />
             </intent-filter>
             
+            <!-- GitHub OAuth Intent Filter -->
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+                <data android:scheme="devshabitat" android:host="github-auth" />
+            </intent-filter>
+            
             <!-- Share Intent Filter -->
             <intent-filter>
                 <action android:name="android.intent.action.SEND" />

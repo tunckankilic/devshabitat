@@ -36,7 +36,7 @@
 			<string>GitHub OAuth</string>
 			<key>CFBundleURLSchemes</key>
 			<array>
-				<string>com.tunckankilic.github</string>
+				<string>devshabitat</string>
 			</array>
 		</dict>
 		<!-- Firebase/Google OAuth için URL scheme -->
@@ -58,6 +58,11 @@
 	<false/>
 	<key>LSRequiresIPhoneOS</key>
 	<true/>
+	<key>LSApplicationQueriesSchemes</key>
+	<array>
+		<string>https</string>
+		<string>http</string>
+	</array>
 	<key>LSSupportsOpeningDocumentsInPlace</key>
 	<true/>
 	<key>NSAppTransportSecurity</key>
@@ -65,6 +70,8 @@
 		<key>NSAllowsArbitraryLoads</key>
 		<true/>
 		<key>NSAllowsLocalNetworking</key>
+		<true/>
+		<key>NSAllowsArbitraryLoadsInWebContent</key>
 		<true/>
 	</dict>
 	<key>NSCameraUsageDescription</key>
@@ -90,6 +97,7 @@
 		<string>remote-notification</string>
 		<string>background-fetch</string>
 		<string>background-processing</string>
+		<string>fetch</string>
 	</array>
 	<key>UIFileSharingEnabled</key>
 	<true/>

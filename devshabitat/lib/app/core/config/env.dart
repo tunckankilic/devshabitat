@@ -1,4 +1,5 @@
 import 'package:envied/envied.dart';
+import 'dart:io' show Platform;
 
 part 'env.g.dart';
 
@@ -47,6 +48,22 @@ abstract class Env {
 
   @EnviedField(varName: 'FIREBASE_IOS_CLIENT_ID', obfuscate: true)
   static final String firebaseIosClientId = _Env.firebaseIosClientId;
+
+  // FCM Configuration
+  static String get fcmSenderId => firebaseAndroidMessagingSenderId;
+  static String get fcmProjectId => firebaseAndroidProjectId;
+  static String get fcmAccessToken =>
+      Platform.isIOS ? firebaseIosApiKey : firebaseAndroidApiKey;
+
+  static const String fcmAndroidChannelId = 'default_notification_channel';
+  static const String fcmIosSoundName = 'default';
+  static const String fcmPriority = 'high';
+
+  static String get fcmServerUrl =>
+      'https://fcm.googleapis.com/v1/projects/$fcmProjectId/messages:send';
+
+  static const String fcmOAuthScope =
+      'https://www.googleapis.com/auth/firebase.messaging';
 
   // GitHub Configuration
   @EnviedField(varName: 'GITHUB_CLIENT_ID', obfuscate: true)

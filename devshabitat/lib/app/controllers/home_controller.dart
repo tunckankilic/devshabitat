@@ -12,6 +12,7 @@ import '../services/notification_service.dart';
 import '../services/feed_service.dart';
 import '../services/connection_service.dart';
 import '../controllers/auth_controller.dart';
+import 'dart:async';
 
 class HomeController extends GetxController {
   final _authRepository = Get.find<AuthRepository>();
@@ -20,6 +21,9 @@ class HomeController extends GetxController {
   late final FeedService _feedService;
   late final ConnectionService _connectionService;
   late final AuthController _authController;
+
+  // GitHub veri güncelleme timer'ı
+  Timer? _githubUpdateTimer;
 
   final RxBool isLoading = false.obs;
   final RxList activityFeed = [].obs;
@@ -51,9 +55,26 @@ class HomeController extends GetxController {
       loadDashboardData();
       loadData();
       getNotifications();
+
+      // GitHub verilerini düzenli olarak güncelle (30 dakikada bir)
+      _startGithubUpdateTimer();
     } catch (e) {
       print('Startup data loading: $e');
     }
+  }
+
+  @override
+  void onClose() {
+    _githubUpdateTimer?.cancel();
+    super.onClose();
+  }
+
+  // GitHub veri güncelleme timer'ını başlat
+  void _startGithubUpdateTimer() {
+    _githubUpdateTimer?.cancel();
+    _githubUpdateTimer = Timer.periodic(const Duration(minutes: 30), (timer) {
+      _loadGithubStats();
+    });
   }
 
   Future<void> loadDashboardData() async {
@@ -148,41 +169,22 @@ class HomeController extends GetxController {
         return;
       }
 
-      // GitHub verilerini paralel olarak çek
-      final results = await Future.wait([
-        _githubService.getUserInfo(username),
-        _githubService.getUserRepos(username),
-        _githubService.getContributedRepos(username),
-        _githubService.getStarredRepos(username),
-        _githubService.getCommitStats(username),
-      ]);
+      // GitHub stats'ları çek
+      final githubStatsData = await _githubService.getGithubStats(username);
+      if (githubStatsData != null) {
+        // GitHub aktivitelerini çek
+        final activities = await _githubService.getUserActivities(username);
 
-      final userInfo = results[0] as Map<String, dynamic>;
-      final repos = results[1] as List<dynamic>;
-      final contributedRepos = results[2] as List<dynamic>;
-      final starredRepos = results[3] as List<dynamic>;
-      final commitStats = results[4] as Map<String, dynamic>;
-
-      githubStats.assignAll({
-        'totalCommits': commitStats['totalCommits'] ?? 0,
-        'openPRs': repos
-            .where((repo) =>
-                (repo as Map<String, dynamic>)['open_issues_count'] > 0)
-            .length,
-        'contributedRepos': contributedRepos.length,
-        'starredRepos': starredRepos.length,
-        'userInfo': userInfo,
-        'repos': repos,
-      });
+        githubStats.assignAll({
+          'stats': githubStatsData.toJson(),
+          'activities': activities,
+          'lastUpdated': DateTime.now().toIso8601String(),
+        });
+      }
     } catch (e) {
       print('GitHub istatistikleri yüklenirken hata: $e');
       // Hata durumunda boş stats göster
-      githubStats.assignAll({
-        'totalCommits': 0,
-        'openPRs': 0,
-        'contributedRepos': 0,
-        'starredRepos': 0,
-      });
+      githubStats.clear();
     }
   }
 
@@ -276,6 +278,16 @@ class HomeController extends GetxController {
       await refreshNotifications();
     } catch (e) {
       debugPrint('Error marking notification as read: $e');
+    }
+  }
+
+  // GitHub username getir
+  Future<String?> getGithubUsername() async {
+    try {
+      return await _authController.getGithubUsername();
+    } catch (e) {
+      debugPrint('Error getting GitHub username: $e');
+      return null;
     }
   }
 }

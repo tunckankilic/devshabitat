@@ -270,8 +270,12 @@ class MessagingService extends GetxService {
   /// Konuşmaları gerçek zamanlı dinler
   Stream<List<ConversationModel>> getConversations() {
     try {
-      if (currentUserId.isEmpty) {
-        throw Exception('Kullanıcı kimliği bulunamadı');
+      final authService = Get.find<AuthRepository>();
+      final currentUser = authService.currentUser;
+
+      if (currentUser == null || currentUserId.isEmpty) {
+        _logger.w('Kullanıcı oturumu açık değil');
+        return Stream.value(<ConversationModel>[]);
       }
 
       return _firestore

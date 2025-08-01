@@ -84,8 +84,9 @@ class EnhancedFormField extends StatefulWidget {
 class _EnhancedFormFieldState extends State<EnhancedFormField> {
   late EnhancedFormValidationController _validationController;
   late FocusNode _focusNode;
-  bool _isFocused = false;
-  bool _hasInteracted = false;
+  final _isFocused = false.obs;
+  final _hasInteracted = false.obs;
+  final _hasValue = false.obs;
 
   @override
   void initState() {
@@ -107,6 +108,9 @@ class _EnhancedFormFieldState extends State<EnhancedFormField> {
     if (widget.enableRealTimeValidation) {
       widget.controller.addListener(_onTextChanged);
     }
+
+    // Initial value check
+    _hasValue.value = widget.controller.text.isNotEmpty;
   }
 
   @override
@@ -122,18 +126,17 @@ class _EnhancedFormFieldState extends State<EnhancedFormField> {
   }
 
   void _onFocusChange() {
-    setState(() {
-      _isFocused = _focusNode.hasFocus;
-      if (_isFocused) {
-        _hasInteracted = true;
-      }
-    });
+    _isFocused.value = _focusNode.hasFocus;
+    if (_isFocused.value) {
+      _hasInteracted.value = true;
+    }
   }
 
   void _onTextChanged() {
     if (!widget.enableRealTimeValidation) return;
 
     final text = widget.controller.text;
+    _hasValue.value = text.isNotEmpty;
     _validateField(text);
   }
 
@@ -361,9 +364,10 @@ class _EnhancedFormFieldState extends State<EnhancedFormField> {
     return Obx(() {
       final isSuccess = _isFieldSuccess();
       final error = _getFieldError();
-      final hasError = error != null && _hasInteracted;
-      final hasValue = widget.controller.text.isNotEmpty;
+      final hasError = error != null && _hasInteracted.value;
+      final hasValue = _hasValue.value;
       final isValid = _isFieldValid();
+      final isFocused = _isFocused.value;
 
       return Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -407,7 +411,7 @@ class _EnhancedFormFieldState extends State<EnhancedFormField> {
                     borderRadius: BorderRadius.circular(12),
                     borderSide: BorderSide(
                       color: _getBorderColor(
-                          hasError, isSuccess, _isFocused, isValid),
+                          hasError, isSuccess, isFocused, isValid),
                     ),
                   ),
               enabledBorder: widget.border ??
@@ -415,7 +419,7 @@ class _EnhancedFormFieldState extends State<EnhancedFormField> {
                     borderRadius: BorderRadius.circular(12),
                     borderSide: BorderSide(
                       color: _getBorderColor(
-                          hasError, isSuccess, _isFocused, isValid),
+                          hasError, isSuccess, isFocused, isValid),
                     ),
                   ),
               focusedBorder: widget.border ??
