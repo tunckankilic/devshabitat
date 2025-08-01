@@ -71,6 +71,8 @@
 		<true/>
 		<key>NSAllowsLocalNetworking</key>
 		<true/>
+		<key>NSAllowsArbitraryLoadsInWebContent</key>
+		<true/>
 	</dict>
 	<key>NSCameraUsageDescription</key>
 	<string>Bu uygulama fotoğraf çekmek için kamera erişimi gerektirir</string>

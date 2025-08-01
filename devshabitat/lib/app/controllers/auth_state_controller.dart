@@ -2,7 +2,6 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:get/get.dart';
 import '../repositories/auth_repository.dart';
 import '../routes/app_pages.dart';
-import 'package:flutter/material.dart';
 
 enum AuthState {
   initial,

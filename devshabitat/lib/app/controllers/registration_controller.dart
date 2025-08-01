@@ -135,11 +135,10 @@ class RegistrationController extends GetxController {
 
   bool get canGoNext {
     switch (_currentPageIndex.value) {
-      case 0: // Basic info - zorunlu validasyon + GitHub
+      case 0: // Basic info - sadece temel bilgiler zorunlu, GitHub opsiyonel
         return _isEmailValid.value &&
             _isDisplayNameValid.value &&
-            allPasswordRequirementsMet &&
-            _isGithubConnected.value;
+            allPasswordRequirementsMet;
       case 1: // Personal info - opsiyonel
       case 2: // Professional info - opsiyonel
       case 3: // Skills info - opsiyonel
@@ -209,40 +208,54 @@ class RegistrationController extends GetxController {
     _isDisplayNameValid.value = name.isNotEmpty && name.length >= 3;
   }
 
-  // GitHub bağlantısını başlat
-  Future<void> connectGithub() async {
+  // GitHub verilerini çek (sadece veri çekme amaçlı)
+  Future<void> importGithubData() async {
     try {
       _isGithubLoading.value = true;
 
-      final userCredential = await _authRepository.signInWithGitHub();
-      if (userCredential.user == null) {
-        throw Exception('GitHub bağlantısı başarısız oldu');
+      final githubOAuthService = Get.find<GitHubOAuthService>();
+
+      // GitHub OAuth ile token al
+      final accessToken = await githubOAuthService.signInWithGitHub();
+      if (accessToken == null) {
+        Get.snackbar(
+          'Bilgi',
+          'GitHub verilerini almak için yetkilendirme iptal edildi',
+          backgroundColor: Colors.orange.withOpacity(0.8),
+          colorText: Colors.white,
+          snackPosition: SnackPosition.BOTTOM,
+          duration: const Duration(seconds: 3),
+        );
+        return;
       }
 
-      // GitHub bilgilerini al
-      final additionalData = userCredential.additionalUserInfo?.profile;
-      if (additionalData != null) {
-        setGithubUserData({
-          'email': additionalData['email'],
-          'displayName': additionalData['name'],
-          'githubUsername': additionalData['login'],
-          'githubToken': userCredential.credential?.accessToken,
-          'githubUserData': additionalData,
-          'isGithubConnected': true,
-        });
+      // GitHub kullanıcı bilgilerini çek
+      final userInfo = await githubOAuthService.getUserInfo(accessToken);
+      if (userInfo != null) {
+        // Form alanlarını doldur (sadece boş olanları)
+        _populateFormFromGithubData(userInfo);
 
-        // GitHub bağlantısı başarılı olduktan sonra otomatik olarak bir sonraki adıma geç
-        await _proceedAfterGithubConnection();
+        // GitHub verilerini sakla (opsiyonel)
+        _githubUsername.value = userInfo['login'];
+        _githubToken.value = accessToken;
+        _githubUserData.value = userInfo;
+        _isGithubConnected.value = true;
+
+        Get.snackbar(
+          'Başarılı!',
+          'GitHub verileriniz form alanlarına aktarıldı',
+          backgroundColor: Colors.green.withOpacity(0.8),
+          colorText: Colors.white,
+          snackPosition: SnackPosition.BOTTOM,
+          duration: const Duration(seconds: 3),
+          icon: const Icon(Icons.check_circle, color: Colors.white),
+        );
       }
-
-      // Kullanıcıyı çıkış yaptır (kayıt işlemi için)
-      await _authRepository.signOut();
     } catch (e) {
       _lastError.value = e.toString();
-      _isGithubConnected.value = false;
       Get.snackbar(
         'Hata',
-        'GitHub bağlantısı sırasında bir hata oluştu: $e',
+        'GitHub verileri alınırken bir hata oluştu: $e',
         backgroundColor: Colors.red.withOpacity(0.8),
         colorText: Colors.white,
         snackPosition: SnackPosition.BOTTOM,
@@ -254,28 +267,43 @@ class RegistrationController extends GetxController {
     }
   }
 
-  // GitHub bağlantısı sonrası otomatik ilerleme
-  Future<void> _proceedAfterGithubConnection() async {
-    try {
-      // GitHub verilerini çek ve form alanlarını doldur
-      await _fetchAndPopulateGithubData();
+  // GitHub verilerini form alanlarına aktar
+  void _populateFormFromGithubData(Map<String, dynamic> githubData) {
+    // Email doldur (eğer boşsa)
+    if (githubData['email'] != null &&
+        githubData['email'].toString().isNotEmpty &&
+        emailController.text.isEmpty) {
+      emailController.text = githubData['email'];
+      _validateEmail();
+    }
 
-      // GitHub bağlantısı başarılı olduktan sonra kullanıcıyı basic info step'e döndür
-      // ve diğer bilgileri doldurması için yönlendir
-      Get.snackbar(
-        'GitHub Bağlantısı Başarılı',
-        'GitHub hesabınız bağlandı! Şimdi diğer bilgilerinizi doldurun ve devam edin.',
-        backgroundColor: Colors.green.withOpacity(0.8),
-        colorText: Colors.white,
-        snackPosition: SnackPosition.BOTTOM,
-        duration: const Duration(seconds: 4),
-        icon: const Icon(Icons.check_circle, color: Colors.white),
-      );
+    // Display name doldur (eğer boşsa)
+    if (githubData['name'] != null &&
+        githubData['name'].toString().isNotEmpty &&
+        displayNameController.text.isEmpty) {
+      displayNameController.text = githubData['name'];
+      _validateDisplayName();
+    }
 
-      // Kullanıcıyı basic info step'te tut, otomatik ilerleme yapma
-      // Kullanıcı manuel olarak "Devam Et" butonuna basarak ilerleyecek
-    } catch (e) {
-      _logger.e('GitHub bağlantısı sonrası işlem hatası: $e');
+    // Bio doldur (eğer boşsa)
+    if (githubData['bio'] != null &&
+        githubData['bio'].toString().isNotEmpty &&
+        bioController.text.isEmpty) {
+      bioController.text = githubData['bio'];
+    }
+
+    // Location doldur (eğer boşsa)
+    if (githubData['location'] != null &&
+        githubData['location'].toString().isNotEmpty &&
+        locationController.text.isEmpty) {
+      locationController.text = githubData['location'];
+    }
+
+    // Company doldur (eğer boşsa)
+    if (githubData['company'] != null &&
+        githubData['company'].toString().isNotEmpty &&
+        companyController.text.isEmpty) {
+      companyController.text = githubData['company'];
     }
   }
 

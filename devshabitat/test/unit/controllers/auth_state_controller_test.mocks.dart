@@ -2,7 +2,7 @@
 // in devshabitat/test/unit/controllers/auth_state_controller_test.dart.
 // Do not manually edit this file.
 
-// ignore_for_file: no_leading_underscores_for_library_prefixes
+// ignore_for_file: no_leading_underscores_for_library_prefixes, duplicate_ignore
 import 'dart:async' as _i6;
 import 'dart:typed_data' as _i9;
 
@@ -616,13 +616,17 @@ class MockAuthRepository extends _i1.Mock implements _i7.AuthRepository {
 
   @override
   _i6.Future<void> handleSocialSignIn(
-    _i2.User? user, {
+    _i2.User? user,
+    String? provider, {
     Map<String, dynamic>? additionalData,
   }) =>
       (super.noSuchMethod(
         Invocation.method(
           #handleSocialSignIn,
-          [user],
+          [
+            user,
+            provider,
+          ],
           {#additionalData: additionalData},
         ),
         returnValue: _i6.Future<void>.value(),

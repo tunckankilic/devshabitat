@@ -122,15 +122,20 @@ class _GithubSigninScreenState extends State<GithubSigninScreen> {
   /// try to get token from github then navigate to previous screen by [Navigator.of(context).pop(value)]
   void handleCodeResponse(String url, BuildContext context) {
     var callBackCode = Uri.parse(url).queryParameters['code'];
+    final navigator = Navigator.of(context);
 
     handleResponse(callBackCode).then((value) {
-      Navigator.of(context).pop(value);
+      if (mounted) {
+        navigator.pop(value);
+      }
     }).catchError((onError) {
       GithubSignInResponse res = GithubSignInResponse(
         status: SignInStatus.failed,
         error: onError.toString(),
       );
-      Navigator.of(context).pop(res);
+      if (mounted) {
+        navigator.pop(res);
+      }
     });
   }
 

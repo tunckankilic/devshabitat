@@ -503,13 +503,17 @@ class MockAuthRepository extends _i1.Mock implements _i7.AuthRepository {
 
   @override
   _i5.Future<void> handleSocialSignIn(
-    _i2.User? user, {
+    _i2.User? user,
+    String? provider, {
     Map<String, dynamic>? additionalData,
   }) =>
       (super.noSuchMethod(
         Invocation.method(
           #handleSocialSignIn,
-          [user],
+          [
+            user,
+            provider,
+          ],
           {#additionalData: additionalData},
         ),
         returnValue: _i5.Future<void>.value(),

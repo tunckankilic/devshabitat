@@ -117,4 +117,24 @@ class UserService extends GetxService {
         .doc('privacy')
         .set(settings.toJson());
   }
+
+  /// Update user data in Firestore
+  Future<void> updateUser(EnhancedUserModel updatedUser) async {
+    final user = _auth.currentUser;
+    if (user == null) {
+      throw Exception('Kullanıcı oturum açmamış');
+    }
+
+    final userToUpdate = updatedUser.copyWith(
+      updatedAt: DateTime.now(),
+      lastSeen: DateTime.now(),
+    );
+
+    await _firestore
+        .collection('users')
+        .doc(user.uid)
+        .update(userToUpdate.toJson());
+
+    _currentUser.value = userToUpdate;
+  }
 }

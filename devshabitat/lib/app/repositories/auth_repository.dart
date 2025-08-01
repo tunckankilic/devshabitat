@@ -6,8 +6,9 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:logger/logger.dart';
 import 'package:get/get.dart';
 import '../services/github_oauth_service.dart';
+import '../models/profile_completion_model.dart';
 import '../constants/app_strings.dart';
-import 'package:flutter/foundation.dart' show kIsWeb;
+import 'package:flutter/material.dart'; // Added for snackbar
 
 abstract class IAuthRepository {
   Future<UserCredential> signInWithEmailAndPassword(
@@ -147,7 +148,7 @@ class AuthRepository implements IAuthRepository {
       );
 
       final userCredential = await _auth.signInWithCredential(credential);
-      await handleSocialSignIn(userCredential.user!);
+      await handleSocialSignIn(userCredential.user!, 'google');
       return userCredential;
     } catch (e) {
       throw _handleAuthException(e);
@@ -180,14 +181,13 @@ class AuthRepository implements IAuthRepository {
       );
 
       final userCredential = await _auth.signInWithCredential(oauthCredential);
-      await handleSocialSignIn(userCredential.user!);
+      await handleSocialSignIn(userCredential.user!, 'apple');
       return userCredential;
     } catch (e) {
       throw _handleAuthException(e);
     }
   }
 
-  @override
   Future<UserCredential> signInWithGitHub() async {
     try {
       final accessToken = await _githubOAuthService.getAccessToken();
@@ -227,7 +227,7 @@ class AuthRepository implements IAuthRepository {
             }
           : null;
 
-      await handleSocialSignIn(userCredential.user!,
+      await handleSocialSignIn(userCredential.user!, 'github',
           additionalData: additionalData);
       return userCredential;
     } catch (e) {
@@ -484,20 +484,25 @@ class AuthRepository implements IAuthRepository {
   User? get currentUser => _auth.currentUser;
 
   // Sosyal giriş sonrası kullanıcı profili oluştur veya güncelle
-  Future<void> handleSocialSignIn(User user,
+  Future<void> handleSocialSignIn(User user, String provider,
       {Map<String, dynamic>? additionalData}) async {
     try {
-      // Kullanıcı dokümanını kontrol et
       final userDoc = await _firestore.collection('users').doc(user.uid).get();
 
       if (!userDoc.exists) {
-        // Yeni kullanıcı - profil oluştur
-        await _createUserProfile(user, additionalData: additionalData);
+        // Yeni kullanıcı - minimal profil oluştur
+        await _createMinimalSocialProfile(user, provider,
+            additionalData: additionalData);
+        Get.offAllNamed('/home'); // Direkt home'a git
       } else {
-        // Mevcut kullanıcı - GitHub bilgilerini güncelle
-        if (additionalData != null &&
-            additionalData.containsKey('githubUsername')) {
-          await _updateGithubInfo(user.uid, additionalData);
+        // Mevcut kullanıcı kontrolü
+        final userData = userDoc.data()!;
+        final completionLevel = _calculateCompletionLevelFromMap(userData);
+
+        if (completionLevel.index >= ProfileCompletionLevel.minimal.index) {
+          Get.offAllNamed('/home');
+        } else {
+          Get.offAllNamed('/onboarding/quick-setup');
         }
       }
     } catch (e) {
@@ -506,7 +511,8 @@ class AuthRepository implements IAuthRepository {
     }
   }
 
-  Future<void> _createUserProfile(User user,
+  // Sosyal giriş için minimal profil oluştur
+  Future<void> _createMinimalSocialProfile(User user, String provider,
       {Map<String, dynamic>? additionalData}) async {
     try {
       final userData = {
@@ -514,15 +520,14 @@ class AuthRepository implements IAuthRepository {
         'email': user.email,
         'displayName': user.displayName,
         'photoURL': user.photoURL,
-        'lastSeen': FieldValue.serverTimestamp(),
-        'updatedAt': FieldValue.serverTimestamp(),
-      };
-
-      userData.addAll({
         'createdAt': FieldValue.serverTimestamp(),
+        'updatedAt': FieldValue.serverTimestamp(),
+        'lastSeen': FieldValue.serverTimestamp(),
+        'authProvider': provider,
+        'onboardingStep': 'minimal_complete',
         'isProfileComplete': false,
-        'registrationStep': 'basicInfo',
-        'authProvider': _determineAuthProvider(user),
+        'profileCompletionLevel': 'minimal',
+        'canUseApp': true,
         'skills': [],
         'interests': [],
         'connections': [],
@@ -537,214 +542,169 @@ class AuthRepository implements IAuthRepository {
           'showLocation': true,
         },
         ...?additionalData,
-      });
+      };
 
-      // Sağlayıcıya özel varsayılan ayarlar
-      _addProviderSpecificDefaults(userData, user);
+      // Smart defaults from social providers
+      await _addSmartSocialDefaults(userData, user, provider);
 
       await _firestore.collection('users').doc(user.uid).set(userData);
-
-      // Yeni kullanıcı için profil tamamlama yönlendirmesi
-      Get.offAllNamed('/register/complete-profile', arguments: {
-        'userId': user.uid,
-        'isNewUser': true,
-        'authProvider': userData['authProvider'],
-      });
+      _showProfileCompletionReminder();
     } catch (e) {
-      _logger.e('Error creating user profile: $e');
+      _logger.e('Error creating minimal social profile: $e');
       throw _handleAuthException(e);
     }
   }
 
-  // Auth provider'ı belirle
-  String _determineAuthProvider(User user) {
-    final providerData = user.providerData.firstOrNull;
-    if (providerData == null) return 'email';
-
-    switch (providerData.providerId) {
-      case 'google.com':
-        return 'google';
-      case 'facebook.com':
-        return 'facebook';
-      case 'apple.com':
-        return 'apple';
-      case 'github.com':
-        return 'github';
+  // Map'ten ProfileCompletionLevel hesapla
+  ProfileCompletionLevel _calculateCompletionLevelFromMap(
+      Map<String, dynamic> userData) {
+    final profileCompletionLevel =
+        userData['profileCompletionLevel'] as String?;
+    switch (profileCompletionLevel) {
+      case 'minimal':
+        return ProfileCompletionLevel.minimal;
+      case 'basic':
+        return ProfileCompletionLevel.basic;
+      case 'standard':
+        return ProfileCompletionLevel.standard;
+      case 'complete':
+        return ProfileCompletionLevel.complete;
       default:
-        return 'email';
+        return ProfileCompletionLevel.minimal;
     }
   }
 
-  // Sağlayıcıya özel varsayılan ayarları ekle
-  void _addProviderSpecificDefaults(Map<String, dynamic> userData, User user) {
-    final authProvider = userData['authProvider'] as String;
+  // Kullanıcıya profil tamamlama hatırlatması
+  void _showProfileCompletionReminder() {
+    Future.delayed(Duration(seconds: 3), () {
+      Get.snackbar(
+        'Hoş geldin!',
+        'Profilini tamamlayarak daha iyi öneriler alabilirsin',
+        backgroundColor: Colors.blue.withOpacity(0.8),
+        colorText: Colors.white,
+        snackPosition: SnackPosition.TOP,
+        duration: Duration(seconds: 5),
+        mainButton: TextButton(
+          onPressed: () => Get.toNamed('/profile/complete'),
+          child: Text('Tamamla', style: TextStyle(color: Colors.white)),
+        ),
+      );
+    });
+  }
 
-    switch (authProvider) {
+  // Smart social defaults for modern social login
+  Future<void> _addSmartSocialDefaults(
+      Map<String, dynamic> userData, User user, String provider) async {
+    switch (provider) {
       case 'google':
-        _addGoogleDefaults(userData, user);
+        await _addGoogleSmartDefaults(userData, user);
         break;
       case 'apple':
-        _addAppleDefaults(userData, user);
+        await _addAppleSmartDefaults(userData, user);
         break;
       case 'github':
-        _addGitHubDefaults(userData, user);
-        break;
-      case 'facebook':
-        _addFacebookDefaults(userData, user);
+        await _addGitHubSmartDefaults(userData, user);
         break;
     }
   }
 
-  void _addGoogleDefaults(Map<String, dynamic> userData, User user) {
-    final googleData = user.providerData
-        .firstWhere((element) => element.providerId == 'google.com');
-
-    userData.addAll({
-      'email': googleData.email,
-      'displayName': googleData.displayName,
-      'photoURL': googleData.photoURL,
-      'isEmailVerified': true, // Google email'leri doğrulanmış kabul edilir
-      'preferences': {
-        'theme': 'system',
-        'language': 'tr',
-        'timezone': 'Europe/Istanbul',
-      },
-      'profile': {
-        'bio': '',
-        'title': '',
-        'company': '',
-        'location': '',
-        'website': '',
-        'github': '',
-        'linkedin': '',
-        'twitter': '',
-      },
-    });
-  }
-
-  void _addAppleDefaults(Map<String, dynamic> userData, User user) {
-    final appleData = user.providerData
-        .firstWhere((element) => element.providerId == 'apple.com');
-
-    userData.addAll({
-      'email': appleData.email,
-      'displayName': appleData.displayName ??
-          'Apple User', // Apple bazen isim vermeyebilir
-      'photoURL': appleData.photoURL ?? '', // Apple foto vermez
-      'isEmailVerified': true, // Apple email'leri doğrulanmış kabul edilir
-      'preferences': {
-        'theme': 'system',
-        'language': 'tr',
-        'timezone': 'Europe/Istanbul',
-        'useSystemTheme':
-            true, // Apple kullanıcıları için sistem teması varsayılan
-      },
-      'profile': {
-        'bio': '',
-        'title': '',
-        'company': '',
-        'location': '',
-        'website': '',
-        'github': '',
-        'linkedin': '',
-        'twitter': '',
-      },
-      'privacySettings': {
-        'profileVisibility':
-            'private', // Apple kullanıcıları için varsayılan olarak private
-        'showEmail': false,
-        'showLocation': false,
-      },
-    });
-  }
-
-  void _addGitHubDefaults(Map<String, dynamic> userData, User user) {
-    final githubData = user.providerData
-        .firstWhere((element) => element.providerId == 'github.com');
-
-    userData.addAll({
-      'email': githubData.email,
-      'displayName': githubData.displayName,
-      'photoURL': githubData.photoURL,
-      'isEmailVerified': true,
-      'preferences': {
-        'theme': 'dark', // GitHub kullanıcıları için dark theme varsayılan
-        'language': 'tr',
-        'timezone': 'Europe/Istanbul',
-        'codeEditor': {
-          'theme': 'monokai',
-          'fontSize': 14,
-          'tabSize': 2,
-        },
-      },
-      'profile': {
-        'bio': '',
-        'title': 'Software Developer', // GitHub kullanıcıları için varsayılan
-        'company': '',
-        'location': '',
-        'website': '',
-        'github':
-            githubData.displayName, // GitHub kullanıcı adını otomatik ekle
-        'linkedin': '',
-        'twitter': '',
-      },
-      'skills': ['Git'], // Temel Git yeteneği varsayılan olarak ekle
-    });
-  }
-
-  void _addFacebookDefaults(Map<String, dynamic> userData, User user) {
-    final facebookData = user.providerData
-        .firstWhere((element) => element.providerId == 'facebook.com');
-
-    userData.addAll({
-      'email': facebookData.email,
-      'displayName': facebookData.displayName,
-      'photoURL': facebookData.photoURL,
-      'isEmailVerified': true,
-      'preferences': {
-        'theme': 'light', // Facebook kullanıcıları için light theme varsayılan
-        'language': 'tr',
-        'timezone': 'Europe/Istanbul',
-      },
-      'profile': {
-        'bio': '',
-        'title': '',
-        'company': '',
-        'location': '',
-        'website': '',
-        'github': '',
-        'linkedin': '',
-        'twitter': '',
-      },
-      'privacySettings': {
-        'profileVisibility':
-            'friends', // Facebook kullanıcıları için varsayılan olarak friends-only
-        'showEmail': false,
-        'showLocation': true,
-      },
-    });
-  }
-
-  Future<void> _updateGithubInfo(
-      String userId, Map<String, dynamic> githubData) async {
+  // Google People API'dan akıllı defaults
+  Future<void> _addGoogleSmartDefaults(
+      Map<String, dynamic> userData, User user) async {
     try {
-      await _firestore.collection('users').doc(userId).update({
-        'githubUsername': githubData['githubUsername'],
-        'githubId': githubData['githubId'],
-        'githubBio': githubData['githubBio'],
-        'githubLocation': githubData['githubLocation'],
-        'githubCompany': githubData['githubCompany'],
-        'githubBlog': githubData['githubBlog'],
-        'githubFollowers': githubData['githubFollowers'],
-        'githubFollowing': githubData['githubFollowing'],
-        'githubPublicRepos': githubData['githubPublicRepos'],
-        'githubCreatedAt': githubData['githubCreatedAt'],
-        'githubUpdatedAt': githubData['githubUpdatedAt'],
-        'lastGithubSync': FieldValue.serverTimestamp(),
+      // Basic Google data
+      userData.addAll({
+        'isEmailVerified': true,
+        'preferences': {
+          'theme': 'system',
+          'language': 'tr',
+          'timezone': 'Europe/Istanbul',
+        },
       });
+
+      // Google People API integration için future improvement
+      // Şimdilik basic defaults
+      if (user.displayName?.isNotEmpty == true) {
+        final nameParts = user.displayName!.split(' ');
+        userData['firstName'] = nameParts.first;
+        if (nameParts.length > 1) {
+          userData['lastName'] = nameParts.sublist(1).join(' ');
+        }
+      }
+
+      // Google hesap region detection
+      userData['region'] = 'TR'; // Default
     } catch (e) {
-      _logger.e('GitHub info update error: $e');
-      throw _handleAuthException(e);
+      _logger.w('Google smart defaults failed: $e');
+    }
+  }
+
+  // Apple UserInfo'dan akıllı defaults
+  Future<void> _addAppleSmartDefaults(
+      Map<String, dynamic> userData, User user) async {
+    try {
+      userData.addAll({
+        'isEmailVerified': true,
+        'preferences': {
+          'theme': 'system',
+          'language': 'tr',
+          'timezone': 'Europe/Istanbul',
+          'useSystemTheme': true,
+        },
+        'privacySettings': {
+          'profileVisibility': 'private', // Apple users prefer privacy
+          'showEmail': false,
+          'showLocation': false,
+        },
+      });
+
+      // Apple name parsing
+      if (user.displayName?.isNotEmpty == true) {
+        final nameParts = user.displayName!.split(' ');
+        userData['firstName'] = nameParts.first;
+        if (nameParts.length > 1) {
+          userData['lastName'] = nameParts.sublist(1).join(' ');
+        }
+      } else {
+        userData['displayName'] = 'Apple User';
+      }
+
+      // Apple account region
+      userData['region'] = 'TR'; // Default
+    } catch (e) {
+      _logger.w('Apple smart defaults failed: $e');
+    }
+  }
+
+  // GitHub için gelişmiş defaults
+  Future<void> _addGitHubSmartDefaults(
+      Map<String, dynamic> userData, User user) async {
+    try {
+      userData.addAll({
+        'isEmailVerified': true,
+        'preferences': {
+          'theme': 'dark',
+          'language': 'tr',
+          'timezone': 'Europe/Istanbul',
+          'codeEditor': {
+            'theme': 'monokai',
+            'fontSize': 14,
+            'tabSize': 2,
+          },
+        },
+        'skills': ['Git'], // Base skill
+      });
+
+      if (user.displayName?.isNotEmpty == true) {
+        userData['githubUsername'] = user.displayName;
+        userData['profile'] = {
+          'bio': '',
+          'title': 'Software Developer',
+          'github': user.displayName,
+        };
+      }
+    } catch (e) {
+      _logger.w('GitHub smart defaults failed: $e');
     }
   }
 

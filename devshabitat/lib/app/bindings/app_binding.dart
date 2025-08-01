@@ -1,7 +1,6 @@
 import 'package:devshabitat/app/controllers/auth_controller.dart';
 import 'package:devshabitat/app/repositories/auth_repository.dart';
 import 'package:get/get.dart';
-import 'package:logger/logger.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../core/services/error_handler_service.dart';
 import '../core/services/memory_manager_service.dart';
@@ -36,6 +35,14 @@ import '../services/network_analytics_service.dart';
 import '../services/location/maps_service.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import '../services/fcm_service.dart';
+import '../services/user_service.dart';
+import '../services/progressive_onboarding_service.dart';
+import '../services/profile_completion_service.dart';
+import '../services/feature_gate_service.dart';
+import '../services/auth_migration_service.dart';
+import '../services/analytics_service.dart';
+import '../controllers/progressive_onboarding_controller.dart';
+import '../controllers/feature_gate_controller.dart';
 
 class AppBinding extends Bindings {
   @override
@@ -97,11 +104,17 @@ class AppBinding extends Bindings {
 
     // FCM Service
     Get.put(FCMService());
+
+    // Profile Completion & Feature Gate Services
+    Get.put(ProfileCompletionService());
+    Get.put(FeatureGateService());
+    Get.put(ProgressiveOnboardingService());
+    Get.put(AuthMigrationService());
+    Get.put(AnalyticsService());
   }
 
   Future<void> _initAsynchronousDependencies() async {
     final errorHandler = Get.find<ErrorHandlerService>();
-    final logger = Get.find<Logger>();
 
     try {
       // SharedPreferences
@@ -169,6 +182,13 @@ class AppBinding extends Bindings {
       Get.put(PostService(
         errorHandler: errorHandler,
       ));
+
+      // User Service
+      Get.put(UserService());
+
+      // Feature Gate & Progressive Onboarding Controllers
+      Get.put(FeatureGateController());
+      Get.put(ProgressiveOnboardingController());
 
       // Message Binding
       MessageBinding().dependencies();

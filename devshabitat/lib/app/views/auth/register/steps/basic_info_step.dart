@@ -5,7 +5,6 @@ import '../../../../controllers/registration_controller.dart';
 import '../../../../controllers/responsive_controller.dart';
 import '../../../../controllers/enhanced_form_validation_controller.dart';
 import '../../../../widgets/enhanced_form_field.dart';
-import '../../../../controllers/auth_controller.dart';
 
 class BasicInfoStep extends GetView<RegistrationController> {
   final _responsiveController = Get.find<ResponsiveController>();
@@ -175,14 +174,12 @@ class BasicInfoStep extends GetView<RegistrationController> {
               ? _buildPasswordMatchStatus()
               : SizedBox.shrink()),
 
-          // GitHub OAuth Bölümü (Zorunlu)
           SizedBox(
               height: _responsiveController.responsiveValue(
-            mobile: 24.0,
-            tablet: 32.0,
-          )),
+                  mobile: 24.0, tablet: 32.0)),
 
-          _buildGithubSection(),
+          // GitHub Veri İçe Aktarma Bölümü (İsteğe Bağlı)
+          _buildGithubImportSection(),
         ],
       ),
     );
@@ -323,7 +320,7 @@ class BasicInfoStep extends GetView<RegistrationController> {
     );
   }
 
-  Widget _buildGithubSection() {
+  Widget _buildGithubImportSection() {
     return Container(
       padding: _responsiveController.responsivePadding(all: 16.0),
       decoration: BoxDecoration(
@@ -332,7 +329,7 @@ class BasicInfoStep extends GetView<RegistrationController> {
         border: Border.all(
           color: controller.isGithubConnected
               ? Colors.green[300]!
-              : Colors.orange[300]!,
+              : Colors.blue[300]!,
           width: 1.5,
         ),
       ),
@@ -342,11 +339,13 @@ class BasicInfoStep extends GetView<RegistrationController> {
           Row(
             children: [
               Icon(
-                Icons.code,
+                controller.isGithubConnected
+                    ? Icons.check_circle
+                    : Icons.download,
                 size: 24.0,
                 color: controller.isGithubConnected
                     ? Colors.green[700]
-                    : Colors.orange[700],
+                    : Colors.blue[700],
               ),
               const SizedBox(width: 8.0),
               Expanded(
@@ -354,24 +353,24 @@ class BasicInfoStep extends GetView<RegistrationController> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      'GitHub Hesabı',
+                      'GitHub Verilerini İçe Aktar',
                       style: TextStyle(
                         fontSize: 16.0,
                         fontWeight: FontWeight.w600,
                         color: controller.isGithubConnected
                             ? Colors.green[800]
-                            : Colors.orange[800],
+                            : Colors.blue[800],
                       ),
                     ),
                     Text(
                       controller.isGithubConnected
-                          ? '✅ GitHub hesabınız bağlandı'
-                          : '⚠️ GitHub hesabı bağlanması zorunludur',
+                          ? 'GitHub verileriniz form alanlarına aktarıldı'
+                          : 'GitHub profilinizden bilgileri otomatik doldur (İsteğe bağlı)',
                       style: TextStyle(
                         fontSize: 12.0,
                         color: controller.isGithubConnected
                             ? Colors.green[600]
-                            : Colors.orange[600],
+                            : Colors.blue[600],
                       ),
                     ),
                   ],
@@ -379,95 +378,30 @@ class BasicInfoStep extends GetView<RegistrationController> {
               ),
             ],
           ),
-          if (!controller.isGithubConnected) ...[
-            const SizedBox(height: 12.0),
-            Text(
-              'DevsHabitat\'a katılmak için GitHub hesabınızı bağlamanız gerekmektedir.',
-              style: TextStyle(
-                fontSize: 13.0,
-                color: Colors.grey[700],
-                height: 1.4,
-              ),
+          const SizedBox(height: 12.0),
+          Text(
+            controller.isGithubConnected
+                ? 'GitHub profilinizden name, email, bio, location ve company bilgileri aktarıldı.'
+                : 'GitHub profilinizden email, isim, bio ve diğer bilgileri otomatik olarak form alanlarına aktarabilirsiniz. Bu işlem isteğe bağlıdır.',
+            style: TextStyle(
+              fontSize: 13.0,
+              color: Colors.grey[700],
+              height: 1.4,
             ),
-          ],
-          const SizedBox(height: 16.0),
-          // GitHub bağlantısı sonrası bilgilendirme
-          Obx(() => controller.isGithubConnected
-              ? Container(
-                  padding: const EdgeInsets.all(12.0),
-                  decoration: BoxDecoration(
-                    color: Colors.green[50],
-                    borderRadius: BorderRadius.circular(8.0),
-                    border: Border.all(color: Colors.green[200]!),
-                  ),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      // Sadece boş olan alanları göster
-                      if (controller.emailController.text.isEmpty)
-                        _buildRequirementItem('Email adresinizi girin', false),
-                      if (controller.displayNameController.text.isEmpty)
-                        _buildRequirementItem('Görünen adınızı girin', false),
-                      if (!controller.allPasswordRequirementsMet)
-                        _buildRequirementItem(
-                            'Güçlü bir şifre oluşturun', false),
-                      if (!controller.passwordsMatch &&
-                          !controller.confirmPasswordIsEmpty)
-                        _buildRequirementItem('Şifrenizi tekrar girin', false),
-                      if (controller.canGoNext) ...[
-                        const SizedBox(height: 8.0),
-                        Container(
-                          padding: const EdgeInsets.symmetric(
-                              horizontal: 8.0, vertical: 6.0),
-                          decoration: BoxDecoration(
-                            color: Colors.blue[50],
-                            borderRadius: BorderRadius.circular(4.0),
-                            border: Border.all(color: Colors.blue[200]!),
-                          ),
-                          child: Row(
-                            children: [
-                              Icon(Icons.check_circle,
-                                  size: 14.0, color: Colors.blue[700]),
-                              const SizedBox(width: 6.0),
-                              Expanded(
-                                child: Text(
-                                  'Tüm bilgiler tamamlandı! "Devam Et" butonuna basabilirsiniz.',
-                                  style: TextStyle(
-                                    fontSize: 11.0,
-                                    color: Colors.blue[700],
-                                    fontWeight: FontWeight.w500,
-                                  ),
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ],
-                    ],
-                  ),
-                )
-              : const SizedBox.shrink()),
+          ),
           const SizedBox(height: 16.0),
           SizedBox(
             width: double.infinity,
             child: ElevatedButton.icon(
               onPressed: controller.isGithubConnected
-                  ? controller.disconnectGithub
+                  ? () {
+                      // GitHub bağlantısını kaldır
+                      controller.disconnectGithub();
+                    }
                   : (controller.isGithubLoading
                       ? null
                       : () async {
-                          try {
-                            final authController = Get.find<AuthController>();
-                            await authController.signInWithGithub();
-                          } catch (e) {
-                            Get.snackbar(
-                              'Hata',
-                              'GitHub bağlantısı sırasında bir hata oluştu: $e',
-                              backgroundColor: Colors.red.withOpacity(0.8),
-                              colorText: Colors.white,
-                              snackPosition: SnackPosition.BOTTOM,
-                            );
-                          }
+                          await controller.importGithubData();
                         }),
               icon: controller.isGithubLoading
                   ? SizedBox(
@@ -480,16 +414,16 @@ class BasicInfoStep extends GetView<RegistrationController> {
                     )
                   : Icon(
                       controller.isGithubConnected
-                          ? Icons.link_off
-                          : Icons.code,
+                          ? Icons.clear
+                          : Icons.download,
                       size: 20.0,
                     ),
               label: Text(
                 controller.isGithubLoading
-                    ? 'GitHub\'a bağlanıyor...'
+                    ? 'GitHub verileriniz alınıyor...'
                     : (controller.isGithubConnected
-                        ? 'GitHub Bağlantısını Kaldır'
-                        : 'GitHub ile Bağlan'),
+                        ? 'GitHub Verilerini Temizle'
+                        : 'GitHub\'dan Verileri Al'),
                 style: const TextStyle(
                   fontSize: 16.0,
                   fontWeight: FontWeight.w600,
@@ -497,8 +431,8 @@ class BasicInfoStep extends GetView<RegistrationController> {
               ),
               style: ElevatedButton.styleFrom(
                 backgroundColor: controller.isGithubConnected
-                    ? Colors.red[600]
-                    : Colors.orange[600],
+                    ? Colors.grey[600]
+                    : Colors.blue[600],
                 foregroundColor: Colors.white,
                 padding: const EdgeInsets.symmetric(
                     horizontal: 24.0, vertical: 16.0),

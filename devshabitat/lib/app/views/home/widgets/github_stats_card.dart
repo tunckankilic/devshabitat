@@ -1,4 +1,3 @@
-import 'package:devshabitat/app/constants/app_strings.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../../../controllers/home_controller.dart';
@@ -251,8 +250,7 @@ class GithubStatsCard extends GetView<HomeController> {
         SizedBox(height: responsive.responsiveValue(mobile: 12, tablet: 16)),
         ...languageStats.entries
             .take(5)
-            .map((entry) => _buildLanguageRow(entry.key, entry.value))
-            .toList(),
+            .map((entry) => _buildLanguageRow(entry.key, entry.value)),
       ],
     );
   }

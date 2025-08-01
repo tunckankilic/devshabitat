@@ -3,8 +3,13 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'dart:io' show Platform;
+import 'package:logger/logger.dart';
 import '../repositories/auth_repository.dart';
 import '../core/services/error_handler_service.dart';
+import '../services/feature_gate_service.dart';
+import '../services/progressive_onboarding_service.dart';
+import '../services/auth_migration_service.dart';
+import '../models/enhanced_user_model.dart';
 import 'email_auth_controller.dart';
 import 'auth_state_controller.dart';
 
@@ -13,6 +18,14 @@ class AuthController extends GetxController {
   final AuthStateController _authState;
   final AuthRepository _authRepository;
   final ErrorHandlerService _errorHandler;
+  final Logger _logger = Get.find<Logger>();
+
+  // Authentication optimization services
+
+  final FeatureGateService _featureGateService = FeatureGateService.to;
+
+  final AuthMigrationService _migrationService =
+      Get.find<AuthMigrationService>();
 
   final Rx<User?> _firebaseUser = Rx<User?>(null);
   final RxMap<String, dynamic> _userProfile = RxMap<String, dynamic>();
@@ -92,9 +105,65 @@ class AuthController extends GetxController {
     final currentRoute = Get.currentRoute;
     final authRoutes = ['/login', '/register', '/forgot-password'];
 
-    // Sadece auth sayfalarındaysa anasayfaya yönlendir
+    // Sadece auth sayfalarındaysa profil durumuna göre yönlendir
     if (authRoutes.contains(currentRoute)) {
-      _navigateToRoute('/home');
+      _checkProfileAndNavigate();
+    }
+  }
+
+  // Profil tamamlanma durumuna göre yönlendirme
+  void _checkProfileAndNavigate() async {
+    try {
+      final currentUser = _firebaseUser.value;
+      if (currentUser == null) return;
+
+      // Auto-migrate user if needed
+      await _migrationService.autoMigrateUserOnLogin(currentUser.uid);
+
+      // Get updated user profile after potential migration
+      await _loadUserProfile();
+
+      final userProfile = _userProfile;
+      if (userProfile.isEmpty) {
+        _navigateToRoute('/register/steps');
+        return;
+      }
+
+      // Create enhanced user model for completion checking
+      final enhancedUser = EnhancedUserModel.fromJson(userProfile);
+
+      // Check if user can access home (browsing feature)
+      if (_featureGateService.canAccess('browsing', enhancedUser)) {
+        _navigateToRoute('/home');
+      } else {
+        // Show progressive onboarding for minimal completion
+        _showProgressiveOnboarding(enhancedUser);
+      }
+    } catch (e) {
+      _logger.e('Error in profile check and navigation: $e');
+      _navigateToRoute('/home'); // Fallback to home
+    }
+  }
+
+  // Show progressive onboarding for uncompleted profiles
+  Future<void> _showProgressiveOnboarding(EnhancedUserModel user) async {
+    try {
+      final result = await ProgressiveOnboardingService.showQuickSetup(
+        user,
+        targetFeature: 'browsing',
+      );
+
+      if (result == true) {
+        // User completed setup, reload profile and navigate
+        await _loadUserProfile();
+        _navigateToRoute('/home');
+      } else {
+        // User skipped setup, still navigate but with limited access
+        _navigateToRoute('/home');
+      }
+    } catch (e) {
+      _logger.e('Error showing progressive onboarding: $e');
+      _navigateToRoute('/home'); // Fallback
     }
   }
 
@@ -102,7 +171,7 @@ class AuthController extends GetxController {
     if (_isNavigating) return;
 
     _isNavigating = true;
-    WidgetsBinding.instance.addPostFrameCallback((_) {
+    Timer(const Duration(milliseconds: 100), () {
       Get.offAllNamed(route);
       _isNavigating = false;
     });
@@ -186,7 +255,9 @@ class AuthController extends GetxController {
 
       final accessToken = await _authRepository.getGithubAccessToken();
       if (accessToken == null) {
-        throw Exception('GitHub ile giriş yapılamadı. Lütfen tekrar deneyin.');
+        // Kullanıcı iptal etti veya işlem başarısız oldu
+        _logger.i('GitHub sign in was cancelled or failed');
+        return null;
       }
 
       return accessToken;

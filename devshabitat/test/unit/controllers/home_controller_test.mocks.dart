@@ -741,13 +741,17 @@ class MockAuthRepository extends _i1.Mock implements _i10.AuthRepository {
 
   @override
   _i8.Future<void> handleSocialSignIn(
-    _i3.User? user, {
+    _i3.User? user,
+    String? provider, {
     Map<String, dynamic>? additionalData,
   }) =>
       (super.noSuchMethod(
         Invocation.method(
           #handleSocialSignIn,
-          [user],
+          [
+            user,
+            provider,
+          ],
           {#additionalData: additionalData},
         ),
         returnValue: _i8.Future<void>.value(),
