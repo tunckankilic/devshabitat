@@ -1,6 +1,5 @@
 import 'dart:math' as math;
 import '../models/enhanced_user_model.dart';
-import '../models/location_model.dart';
 import '../models/user_profile_model.dart';
 import '../models/connection_model.dart';
 
@@ -23,9 +22,8 @@ class ConnectionScoringAlgorithm {
     }
 
     // Deneyim seviyesi uyumu (30%)
-    if (user1.yearsOfExperience != null && user2.yearsOfExperience != null) {
-      final expDiff =
-          (user1.yearsOfExperience! - user2.yearsOfExperience!).abs();
+    if (user1.yearsOfExperience != 0 && user2.yearsOfExperience != 0) {
+      final expDiff = (user1.yearsOfExperience - user2.yearsOfExperience).abs();
       score += (1 - (expDiff / 10).clamp(0.0, 1.0)) * 0.3;
       totalWeight += 0.3;
     }

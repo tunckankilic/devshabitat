@@ -1,3 +1,9 @@
+import 'package:json_annotation/json_annotation.dart';
+import 'package:location/location.dart';
+
+part 'location_data_model.g.dart';
+
+@JsonSerializable()
 class LocationDataModel {
   final double latitude;
   final double longitude;
@@ -17,15 +23,21 @@ class LocationDataModel {
     this.timestamp,
   });
 
-  Map<String, dynamic> toJson() {
-    return {
-      'latitude': latitude,
-      'longitude': longitude,
-      'accuracy': accuracy,
-      'altitude': altitude,
-      'speed': speed,
-      'heading': heading,
-      'timestamp': timestamp?.toIso8601String(),
-    };
+  factory LocationDataModel.fromLocationData(LocationData data) {
+    return LocationDataModel(
+      latitude: data.latitude ?? 0,
+      longitude: data.longitude ?? 0,
+      accuracy: data.accuracy,
+      altitude: data.altitude,
+      speed: data.speed,
+      heading: data.heading,
+      timestamp: data.time != null
+          ? DateTime.fromMillisecondsSinceEpoch(data.time!.toInt())
+          : null,
+    );
   }
+
+  factory LocationDataModel.fromJson(Map<String, dynamic> json) =>
+      _$LocationDataModelFromJson(json);
+  Map<String, dynamic> toJson() => _$LocationDataModelToJson(this);
 }

@@ -14,15 +14,16 @@ PrivacySettings _$PrivacySettingsFromJson(Map<String, dynamic> json) =>
       showTechnologies: json['showTechnologies'] as bool? ?? true,
       showBio: json['showBio'] as bool? ?? true,
       allowMentorshipRequests: json['allowMentorshipRequests'] as bool? ?? true,
-      blockedUsers: (json['blockedUsers'] as List<dynamic>?)
+      blockedUsers:
+          (json['blockedUsers'] as List<dynamic>?)
               ?.map((e) => e as String)
               .toList() ??
           const [],
       customVisibility:
           (json['customVisibility'] as Map<String, dynamic>?)?.map(
-                (k, e) => MapEntry(k, e as bool),
-              ) ??
-              const {},
+            (k, e) => MapEntry(k, e as bool),
+          ) ??
+          const {},
     );
 
 Map<String, dynamic> _$PrivacySettingsToJson(PrivacySettings instance) =>

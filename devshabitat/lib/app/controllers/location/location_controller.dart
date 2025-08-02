@@ -3,7 +3,6 @@
 import 'dart:async';
 import 'package:get/get.dart';
 import 'package:location/location.dart';
-import '../../models/location/location_model.dart';
 import '../../models/location/geofence_model.dart';
 import '../../services/location/location_tracking_service.dart';
 import '../../services/location/geofence_service.dart';

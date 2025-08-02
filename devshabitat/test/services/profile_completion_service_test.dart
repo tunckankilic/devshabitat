@@ -107,12 +107,13 @@ void main() {
           enhanced.WorkExperience(title: 'Developer', company: 'Test Company'),
         ],
         location: LocationModel(
-          userId: 'test-user',
-          location: GeoPoint(40.7128, -74.0060),
+          latitude: 40.7128,
+          longitude: -74.0060,
           accuracy: 10.0,
+          timestamp: DateTime.now(),
           speed: 0.0,
           heading: 0.0,
-          timestamp: DateTime.now(),
+          userId: 'test-user',
           address: 'New York, NY',
         ),
       );
@@ -276,12 +277,13 @@ void main() {
           enhanced.WorkExperience(title: 'Developer', company: 'Test Company'),
         ],
         location: LocationModel(
-          userId: 'test-user',
-          location: GeoPoint(40.7128, -74.0060),
+          latitude: 40.7128,
+          longitude: -74.0060,
           accuracy: 10.0,
+          timestamp: DateTime.now(),
           speed: 0.0,
           heading: 0.0,
-          timestamp: DateTime.now(),
+          userId: 'test-user',
           address: 'New York, NY',
         ),
         education: [

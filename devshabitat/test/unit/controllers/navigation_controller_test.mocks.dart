@@ -26,25 +26,16 @@ import 'package:mockito/mockito.dart' as _i2;
 // ignore_for_file: subtype_of_sealed_class
 
 class _FakeGlobalKey_0<T extends _i1.State<_i1.StatefulWidget>>
-    extends _i2.SmartFake implements _i1.GlobalKey<T> {
-  _FakeGlobalKey_0(
-    Object parent,
-    Invocation parentInvocation,
-  ) : super(
-          parent,
-          parentInvocation,
-        );
+    extends _i2.SmartFake
+    implements _i1.GlobalKey<T> {
+  _FakeGlobalKey_0(Object parent, Invocation parentInvocation)
+    : super(parent, parentInvocation);
 }
 
 class _FakeInternalFinalCallback_1<T> extends _i2.SmartFake
     implements _i3.InternalFinalCallback<T> {
-  _FakeInternalFinalCallback_1(
-    Object parent,
-    Invocation parentInvocation,
-  ) : super(
-          parent,
-          parentInvocation,
-        );
+  _FakeInternalFinalCallback_1(Object parent, Invocation parentInvocation)
+    : super(parent, parentInvocation);
 }
 
 /// A class which mocks [NavigationService].
@@ -52,81 +43,86 @@ class _FakeInternalFinalCallback_1<T> extends _i2.SmartFake
 /// See the documentation for Mockito's code generation for more information.
 class MockNavigationService extends _i2.Mock implements _i4.NavigationService {
   @override
-  _i1.GlobalKey<_i1.NavigatorState> get navigationKey => (super.noSuchMethod(
-        Invocation.getter(#navigationKey),
-        returnValue: _FakeGlobalKey_0<_i1.NavigatorState>(
-          this,
-          Invocation.getter(#navigationKey),
-        ),
-        returnValueForMissingStub: _FakeGlobalKey_0<_i1.NavigatorState>(
-          this,
-          Invocation.getter(#navigationKey),
-        ),
-      ) as _i1.GlobalKey<_i1.NavigatorState>);
-
-  @override
-  _i3.InternalFinalCallback<void> get onStart => (super.noSuchMethod(
-        Invocation.getter(#onStart),
-        returnValue: _FakeInternalFinalCallback_1<void>(
-          this,
-          Invocation.getter(#onStart),
-        ),
-        returnValueForMissingStub: _FakeInternalFinalCallback_1<void>(
-          this,
-          Invocation.getter(#onStart),
-        ),
-      ) as _i3.InternalFinalCallback<void>);
-
-  @override
-  _i3.InternalFinalCallback<void> get onDelete => (super.noSuchMethod(
-        Invocation.getter(#onDelete),
-        returnValue: _FakeInternalFinalCallback_1<void>(
-          this,
-          Invocation.getter(#onDelete),
-        ),
-        returnValueForMissingStub: _FakeInternalFinalCallback_1<void>(
-          this,
-          Invocation.getter(#onDelete),
-        ),
-      ) as _i3.InternalFinalCallback<void>);
-
-  @override
-  bool get initialized => (super.noSuchMethod(
-        Invocation.getter(#initialized),
-        returnValue: false,
-        returnValueForMissingStub: false,
-      ) as bool);
-
-  @override
-  bool get isClosed => (super.noSuchMethod(
-        Invocation.getter(#isClosed),
-        returnValue: false,
-        returnValueForMissingStub: false,
-      ) as bool);
-
-  @override
-  _i5.Future<dynamic> navigateTo(
-    String? routeName, {
-    dynamic arguments,
-  }) =>
+  _i1.GlobalKey<_i1.NavigatorState> get navigationKey =>
       (super.noSuchMethod(
-        Invocation.method(
-          #navigateTo,
-          [routeName],
-          {#arguments: arguments},
-        ),
-        returnValue: _i5.Future<dynamic>.value(),
-        returnValueForMissingStub: _i5.Future<dynamic>.value(),
-      ) as _i5.Future<dynamic>);
+            Invocation.getter(#navigationKey),
+            returnValue: _FakeGlobalKey_0<_i1.NavigatorState>(
+              this,
+              Invocation.getter(#navigationKey),
+            ),
+            returnValueForMissingStub: _FakeGlobalKey_0<_i1.NavigatorState>(
+              this,
+              Invocation.getter(#navigationKey),
+            ),
+          )
+          as _i1.GlobalKey<_i1.NavigatorState>);
+
+  @override
+  _i3.InternalFinalCallback<void> get onStart =>
+      (super.noSuchMethod(
+            Invocation.getter(#onStart),
+            returnValue: _FakeInternalFinalCallback_1<void>(
+              this,
+              Invocation.getter(#onStart),
+            ),
+            returnValueForMissingStub: _FakeInternalFinalCallback_1<void>(
+              this,
+              Invocation.getter(#onStart),
+            ),
+          )
+          as _i3.InternalFinalCallback<void>);
+
+  @override
+  _i3.InternalFinalCallback<void> get onDelete =>
+      (super.noSuchMethod(
+            Invocation.getter(#onDelete),
+            returnValue: _FakeInternalFinalCallback_1<void>(
+              this,
+              Invocation.getter(#onDelete),
+            ),
+            returnValueForMissingStub: _FakeInternalFinalCallback_1<void>(
+              this,
+              Invocation.getter(#onDelete),
+            ),
+          )
+          as _i3.InternalFinalCallback<void>);
+
+  @override
+  bool get initialized =>
+      (super.noSuchMethod(
+            Invocation.getter(#initialized),
+            returnValue: false,
+            returnValueForMissingStub: false,
+          )
+          as bool);
+
+  @override
+  bool get isClosed =>
+      (super.noSuchMethod(
+            Invocation.getter(#isClosed),
+            returnValue: false,
+            returnValueForMissingStub: false,
+          )
+          as bool);
+
+  @override
+  _i5.Future<dynamic> navigateTo(String? routeName, {dynamic arguments}) =>
+      (super.noSuchMethod(
+            Invocation.method(
+              #navigateTo,
+              [routeName],
+              {#arguments: arguments},
+            ),
+            returnValue: _i5.Future<dynamic>.value(),
+            returnValueForMissingStub: _i5.Future<dynamic>.value(),
+          )
+          as _i5.Future<dynamic>);
 
   @override
   void goBack() => super.noSuchMethod(
-        Invocation.method(
-          #goBack,
-          [],
-        ),
-        returnValueForMissingStub: null,
-      );
+    Invocation.method(#goBack, []),
+    returnValueForMissingStub: null,
+  );
 
   @override
   _i5.Future<dynamic> navigateToAndRemoveUntil(
@@ -134,14 +130,15 @@ class MockNavigationService extends _i2.Mock implements _i4.NavigationService {
     dynamic arguments,
   }) =>
       (super.noSuchMethod(
-        Invocation.method(
-          #navigateToAndRemoveUntil,
-          [routeName],
-          {#arguments: arguments},
-        ),
-        returnValue: _i5.Future<dynamic>.value(),
-        returnValueForMissingStub: _i5.Future<dynamic>.value(),
-      ) as _i5.Future<dynamic>);
+            Invocation.method(
+              #navigateToAndRemoveUntil,
+              [routeName],
+              {#arguments: arguments},
+            ),
+            returnValue: _i5.Future<dynamic>.value(),
+            returnValueForMissingStub: _i5.Future<dynamic>.value(),
+          )
+          as _i5.Future<dynamic>);
 
   @override
   _i5.Future<dynamic> navigateToAndReplace(
@@ -149,23 +146,21 @@ class MockNavigationService extends _i2.Mock implements _i4.NavigationService {
     dynamic arguments,
   }) =>
       (super.noSuchMethod(
-        Invocation.method(
-          #navigateToAndReplace,
-          [routeName],
-          {#arguments: arguments},
-        ),
-        returnValue: _i5.Future<dynamic>.value(),
-        returnValueForMissingStub: _i5.Future<dynamic>.value(),
-      ) as _i5.Future<dynamic>);
+            Invocation.method(
+              #navigateToAndReplace,
+              [routeName],
+              {#arguments: arguments},
+            ),
+            returnValue: _i5.Future<dynamic>.value(),
+            returnValueForMissingStub: _i5.Future<dynamic>.value(),
+          )
+          as _i5.Future<dynamic>);
 
   @override
   void popUntil(String? routeName) => super.noSuchMethod(
-        Invocation.method(
-          #popUntil,
-          [routeName],
-        ),
-        returnValueForMissingStub: null,
-      );
+    Invocation.method(#popUntil, [routeName]),
+    returnValueForMissingStub: null,
+  );
 
   @override
   _i5.Future<dynamic> showCustomDialog({
@@ -173,17 +168,14 @@ class MockNavigationService extends _i2.Mock implements _i4.NavigationService {
     bool? barrierDismissible = true,
   }) =>
       (super.noSuchMethod(
-        Invocation.method(
-          #showCustomDialog,
-          [],
-          {
-            #child: child,
-            #barrierDismissible: barrierDismissible,
-          },
-        ),
-        returnValue: _i5.Future<dynamic>.value(),
-        returnValueForMissingStub: _i5.Future<dynamic>.value(),
-      ) as _i5.Future<dynamic>);
+            Invocation.method(#showCustomDialog, [], {
+              #child: child,
+              #barrierDismissible: barrierDismissible,
+            }),
+            returnValue: _i5.Future<dynamic>.value(),
+            returnValueForMissingStub: _i5.Future<dynamic>.value(),
+          )
+          as _i5.Future<dynamic>);
 
   @override
   _i5.Future<dynamic> showCustomBottomSheet({
@@ -193,53 +185,38 @@ class MockNavigationService extends _i2.Mock implements _i4.NavigationService {
     _i6.Color? backgroundColor,
   }) =>
       (super.noSuchMethod(
-        Invocation.method(
-          #showCustomBottomSheet,
-          [],
-          {
-            #child: child,
-            #isDismissible: isDismissible,
-            #enableDrag: enableDrag,
-            #backgroundColor: backgroundColor,
-          },
-        ),
-        returnValue: _i5.Future<dynamic>.value(),
-        returnValueForMissingStub: _i5.Future<dynamic>.value(),
-      ) as _i5.Future<dynamic>);
+            Invocation.method(#showCustomBottomSheet, [], {
+              #child: child,
+              #isDismissible: isDismissible,
+              #enableDrag: enableDrag,
+              #backgroundColor: backgroundColor,
+            }),
+            returnValue: _i5.Future<dynamic>.value(),
+            returnValueForMissingStub: _i5.Future<dynamic>.value(),
+          )
+          as _i5.Future<dynamic>);
 
   @override
   void onInit() => super.noSuchMethod(
-        Invocation.method(
-          #onInit,
-          [],
-        ),
-        returnValueForMissingStub: null,
-      );
+    Invocation.method(#onInit, []),
+    returnValueForMissingStub: null,
+  );
 
   @override
   void onReady() => super.noSuchMethod(
-        Invocation.method(
-          #onReady,
-          [],
-        ),
-        returnValueForMissingStub: null,
-      );
+    Invocation.method(#onReady, []),
+    returnValueForMissingStub: null,
+  );
 
   @override
   void onClose() => super.noSuchMethod(
-        Invocation.method(
-          #onClose,
-          [],
-        ),
-        returnValueForMissingStub: null,
-      );
+    Invocation.method(#onClose, []),
+    returnValueForMissingStub: null,
+  );
 
   @override
   void $configureLifeCycle() => super.noSuchMethod(
-        Invocation.method(
-          #$configureLifeCycle,
-          [],
-        ),
-        returnValueForMissingStub: null,
-      );
+    Invocation.method(#$configureLifeCycle, []),
+    returnValueForMissingStub: null,
+  );
 }

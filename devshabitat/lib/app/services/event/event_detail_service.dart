@@ -1,280 +1,91 @@
 import 'package:get/get.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import '../../models/event/event_model.dart';
-import 'package:logger/logger.dart';
+import '../../controllers/event/event_detail_controller.dart';
 
 class EventDetailService extends GetxService {
-  final _firestore = FirebaseFirestore.instance;
-  final Logger _logger = Logger();
+  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
 
-  Future<EventModel?> getEventDetails(String eventId) async {
-    try {
-      final doc = await _firestore.collection('events').doc(eventId).get();
-      if (doc.exists) {
-        return EventModel.fromMap({...doc.data()!, 'id': doc.id});
-      }
-      return null;
-    } catch (e) {
-      _logger.e('Etkinlik detayları alınırken hata: $e');
-      throw Exception(
-          'Etkinlik bilgileri şu anda yüklenemiyor. Lütfen daha sonra tekrar deneyin.');
+  Future<EventModel> getEventById(String eventId) async {
+    final doc = await _firestore.collection('events').doc(eventId).get();
+    if (!doc.exists) {
+      throw Exception('Etkinlik bulunamadı');
     }
+    return EventModel.fromMap({...doc.data()!, 'id': doc.id});
   }
 
-  Future<List<Map<String, dynamic>>> getEventParticipants(
-      String eventId) async {
-    try {
-      final eventDoc = await _firestore.collection('events').doc(eventId).get();
-      if (!eventDoc.exists) return [];
-
-      final participants =
-          eventDoc.data()?['participants'] as List<dynamic>? ?? [];
-      final participantsData = <Map<String, dynamic>>[];
-
-      for (final participantId in participants) {
-        try {
-          final userDoc =
-              await _firestore.collection('users').doc(participantId).get();
-          if (userDoc.exists) {
-            participantsData.add({
-              'id': participantId,
-              'displayName': userDoc.data()?['displayName'] ?? 'Anonim',
-              'email': userDoc.data()?['email'] ?? '',
-              'photoURL': userDoc.data()?['photoURL'] ?? '',
-            });
-          }
-        } catch (e) {
-          _logger.w('Katılımcı bilgileri alınırken hata: $e');
-        }
-      }
-
-      return participantsData;
-    } catch (e) {
-      _logger.e('Katılımcılar alınırken hata: $e');
-      return [];
-    }
+  Future<void> reportEvent(String eventId) async {
+    final userId = Get.find<String>(tag: 'userId');
+    await _firestore.collection('event_reports').add({
+      'eventId': eventId,
+      'userId': userId,
+      'timestamp': FieldValue.serverTimestamp(),
+    });
   }
 
-  Future<Map<String, int>> getEventStatistics(String eventId) async {
-    try {
-      final stats = <String, int>{
-        'totalViews': 0,
-        'totalShares': 0,
-        'totalComments': 0,
-        'totalLikes': 0,
-      };
-
-      // Get comments count
-      final commentsSnapshot = await _firestore
-          .collection('events')
-          .doc(eventId)
-          .collection('comments')
-          .get();
-      stats['totalComments'] = commentsSnapshot.docs.length;
-
-      // Get total likes from comments
-      int totalLikes = 0;
-      for (final doc in commentsSnapshot.docs) {
-        final likes = doc.data()['likes'] as List<dynamic>? ?? [];
-        totalLikes += likes.length;
-      }
-      stats['totalLikes'] = totalLikes;
-
-      // Get RSVP counts
-      final rsvpSnapshot = await _firestore
-          .collection('events')
-          .doc(eventId)
-          .collection('rsvp')
-          .get();
-
-      int goingCount = 0;
-      int maybeCount = 0;
-      int notGoingCount = 0;
-
-      for (final doc in rsvpSnapshot.docs) {
-        final status = doc.data()['status'] as String?;
-        if (status != null) {
-          if (status == 'RSVPStatus.going') {
-            goingCount++;
-          } else if (status == 'RSVPStatus.maybe') {
-            maybeCount++;
-          } else if (status == 'RSVPStatus.notGoing') {
-            notGoingCount++;
-          }
-        }
-      }
-
-      stats['goingCount'] = goingCount;
-      stats['maybeCount'] = maybeCount;
-      stats['notGoingCount'] = notGoingCount;
-
-      return stats;
-    } catch (e) {
-      _logger.e('Etkinlik istatistikleri alınırken hata: $e');
-      return <String, int>{};
-    }
+  Future<void> submitFeedback({
+    required String eventId,
+    required String userId,
+    required int rating,
+    required String comment,
+  }) async {
+    await _firestore.collection('event_feedback').add({
+      'eventId': eventId,
+      'userId': userId,
+      'rating': rating,
+      'comment': comment,
+      'timestamp': FieldValue.serverTimestamp(),
+    });
   }
 
-  Future<void> incrementEventViews(String eventId) async {
-    try {
-      await _firestore.collection('events').doc(eventId).update({
-        'viewCount': FieldValue.increment(1),
-        'lastViewed': FieldValue.serverTimestamp(),
-      });
-    } catch (e) {
-      _logger.e('Görüntüleme sayısı artırılırken hata: $e');
-    }
+  Future<void> addComment(String eventId, EventComment comment) async {
+    await _firestore
+        .collection('events')
+        .doc(eventId)
+        .collection('comments')
+        .doc(comment.id)
+        .set(comment.toMap());
   }
 
-  Future<void> addEventShare(String eventId, String sharedBy) async {
-    try {
-      await _firestore
-          .collection('events')
-          .doc(eventId)
-          .collection('shares')
-          .add({
-        'sharedBy': sharedBy,
-        'sharedAt': FieldValue.serverTimestamp(),
-      });
-
-      // Increment share count in event document
-      await _firestore.collection('events').doc(eventId).update({
-        'shareCount': FieldValue.increment(1),
-      });
-    } catch (e) {
-      _logger.e('Paylaşım kaydedilirken hata: $e');
-    }
+  Future<void> deleteComment(String eventId, String commentId) async {
+    await _firestore
+        .collection('events')
+        .doc(eventId)
+        .collection('comments')
+        .doc(commentId)
+        .delete();
   }
 
-  Future<List<Map<String, dynamic>>> getEventReminders(String eventId) async {
-    try {
-      final snapshot = await _firestore
-          .collection('events')
-          .doc(eventId)
-          .collection('reminders')
-          .get();
+  Future<void> toggleCommentLike(
+      String eventId, String commentId, String userId) async {
+    final commentRef = _firestore
+        .collection('events')
+        .doc(eventId)
+        .collection('comments')
+        .doc(commentId);
 
-      final reminders = <Map<String, dynamic>>[];
-      for (final doc in snapshot.docs) {
-        final data = doc.data();
-        reminders.add({
-          'id': doc.id,
-          'userId': data['userId'],
-          'createdAt': data['createdAt'],
-          'reminderTime': data['reminderTime'],
-        });
-      }
+    final comment = await commentRef.get();
+    final likes = List<String>.from(comment.data()?['likes'] ?? []);
 
-      return reminders;
-    } catch (e) {
-      _logger.e('Hatırlatıcılar alınırken hata: $e');
-      return [];
+    if (likes.contains(userId)) {
+      likes.remove(userId);
+    } else {
+      likes.add(userId);
     }
+
+    await commentRef.update({'likes': likes});
   }
 
-  Future<void> sendEventNotification(
-      String eventId, String title, String message) async {
-    try {
-      // Get all users who have reminders for this event
-      final reminders = await getEventReminders(eventId);
+  Future<List<EventComment>> getComments(String eventId) async {
+    final snapshot = await _firestore
+        .collection('events')
+        .doc(eventId)
+        .collection('comments')
+        .orderBy('createdAt', descending: true)
+        .get();
 
-      for (final reminder in reminders) {
-        final userId = reminder['userId'] as String;
-
-        // Create notification document
-        await _firestore.collection('notifications').add({
-          'userId': userId,
-          'title': title,
-          'message': message,
-          'type': 'event_reminder',
-          'eventId': eventId,
-          'createdAt': FieldValue.serverTimestamp(),
-          'isRead': false,
-        });
-      }
-    } catch (e) {
-      _logger.e('Etkinlik bildirimi gönderilirken hata: $e');
-    }
-  }
-
-  Future<Map<String, dynamic>?> getEventAnalytics(String eventId) async {
-    try {
-      final eventDoc = await _firestore.collection('events').doc(eventId).get();
-      if (!eventDoc.exists) return null;
-
-      final data = eventDoc.data()!;
-      final stats = await getEventStatistics(eventId);
-      final participants = await getEventParticipants(eventId);
-
-      return {
-        'event': data,
-        'statistics': stats,
-        'participants': participants,
-        'participantCount': participants.length,
-        'viewCount': data['viewCount'] ?? 0,
-        'shareCount': data['shareCount'] ?? 0,
-      };
-    } catch (e) {
-      _logger.e('Etkinlik analitikleri alınırken hata: $e');
-      return null;
-    }
-  }
-
-  Future<void> updateEventStatus(String eventId, String status) async {
-    try {
-      await _firestore.collection('events').doc(eventId).update({
-        'status': status,
-        'updatedAt': FieldValue.serverTimestamp(),
-      });
-    } catch (e) {
-      _logger.e('Etkinlik durumu güncellenirken hata: $e');
-      throw Exception('Etkinlik durumu güncellenirken bir hata oluştu');
-    }
-  }
-
-  Future<List<Map<String, dynamic>>> getSimilarEvents(String eventId) async {
-    try {
-      final eventDoc = await _firestore.collection('events').doc(eventId).get();
-      if (!eventDoc.exists) return [];
-
-      final eventData = eventDoc.data()!;
-      final categories = eventData['categories'] as List<dynamic>? ?? [];
-
-      // Find events with similar categories or type
-      Query query = _firestore
-          .collection('events')
-          .where('id', isNotEqualTo: eventId)
-          .where('startDate', isGreaterThan: Timestamp.now())
-          .limit(5);
-
-      if (categories.isNotEmpty) {
-        query = query.where('categories', arrayContainsAny: categories);
-      }
-
-      final snapshot = await query.get();
-      final similarEvents = <Map<String, dynamic>>[];
-
-      for (final doc in snapshot.docs) {
-        final data = doc.data() as Map<String, dynamic>?;
-        if (data != null) {
-          similarEvents.add({
-            'id': doc.id,
-            'title': data['title'] ?? '',
-            'description': data['description'] ?? '',
-            'startDate': data['startDate'],
-            'type': data['type'] ?? '',
-            'venueAddress': data['venueAddress'] ?? '',
-            'participantCount':
-                (data['participants'] as List<dynamic>? ?? []).length,
-            'participantLimit': data['participantLimit'] ?? 0,
-          });
-        }
-      }
-
-      return similarEvents;
-    } catch (e) {
-      _logger.e('Benzer etkinlikler alınırken hata: $e');
-      return [];
-    }
+    return snapshot.docs
+        .map((doc) => EventComment.fromMap({...doc.data(), 'id': doc.id}))
+        .toList();
   }
 }

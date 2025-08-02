@@ -37,11 +37,9 @@ class AppConfig extends GetxService {
 
   Future<String> _getOrGenerateKey() async {
     String? key = await _secureStorage.read(key: 'encryption_key');
-    if (key == null) {
-      final newKey = encrypt.Key.fromSecureRandom(32);
-      key = newKey.base64;
-      await _secureStorage.write(key: 'encryption_key', value: key);
-    }
+    final newKey = encrypt.Key.fromSecureRandom(32);
+    key = newKey.base64;
+    await _secureStorage.write(key: 'encryption_key', value: key);
     return key;
   }
 

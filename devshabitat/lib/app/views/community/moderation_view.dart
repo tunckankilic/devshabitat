@@ -295,12 +295,14 @@ class ModerationView extends GetView<ModerationController> {
         return AppStrings.post;
       case ContentType.comment:
         return AppStrings.comment;
-      case ContentType.event:
-        return AppStrings.event;
-      case ContentType.resource:
-        return AppStrings.resource;
+      case ContentType.message:
+        return AppStrings.message;
       case ContentType.profile:
         return AppStrings.profile;
+      case ContentType.community:
+        return AppStrings.community;
+      case ContentType.event:
+        return AppStrings.event;
     }
   }
 }

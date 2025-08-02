@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
 import '../../controllers/integration/integration_controller.dart';
 import '../../models/event/event_model.dart';
 import '../../models/community/community_model.dart';
@@ -818,12 +817,13 @@ class IntegrationsView extends BaseView<IntegrationController> {
     try {
       // Test location oluştur
       final testLocation = LocationModel(
-        userId: 'test_user',
-        location: GeoPoint(41.0082, 28.9784),
+        latitude: 41.0082,
+        longitude: 28.9784,
         accuracy: 10.0,
+        timestamp: DateTime.now(),
         speed: 0.0,
         heading: 0.0,
-        timestamp: DateTime.now(),
+        userId: 'test_user',
         address: 'Test Adresi',
       );
 

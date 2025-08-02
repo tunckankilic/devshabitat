@@ -52,11 +52,10 @@ class ModerationService extends GetxService {
       contentId: contentId,
       contentType: contentType,
       reporterId: reporterId,
-      status: ModerationStatus.pending,
-      reason: reason,
-      customReason: customReason,
-      note: note,
-      createdAt: DateTime.now(),
+      category: reason.toString(),
+      description: customReason ?? 'Rapor açıklaması yok',
+      tags: [],
+      attachments: [],
       metadata: metadata,
     );
 
@@ -90,11 +89,14 @@ class ModerationService extends GetxService {
 
     final moderation = ModerationModel.fromFirestore(doc);
     final updatedModeration = moderation.copyWith(
-      moderatorId: moderatorId,
-      action: action,
-      status: _getStatusFromAction(action),
-      resolvedAt: DateTime.now(),
-      note: note,
+      metadata: {
+        ...moderation.metadata,
+        'moderatorId': moderatorId,
+        'action': action.toString(),
+        'status': _getStatusFromAction(action).toString(),
+        'resolvedAt': DateTime.now(),
+        'note': note,
+      },
     );
 
     await _getModerationCollection(communityId)
@@ -194,28 +196,30 @@ class ModerationService extends GetxService {
 
   // Moderasyon aksiyonunu uygula
   Future<void> _applyModerationAction(ModerationModel moderation) async {
-    if (moderation.action == null) return;
+    final actionStr = moderation.metadata['action'] as String?;
+    if (actionStr == null) return;
+
+    final action = ModerationAction.values.firstWhere(
+      (e) => e.toString() == actionStr,
+      orElse: () => ModerationAction.warn,
+    );
 
     final contentRef = _getContentReference(moderation);
     if (contentRef == null) return;
 
-    switch (moderation.action!) {
+    switch (action) {
       case ModerationAction.delete:
         await contentRef.delete();
         break;
-
       case ModerationAction.ban:
         await _banUser(moderation.communityId, moderation.reporterId);
         break;
-
       case ModerationAction.mute:
         await _muteUser(moderation.communityId, moderation.reporterId);
         break;
-
       case ModerationAction.warn:
         await _warnUser(moderation.communityId, moderation.reporterId);
         break;
-
       default:
         break;
     }
@@ -231,12 +235,14 @@ class ModerationService extends GetxService {
         return communityRef.collection('posts').doc(moderation.contentId);
       case ContentType.comment:
         return communityRef.collection('comments').doc(moderation.contentId);
-      case ContentType.event:
-        return communityRef.collection('events').doc(moderation.contentId);
-      case ContentType.resource:
-        return communityRef.collection('resources').doc(moderation.contentId);
+      case ContentType.message:
+        return communityRef.collection('messages').doc(moderation.contentId);
       case ContentType.profile:
         return _firestore.collection('users').doc(moderation.contentId);
+      case ContentType.community:
+        return _firestore.collection('communities').doc(moderation.contentId);
+      case ContentType.event:
+        return communityRef.collection('events').doc(moderation.contentId);
     }
   }
 
@@ -337,5 +343,183 @@ class ModerationService extends GetxService {
 
     // URL güvenlik kontrolü yapılabilir
     return false; // Şimdilik tüm linklere izin ver
+  }
+
+  // Rapor kategorileri
+  static const List<String> reportCategories = [
+    'spam',
+    'nefret_soylemi',
+    'taciz',
+    'yanlis_bilgi',
+    'uygunsuz_icerik',
+    'telif_hakki',
+    'diger',
+  ];
+
+  // Gelişmiş içerik raporlama
+  Future<void> reportContentAdvanced({
+    required String communityId,
+    required String contentId,
+    required String reporterId,
+    required ContentType contentType,
+    required String category,
+    required String description,
+    List<String> tags = const [],
+    List<String>? attachments,
+    Map<String, dynamic> metadata = const {},
+  }) async {
+    // Kategori kontrolü
+    if (!reportCategories.contains(category)) {
+      throw Exception('Geçersiz rapor kategorisi');
+    }
+
+    final moderation = ModerationModel(
+      id: '',
+      communityId: communityId,
+      contentId: contentId,
+      reporterId: reporterId,
+      contentType: contentType,
+      category: category,
+      description: description,
+      tags: tags,
+      attachments: attachments ?? [],
+      metadata: {
+        ...metadata,
+        'reportedAt': FieldValue.serverTimestamp(),
+        'status': 'pending',
+        'reviewedBy': null,
+        'reviewedAt': null,
+        'resolution': null,
+      },
+    );
+
+    await _getModerationCollection(communityId).add(moderation.toJson());
+
+    // Raporlama geçmişini güncelle
+    await _updateReportHistory(communityId, contentId, moderation);
+  }
+
+  // Raporlama geçmişini getir
+  Future<List<ModerationModel>> getReportHistory({
+    required String communityId,
+    String? contentId,
+    String? reporterId,
+    String? category,
+    DateTime? startDate,
+    DateTime? endDate,
+    int limit = 50,
+  }) async {
+    var query = _getModerationCollection(communityId)
+        .orderBy('metadata.reportedAt', descending: true);
+
+    if (contentId != null) {
+      query = query.where('contentId', isEqualTo: contentId);
+    }
+
+    if (reporterId != null) {
+      query = query.where('reporterId', isEqualTo: reporterId);
+    }
+
+    if (category != null) {
+      query = query.where('category', isEqualTo: category);
+    }
+
+    if (startDate != null) {
+      query =
+          query.where('metadata.reportedAt', isGreaterThanOrEqualTo: startDate);
+    }
+
+    if (endDate != null) {
+      query = query.where('metadata.reportedAt', isLessThanOrEqualTo: endDate);
+    }
+
+    query = query.limit(limit);
+
+    final snapshot = await query.get();
+    return snapshot.docs.map((doc) {
+      final data = doc.data();
+      return ModerationModel.fromJson({...data, 'id': doc.id});
+    }).toList();
+  }
+
+  // Raporlama istatistiklerini getir
+  Future<Map<String, dynamic>> getReportStats(String communityId) async {
+    final stats = <String, dynamic>{
+      'totalReports': 0,
+      'categoryStats': <String, int>{},
+      'resolutionStats': <String, int>{},
+      'timeStats': <String, int>{
+        'lastDay': 0,
+        'lastWeek': 0,
+        'lastMonth': 0,
+      },
+    };
+
+    final now = DateTime.now();
+    final lastDay = now.subtract(const Duration(days: 1));
+    final lastWeek = now.subtract(const Duration(days: 7));
+    final lastMonth = now.subtract(const Duration(days: 30));
+
+    final reports = await _getModerationCollection(communityId).get();
+
+    for (var doc in reports.docs) {
+      final data = doc.data();
+      final reportedAt = (data['metadata']['reportedAt'] as Timestamp).toDate();
+
+      // Toplam rapor sayısı
+      stats['totalReports'] = (stats['totalReports'] as int) + 1;
+
+      // Kategori istatistikleri
+      final category = data['category'] as String;
+      (stats['categoryStats'] as Map<String, int>)[category] =
+          ((stats['categoryStats'] as Map<String, int>)[category] ?? 0) + 1;
+
+      // Çözüm istatistikleri
+      final resolution = data['metadata']['resolution'] as String?;
+      if (resolution != null) {
+        (stats['resolutionStats'] as Map<String, int>)[resolution] =
+            ((stats['resolutionStats'] as Map<String, int>)[resolution] ?? 0) +
+                1;
+      }
+
+      // Zaman istatistikleri
+      if (reportedAt.isAfter(lastDay)) {
+        (stats['timeStats'] as Map<String, int>)['lastDay'] =
+            ((stats['timeStats'] as Map<String, int>)['lastDay'] ?? 0) + 1;
+      }
+      if (reportedAt.isAfter(lastWeek)) {
+        (stats['timeStats'] as Map<String, int>)['lastWeek'] =
+            ((stats['timeStats'] as Map<String, int>)['lastWeek'] ?? 0) + 1;
+      }
+      if (reportedAt.isAfter(lastMonth)) {
+        (stats['timeStats'] as Map<String, int>)['lastMonth'] =
+            ((stats['timeStats'] as Map<String, int>)['lastMonth'] ?? 0) + 1;
+      }
+    }
+
+    return stats;
+  }
+
+  // Raporlama geçmişini güncelle
+  Future<void> _updateReportHistory(
+    String communityId,
+    String contentId,
+    ModerationModel moderation,
+  ) async {
+    final historyRef = _firestore
+        .collection(_collection)
+        .doc(communityId)
+        .collection('content')
+        .doc(contentId)
+        .collection('reportHistory');
+
+    await historyRef.add({
+      'reportId': moderation.id,
+      'reportedAt': FieldValue.serverTimestamp(),
+      'category': moderation.category,
+      'description': moderation.description,
+      'reporterId': moderation.reporterId,
+      'status': 'pending',
+    });
   }
 }

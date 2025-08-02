@@ -1106,4 +1106,5 @@ class AppStrings {
   static const String deleteInProgress = 'Silme işlemi devam ediyor...';
   static const String operationSuccess = 'İşlem başarılı';
   static const String operationFailed = 'İşlem başarısız';
+  static const String message = 'Mesaj';
 }

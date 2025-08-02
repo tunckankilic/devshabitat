@@ -240,6 +240,138 @@ class RuleService extends GetxService {
     }).toList();
   }
 
+  // Gelişmiş içerik filtreleme yapılandırması
+  static const Map<String, dynamic> defaultAdvancedConfig = {
+    'regexPatterns': <String>[],
+    'spamDetection': {
+      'enabled': true,
+      'threshold': 0.7,
+      'maxRepeatedChars': 5,
+      'maxUrls': 3,
+      'minContentLength': 10,
+    },
+    'languageSettings': {
+      'allowedLanguages': ['tr', 'en'],
+      'defaultLanguage': 'tr',
+      'profanityCheck': true,
+    },
+  };
+
+  // Gelişmiş içerik kontrolü
+  Future<bool> checkContentAdvanced(
+    String communityId,
+    String content,
+    String contentType, {
+    String? language,
+  }) async {
+    try {
+      final rules = await getRules(communityId, onlyEnabled: true);
+
+      for (final rule in rules) {
+        if (rule.enforcement != RuleEnforcement.automatic &&
+            rule.enforcement != RuleEnforcement.hybrid) {
+          continue;
+        }
+
+        // Regex kontrolleri
+        if (rule.autoModConfig['regexPatterns'] != null) {
+          for (String pattern in rule.autoModConfig['regexPatterns']) {
+            try {
+              final regex =
+                  RegExp(pattern, caseSensitive: false, unicode: true);
+              if (regex.hasMatch(content)) {
+                return true;
+              }
+            } catch (e) {
+              print('Regex hatası: $pattern - $e');
+            }
+          }
+        }
+
+        // Spam kontrolü
+        if (rule.autoModConfig['spamDetection']?['enabled'] == true) {
+          if (await _isSpamContent(
+              content, rule.autoModConfig['spamDetection'])) {
+            return true;
+          }
+        }
+
+        // Dil kontrolü
+        if (rule.autoModConfig['languageSettings'] != null) {
+          final settings = rule.autoModConfig['languageSettings'];
+          if (!settings['allowedLanguages'].contains(language)) {
+            return true;
+          }
+
+          if (settings['profanityCheck'] == true) {
+            if (await _containsProfanity(
+                content, language ?? settings['defaultLanguage'])) {
+              return true;
+            }
+          }
+        }
+      }
+
+      return false;
+    } catch (e) {
+      print('Gelişmiş içerik kontrolü hatası: $e');
+      return false;
+    }
+  }
+
+  Future<bool> _isSpamContent(
+      String content, Map<String, dynamic> config) async {
+    // Tekrarlanan karakter kontrolü
+    final repeatedChars =
+        RegExp(r'(.)\1{' + (config['maxRepeatedChars'] - 1).toString() + ',}');
+    if (repeatedChars.hasMatch(content)) {
+      return true;
+    }
+
+    // URL sayısı kontrolü
+    final urlCount = RegExp(r'https?://\S+').allMatches(content).length;
+    if (urlCount > config['maxUrls']) {
+      return true;
+    }
+
+    // İçerik uzunluğu kontrolü
+    if (content.length < config['minContentLength']) {
+      return true;
+    }
+
+    // Spam skoru hesaplama
+    double spamScore = 0.0;
+
+    // Büyük harf oranı
+    final upperCaseRatio =
+        content.replaceAll(RegExp(r'[^A-Z]'), '').length / content.length;
+    if (upperCaseRatio > 0.7) spamScore += 0.3;
+
+    // Tekrarlanan kelimeler
+    final words = content.toLowerCase().split(RegExp(r'\s+'));
+    final wordFreq = <String, int>{};
+    for (var word in words) {
+      wordFreq[word] = (wordFreq[word] ?? 0) + 1;
+    }
+    if (wordFreq.values.any((freq) => freq > 3)) spamScore += 0.4;
+
+    return spamScore >= config['threshold'];
+  }
+
+  Future<bool> _containsProfanity(String content, String language) async {
+    // Dile özgü yasaklı kelime listelerini yükle
+    final bannedWords = await _loadBannedWords(language);
+
+    final normalizedContent = content.toLowerCase();
+    return bannedWords
+        .any((word) => normalizedContent.contains(word.toLowerCase()));
+  }
+
+  Future<List<String>> _loadBannedWords(String language) async {
+    // TODO: Implement banned words loading from Firestore or local storage
+    return [];
+  }
+
   // İhlal istatistiklerini getir
   Future<Map<String, dynamic>> getViolationStats(String communityId) async {
     final now = DateTime.now();

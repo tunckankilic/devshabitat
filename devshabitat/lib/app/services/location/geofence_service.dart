@@ -1,55 +1,170 @@
 import 'dart:async';
-import 'package:geofence_flutter/geofence_flutter.dart';
 import 'package:get/get.dart';
+import 'package:geolocator/geolocator.dart';
 import 'package:logger/logger.dart';
 import 'package:location/location.dart';
-import '../../models/location/geofence_model.dart';
 import '../../models/location/location_model.dart';
+import '../../models/location/geofence_model.dart';
+import 'location_tracking_service.dart';
 
 class GeofenceService extends GetxService {
-  final activeGeofences = <GeofenceModel>[].obs;
-  final isGeofenceServiceActive = false.obs;
-  StreamSubscription<GeofenceEvent>? _geofenceEventStream;
-  final Logger _logger = Logger();
-  final Location _location = Location();
+  final LocationTrackingService _trackingService = Get.find();
+  final Logger _logger = Get.find();
+
+  final RxList<GeofenceModel> activeGeofences = <GeofenceModel>[].obs;
+  final RxBool isGeofenceServiceActive = false.obs;
+
+  StreamSubscription? _locationSubscription;
+  Timer? _geofenceCheckTimer;
+
+  // Optimize edilmiş değerler
+  static const double _defaultRadius = 100.0; // metre
+  static const Duration _checkInterval = Duration(minutes: 1);
+  static const int _maxActiveGeofences = 20;
+
+  @override
+  void onInit() {
+    super.onInit();
+    _initializeGeofencing();
+  }
+
+  Future<void> _initializeGeofencing() async {
+    try {
+      isGeofenceServiceActive.value = true;
+      await _startGeofenceMonitoring();
+      _logger.i('Geofence service initialized');
+    } catch (e) {
+      _logger.e('Geofence initialization error: $e');
+      isGeofenceServiceActive.value = false;
+    }
+  }
+
+  Future<void> _startGeofenceMonitoring() async {
+    _locationSubscription?.cancel();
+    _geofenceCheckTimer?.cancel();
+
+    // Konum değişikliklerini dinle
+    _locationSubscription = _trackingService.getLocationStream().listen(
+      _handleLocationUpdate,
+    );
+
+    // Periyodik kontrol başlat
+    _geofenceCheckTimer = Timer.periodic(_checkInterval, (_) {
+      _checkActiveGeofences();
+    });
+  }
+
+  void _handleLocationUpdate(LocationData? locationData) {
+    if (locationData == null) return;
+
+    for (var geofence in activeGeofences) {
+      final distance = Geolocator.distanceBetween(
+        locationData.latitude!,
+        locationData.longitude!,
+        geofence.latitude,
+        geofence.longitude,
+      );
+
+      final wasInside = geofence.isInside;
+      final isInside = distance <= (geofence.radius ?? _defaultRadius);
+
+      if (isInside != wasInside) {
+        geofence.isInside = isInside;
+        _handleGeofenceTransition(geofence, isInside);
+      }
+    }
+  }
+
+  void _handleGeofenceTransition(GeofenceModel geofence, bool isInside) {
+    try {
+      if (isInside) {
+        _logger.i('Entered geofence: ${geofence.id}');
+        _executeGeofenceActions(geofence, 'enter');
+      } else {
+        _logger.i('Exited geofence: ${geofence.id}');
+        _executeGeofenceActions(geofence, 'exit');
+      }
+    } catch (e) {
+      _logger.e('Geofence transition error: $e');
+    }
+  }
+
+  Future<void> _executeGeofenceActions(
+    GeofenceModel geofence,
+    String trigger,
+  ) async {
+    try {
+      final actions = trigger == 'enter'
+          ? geofence.onEnterActions
+          : geofence.onExitActions;
+
+      for (var action in actions ?? []) {
+        switch (action.type) {
+          case 'notification':
+            // Bildirim gönder
+            break;
+          case 'event':
+            // Etkinlik tetikle
+            break;
+          case 'status':
+            // Durum güncelle
+            break;
+        }
+      }
+    } catch (e) {
+      _logger.e('Execute geofence actions error: $e');
+    }
+  }
+
+  Future<void> addGeofence(GeofenceModel geofence) async {
+    try {
+      if (activeGeofences.length >= _maxActiveGeofences) {
+        throw Exception('Maximum geofence limit reached');
+      }
+
+      if (!activeGeofences.any((g) => g.id == geofence.id)) {
+        activeGeofences.add(geofence);
+        _logger.i('Added geofence: ${geofence.id}');
+      }
+    } catch (e) {
+      _logger.e('Add geofence error: $e');
+      rethrow;
+    }
+  }
+
+  Future<void> removeGeofence(String geofenceId) async {
+    try {
+      activeGeofences.removeWhere((g) => g.id == geofenceId);
+      _logger.i('Removed geofence: $geofenceId');
+    } catch (e) {
+      _logger.e('Remove geofence error: $e');
+      rethrow;
+    }
+  }
+
+  void _checkActiveGeofences() {
+    try {
+      // Geofence'lerin geçerliliğini kontrol et
+      final now = DateTime.now();
+      activeGeofences.removeWhere((geofence) {
+        final isExpired =
+            geofence.expirationDate != null &&
+            geofence.expirationDate!.isBefore(now);
+        if (isExpired) {
+          _logger.i('Geofence expired: ${geofence.id}');
+        }
+        return isExpired;
+      });
+    } catch (e) {
+      _logger.e('Check active geofences error: $e');
+    }
+  }
 
   Future<void> initializeGeofencing() async {
     try {
-      // Geofence servisi zaten başlatılmışsa tekrar başlatma
-      if (isGeofenceServiceActive.value) {
-        _logger.w('Geofence service is already active');
-        return;
-      }
-
-      // Location permission kontrolü
-      if (!await _checkLocationPermission()) {
-        throw Exception('Location permission not granted');
-      }
-
-      // Mevcut konumu al
-      final currentLocation = await _getCurrentLocation();
-
-      // Geofence servisini başlat
-      await Geofence.startGeofenceService(
-        pointedLatitude: currentLocation.latitude.toString(),
-        pointedLongitude: currentLocation.longitude.toString(),
-        radiusMeter: "100.0", // 100 metre yarıçap
-        eventPeriodInSeconds: 10,
-      );
-
-      // Geofence event stream'i dinle
-      _geofenceEventStream = Geofence.getGeofenceStream()?.listen(
-        (GeofenceEvent event) {
-          _handleGeofenceEvent(event);
-        },
-        onError: (error) {
-          _logger.e('Geofence stream error: $error');
-          isGeofenceServiceActive.value = false;
-        },
-      );
-
       isGeofenceServiceActive.value = true;
-      _logger.i('Geofence service initialized successfully');
+      await _startGeofenceMonitoring();
+      _logger.i('Geofence service initialized');
     } catch (e) {
       _logger.e('Geofence initialization error: $e');
       isGeofenceServiceActive.value = false;
@@ -57,158 +172,25 @@ class GeofenceService extends GetxService {
     }
   }
 
-  Future<bool> _checkLocationPermission() async {
-    try {
-      bool serviceEnabled = await _location.serviceEnabled();
-      if (!serviceEnabled) {
-        serviceEnabled = await _location.requestService();
-        if (!serviceEnabled) {
-          _logger.w('Location service is not enabled');
-          return false;
-        }
-      }
-
-      PermissionStatus permissionGranted = await _location.hasPermission();
-      if (permissionGranted == PermissionStatus.denied) {
-        permissionGranted = await _location.requestPermission();
-        if (permissionGranted != PermissionStatus.granted) {
-          _logger.w('Location permission denied');
-          return false;
-        }
-      }
-
-      return true;
-    } catch (e) {
-      _logger.e('Error checking location permission: $e');
-      return false;
-    }
-  }
-
-  Future<LocationData> _getCurrentLocation() async {
-    try {
-      final locationData = await _location.getLocation();
-      _logger.i(
-          'Current location: ${locationData.latitude}, ${locationData.longitude}');
-      return locationData;
-    } catch (e) {
-      _logger.w('Could not get current location, using default (Istanbul): $e');
-      // Fallback to Istanbul coordinates
-      return LocationData.fromMap({
-        'latitude': 41.0082,
-        'longitude': 28.9784,
-      });
-    }
-  }
-
-  void _handleGeofenceEvent(GeofenceEvent event) {
-    _logger.i('Geofence Event - Type: ${event.toString()}');
-
-    // Event tipine göre işlem yap
-    switch (event) {
-      case GeofenceEvent.init:
-        _logger.i('Geofence servisi başlatıldı');
-        break;
-      case GeofenceEvent.enter:
-        _logger.i('Geofence alanına giriş yapıldı');
-        _onGeofenceEnter();
-        break;
-      case GeofenceEvent.exit:
-        _logger.i('Geofence alanından çıkış yapıldı');
-        _onGeofenceExit();
-        break;
-    }
-  }
-
-  void _onGeofenceEnter() {
-    // Geofence alanına giriş event'i
-    // Burada bildirim gösterilebilir, analytics event'i gönderilebilir vb.
-    Get.snackbar(
-      'Geofence Giriş',
-      'Tanımlı bir alan içine girdiniz',
-      snackPosition: SnackPosition.TOP,
-    );
-  }
-
-  void _onGeofenceExit() {
-    // Geofence alanından çıkış event'i
-    // Burada bildirim gösterilebilir, analytics event'i gönderilebilir vb.
-    Get.snackbar(
-      'Geofence Çıkış',
-      'Tanımlı alandan ayrıldınız',
-      snackPosition: SnackPosition.TOP,
-    );
-  }
-
   Future<void> stopGeofencing() async {
     try {
-      await Geofence.stopGeofenceService();
-      await _geofenceEventStream?.cancel();
-      _geofenceEventStream = null;
+      _locationSubscription?.cancel();
+      _geofenceCheckTimer?.cancel();
+      activeGeofences.clear();
       isGeofenceServiceActive.value = false;
-      _logger.i('Geofence service stopped successfully');
+      _logger.i('Geofence service stopped');
     } catch (e) {
-      _logger.e('Error stopping geofence service: $e');
-      isGeofenceServiceActive.value = false;
-    }
-  }
-
-  Future<void> addGeofence(GeofenceModel geofence) async {
-    try {
-      await Geofence.startGeofenceService(
-        pointedLatitude: geofence.latitude.toString(),
-        pointedLongitude: geofence.longitude.toString(),
-        radiusMeter: geofence.radius.toString(),
-        eventPeriodInSeconds: 10,
-      );
-
-      activeGeofences.add(geofence);
-      isGeofenceServiceActive.value = true;
-
-      _logger.i(
-          'Geofence added: ${geofence.id} at (${geofence.latitude}, ${geofence.longitude}) with radius ${geofence.radius}m');
-    } catch (e) {
-      _logger.e('Error adding geofence: $e');
+      _logger.e('Stop geofencing error: $e');
       rethrow;
     }
   }
 
-  Future<void> removeGeofence(String geofenceId) async {
-    try {
-      // Mevcut implementasyonda tek bir geofence destekleniyor
-      await stopGeofencing();
-      final removedCount = activeGeofences.length;
-      activeGeofences.removeWhere((geofence) => geofence.id == geofenceId);
-
-      if (removedCount > activeGeofences.length) {
-        _logger.i('Geofence removed: $geofenceId');
-      } else {
-        _logger.w('Geofence not found: $geofenceId');
-      }
-    } catch (e) {
-      _logger.e('Error removing geofence: $e');
-    }
-  }
-
-  Future<void> clearGeofences() async {
-    try {
-      await stopGeofencing();
-      final clearedCount = activeGeofences.length;
-      activeGeofences.clear();
-      _logger.i('All geofences cleared ($clearedCount items)');
-    } catch (e) {
-      _logger.e('Error clearing geofences: $e');
-    }
-  }
-
-  bool isLocationInAnyGeofence(LocationModel location) {
-    return activeGeofences.any((geofence) =>
-        geofence.isPointInside(location.latitude, location.longitude));
-  }
-
   @override
   void onClose() {
-    stopGeofencing();
-    _logger.i('GeofenceService disposed');
+    _locationSubscription?.cancel();
+    _geofenceCheckTimer?.cancel();
+    activeGeofences.clear();
+    isGeofenceServiceActive.value = false;
     super.onClose();
   }
 }

@@ -1,69 +1,73 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:json_annotation/json_annotation.dart';
+import 'package:hive/hive.dart';
 import 'location_data_model.dart';
 
-class LocationModel {
-  final String userId;
-  final GeoPoint location;
+part 'location_model.g.dart';
+
+@JsonSerializable()
+@HiveType(typeId: 1)
+class LocationModel extends HiveObject {
+  @HiveField(0)
+  final double latitude;
+
+  @HiveField(1)
+  final double longitude;
+
+  @HiveField(2)
   final double accuracy;
+
+  @HiveField(3)
   final DateTime timestamp;
-  final double speed;
-  final double heading;
+
+  @HiveField(4)
+  final double? speed;
+
+  @HiveField(5)
+  final double? heading;
+
+  @HiveField(6)
+  final double? altitude;
+
+  @HiveField(7)
   final String? address;
 
-  double get latitude => location.latitude;
-  double get longitude => location.longitude;
+  @HiveField(8)
+  final String? userId;
 
   LocationModel({
-    required this.userId,
-    required this.location,
+    required this.latitude,
+    required this.longitude,
     required this.accuracy,
     required this.timestamp,
-    required this.speed,
-    required this.heading,
+    this.speed,
+    this.heading,
+    this.altitude,
     this.address,
+    this.userId,
   });
 
-  factory LocationModel.fromJson(Map<String, dynamic> json) {
-    return LocationModel(
-      userId: json['userId'] as String,
-      location: json['location'] as GeoPoint,
-      accuracy: (json['accuracy'] as num).toDouble(),
-      timestamp: (json['timestamp'] as Timestamp).toDate(),
-      speed: (json['speed'] as num).toDouble(),
-      heading: (json['heading'] as num).toDouble(),
-      address: json['address'] as String?,
-    );
-  }
+  factory LocationModel.fromJson(Map<String, dynamic> json) =>
+      _$LocationModelFromJson(json);
+  Map<String, dynamic> toJson() => _$LocationModelToJson(this);
 
   factory LocationModel.fromLocationData(LocationDataModel data) {
     return LocationModel(
-      userId:
-          '', // Boş string olarak bırakıyoruz çünkü bu bilgi LocationDataModel'de yok
-      location: GeoPoint(data.latitude, data.longitude),
-      accuracy: data.accuracy ?? 0.0,
+      latitude: data.latitude,
+      longitude: data.longitude,
+      accuracy: data.accuracy ?? 0,
       timestamp: data.timestamp ?? DateTime.now(),
-      speed: data.speed ?? 0.0,
-      heading: data.heading ?? 0.0,
+      speed: data.speed,
+      heading: data.heading,
+      altitude: data.altitude,
     );
-  }
-
-  Map<String, dynamic> toJson() {
-    return {
-      'userId': userId,
-      'location': location,
-      'accuracy': accuracy,
-      'timestamp': Timestamp.fromDate(timestamp),
-      'speed': speed,
-      'heading': heading,
-      'address': address,
-    };
   }
 
   LocationDataModel toLocationData() {
     return LocationDataModel(
-      latitude: location.latitude,
-      longitude: location.longitude,
+      latitude: latitude,
+      longitude: longitude,
       accuracy: accuracy,
+      altitude: altitude,
       speed: speed,
       heading: heading,
       timestamp: timestamp,

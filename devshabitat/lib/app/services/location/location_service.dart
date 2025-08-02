@@ -105,12 +105,13 @@ class LocationService extends GetxService {
     try {
       final userId = Get.find<String>(tag: 'userId');
       final locationData = LocationModel(
-        userId: userId,
-        location: GeoPoint(position.latitude, position.longitude),
+        latitude: position.latitude,
+        longitude: position.longitude,
         accuracy: position.accuracy,
         timestamp: DateTime.now(),
         speed: position.speed,
         heading: position.heading,
+        userId: userId,
       );
 
       await _firestore
@@ -159,8 +160,8 @@ class LocationService extends GetxService {
         final distance = Geolocator.distanceBetween(
           latitude,
           longitude,
-          location.location.latitude,
-          location.location.longitude,
+          location.latitude,
+          location.longitude,
         );
         return distance <= radius;
       }).toList();
@@ -211,14 +212,13 @@ class LocationService extends GetxService {
         .snapshots()
         .map((snapshot) {
       return snapshot.docs
-          .map((doc) =>
-              LocationModel.fromJson(doc.data() as Map<String, dynamic>))
+          .map((doc) => LocationModel.fromJson(doc.data()))
           .where((location) {
         final distance = Geolocator.distanceBetween(
           latitude,
           longitude,
-          location.location.latitude,
-          location.location.longitude,
+          location.latitude,
+          location.longitude,
         );
         return distance <= radius;
       }).toList();
