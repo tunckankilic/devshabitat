@@ -23,6 +23,26 @@ class NotificationService extends GetxService {
   final SharedPreferences _prefs;
   final Logger _logger = Logger();
 
+  // Platform özel bildirim ayarları
+  final Map<String, dynamic> _platformSettings = {
+    'ios': {
+      'sound': true,
+      'badge': true,
+      'alert': true,
+      'provisional': false,
+      'criticalAlert': false,
+    },
+    'android': {
+      'channelId': 'high_importance_channel',
+      'channelName': 'Önemli Bildirimler',
+      'channelDescription': 'Bu kanal önemli bildirimleri içerir',
+      'importance': Importance.high,
+      'priority': Priority.high,
+      'enableVibration': true,
+      'playSound': true,
+    },
+  };
+
   // Bildirim izinleri için RxBool değişkenler
   final RxBool isPushEnabled = true.obs;
   final RxBool isInAppEnabled = true.obs;
@@ -44,40 +64,78 @@ class NotificationService extends GetxService {
 
   Future<void> init() async {
     try {
-      // FCM izinlerini iste
+      await _initializePlatformSpecifics();
       await _requestPermissions();
-
-      // Local notifications için initialize
-      await _initializeLocalNotifications();
-
-      // FCM token al ve sakla
-      await _initializeFCMToken();
-
-      // Tercihleri yükle
-      await _loadPreferences();
-
-      // Bildirim dinleyicilerini ayarla
-      _setupNotificationListeners();
-
-      // Token yenileme dinleyicisini ayarla
-      _setupTokenRefreshListener();
+      await _configureFCM();
+      await _setupNotificationChannels();
+      _setupTokenRefresh();
     } catch (e) {
-      _logger.e('Notification service initialization error: $e');
+      _logger.e('Bildirim servisi başlatılamadı: $e');
+    }
+  }
+
+  Future<void> _initializePlatformSpecifics() async {
+    if (Platform.isIOS) {
+      await _initializeIOS();
+    } else if (Platform.isAndroid) {
+      await _initializeAndroid();
+    }
+  }
+
+  Future<void> _initializeIOS() async {
+    await _firebaseMessaging.setForegroundNotificationPresentationOptions(
+      alert: _platformSettings['ios']['alert'],
+      badge: _platformSettings['ios']['badge'],
+      sound: _platformSettings['ios']['sound'],
+    );
+  }
+
+  Future<void> _initializeAndroid() async {
+    final androidSettings = _platformSettings['android'];
+    const androidInitializationSettings = AndroidInitializationSettings(
+      '@mipmap/ic_launcher',
+    );
+
+    final initializationSettings = InitializationSettings(
+      android: androidInitializationSettings,
+      iOS: DarwinInitializationSettings(),
+    );
+
+    await _localNotifications.initialize(initializationSettings);
+  }
+
+  Future<void> _setupNotificationChannels() async {
+    if (Platform.isAndroid) {
+      final androidSettings = _platformSettings['android'];
+      final channel = AndroidNotificationChannel(
+        androidSettings['channelId'],
+        androidSettings['channelName'],
+        description: androidSettings['channelDescription'],
+        importance: androidSettings['importance'],
+        playSound: androidSettings['playSound'],
+        enableVibration: androidSettings['enableVibration'],
+      );
+
+      await _localNotifications
+          .resolvePlatformSpecificImplementation<
+            AndroidFlutterLocalNotificationsPlugin
+          >()
+          ?.createNotificationChannel(channel);
     }
   }
 
   Future<void> _requestPermissions() async {
     try {
-      NotificationSettings settings =
-          await _firebaseMessaging.requestPermission(
-        alert: true,
-        badge: true,
-        sound: true,
-        provisional: false,
-        announcement: true,
-        carPlay: true,
-        criticalAlert: true,
-      );
+      NotificationSettings settings = await _firebaseMessaging
+          .requestPermission(
+            alert: true,
+            badge: true,
+            sound: true,
+            provisional: false,
+            announcement: true,
+            carPlay: true,
+            criticalAlert: true,
+          );
 
       isPushEnabled.value =
           settings.authorizationStatus == AuthorizationStatus.authorized;
@@ -93,91 +151,6 @@ class NotificationService extends GetxService {
     }
   }
 
-  Future<void> _initializeLocalNotifications() async {
-    try {
-      const initializationSettingsAndroid =
-          AndroidInitializationSettings('@mipmap/ic_launcher');
-      final initializationSettingsIOS = DarwinInitializationSettings(
-        requestAlertPermission: true,
-        requestBadgePermission: true,
-        requestSoundPermission: true,
-      );
-
-      final initializationSettings = InitializationSettings(
-        android: initializationSettingsAndroid,
-        iOS: initializationSettingsIOS,
-      );
-
-      await _localNotifications.initialize(
-        initializationSettings,
-        onDidReceiveNotificationResponse: _onSelectNotification,
-      );
-
-      // Android için bildirim kanalları oluştur
-      await _createNotificationChannels();
-    } catch (e) {
-      _logger.e('Error initializing local notifications: $e');
-    }
-  }
-
-  Future<void> _createNotificationChannels() async {
-    const channels = [
-      AndroidNotificationChannel(
-        'high_importance_channel',
-        'Önemli Bildirimler',
-        description: 'Acil ve önemli bildirimler için kanal',
-        importance: Importance.high,
-        enableVibration: true,
-        playSound: true,
-        showBadge: true,
-        enableLights: true,
-      ),
-      AndroidNotificationChannel(
-        'default_channel',
-        'Genel Bildirimler',
-        description: 'Genel bildirimler için varsayılan kanal',
-        importance: Importance.defaultImportance,
-        enableVibration: true,
-        playSound: true,
-        showBadge: true,
-      ),
-      AndroidNotificationChannel(
-        'silent_channel',
-        'Sessiz Bildirimler',
-        description: 'Sessiz bildirimler için kanal',
-        importance: Importance.low,
-        playSound: false,
-        enableVibration: false,
-        showBadge: false,
-      ),
-      AndroidNotificationChannel(
-        'messages_channel',
-        'Mesaj Bildirimleri',
-        description: 'Mesaj bildirimleri için özel kanal',
-        importance: Importance.high,
-        enableVibration: true,
-        playSound: true,
-        showBadge: true,
-      ),
-      AndroidNotificationChannel(
-        'events_channel',
-        'Etkinlik Bildirimleri',
-        description: 'Etkinlik bildirimleri için özel kanal',
-        importance: Importance.defaultImportance,
-        enableVibration: true,
-        playSound: true,
-        showBadge: true,
-      ),
-    ];
-
-    for (var channel in channels) {
-      await _localNotifications
-          .resolvePlatformSpecificImplementation<
-              AndroidFlutterLocalNotificationsPlugin>()
-          ?.createNotificationChannel(channel);
-    }
-  }
-
   Future<void> _initializeFCMToken() async {
     try {
       if (Platform.isIOS && !await _firebaseMessaging.isSupported()) {
@@ -190,7 +163,7 @@ class NotificationService extends GetxService {
         await _updateFCMToken(fcmToken);
       }
     } catch (e) {
-      debugPrint('⛔ Error initializing FCM token: $e');
+      debugPrint('Error initializing FCM token: $e');
     }
   }
 
@@ -246,23 +219,26 @@ class NotificationService extends GetxService {
   }
 
   void _setupTokenRefreshListener() {
-    _firebaseMessaging.onTokenRefresh.listen((String token) async {
-      try {
-        _logger.i('FCM token refreshed');
-        await _updateFCMToken(token);
-      } catch (e) {
-        _logger.e('Error in token refresh listener: $e');
-        // Retry mechanism
-        await Future.delayed(const Duration(seconds: 5));
+    _firebaseMessaging.onTokenRefresh.listen(
+      (String token) async {
         try {
+          _logger.i('FCM token refreshed');
           await _updateFCMToken(token);
-        } catch (retryError) {
-          _logger.e('Error in token refresh retry: $retryError');
+        } catch (e) {
+          _logger.e('Error in token refresh listener: $e');
+          // Retry mechanism
+          await Future.delayed(const Duration(seconds: 5));
+          try {
+            await _updateFCMToken(token);
+          } catch (retryError) {
+            _logger.e('Error in token refresh retry: $retryError');
+          }
         }
-      }
-    }, onError: (error) {
-      _logger.e('Token refresh stream error: $error');
-    });
+      },
+      onError: (error) {
+        _logger.e('Token refresh stream error: $error');
+      },
+    );
   }
 
   void _onSelectNotification(NotificationResponse response) {
@@ -347,9 +323,13 @@ class NotificationService extends GetxService {
   Future<void> _savePreferencesToLocal(Map<String, dynamic> preferences) async {
     try {
       await _prefs.setBool(
-          'push_enabled', preferences['isPushEnabled'] ?? true);
+        'push_enabled',
+        preferences['isPushEnabled'] ?? true,
+      );
       await _prefs.setBool(
-          'in_app_enabled', preferences['isInAppEnabled'] ?? true);
+        'in_app_enabled',
+        preferences['isInAppEnabled'] ?? true,
+      );
 
       final categories = preferences['categories'] as Map<String, dynamic>?;
       if (categories != null) {
@@ -370,32 +350,32 @@ class NotificationService extends GetxService {
         .doc('notifications')
         .snapshots()
         .listen(
-      (doc) {
-        if (doc.exists) {
-          final data = doc.data()!;
+          (doc) {
+            if (doc.exists) {
+              final data = doc.data()!;
 
-          // Genel ayarları güncelle
-          isPushEnabled.value = data['isPushEnabled'] ?? true;
-          isInAppEnabled.value = data['isInAppEnabled'] ?? true;
+              // Genel ayarları güncelle
+              isPushEnabled.value = data['isPushEnabled'] ?? true;
+              isInAppEnabled.value = data['isInAppEnabled'] ?? true;
 
-          // Kategori tercihlerini güncelle
-          final categories = data['categories'] as Map<String, dynamic>?;
-          if (categories != null) {
-            categories.forEach((key, value) {
-              if (categoryPreferences.containsKey(key)) {
-                categoryPreferences[key]?.value = value as bool;
+              // Kategori tercihlerini güncelle
+              final categories = data['categories'] as Map<String, dynamic>?;
+              if (categories != null) {
+                categories.forEach((key, value) {
+                  if (categoryPreferences.containsKey(key)) {
+                    categoryPreferences[key]?.value = value as bool;
+                  }
+                });
               }
-            });
-          }
 
-          // Local'e kaydet
-          _savePreferencesToLocal(data);
-        }
-      },
-      onError: (error) {
-        _logger.e('Error in preferences listener: $error');
-      },
-    );
+              // Local'e kaydet
+              _savePreferencesToLocal(data);
+            }
+          },
+          onError: (error) {
+            _logger.e('Error in preferences listener: $error');
+          },
+        );
   }
 
   void _setupNotificationListeners() {
@@ -413,25 +393,114 @@ class NotificationService extends GetxService {
     });
   }
 
-  Future<void> _handleForegroundMessage(RemoteMessage message) async {
-    if (!isPushEnabled.value) return;
+  Future<void> _configureFCM() async {
+    try {
+      final token = await _firebaseMessaging.getToken();
+      if (token != null) {
+        fcmToken.value = token;
+        await _saveFCMToken(token);
+      }
 
-    final category = message.data['category'] as String?;
-    if (category != null && !(categoryPreferences[category]?.value ?? true)) {
-      return;
+      FirebaseMessaging.onMessage.listen(_handleForegroundMessage);
+      FirebaseMessaging.onMessageOpenedApp.listen(_handleMessageOpenedApp);
+      FirebaseMessaging.onBackgroundMessage(backgroundMessageHandler);
+    } catch (e) {
+      _logger.e('FCM yapılandırma hatası: $e');
     }
-
-    // In-app bildirim göster
-    if (isInAppEnabled.value) {
-      _showInAppNotification(message);
-    }
-
-    // Local notification göster
-    await _showLocalNotification(message);
   }
 
-  void _handleBackgroundMessage(RemoteMessage message) {
-    handleNotificationNavigation(message.data);
+  void _setupTokenRefresh() {
+    _firebaseMessaging.onTokenRefresh.listen((token) async {
+      isTokenRefreshing.value = true;
+      try {
+        fcmToken.value = token;
+        await _saveFCMToken(token);
+      } catch (e) {
+        _logger.e('Token yenileme hatası: $e');
+      } finally {
+        isTokenRefreshing.value = false;
+      }
+    });
+  }
+
+  Future<void> _saveFCMToken(String token) async {
+    try {
+      final userId = Get.find<AuthRepository>().currentUser?.uid;
+      if (userId != null) {
+        await _firestore.collection('users').doc(userId).update({
+          'fcmToken': token,
+          'lastTokenUpdate': FieldValue.serverTimestamp(),
+          'platform': Platform.isIOS ? 'ios' : 'android',
+          'appVersion': (await PackageInfo.fromPlatform()).version,
+        });
+      }
+    } catch (e) {
+      _logger.e('Token kaydetme hatası: $e');
+    }
+  }
+
+  Future<void> _handleForegroundMessage(RemoteMessage message) async {
+    try {
+      if (!isPushEnabled.value) return;
+
+      final notification = message.notification;
+      final data = message.data;
+
+      if (notification != null) {
+        final platformChannelSpecifics = await _getPlatformChannelSpecifics(
+          data,
+        );
+
+        await _localNotifications.show(
+          notification.hashCode,
+          notification.title,
+          notification.body,
+          platformChannelSpecifics,
+          payload: json.encode(data),
+        );
+      }
+    } catch (e) {
+      _logger.e('Bildirim işleme hatası: $e');
+    }
+  }
+
+  Future<NotificationDetails> _getPlatformChannelSpecifics(
+    Map<String, dynamic> data,
+  ) async {
+    if (Platform.isIOS) {
+      return NotificationDetails(
+        iOS: DarwinNotificationDetails(
+          presentAlert: _platformSettings['ios']['alert'],
+          presentBadge: _platformSettings['ios']['badge'],
+          presentSound: _platformSettings['ios']['sound'],
+        ),
+      );
+    } else {
+      final androidSettings = _platformSettings['android'];
+      return NotificationDetails(
+        android: AndroidNotificationDetails(
+          androidSettings['channelId'],
+          androidSettings['channelName'],
+          channelDescription: androidSettings['channelDescription'],
+          importance: androidSettings['importance'],
+          priority: androidSettings['priority'],
+          enableVibration: androidSettings['enableVibration'],
+          playSound: androidSettings['playSound'],
+        ),
+      );
+    }
+  }
+
+  Future<void> _handleMessageOpenedApp(RemoteMessage message) async {
+    // Bildirime tıklandığında yapılacak işlemler
+    final data = message.data;
+    if (data.containsKey('route')) {
+      Get.toNamed(data['route']);
+    }
+  }
+
+  Future<void> _handleBackgroundMessage(RemoteMessage message) async {
+    await handleNotificationNavigation(message.data);
   }
 
   void _handleTerminatedMessage(RemoteMessage message) {
@@ -532,10 +601,7 @@ class NotificationService extends GetxService {
     String? id,
   }) async {
     final message = RemoteMessage(
-      notification: RemoteNotification(
-        title: title,
-        body: body,
-      ),
+      notification: RemoteNotification(title: title, body: body),
       data: {
         'category': category,
         if (route != null) 'route': route,
@@ -571,14 +637,14 @@ class NotificationService extends GetxService {
           .collection('notifications')
           .doc(notification.id)
           .set({
-        'id': notification.id,
-        'title': notification.title,
-        'body': notification.body,
-        'data': notification.data,
-        'createdAt': notification.createdAt,
-        'isRead': notification.isRead,
-        'type': notification.type.toString().split('.').last,
-      });
+            'id': notification.id,
+            'title': notification.title,
+            'body': notification.body,
+            'data': notification.data,
+            'createdAt': notification.createdAt,
+            'isRead': notification.isRead,
+            'type': notification.type.toString().split('.').last,
+          });
     }
   }
 
@@ -601,8 +667,10 @@ class NotificationService extends GetxService {
     try {
       var query = _firestore
           .collection('notifications')
-          .where('userId',
-              isEqualTo: Get.find<AuthRepository>().currentUser?.uid)
+          .where(
+            'userId',
+            isEqualTo: Get.find<AuthRepository>().currentUser?.uid,
+          )
           .orderBy('createdAt', descending: true)
           .limit(limit);
 
@@ -613,8 +681,9 @@ class NotificationService extends GetxService {
       final snapshot = await query.get();
 
       return snapshot.docs
-          .map((doc) =>
-              NotificationModel.fromJson({...doc.data(), 'id': doc.id}))
+          .map(
+            (doc) => NotificationModel.fromJson({...doc.data(), 'id': doc.id}),
+          )
           .toList();
     } catch (e) {
       debugPrint('Error getting notifications: $e');
@@ -625,10 +694,11 @@ class NotificationService extends GetxService {
 
 // Top-level handler for background messages
 @pragma('vm:entry-point')
-Future<void> _handleBackgroundMessage(RemoteMessage message) async {
+Future<void> backgroundMessageHandler(RemoteMessage message) async {
+  // Background message handler must be a top-level function
   await Firebase.initializeApp();
-
-  final prefs = await SharedPreferences.getInstance();
-  final notificationService = Get.put(NotificationService(prefs));
-  await notificationService.saveNotification(message);
+  final notificationService = Get.put(
+    NotificationService(await SharedPreferences.getInstance()),
+  );
+  await notificationService.handleNotificationNavigation(message.data);
 }

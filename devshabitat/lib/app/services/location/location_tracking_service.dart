@@ -10,6 +10,7 @@ import '../../models/location/location_model.dart';
 import 'package:logger/logger.dart';
 import 'package:device_info_plus/device_info_plus.dart';
 import 'package:devshabitat/app/services/location/location_cache_service.dart';
+import 'package:flutter/material.dart';
 
 class BatteryOptimizedSettings {
   final LocationAccuracy accuracy;
@@ -63,328 +64,69 @@ class LocationTrackingService extends GetxService {
       if (Platform.isAndroid) {
         final androidInfo = await _deviceInfo.androidInfo;
         _isLowEndDevice =
-            androidInfo.systemFeatures.contains('android.hardware.ram.low') ||
-            androidInfo.version.sdkInt < 24; // Android 7.0'dan düşük
+            androidInfo.version.sdkInt < 29 ||
+            androidInfo.supportedAbis.length < 2;
       } else if (Platform.isIOS) {
         final iosInfo = await _deviceInfo.iosInfo;
-        final model = iosInfo.model.toLowerCase();
-
-        // Consider older iOS devices as low-end
         _isLowEndDevice =
-            model.contains('iphone 6') ||
-            model.contains('iphone 7') ||
-            model.contains('iphone se') ||
-            iosInfo.systemVersion.startsWith('13') ||
-            iosInfo.systemVersion.startsWith('14');
+            !iosInfo.isPhysicalDevice ||
+            double.parse(iosInfo.systemVersion) < 13.0;
       }
 
-      // Başlangıç ayarlarını optimize et
-      await _location.changeSettings(
-        accuracy: _isLowEndDevice
-            ? LocationAccuracy.balanced
-            : LocationAccuracy.high,
-        interval: _isLowEndDevice ? 60000 : 30000, // 1 dakika veya 30 saniye
-        distanceFilter: _isLowEndDevice ? 50 : 20, // 50m veya 20m
-      );
-
-      // Hareket sensörünü başlat
-      _initializeMotionDetection();
-    } catch (e) {
-      _logger.e('Optimal settings initialization error: $e');
-    }
-  }
-
-  void _initializeMotionDetection() {
-    if (Platform.isAndroid || Platform.isIOS) {
-      _location.enableBackgroundMode(enable: true);
-      _startActivityBasedUpdates();
-    }
-  }
-
-  void _startActivityBasedUpdates() {
-    Timer.periodic(const Duration(minutes: 5), (_) async {
-      final battery = await _getBatteryLevel();
-      final isMoving = await _checkIfMoving();
-
-      if (battery < 15) {
-        // Düşük pil modu
-        _updateTrackingSettings(
-          LocationAccuracy.powerSave,
-          120000,
-          'Low battery',
-        );
-      } else if (!isMoving) {
-        // Hareketsiz mod
-        _updateTrackingSettings(
-          LocationAccuracy.balanced,
-          300000,
-          'Device stationary',
-        );
-      } else if (battery > 50) {
-        // Normal mod
-        _updateTrackingSettings(
-          _isLowEndDevice ? LocationAccuracy.balanced : LocationAccuracy.high,
-          _isLowEndDevice ? 60000 : 30000,
-          'Normal operation',
-        );
-      }
-    });
-  }
-
-  Future<bool> _checkIfMoving() async {
-    try {
-      final location = await _location.getLocation();
-      final lastLocation = await _cacheService.getLastLocation();
-
-      if (lastLocation != null && location.speed != null) {
-        return location.speed! > 0.5; // 0.5 m/s threshold
-      }
-      return true; // Varsayılan olarak hareket ediyor kabul et
-    } catch (e) {
-      _logger.e('Motion detection error: $e');
-      return true;
-    }
-  }
-
-  Future<int> _getBatteryLevel() async {
-    try {
-      // Platform specific battery level implementation
-      return 100; // Şimdilik sabit değer, gerçek implementasyon eklenecek
-    } catch (e) {
-      _logger.e('Battery level check error: $e');
-      return 100;
-    }
-  }
-
-  void _updateTrackingSettings(
-    LocationAccuracy accuracy,
-    int interval,
-    String reason,
-  ) async {
-    if (_currentAccuracy == accuracy && _currentInterval == interval) return;
-
-    try {
-      await _location.changeSettings(
-        accuracy: accuracy,
-        interval: interval,
-        distanceFilter: interval ~/ 1000 * 5, // Her interval için 5 metre
-      );
-
-      _currentAccuracy = accuracy;
-      _currentInterval = interval;
-      _lastOptimizationReason = reason;
-
-      _logger.i('Location settings updated: $reason');
-    } catch (e) {
-      _logger.e('Settings update error: $e');
-    }
-  }
-
-  Future<BatteryOptimizedSettings> _calculateOptimalSettings() async {
-    try {
-      // Pil durumunu kontrol et
-      final batteryLevel = await _getBatteryLevel();
-
-      // Hareket durumunu kontrol et
-      final isMoving = await _checkIfMoving();
-
-      // Kullanım sıklığını kontrol et
-      final usageFrequency = _analyzeUsagePattern();
-
-      if (batteryLevel < 15) {
-        return BatteryOptimizedSettings(
-          accuracy: LocationAccuracy.powerSave,
-          interval: 120000, // 2 dakika
-          reason: 'Düşük pil seviyesi',
-        );
+      // Platform bazlı optimizasyonlar
+      if (Platform.isIOS) {
+        await _optimizeForIOS();
+      } else if (Platform.isAndroid) {
+        await _optimizeForAndroid();
       }
 
+      // Düşük performanslı cihazlar için ek optimizasyonlar
       if (_isLowEndDevice) {
-        return BatteryOptimizedSettings(
-          accuracy: LocationAccuracy.balanced,
-          interval: 60000, // 1 dakika
-          reason: 'Düşük özellikli cihaz',
-        );
+        _currentInterval = 60000; // 1 dakika
+        _currentAccuracy = LocationAccuracy.balanced;
+        _lastOptimizationReason = 'Düşük performanslı cihaz optimizasyonu';
       }
-
-      if (isMoving) {
-        return BatteryOptimizedSettings(
-          accuracy: LocationAccuracy.high,
-          interval: 30000, // 30 saniye
-          reason: 'Kullanıcı hareket halinde',
-        );
-      }
-
-      if (usageFrequency == 'high') {
-        return BatteryOptimizedSettings(
-          accuracy: LocationAccuracy.balanced,
-          interval: 45000, // 45 saniye
-          reason: 'Yüksek kullanım sıklığı',
-        );
-      }
-
-      return BatteryOptimizedSettings(
-        accuracy: LocationAccuracy.balanced,
-        interval: 60000, // 1 dakika
-        reason: 'Varsayılan ayarlar',
-      );
     } catch (e) {
-      _logger.e('Optimal ayarlar hesaplanamadı: $e');
-      return BatteryOptimizedSettings(
-        accuracy: LocationAccuracy.balanced,
-        interval: 60000,
-        reason: 'Hata durumu - varsayılan ayarlar',
-      );
+      _logger.e('Konum optimizasyonu başlatılamadı: $e');
+      // Varsayılan ayarları kullan
+      _currentInterval = 30000;
+      _currentAccuracy = LocationAccuracy.balanced;
     }
   }
 
-  Future<void> _optimizeLocationSettings() async {
-    final settings = await _calculateOptimalSettings();
-    await updateLocationSettings(
-      accuracy: settings.accuracy,
-      interval: settings.interval,
+  Future<void> _optimizeForIOS() async {
+    await _location.changeSettings(
+      accuracy: _isLowEndDevice
+          ? LocationAccuracy.balanced
+          : LocationAccuracy.high,
+      interval: _currentInterval,
+      distanceFilter: 10,
     );
-    _lastOptimizationReason = settings.reason;
-  }
 
-  Future<BatteryOptimizedSettings> _getBatteryOptimizedSettings() async {
-    try {
-      // Device performance analysis
-      await _analyzeDeviceCapabilities();
-
-      // Usage pattern analysis
-      final usagePattern = _analyzeUsagePattern();
-
-      // Time-based optimization
-      final timeBasedOptimization = _getTimeBasedOptimization();
-
-      // Network status consideration
-      final isNetworkLimited = await _isNetworkLimited();
-
-      // Determine optimal settings
-      LocationAccuracy accuracy;
-      int interval;
-      String reason;
-
-      if (_isLowEndDevice) {
-        accuracy = LocationAccuracy.low;
-        interval = 60000; // 1 minute
-        reason = 'Low-end device optimization';
-      } else if (usagePattern == 'background') {
-        accuracy = LocationAccuracy.balanced;
-        interval = 45000; // 45 seconds
-        reason = 'Background usage pattern';
-      } else if (timeBasedOptimization == 'night') {
-        accuracy = LocationAccuracy.low;
-        interval = 120000; // 2 minutes
-        reason = 'Night time optimization';
-      } else if (isNetworkLimited) {
-        accuracy = LocationAccuracy.balanced;
-        interval = 30000; // 30 seconds
-        reason = 'Network limited optimization';
-      } else if (usagePattern == 'active') {
-        accuracy = LocationAccuracy.high;
-        interval = 15000; // 15 seconds
-        reason = 'Active usage pattern';
-      } else {
-        accuracy = LocationAccuracy.balanced;
-        interval = 30000; // 30 seconds
-        reason = 'Default balanced settings';
-      }
-
-      _lastOptimizationReason = reason;
-      _logger.i('Battery optimization applied: $reason');
-
-      return BatteryOptimizedSettings(
-        accuracy: accuracy,
-        interval: interval,
-        reason: reason,
-      );
-    } catch (e) {
-      _logger.e('Error in battery optimization: $e');
-      return BatteryOptimizedSettings(
-        accuracy: LocationAccuracy.balanced,
-        interval: 30000,
-        reason: 'Fallback to default settings',
-      );
-    }
-  }
-
-  Future<void> _analyzeDeviceCapabilities() async {
-    try {
-      if (Platform.isAndroid) {
-        final androidInfo = await _deviceInfo.androidInfo;
-        // Consider device as low-end if it has less than 3GB RAM or old Android version
-        final totalMemoryMB =
-            (androidInfo.systemFeatures.contains('android.hardware.ram.normal'))
-            ? 2048
-            : 4096;
-        final sdkInt = androidInfo.version.sdkInt;
-
-        _isLowEndDevice = totalMemoryMB < 3072 || sdkInt < 28; // Android 9.0
-
-        if (_isLowEndDevice) {
-          _logger.i(
-            'Low-end Android device detected: SDK $sdkInt, estimated RAM ${totalMemoryMB}MB',
-          );
-        }
-      } else if (Platform.isIOS) {
-        final iosInfo = await _deviceInfo.iosInfo;
-        final model = iosInfo.model.toLowerCase();
-
-        // Consider older iOS devices as low-end
-        _isLowEndDevice =
-            model.contains('iphone 6') ||
-            model.contains('iphone 7') ||
-            model.contains('iphone se') ||
-            iosInfo.systemVersion.startsWith('13') ||
-            iosInfo.systemVersion.startsWith('14');
-
-        if (_isLowEndDevice) {
-          _logger.i(
-            'Low-end iOS device detected: ${iosInfo.model}, iOS ${iosInfo.systemVersion}',
-          );
-        }
-      }
-    } catch (e) {
-      _logger.w('Could not analyze device capabilities: $e');
-      _isLowEndDevice = false;
-    }
-  }
-
-  String _analyzeUsagePattern() {
-    final now = DateTime.now();
-    final timeSinceLastRequest = now.difference(_lastLocationRequest).inMinutes;
-
-    if (timeSinceLastRequest < 2) {
-      return 'active'; // Very frequent requests
-    } else if (timeSinceLastRequest < 10) {
-      return 'moderate'; // Regular usage
+    // iOS özel ayarlar
+    if (_isLowEndDevice) {
+      await _location.enableBackgroundMode(enable: false);
     } else {
-      return 'background'; // Infrequent usage
+      await _location.enableBackgroundMode(enable: true);
     }
   }
 
-  String _getTimeBasedOptimization() {
-    final hour = DateTime.now().hour;
+  Future<void> _optimizeForAndroid() async {
+    await _location.changeSettings(
+      accuracy: _currentAccuracy,
+      interval: _currentInterval,
+      distanceFilter: _isLowEndDevice ? 20 : 10,
+    );
 
-    if (hour >= 23 || hour <= 6) {
-      return 'night'; // Night time (11 PM - 6 AM)
-    } else if (hour >= 9 && hour <= 18) {
-      return 'day'; // Work hours
-    } else {
-      return 'evening'; // Evening hours
-    }
-  }
-
-  Future<bool> _isNetworkLimited() async {
-    try {
-      // Check if user is on cellular data or limited connection
-      // This is a simplified check - in real app, use connectivity_plus
-      return false; // For now, assume good network
-    } catch (e) {
-      _logger.w('Could not check network status: $e');
-      return false;
+    // Android özel ayarlar
+    if (!_isLowEndDevice) {
+      await _location.changeNotificationOptions(
+        channelName: "Konum Güncellemeleri",
+        title: "Konum Takibi Aktif",
+        subtitle: "Yakındaki geliştiricileri bulmak için konum kullanılıyor",
+        description: "Arka planda konum güncellemeleri alınıyor",
+        color: Colors.blue,
+      );
     }
   }
 
@@ -392,24 +134,61 @@ class LocationTrackingService extends GetxService {
     _batteryOptimizationTimer?.cancel();
     _batteryOptimizationTimer = Timer.periodic(
       const Duration(minutes: 5),
-      (_) => _adjustSettingsBasedOnUsage(),
+      (timer) => _adjustLocationSettings(),
     );
   }
 
-  Future<void> _adjustSettingsBasedOnUsage() async {
-    if (_isDisposed) return;
-
+  Future<void> _adjustLocationSettings() async {
     try {
-      final settings = await _getBatteryOptimizedSettings();
-      if (settings.accuracy != _currentAccuracy ||
-          settings.interval != _currentInterval) {
-        await updateLocationSettings(
-          accuracy: settings.accuracy,
-          interval: settings.interval,
+      final now = DateTime.now();
+      final timeSinceLastRequest = now.difference(_lastLocationRequest);
+      final hourOfDay = now.hour;
+
+      BatteryOptimizedSettings newSettings;
+
+      // Gece saatleri optimizasyonu (23:00 - 06:00)
+      if (hourOfDay >= 23 || hourOfDay < 6) {
+        newSettings = BatteryOptimizedSettings(
+          accuracy: LocationAccuracy.balanced,
+          interval: 120000, // 2 dakika
+          reason: 'Gece modu optimizasyonu',
         );
       }
+      // Düşük kullanım optimizasyonu
+      else if (timeSinceLastRequest.inHours > 2) {
+        newSettings = BatteryOptimizedSettings(
+          accuracy: LocationAccuracy.balanced,
+          interval: 60000, // 1 dakika
+          reason: 'Düşük kullanım optimizasyonu',
+        );
+      }
+      // Normal mod
+      else {
+        newSettings = BatteryOptimizedSettings(
+          accuracy: _isLowEndDevice
+              ? LocationAccuracy.balanced
+              : LocationAccuracy.high,
+          interval: _isLowEndDevice ? 45000 : 30000, // 45 veya 30 saniye
+          reason: 'Normal mod',
+        );
+      }
+
+      // Ayarları güncelle
+      if (newSettings.interval != _currentInterval ||
+          newSettings.accuracy != _currentAccuracy) {
+        _currentInterval = newSettings.interval;
+        _currentAccuracy = newSettings.accuracy;
+        _lastOptimizationReason = newSettings.reason;
+
+        await _location.changeSettings(
+          accuracy: newSettings.accuracy,
+          interval: newSettings.interval,
+        );
+
+        _logger.i('Konum ayarları güncellendi: ${newSettings.reason}');
+      }
     } catch (e) {
-      _logger.e('Error adjusting location settings: $e');
+      _logger.e('Konum ayarları güncellenirken hata: $e');
     }
   }
 
