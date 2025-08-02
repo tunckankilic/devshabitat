@@ -160,18 +160,18 @@ class NetworkAnalyticsService extends GetxService {
       int declinedCount = 0;
 
       for (final doc in allConnections) {
-        final connection = ConnectionModel.fromFirestore(doc);
+        final connection = ConnectionModel.fromJson(doc.data());
         switch (connection.status) {
-          case ConnectionStatus.pending:
+          case 'pending':
             pendingCount++;
             break;
-          case ConnectionStatus.accepted:
+          case 'accepted':
             acceptedCount++;
             break;
-          case ConnectionStatus.declined:
+          case 'declined':
             declinedCount++;
             break;
-          case ConnectionStatus.blocked:
+          case 'blocked':
             declinedCount++;
             break;
         }
@@ -249,7 +249,7 @@ class NetworkAnalyticsService extends GetxService {
       final Map<String, int> dailyCounts = {};
 
       for (final doc in connections.docs) {
-        final connection = ConnectionModel.fromFirestore(doc);
+        final connection = ConnectionModel.fromJson(doc.data());
         final dateKey = _formatDateKey(connection.createdAt);
         dailyCounts[dateKey] = (dailyCounts[dateKey] ?? 0) + 1;
       }
@@ -438,20 +438,20 @@ class NetworkAnalyticsService extends GetxService {
 
       // İkinci derece bağlantıları bul
       for (final doc in directConnections.docs) {
-        final connection = ConnectionModel.fromFirestore(doc);
+        final connection = ConnectionModel.fromJson(doc.data());
 
         // Bu bağlantının bağlantılarını al
         final secondConnections = await _firestore
             .collection('connections')
-            .where('fromUserId', isEqualTo: connection.toUserId)
+            .where('fromUserId', isEqualTo: connection.targetUserId)
             .where('status', isEqualTo: 'accepted')
             .limit(_batchSize)
             .get();
 
         for (final secondDoc in secondConnections.docs) {
-          final secondConnection = ConnectionModel.fromFirestore(secondDoc);
-          if (secondConnection.toUserId != userId) {
-            secondDegreeUsers.add(secondConnection.toUserId);
+          final secondConnection = ConnectionModel.fromJson(secondDoc.data());
+          if (secondConnection.targetUserId != userId) {
+            secondDegreeUsers.add(secondConnection.targetUserId);
           }
         }
       }
@@ -477,7 +477,7 @@ class NetworkAnalyticsService extends GetxService {
 
       // Batch processing ile user bilgilerini al
       final userIds = connections.docs
-          .map((doc) => ConnectionModel.fromFirestore(doc).toUserId)
+          .map((doc) => ConnectionModel.fromJson(doc.data()).targetUserId)
           .toSet()
           .toList();
 
@@ -565,7 +565,7 @@ class NetworkAnalyticsService extends GetxService {
 
       // Batch processing
       final connectionUserIds = connections.docs
-          .map((doc) => ConnectionModel.fromFirestore(doc).toUserId)
+          .map((doc) => ConnectionModel.fromJson(doc.data()).targetUserId)
           .toList();
 
       for (int i = 0; i < connectionUserIds.length; i += _batchSize) {

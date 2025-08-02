@@ -16,8 +16,9 @@ CommunityModel _$CommunityModelFromJson(Map<String, dynamic> json) =>
       moderatorIds: (json['moderatorIds'] as List<dynamic>)
           .map((e) => e as String)
           .toList(),
-      memberIds:
-          (json['memberIds'] as List<dynamic>).map((e) => e as String).toList(),
+      memberIds: (json['memberIds'] as List<dynamic>)
+          .map((e) => e as String)
+          .toList(),
       pendingMemberIds: (json['pendingMemberIds'] as List<dynamic>)
           .map((e) => e as String)
           .toList(),

@@ -41,9 +41,7 @@ class LocationSharingService extends GetxService {
           'timestamp': FieldValue.serverTimestamp(),
           'shared_with': shareWithUserIds,
           'expires_at': duration != null
-              ? Timestamp.fromDate(
-                  DateTime.now().add(duration),
-                )
+              ? Timestamp.fromDate(DateTime.now().add(duration))
               : null,
         });
       }
@@ -65,23 +63,20 @@ class LocationSharingService extends GetxService {
         .where('shared_with', arrayContains: _userId)
         .snapshots()
         .map((snapshot) {
-      final Map<String, LatLng> locations = {};
+          final Map<String, LatLng> locations = {};
 
-      for (var doc in snapshot.docs) {
-        final data = doc.data();
-        final GeoPoint? geoPoint = data['location'] as GeoPoint?;
+          for (var doc in snapshot.docs) {
+            final data = doc.data();
+            final GeoPoint? geoPoint = data['location'] as GeoPoint?;
 
-        if (geoPoint != null) {
-          locations[doc.id] = LatLng(
-            geoPoint.latitude,
-            geoPoint.longitude,
-          );
-        }
-      }
+            if (geoPoint != null) {
+              locations[doc.id] = LatLng(geoPoint.latitude, geoPoint.longitude);
+            }
+          }
 
-      sharedLocations.value = locations;
-      return locations;
-    });
+          sharedLocations.value = locations;
+          return locations;
+        });
   }
 
   Future<void> addGeofence(GeofenceModel geofence) async {
@@ -111,7 +106,7 @@ class LocationSharingService extends GetxService {
     return LocationTrackingService.isWithinRadius(
       LatLng(geofence.latitude, geofence.longitude),
       userLocation,
-      geofence.radius,
+      geofence.radius ?? 100.0, // Default radius: 100 meters
     );
   }
 

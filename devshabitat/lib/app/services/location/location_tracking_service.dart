@@ -1,14 +1,16 @@
 import 'dart:async';
 import 'dart:math';
 import 'dart:io';
-import 'package:devshabitat/app/models/location/location_model.dart';
 import 'package:get/get.dart';
 import 'package:location/location.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import '../../models/location/developer_location_model.dart';
+import '../../models/location/location_model.dart';
 import 'package:logger/logger.dart';
 import 'package:device_info_plus/device_info_plus.dart';
+import 'package:devshabitat/app/services/location/location_cache_service.dart';
+import 'package:flutter/material.dart';
 
 class BatteryOptimizedSettings {
   final LocationAccuracy accuracy;
@@ -24,9 +26,10 @@ class BatteryOptimizedSettings {
 
 class LocationTrackingService extends GetxService {
   final Location _location = Location();
+  final LocationCacheService _cacheService = Get.find();
   StreamController<LocationData>? _locationController;
   StreamSubscription<LocationData>? _locationSubscription;
-  final Logger _logger = Get.find<Logger>();
+  final Logger _logger = Get.find();
   bool _isDisposed = false;
 
   // Battery optimization settings
@@ -56,151 +59,74 @@ class LocationTrackingService extends GetxService {
   }
 
   Future<void> _initializeOptimalSettings() async {
-    // Get battery level and adjust settings accordingly
-    final batteryLevel = await _getBatteryOptimizedSettings();
-    await _location.changeSettings(
-      accuracy: batteryLevel.accuracy,
-      interval: batteryLevel.interval,
-    );
-    _currentAccuracy = batteryLevel.accuracy;
-    _currentInterval = batteryLevel.interval;
-  }
-
-  Future<BatteryOptimizedSettings> _getBatteryOptimizedSettings() async {
     try {
-      // Device performance analysis
-      await _analyzeDeviceCapabilities();
-
-      // Usage pattern analysis
-      final usagePattern = _analyzeUsagePattern();
-
-      // Time-based optimization
-      final timeBasedOptimization = _getTimeBasedOptimization();
-
-      // Network status consideration
-      final isNetworkLimited = await _isNetworkLimited();
-
-      // Determine optimal settings
-      LocationAccuracy accuracy;
-      int interval;
-      String reason;
-
-      if (_isLowEndDevice) {
-        accuracy = LocationAccuracy.low;
-        interval = 60000; // 1 minute
-        reason = 'Low-end device optimization';
-      } else if (usagePattern == 'background') {
-        accuracy = LocationAccuracy.balanced;
-        interval = 45000; // 45 seconds
-        reason = 'Background usage pattern';
-      } else if (timeBasedOptimization == 'night') {
-        accuracy = LocationAccuracy.low;
-        interval = 120000; // 2 minutes
-        reason = 'Night time optimization';
-      } else if (isNetworkLimited) {
-        accuracy = LocationAccuracy.balanced;
-        interval = 30000; // 30 seconds
-        reason = 'Network limited optimization';
-      } else if (usagePattern == 'active') {
-        accuracy = LocationAccuracy.high;
-        interval = 15000; // 15 seconds
-        reason = 'Active usage pattern';
-      } else {
-        accuracy = LocationAccuracy.balanced;
-        interval = 30000; // 30 seconds
-        reason = 'Default balanced settings';
-      }
-
-      _lastOptimizationReason = reason;
-      _logger.i('Battery optimization applied: $reason');
-
-      return BatteryOptimizedSettings(
-        accuracy: accuracy,
-        interval: interval,
-        reason: reason,
-      );
-    } catch (e) {
-      _logger.e('Error in battery optimization: $e');
-      return BatteryOptimizedSettings(
-        accuracy: LocationAccuracy.balanced,
-        interval: 30000,
-        reason: 'Fallback to default settings',
-      );
-    }
-  }
-
-  Future<void> _analyzeDeviceCapabilities() async {
-    try {
+      // Cihaz bilgilerini al
       if (Platform.isAndroid) {
         final androidInfo = await _deviceInfo.androidInfo;
-        // Consider device as low-end if it has less than 3GB RAM or old Android version
-        final totalMemoryMB =
-            (androidInfo.systemFeatures.contains('android.hardware.ram.normal'))
-                ? 2048
-                : 4096;
-        final sdkInt = androidInfo.version.sdkInt;
-
-        _isLowEndDevice = totalMemoryMB < 3072 || sdkInt < 28; // Android 9.0
-
-        if (_isLowEndDevice) {
-          _logger.i(
-              'Low-end Android device detected: SDK $sdkInt, estimated RAM ${totalMemoryMB}MB');
-        }
+        _isLowEndDevice =
+            androidInfo.version.sdkInt < 29 ||
+            androidInfo.supportedAbis.length < 2;
       } else if (Platform.isIOS) {
         final iosInfo = await _deviceInfo.iosInfo;
-        final model = iosInfo.model.toLowerCase();
+        _isLowEndDevice =
+            !iosInfo.isPhysicalDevice ||
+            double.parse(iosInfo.systemVersion) < 13.0;
+      }
 
-        // Consider older iOS devices as low-end
-        _isLowEndDevice = model.contains('iphone 6') ||
-            model.contains('iphone 7') ||
-            model.contains('iphone se') ||
-            iosInfo.systemVersion.startsWith('13') ||
-            iosInfo.systemVersion.startsWith('14');
+      // Platform bazlı optimizasyonlar
+      if (Platform.isIOS) {
+        await _optimizeForIOS();
+      } else if (Platform.isAndroid) {
+        await _optimizeForAndroid();
+      }
 
-        if (_isLowEndDevice) {
-          _logger.i(
-              'Low-end iOS device detected: ${iosInfo.model}, iOS ${iosInfo.systemVersion}');
-        }
+      // Düşük performanslı cihazlar için ek optimizasyonlar
+      if (_isLowEndDevice) {
+        _currentInterval = 60000; // 1 dakika
+        _currentAccuracy = LocationAccuracy.balanced;
+        _lastOptimizationReason = 'Düşük performanslı cihaz optimizasyonu';
       }
     } catch (e) {
-      _logger.w('Could not analyze device capabilities: $e');
-      _isLowEndDevice = false;
+      _logger.e('Konum optimizasyonu başlatılamadı: $e');
+      // Varsayılan ayarları kullan
+      _currentInterval = 30000;
+      _currentAccuracy = LocationAccuracy.balanced;
     }
   }
 
-  String _analyzeUsagePattern() {
-    final now = DateTime.now();
-    final timeSinceLastRequest = now.difference(_lastLocationRequest).inMinutes;
+  Future<void> _optimizeForIOS() async {
+    await _location.changeSettings(
+      accuracy: _isLowEndDevice
+          ? LocationAccuracy.balanced
+          : LocationAccuracy.high,
+      interval: _currentInterval,
+      distanceFilter: 10,
+    );
 
-    if (timeSinceLastRequest < 2) {
-      return 'active'; // Very frequent requests
-    } else if (timeSinceLastRequest < 10) {
-      return 'moderate'; // Regular usage
+    // iOS özel ayarlar
+    if (_isLowEndDevice) {
+      await _location.enableBackgroundMode(enable: false);
     } else {
-      return 'background'; // Infrequent usage
+      await _location.enableBackgroundMode(enable: true);
     }
   }
 
-  String _getTimeBasedOptimization() {
-    final hour = DateTime.now().hour;
+  Future<void> _optimizeForAndroid() async {
+    await _location.changeSettings(
+      accuracy: _currentAccuracy,
+      interval: _currentInterval,
+      distanceFilter: _isLowEndDevice ? 20 : 10,
+    );
 
-    if (hour >= 23 || hour <= 6) {
-      return 'night'; // Night time (11 PM - 6 AM)
-    } else if (hour >= 9 && hour <= 18) {
-      return 'day'; // Work hours
-    } else {
-      return 'evening'; // Evening hours
-    }
-  }
-
-  Future<bool> _isNetworkLimited() async {
-    try {
-      // Check if user is on cellular data or limited connection
-      // This is a simplified check - in real app, use connectivity_plus
-      return false; // For now, assume good network
-    } catch (e) {
-      _logger.w('Could not check network status: $e');
-      return false;
+    // Android özel ayarlar
+    if (!_isLowEndDevice) {
+      await _location.changeNotificationOptions(
+        channelName: "Konum Güncellemeleri",
+        title: "Konum Takibi Aktif",
+        subtitle: "Yakındaki geliştiricileri bulmak için konum kullanılıyor",
+        description: "Arka planda konum güncellemeleri alınıyor",
+        color: Colors.blue,
+      );
     }
   }
 
@@ -208,24 +134,61 @@ class LocationTrackingService extends GetxService {
     _batteryOptimizationTimer?.cancel();
     _batteryOptimizationTimer = Timer.periodic(
       const Duration(minutes: 5),
-      (_) => _adjustSettingsBasedOnUsage(),
+      (timer) => _adjustLocationSettings(),
     );
   }
 
-  Future<void> _adjustSettingsBasedOnUsage() async {
-    if (_isDisposed) return;
-
+  Future<void> _adjustLocationSettings() async {
     try {
-      final settings = await _getBatteryOptimizedSettings();
-      if (settings.accuracy != _currentAccuracy ||
-          settings.interval != _currentInterval) {
-        await updateLocationSettings(
-          accuracy: settings.accuracy,
-          interval: settings.interval,
+      final now = DateTime.now();
+      final timeSinceLastRequest = now.difference(_lastLocationRequest);
+      final hourOfDay = now.hour;
+
+      BatteryOptimizedSettings newSettings;
+
+      // Gece saatleri optimizasyonu (23:00 - 06:00)
+      if (hourOfDay >= 23 || hourOfDay < 6) {
+        newSettings = BatteryOptimizedSettings(
+          accuracy: LocationAccuracy.balanced,
+          interval: 120000, // 2 dakika
+          reason: 'Gece modu optimizasyonu',
         );
       }
+      // Düşük kullanım optimizasyonu
+      else if (timeSinceLastRequest.inHours > 2) {
+        newSettings = BatteryOptimizedSettings(
+          accuracy: LocationAccuracy.balanced,
+          interval: 60000, // 1 dakika
+          reason: 'Düşük kullanım optimizasyonu',
+        );
+      }
+      // Normal mod
+      else {
+        newSettings = BatteryOptimizedSettings(
+          accuracy: _isLowEndDevice
+              ? LocationAccuracy.balanced
+              : LocationAccuracy.high,
+          interval: _isLowEndDevice ? 45000 : 30000, // 45 veya 30 saniye
+          reason: 'Normal mod',
+        );
+      }
+
+      // Ayarları güncelle
+      if (newSettings.interval != _currentInterval ||
+          newSettings.accuracy != _currentAccuracy) {
+        _currentInterval = newSettings.interval;
+        _currentAccuracy = newSettings.accuracy;
+        _lastOptimizationReason = newSettings.reason;
+
+        await _location.changeSettings(
+          accuracy: newSettings.accuracy,
+          interval: newSettings.interval,
+        );
+
+        _logger.i('Konum ayarları güncellendi: ${newSettings.reason}');
+      }
     } catch (e) {
-      _logger.e('Error adjusting location settings: $e');
+      _logger.e('Konum ayarları güncellenirken hata: $e');
     }
   }
 
@@ -235,15 +198,41 @@ class LocationTrackingService extends GetxService {
         throw Exception('Service disposed');
       }
 
+      // Önce önbellekten kontrol et
+      final cachedLocation = await _cacheService.getLastLocation();
+      if (cachedLocation != null) {
+        _logger.d('Konum önbellekten alındı');
+        return LocationData.fromMap({
+          'latitude': cachedLocation.latitude,
+          'longitude': cachedLocation.longitude,
+          'accuracy': cachedLocation.accuracy,
+          'speed': cachedLocation.speed,
+          'heading': cachedLocation.heading,
+        });
+      }
+
       // Track usage for optimization
       _lastLocationRequest = DateTime.now();
       _locationRequestCount++;
 
       final location = await _location.getLocation();
 
+      // Konumu önbelleğe al
+      await _cacheService.cacheLocation(
+        LocationModel(
+          latitude: location.latitude!,
+          longitude: location.longitude!,
+          accuracy: location.accuracy!,
+          timestamp: DateTime.now(),
+          speed: location.speed,
+          heading: location.heading,
+        ),
+      );
+
       // Log location request for analytics
       _logger.d(
-          'Location request #$_locationRequestCount - Optimization: $_lastOptimizationReason');
+        'Location request #$_locationRequestCount - Optimization: $_lastOptimizationReason',
+      );
 
       return location;
     } catch (e) {
@@ -265,10 +254,22 @@ class LocationTrackingService extends GetxService {
       _locationController = StreamController<LocationData>.broadcast();
 
       _locationSubscription = _location.onLocationChanged.listen(
-        (locationData) {
+        (locationData) async {
           if (!_isDisposed &&
               _locationController != null &&
               !_locationController!.isClosed) {
+            // Konumu önbelleğe al
+            await _cacheService.cacheLocation(
+              LocationModel(
+                latitude: locationData.latitude!,
+                longitude: locationData.longitude!,
+                accuracy: locationData.accuracy!,
+                timestamp: DateTime.now(),
+                speed: locationData.speed,
+                heading: locationData.heading,
+              ),
+            );
+
             _locationController!.add(locationData);
           }
         },
@@ -302,14 +303,12 @@ class LocationTrackingService extends GetxService {
   }) async {
     try {
       if (_isDisposed) return;
-      await _location.changeSettings(
-        accuracy: accuracy,
-        interval: interval,
-      );
+      await _location.changeSettings(accuracy: accuracy, interval: interval);
       _currentAccuracy = accuracy;
       _currentInterval = interval;
       _logger.i(
-          'Location settings updated: accuracy=$accuracy, interval=${interval}ms - Reason: $_lastOptimizationReason');
+        'Location settings updated: accuracy=$accuracy, interval=${interval}ms - Reason: $_lastOptimizationReason',
+      );
     } catch (e) {
       _logger.e('Error updating location settings: $e');
     }
@@ -317,13 +316,13 @@ class LocationTrackingService extends GetxService {
 
   // Getter methods for monitoring
   Map<String, dynamic> get optimizationInfo => {
-        'currentAccuracy': _currentAccuracy.toString(),
-        'currentInterval': _currentInterval,
-        'lastOptimizationReason': _lastOptimizationReason,
-        'isLowEndDevice': _isLowEndDevice,
-        'locationRequestCount': _locationRequestCount,
-        'lastLocationRequest': _lastLocationRequest.toIso8601String(),
-      };
+    'currentAccuracy': _currentAccuracy.toString(),
+    'currentInterval': _currentInterval,
+    'lastOptimizationReason': _lastOptimizationReason,
+    'isLowEndDevice': _isLowEndDevice,
+    'locationRequestCount': _locationRequestCount,
+    'lastLocationRequest': _lastLocationRequest.toIso8601String(),
+  };
 
   bool get isLowEndDevice => _isLowEndDevice;
   String get lastOptimizationReason => _lastOptimizationReason;
@@ -364,10 +363,9 @@ class LocationTrackingService extends GetxService {
   }) async {
     try {
       if (_isDisposed) return;
-      await FirebaseFirestore.instance
-          .collection('users')
-          .doc(userId)
-          .update({'location': location});
+      await FirebaseFirestore.instance.collection('users').doc(userId).update({
+        'location': location,
+      });
     } catch (e) {
       _logger.e('Error updating user location: $e');
       throw Exception('Konum güncellenirken hata oluştu: $e');
@@ -377,10 +375,9 @@ class LocationTrackingService extends GetxService {
   Future<void> removeUserLocation({required String userId}) async {
     try {
       if (_isDisposed) return;
-      await FirebaseFirestore.instance
-          .collection('users')
-          .doc(userId)
-          .update({'location': FieldValue.delete()});
+      await FirebaseFirestore.instance.collection('users').doc(userId).update({
+        'location': FieldValue.delete(),
+      });
     } catch (e) {
       _logger.e('Error removing user location: $e');
       throw Exception('Konum silinirken hata oluştu: $e');
@@ -410,7 +407,8 @@ class LocationTrackingService extends GetxService {
     final dLon = lon2 - lon1;
 
     // Haversine formülü
-    final a = sin(dLat / 2) * sin(dLat / 2) +
+    final a =
+        sin(dLat / 2) * sin(dLat / 2) +
         cos(lat1) * cos(lat2) * sin(dLon / 2) * sin(dLon / 2);
     final c = 2 * atan2(sqrt(a), sqrt(1 - a));
 
@@ -430,15 +428,18 @@ class LocationTrackingService extends GetxService {
     try {
       if (_isDisposed) return [];
 
-      final snapshot =
-          await FirebaseFirestore.instance.collection('users').get();
+      final snapshot = await FirebaseFirestore.instance
+          .collection('users')
+          .get();
       final developers = snapshot.docs
           .map((doc) => DeveloperLocationModel.fromFirestore(doc))
-          .where((dev) => isWithinRadius(
-                LatLng(currentLocation.latitude, currentLocation.longitude),
-                LatLng(dev.location.latitude, dev.location.longitude),
-                radiusKm,
-              ))
+          .where(
+            (dev) => isWithinRadius(
+              LatLng(currentLocation.latitude, currentLocation.longitude),
+              LatLng(dev.location.latitude, dev.location.longitude),
+              radiusKm,
+            ),
+          )
           .toList();
       return developers;
     } catch (e) {
@@ -453,10 +454,9 @@ class LocationTrackingService extends GetxService {
   }) async {
     try {
       if (_isDisposed) return;
-      await FirebaseFirestore.instance
-          .collection('users')
-          .doc(userId)
-          .update({'locationNotificationsEnabled': enabled});
+      await FirebaseFirestore.instance.collection('users').doc(userId).update({
+        'locationNotificationsEnabled': enabled,
+      });
     } catch (e) {
       _logger.e('Error updating location notification settings: $e');
       throw Exception('Bildirim ayarları güncellenirken hata oluştu: $e');
@@ -475,8 +475,8 @@ class LocationTrackingService extends GetxService {
           notificationType: {
             'enabled': enabled,
             'updatedAt': FieldValue.serverTimestamp(),
-          }
-        }
+          },
+        },
       });
     } catch (e) {
       _logger.e('Error updating notification settings: $e');

@@ -3,7 +3,13 @@ import 'package:json_annotation/json_annotation.dart';
 
 part 'event_registration_model.g.dart';
 
-enum RegistrationStatus { pending, approved, rejected, cancelled }
+enum RegistrationStatus {
+  pending,
+  approved,
+  rejected,
+  cancelled,
+  waitlisted,
+}
 
 @JsonSerializable()
 class EventRegistrationModel {

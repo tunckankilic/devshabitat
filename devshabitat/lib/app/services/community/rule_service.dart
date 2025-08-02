@@ -11,7 +11,8 @@ class RuleService extends GetxService {
 
   // Kural koleksiyonunu al
   CollectionReference<Map<String, dynamic>> _getRulesCollection(
-      String communityId) {
+    String communityId,
+  ) {
     return _firestore
         .collection('communities')
         .doc(communityId)
@@ -20,7 +21,8 @@ class RuleService extends GetxService {
 
   // İhlal koleksiyonunu al
   CollectionReference<Map<String, dynamic>> _getViolationsCollection(
-      String communityId) {
+    String communityId,
+  ) {
     return _firestore
         .collection('communities')
         .doc(communityId)
@@ -29,18 +31,18 @@ class RuleService extends GetxService {
 
   // Yeni kural oluştur
   Future<RuleModel> createRule(RuleModel rule) async {
-    final doc = await _getRulesCollection(rule.communityId).add(
-      rule.toFirestore(),
-    );
+    final doc = await _getRulesCollection(
+      rule.communityId,
+    ).add(rule.toFirestore());
 
     return rule.copyWith(id: doc.id);
   }
 
   // Kuralı güncelle
   Future<void> updateRule(RuleModel rule) async {
-    await _getRulesCollection(rule.communityId)
-        .doc(rule.id)
-        .update(rule.toFirestore());
+    await _getRulesCollection(
+      rule.communityId,
+    ).doc(rule.id).update(rule.toFirestore());
   }
 
   // Kuralı sil
@@ -78,10 +80,11 @@ class RuleService extends GetxService {
 
   // Kural ihlali bildir
   Future<RuleViolationModel> reportViolation(
-      RuleViolationModel violation) async {
-    final doc = await _getViolationsCollection(violation.communityId).add(
-      violation.toFirestore(),
-    );
+    RuleViolationModel violation,
+  ) async {
+    final doc = await _getViolationsCollection(
+      violation.communityId,
+    ).add(violation.toFirestore());
 
     return violation.copyWith(id: doc.id);
   }
@@ -188,10 +191,7 @@ class RuleService extends GetxService {
     String content,
     String contentType,
   ) async {
-    final rules = await getRules(
-      communityId,
-      onlyEnabled: true,
-    );
+    final rules = await getRules(communityId, onlyEnabled: true);
 
     return rules.where((rule) {
       if (rule.enforcement != RuleEnforcement.automatic &&
@@ -201,7 +201,8 @@ class RuleService extends GetxService {
 
       // Anahtar kelime kontrolü
       final hasKeyword = rule.keywords.any(
-          (keyword) => content.toLowerCase().contains(keyword.toLowerCase()));
+        (keyword) => content.toLowerCase().contains(keyword.toLowerCase()),
+      );
 
       if (!hasKeyword) return false;
 
@@ -240,27 +241,188 @@ class RuleService extends GetxService {
     }).toList();
   }
 
+  // Gelişmiş içerik filtreleme yapılandırması
+  static const Map<String, dynamic> defaultAdvancedConfig = {
+    'regexPatterns': <String>[],
+    'spamDetection': {
+      'enabled': true,
+      'threshold': 0.7,
+      'maxRepeatedChars': 5,
+      'maxUrls': 3,
+      'minContentLength': 10,
+    },
+    'languageSettings': {
+      'allowedLanguages': ['tr', 'en'],
+      'defaultLanguage': 'tr',
+      'profanityCheck': true,
+    },
+  };
+
+  // Gelişmiş içerik kontrolü
+  Future<bool> checkContentAdvanced(
+    String communityId,
+    String content,
+    String contentType, {
+    String? language,
+  }) async {
+    try {
+      final rules = await getRules(communityId, onlyEnabled: true);
+
+      for (final rule in rules) {
+        if (rule.enforcement != RuleEnforcement.automatic &&
+            rule.enforcement != RuleEnforcement.hybrid) {
+          continue;
+        }
+
+        // Regex kontrolleri
+        if (rule.autoModConfig['regexPatterns'] != null) {
+          for (String pattern in rule.autoModConfig['regexPatterns']) {
+            try {
+              final regex = RegExp(
+                pattern,
+                caseSensitive: false,
+                unicode: true,
+              );
+              if (regex.hasMatch(content)) {
+                return true;
+              }
+            } catch (e) {
+              print('Regex hatası: $pattern - $e');
+            }
+          }
+        }
+
+        // Spam kontrolü
+        if (rule.autoModConfig['spamDetection']?['enabled'] == true) {
+          if (await _isSpamContent(
+            content,
+            rule.autoModConfig['spamDetection'],
+          )) {
+            return true;
+          }
+        }
+
+        // Dil kontrolü
+        if (rule.autoModConfig['languageSettings'] != null) {
+          final settings = rule.autoModConfig['languageSettings'];
+          if (!settings['allowedLanguages'].contains(language)) {
+            return true;
+          }
+
+          if (settings['profanityCheck'] == true) {
+            if (await _containsProfanity(
+              content,
+              language ?? settings['defaultLanguage'],
+            )) {
+              return true;
+            }
+          }
+        }
+      }
+
+      return false;
+    } catch (e) {
+      print('Gelişmiş içerik kontrolü hatası: $e');
+      return false;
+    }
+  }
+
+  Future<bool> _isSpamContent(
+    String content,
+    Map<String, dynamic> config,
+  ) async {
+    // Tekrarlanan karakter kontrolü
+    final repeatedChars = RegExp(
+      r'(.)\1{' + (config['maxRepeatedChars'] - 1).toString() + ',}',
+    );
+    if (repeatedChars.hasMatch(content)) {
+      return true;
+    }
+
+    // URL sayısı kontrolü
+    final urlCount = RegExp(r'https?://\S+').allMatches(content).length;
+    if (urlCount > config['maxUrls']) {
+      return true;
+    }
+
+    // İçerik uzunluğu kontrolü
+    if (content.length < config['minContentLength']) {
+      return true;
+    }
+
+    // Spam skoru hesaplama
+    double spamScore = 0.0;
+
+    // Büyük harf oranı
+    final upperCaseRatio =
+        content.replaceAll(RegExp(r'[^A-Z]'), '').length / content.length;
+    if (upperCaseRatio > 0.7) spamScore += 0.3;
+
+    // Tekrarlanan kelimeler
+    final words = content.toLowerCase().split(RegExp(r'\s+'));
+    final wordFreq = <String, int>{};
+    for (var word in words) {
+      wordFreq[word] = (wordFreq[word] ?? 0) + 1;
+    }
+    if (wordFreq.values.any((freq) => freq > 3)) spamScore += 0.4;
+
+    return spamScore >= config['threshold'];
+  }
+
+  Future<bool> _containsProfanity(String content, String language) async {
+    // Dile özgü yasaklı kelime listelerini yükle
+    final bannedWords = await _loadBannedWords(language);
+
+    final normalizedContent = content.toLowerCase();
+    return bannedWords.any(
+      (word) => normalizedContent.contains(word.toLowerCase()),
+    );
+  }
+
+  Future<List<String>> _loadBannedWords(String language) async {
+    try {
+      final doc = await _firestore
+          .collection('moderation')
+          .doc('banned_words')
+          .collection(language)
+          .doc('words')
+          .get();
+
+      if (doc.exists && doc.data()?['words'] != null) {
+        return List<String>.from(doc.data()!['words']);
+      }
+
+      return [];
+    } catch (e) {
+      print('Yasaklı kelimeler yüklenirken hata: $e');
+      return [];
+    }
+  }
+
   // İhlal istatistiklerini getir
   Future<Map<String, dynamic>> getViolationStats(String communityId) async {
     final now = DateTime.now();
     final lastWeek = now.subtract(const Duration(days: 7));
     final lastMonth = now.subtract(const Duration(days: 30));
 
-    final snapshot = await _getViolationsCollection(communityId)
-        .where('createdAt', isGreaterThan: Timestamp.fromDate(lastMonth))
-        .get();
+    final snapshot = await _getViolationsCollection(
+      communityId,
+    ).where('createdAt', isGreaterThan: Timestamp.fromDate(lastMonth)).get();
 
     final violations = snapshot.docs
         .map((doc) => RuleViolationModel.fromFirestore(doc))
         .toList();
 
     int totalViolations = violations.length;
-    int weeklyViolations =
-        violations.where((v) => v.createdAt.isAfter(lastWeek)).length;
-    int resolvedViolations =
-        violations.where((v) => v.status == ViolationStatus.resolved).length;
-    int pendingViolations =
-        violations.where((v) => v.status == ViolationStatus.pending).length;
+    int weeklyViolations = violations
+        .where((v) => v.createdAt.isAfter(lastWeek))
+        .length;
+    int resolvedViolations = violations
+        .where((v) => v.status == ViolationStatus.resolved)
+        .length;
+    int pendingViolations = violations
+        .where((v) => v.status == ViolationStatus.pending)
+        .length;
 
     Map<String, int> violationsByRule = {};
     Map<String, int> violationsByUser = {};

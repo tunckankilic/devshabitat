@@ -1,115 +1,99 @@
+import 'dart:math' as math;
 import '../models/enhanced_user_model.dart';
+import '../models/user_profile_model.dart';
+import '../models/connection_model.dart';
 
 class ConnectionScoringAlgorithm {
-  // Ağırlık faktörleri
-  static const double _skillWeight = 0.4;
-  static const double _experienceWeight = 0.3;
-  static const double _locationWeight = 0.2;
-  static const double _companyWeight = 0.1;
-
-  /// Ana puanlama metodunu çağırır ve ağırlıklı skoru hesaplar
   static double calculateConnectionScore(
     EnhancedUserModel user1,
     EnhancedUserModel user2,
   ) {
-    final skillScore = calculateSkillMatch(
-      user1.skills ?? [],
-      user2.skills ?? [],
-    );
+    double score = 0.0;
+    double totalWeight = 0.0;
 
-    final experienceScore = calculateExperienceMatch(
-      user1.experience ?? [],
-      user2.experience ?? [],
-    );
+    // Yetenek uyumu (40%)
+    if (user1.skills != null && user2.skills != null) {
+      final commonSkills =
+          user1.skills!.toSet().intersection(user2.skills!.toSet());
+      score += (commonSkills.length /
+              math.max(user1.skills!.length, user2.skills!.length)) *
+          0.4;
+      totalWeight += 0.4;
+    }
 
-    final locationScore = calculateLocationMatch(
-      _extractLocations(user1.experience ?? []),
-      _extractLocations(user2.experience ?? []),
-    );
+    // Deneyim seviyesi uyumu (30%)
+    if (user1.yearsOfExperience != 0 && user2.yearsOfExperience != 0) {
+      final expDiff = (user1.yearsOfExperience - user2.yearsOfExperience).abs();
+      score += (1 - (expDiff / 10).clamp(0.0, 1.0)) * 0.3;
+      totalWeight += 0.3;
+    }
 
-    final companyScore = calculateCompanyMatch(
-      _extractCompanies(user1.experience ?? []),
-      _extractCompanies(user2.experience ?? []),
-    );
+    // Konum uyumu (30%)
+    if (user1.location != null && user2.location != null) {
+      final distance = calculateDistance(
+        lat1: user1.location!.latitude,
+        lon1: user1.location!.longitude,
+        lat2: user2.location!.latitude,
+        lon2: user2.location!.longitude,
+      );
+      score += (1 - (distance / 100).clamp(0.0, 1.0)) * 0.3;
+      totalWeight += 0.3;
+    }
 
-    // Ağırlıklı toplam skoru hesapla
-    return (skillScore * _skillWeight) +
-        (experienceScore * _experienceWeight) +
-        (locationScore * _locationWeight) +
-        (companyScore * _companyWeight);
+    return totalWeight > 0 ? (score / totalWeight).clamp(0.0, 1.0) : 0.0;
   }
 
-  /// Jaccard benzerlik algoritması ile yetenek eşleşme skorunu hesaplar
-  static double calculateSkillMatch(
-      List<String> skills1, List<String> skills2) {
-    if (skills1.isEmpty && skills2.isEmpty) return 0.0;
+  double calculateScore({
+    required UserProfile userProfile,
+    required ConnectionModel connection,
+    List<String>? preferredSkills,
+  }) {
+    // Basit bir skor hesaplama
+    double score = 0.0;
+    double totalWeight = 0.0;
 
-    final set1 = skills1.toSet();
-    final set2 = skills2.toSet();
+    // Tercih edilen yeteneklere göre skor (70%)
+    if (preferredSkills != null && preferredSkills.isNotEmpty) {
+      final matchingSkills = userProfile.skills
+          .where((skill) => preferredSkills.contains(skill))
+          .length;
+      score += matchingSkills / preferredSkills.length * 0.7;
+      totalWeight += 0.7;
+    }
 
-    final intersection = set1.intersection(set2);
-    final union = set1.union(set2);
+    // Konum uyumu (30%)
+    if (userProfile.location != null && connection.location != null) {
+      final distance = calculateDistance(
+        lat1: userProfile.location!.latitude,
+        lon1: userProfile.location!.longitude,
+        lat2: connection.location!.latitude,
+        lon2: connection.location!.longitude,
+      );
+      score += (1 - (distance / 100).clamp(0.0, 1.0)) * 0.3;
+      totalWeight += 0.3;
+    }
 
-    return intersection.length / union.length;
+    return totalWeight > 0 ? (score / totalWeight).clamp(0.0, 1.0) : 0.0;
   }
 
-  /// Deneyim eşleşme skorunu hesaplar
-  static double calculateExperienceMatch(
-    List<Map<String, dynamic>> exp1,
-    List<Map<String, dynamic>> exp2,
-  ) {
-    if (exp1.isEmpty || exp2.isEmpty) return 0.0;
+  static double calculateDistance({
+    required double lat1,
+    required double lon1,
+    required double lat2,
+    required double lon2,
+  }) {
+    const double earthRadius = 6371; // km
+    final lat1Rad = lat1 * math.pi / 180;
+    final lat2Rad = lat2 * math.pi / 180;
+    final dLat = (lat2 - lat1) * math.pi / 180;
+    final dLon = (lon2 - lon1) * math.pi / 180;
 
-    final roles1 =
-        exp1.map((e) => e['role'] as String?).where((e) => e != null).toSet();
-    final roles2 =
-        exp2.map((e) => e['role'] as String?).where((e) => e != null).toSet();
-
-    if (roles1.isEmpty || roles2.isEmpty) return 0.0;
-
-    final intersection = roles1.intersection(roles2);
-    final union = roles1.union(roles2);
-
-    return intersection.length / union.length;
-  }
-
-  /// Lokasyon eşleşme skorunu hesaplar
-  static double calculateLocationMatch(
-      Set<String> locations1, Set<String> locations2) {
-    if (locations1.isEmpty || locations2.isEmpty) return 0.0;
-
-    final intersection = locations1.intersection(locations2);
-    final union = locations1.union(locations2);
-
-    return intersection.length / union.length;
-  }
-
-  /// Şirket eşleşme skorunu hesaplar
-  static double calculateCompanyMatch(
-      Set<String> companies1, Set<String> companies2) {
-    if (companies1.isEmpty || companies2.isEmpty) return 0.0;
-
-    final intersection = companies1.intersection(companies2);
-    final union = companies1.union(companies2);
-
-    return intersection.length / union.length;
-  }
-
-  /// Deneyimlerden lokasyonları çıkarır
-  static Set<String> _extractLocations(List<Map<String, dynamic>> experience) {
-    return experience
-        .map((e) => e['location'] as String?)
-        .where((e) => e != null)
-        .toSet()
-        .cast<String>();
-  }
-
-  /// Deneyimlerden şirketleri çıkarır
-  static Set<String> _extractCompanies(List<Map<String, dynamic>> experience) {
-    return experience
-        .map((e) => e['company'] as String?)
-        .where((e) => e != null)
-        .toSet()
-        .cast<String>();
+    final a = math.sin(dLat / 2) * math.sin(dLat / 2) +
+        math.cos(lat1Rad) *
+            math.cos(lat2Rad) *
+            math.sin(dLon / 2) *
+            math.sin(dLon / 2);
+    final c = 2 * math.atan2(math.sqrt(a), math.sqrt(1 - a));
+    return earthRadius * c;
   }
 }

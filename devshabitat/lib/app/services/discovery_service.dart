@@ -60,8 +60,10 @@ class DiscoveryService extends GetxService {
 
     // Apply text search filter
     if (filters.name.isNotEmpty) {
-      query = query.where('searchKeywords',
-          arrayContains: filters.name.toLowerCase());
+      query = query.where(
+        'searchKeywords',
+        arrayContains: filters.name.toLowerCase(),
+      );
     }
 
     // Apply skills filter with limit check for whereIn operations
@@ -88,13 +90,14 @@ class DiscoveryService extends GetxService {
         final users = snapshot.docs
             .map((doc) => UserProfile.fromFirestore(doc))
             .where((user) {
-          if (user.location == null) return false;
-          return _isWithinRadius(
-            center,
-            user.location!,
-            filters.maxDistance!.toDouble(),
-          );
-        }).toList();
+              if (user.location == null) return false;
+              return _isWithinRadius(
+                center,
+                user.location!,
+                filters.maxDistance!.toDouble(),
+              );
+            })
+            .toList();
 
         return users;
       });
@@ -102,12 +105,16 @@ class DiscoveryService extends GetxService {
 
     // Apply experience filter
     if (filters.minExperience != null) {
-      query = query.where('experienceYears',
-          isGreaterThanOrEqualTo: filters.minExperience);
+      query = query.where(
+        'experienceYears',
+        isGreaterThanOrEqualTo: filters.minExperience,
+      );
     }
     if (filters.maxExperience != null) {
-      query = query.where('experienceYears',
-          isLessThanOrEqualTo: filters.maxExperience);
+      query = query.where(
+        'experienceYears',
+        isLessThanOrEqualTo: filters.maxExperience,
+      );
     }
 
     // Apply work type filters
@@ -136,8 +143,10 @@ class DiscoveryService extends GetxService {
 
     query = query.limit(limit);
 
-    return query.snapshots().map((snapshot) =>
-        snapshot.docs.map((doc) => UserProfile.fromFirestore(doc)).toList());
+    return query.snapshots().map(
+      (snapshot) =>
+          snapshot.docs.map((doc) => UserProfile.fromFirestore(doc)).toList(),
+    );
   }
 
   // Get recommended users with optimization
@@ -171,8 +180,9 @@ class DiscoveryService extends GetxService {
         }
 
         // Limit skills for whereIn constraint (max 10)
-        final limitedSkills =
-            userSkills.length > 10 ? userSkills.take(10).toList() : userSkills;
+        final limitedSkills = userSkills.length > 10
+            ? userSkills.take(10).toList()
+            : userSkills;
 
         // Get users with similar interests and skills
         final query = _usersCollection
@@ -202,8 +212,8 @@ class DiscoveryService extends GetxService {
 
         // Check if connection already exists
         final existingConnection = await _connectionsCollection
-            .where('senderId', isEqualTo: senderId)
-            .where('recipientId', isEqualTo: recipientId)
+            .where('userId', isEqualTo: senderId)
+            .where('targetUserId', isEqualTo: recipientId)
             .get();
 
         if (existingConnection.docs.isNotEmpty) {
@@ -213,14 +223,17 @@ class DiscoveryService extends GetxService {
         // Create new connection request
         final connection = ConnectionModel(
           id: '',
-          fromUserId: senderId,
-          toUserId: recipientId,
-          status: ConnectionStatus.pending,
+          userId: senderId,
+          targetUserId: recipientId,
+          status: ConnectionStatus.pending.toString().split('.').last,
           createdAt: DateTime.now(),
-          updatedAt: DateTime.now(),
+          lastActive: DateTime.now(),
+          skills: [],
+          isOnline: false,
+          yearsOfExperience: 0,
         );
 
-        await _connectionsCollection.add(connection.toMap());
+        await _connectionsCollection.add(connection.toJson());
 
         // Update analytics
         await _updateConnectionAnalytics(senderId);
@@ -234,8 +247,9 @@ class DiscoveryService extends GetxService {
   // Respond to connection request
   Future<bool> respondToConnectionRequest(String requestId, bool accept) async {
     try {
-      final status =
-          accept ? ConnectionStatus.accepted : ConnectionStatus.declined;
+      final status = accept
+          ? ConnectionStatus.accepted
+          : ConnectionStatus.declined;
 
       await _connectionsCollection.doc(requestId).update({
         'status': status.toString().split('.').last,
@@ -247,8 +261,8 @@ class DiscoveryService extends GetxService {
         final data = request.data() as Map<String, dynamic>;
 
         // Update analytics for both users
-        await _updateConnectionAnalytics(data['senderId']);
-        await _updateConnectionAnalytics(data['recipientId']);
+        await _updateConnectionAnalytics(data['userId']);
+        await _updateConnectionAnalytics(data['targetUserId']);
       }
 
       return true;
@@ -260,45 +274,51 @@ class DiscoveryService extends GetxService {
 
   // Get connection requests
   Stream<List<ConnectionModel>> getConnectionRequests(String userId) {
-    return _connectionsCollection
-        .where('recipientId', isEqualTo: userId)
-        .where('status',
-            isEqualTo: ConnectionStatus.pending.toString().split('.').last)
+    return _firestore
+        .collection('connections')
+        .where('targetUserId', isEqualTo: userId)
+        .where(
+          'status',
+          isEqualTo: ConnectionStatus.pending.toString().split('.').last,
+        )
         .snapshots()
-        .map((snapshot) => snapshot.docs
-            .map((doc) => ConnectionModel.fromFirestore(doc))
-            .toList());
+        .map(
+          (snapshot) => snapshot.docs
+              .map((doc) => ConnectionModel.fromJson(doc.data()))
+              .toList(),
+        );
   }
 
   // Get connections
   Stream<List<UserProfile>> getConnections(String userId) {
     return _connectionsCollection
-        .where('status',
-            isEqualTo: ConnectionStatus.accepted.toString().split('.').last)
-        .where(Filter.or(
-          Filter('senderId', isEqualTo: userId),
-          Filter('recipientId', isEqualTo: userId),
-        ))
+        .where(
+          'status',
+          isEqualTo: ConnectionStatus.accepted.toString().split('.').last,
+        )
+        .where(
+          Filter.or(
+            Filter('userId', isEqualTo: userId),
+            Filter('targetUserId', isEqualTo: userId),
+          ),
+        )
         .snapshots()
         .asyncMap((snapshot) async {
-      final connections = snapshot.docs;
-      final connectedUserIds = connections.map((doc) {
-        final data = doc.data() as Map<String, dynamic>;
-        return data['senderId'] == userId
-            ? data['recipientId']
-            : data['senderId'];
-      }).toList();
-
-      if (connectedUserIds.isEmpty) return [];
-
-      final userDocs = await _usersCollection
-          .where(FieldPath.documentId, whereIn: connectedUserIds)
-          .get();
-
-      return userDocs.docs
-          .map((doc) => UserProfile.fromFirestore(doc))
-          .toList();
-    });
+          final List<UserProfile> connections = [];
+          for (var doc in snapshot.docs) {
+            final connection = ConnectionModel.fromJson(
+              doc.data() as Map<String, dynamic>,
+            );
+            final userDoc = await _firestore
+                .collection('users')
+                .doc(connection.targetUserId)
+                .get();
+            if (userDoc.exists) {
+              connections.add(UserProfile.fromFirestore(userDoc));
+            }
+          }
+          return connections;
+        });
   }
 
   // Block user
@@ -309,25 +329,32 @@ class DiscoveryService extends GetxService {
       // Create blocking connection
       final connection = ConnectionModel(
         id: '',
-        fromUserId: currentUserId,
-        toUserId: userId,
-        status: ConnectionStatus.blocked,
+        userId: currentUserId,
+        targetUserId: userId,
+        status: ConnectionStatus.blocked.toString().split('.').last,
         createdAt: DateTime.now(),
-        updatedAt: DateTime.now(),
+        lastActive: DateTime.now(),
+        skills: [],
+        isOnline: false,
+        yearsOfExperience: 0,
       );
 
-      await _connectionsCollection.add(connection.toMap());
+      await _connectionsCollection.add(connection.toJson());
 
       // Remove any existing connections
       final existingConnections = await _connectionsCollection
-          .where(Filter.or(
-            Filter('senderId', isEqualTo: currentUserId),
-            Filter('recipientId', isEqualTo: currentUserId),
-          ))
-          .where(Filter.or(
-            Filter('senderId', isEqualTo: userId),
-            Filter('recipientId', isEqualTo: userId),
-          ))
+          .where(
+            Filter.or(
+              Filter('userId', isEqualTo: currentUserId),
+              Filter('targetUserId', isEqualTo: currentUserId),
+            ),
+          )
+          .where(
+            Filter.or(
+              Filter('userId', isEqualTo: userId),
+              Filter('targetUserId', isEqualTo: userId),
+            ),
+          )
           .get();
 
       final batch = _firestore.batch();
@@ -374,33 +401,41 @@ class DiscoveryService extends GetxService {
     return _firestore
         .collection('connections')
         .where('toUserId', isEqualTo: userId)
-        .where('status',
-            isEqualTo: ConnectionStatus.pending.toString().split('.').last)
+        .where(
+          'status',
+          isEqualTo: ConnectionStatus.pending.toString().split('.').last,
+        )
         .snapshots()
-        .map((snapshot) => snapshot.docs
-            .map((doc) => ConnectionModel.fromFirestore(doc))
-            .toList());
+        .map(
+          (snapshot) => snapshot.docs
+              .map((doc) => ConnectionModel.fromJson(doc.data()))
+              .toList(),
+        );
   }
 
   Stream<List<UserProfile>> listenToConnectionStatusUpdates(String userId) {
     return _firestore
         .collection('connections')
-        .where('status',
-            isEqualTo: ConnectionStatus.accepted.toString().split('.').last)
+        .where(
+          'status',
+          isEqualTo: ConnectionStatus.accepted.toString().split('.').last,
+        )
         .where('fromUserId', isEqualTo: userId)
         .snapshots()
         .asyncMap((snapshot) async {
-      final List<UserProfile> connections = [];
-      for (var doc in snapshot.docs) {
-        final connection = ConnectionModel.fromFirestore(doc);
-        final userDoc =
-            await _firestore.collection('users').doc(connection.toUserId).get();
-        if (userDoc.exists) {
-          connections.add(UserProfile.fromFirestore(userDoc));
-        }
-      }
-      return connections;
-    });
+          final List<UserProfile> connections = [];
+          for (var doc in snapshot.docs) {
+            final connection = ConnectionModel.fromJson(doc.data());
+            final userDoc = await _firestore
+                .collection('users')
+                .doc(connection.targetUserId)
+                .get();
+            if (userDoc.exists) {
+              connections.add(UserProfile.fromFirestore(userDoc));
+            }
+          }
+          return connections;
+        });
   }
 
   Stream<Map<String, bool>> listenToOnlineStatus() {
@@ -418,19 +453,25 @@ class DiscoveryService extends GetxService {
 
       // Temel arama sorgusu
       if (query.isNotEmpty) {
-        usersQuery = usersQuery.where('searchKeywords',
-            arrayContains: query.toLowerCase());
+        usersQuery = usersQuery.where(
+          'searchKeywords',
+          arrayContains: query.toLowerCase(),
+        );
       }
 
       // Filtreleri uygula
       if (filters.skills.isNotEmpty) {
-        usersQuery =
-            usersQuery.where('skills', arrayContainsAny: filters.skills);
+        usersQuery = usersQuery.where(
+          'skills',
+          arrayContainsAny: filters.skills,
+        );
       }
 
       if (filters.interests.isNotEmpty) {
-        usersQuery =
-            usersQuery.where('interests', arrayContainsAny: filters.interests);
+        usersQuery = usersQuery.where(
+          'interests',
+          arrayContainsAny: filters.interests,
+        );
       }
 
       if (filters.company != null) {
@@ -442,7 +483,8 @@ class DiscoveryService extends GetxService {
       final snapshot = await usersQuery
           .orderBy('lastSeen', descending: true)
           .limit(pageSize)
-          .startAt([startAt]).get();
+          .startAt([startAt])
+          .get();
 
       return snapshot.docs
           .map((doc) => UserProfile.fromFirestore(doc))
@@ -501,8 +543,10 @@ class DiscoveryService extends GetxService {
   }
 
   // Kullanıcı arama
-  Future<List<UserProfile>> searchUsersByName(String query,
-      {int limit = 20}) async {
+  Future<List<UserProfile>> searchUsersByName(
+    String query, {
+    int limit = 20,
+  }) async {
     try {
       final querySnapshot = await _firestore
           .collection('users')
@@ -604,7 +648,9 @@ class DiscoveryService extends GetxService {
 
   // Kullanıcı profilini güncelle
   Future<void> updateUserProfile(
-      String userId, Map<String, dynamic> data) async {
+    String userId,
+    Map<String, dynamic> data,
+  ) async {
     try {
       await _firestore.collection('users').doc(userId).update({
         ...data,
@@ -665,9 +711,10 @@ class DiscoveryService extends GetxService {
       final nearbyUsers = querySnapshot.docs
           .map((doc) => UserProfile.fromFirestore(doc))
           .where((user) {
-        if (user.location == null) return false;
-        return _isWithinRadius(center, user.location!, radiusInKm);
-      }).toList();
+            if (user.location == null) return false;
+            return _isWithinRadius(center, user.location!, radiusInKm);
+          })
+          .toList();
 
       // Mesafeye göre sırala
       nearbyUsers.sort((a, b) {

@@ -7,14 +7,16 @@ void main() {
       final user = UserProfile(
         id: 'test-id',
         email: 'test@example.com',
-        fullName: 'Test User',
+        displayName: 'Test User',
         skills: ['Flutter', 'Dart'],
+        interests: ['Mobile Development'],
         yearsOfExperience: 2,
+        isOnline: false,
       );
 
       expect(user.id, 'test-id');
       expect(user.email, 'test@example.com');
-      expect(user.fullName, 'Test User');
+      expect(user.displayName, 'Test User');
       expect(user.skills, ['Flutter', 'Dart']);
       expect(user.yearsOfExperience, 2);
     });
@@ -23,7 +25,11 @@ void main() {
       final user = UserProfile(
         id: 'test-id',
         email: 'test@example.com',
-        fullName: 'Test User',
+        displayName: 'Test User',
+        skills: [],
+        interests: [],
+        yearsOfExperience: 0,
+        isOnline: false,
         title: 'Flutter Developer',
         company: 'Tech Corp',
         locationName: 'Istanbul, Turkey',
@@ -42,19 +48,21 @@ void main() {
       final user = UserProfile(
         id: 'test-id',
         email: 'test@example.com',
-        fullName: 'Test User',
+        displayName: 'Test User',
+        skills: [],
+        interests: [],
+        yearsOfExperience: 0,
+        isOnline: false,
       );
 
       expect(user.skills, isEmpty);
       expect(user.interests, isEmpty);
       expect(user.languages, isEmpty);
       expect(user.yearsOfExperience, 0);
-      expect(user.isAvailableForWork, true);
       expect(user.isRemote, false);
       expect(user.isFullTime, false);
       expect(user.isPartTime, false);
       expect(user.isFreelance, false);
-      expect(user.isInternship, false);
       expect(user.isOnline, false);
     });
   });

@@ -817,10 +817,14 @@ class IntegrationsView extends BaseView<IntegrationController> {
     try {
       // Test location oluştur
       final testLocation = LocationModel(
-        latitude: 41.0082, // İstanbul koordinatları
+        latitude: 41.0082,
         longitude: 28.9784,
-        address: 'Test Adresi',
+        accuracy: 10.0,
         timestamp: DateTime.now(),
+        speed: 0.0,
+        heading: 0.0,
+        userId: 'test_user',
+        address: 'Test Adresi',
       );
 
       await controller.handleLocationEventIntegration(

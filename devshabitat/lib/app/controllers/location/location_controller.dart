@@ -3,7 +3,6 @@
 import 'dart:async';
 import 'package:get/get.dart';
 import 'package:location/location.dart';
-import '../../models/location/location_model.dart';
 import '../../models/location/geofence_model.dart';
 import '../../services/location/location_tracking_service.dart';
 import '../../services/location/geofence_service.dart';
@@ -15,6 +14,7 @@ import 'package:cloud_firestore/cloud_firestore.dart'; // Added for Firestore
 import 'package:geocoding/geocoding.dart'
     hide Location; // Added for placemarkFromCoordinates
 import '../auth_controller.dart'; // Added for AuthController
+import '../../models/location/location_data_model.dart';
 
 class LocationController extends GetxController with MemoryManagementMixin {
   final LocationTrackingService _trackingService =
@@ -24,8 +24,8 @@ class LocationController extends GetxController with MemoryManagementMixin {
   final Logger _logger = Logger();
 
   // Enhanced reactive variables
-  final currentLocation = Rxn<LocationModel>();
-  final lastKnownLocation = Rxn<LocationModel>();
+  final currentLocation = Rxn<LocationDataModel>();
+  final lastKnownLocation = Rxn<LocationDataModel>();
   final isTrackingEnabled = false.obs;
   final locationPermissionGranted = false.obs;
   final locationServicesEnabled = false.obs;
@@ -44,8 +44,8 @@ class LocationController extends GetxController with MemoryManagementMixin {
   StreamSubscription<LocationData?>? _locationSubscription;
   Timer? _statusUpdateTimer;
 
-  LocationModel _convertToLocationModel(LocationData data) {
-    return LocationModel(
+  LocationDataModel _convertToLocationModel(LocationData data) {
+    return LocationDataModel(
       latitude: data.latitude ?? 0,
       longitude: data.longitude ?? 0,
       accuracy: data.accuracy,

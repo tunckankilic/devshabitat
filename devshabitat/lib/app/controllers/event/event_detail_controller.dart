@@ -1,11 +1,17 @@
 import 'package:get/get.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_auth/firebase_auth.dart';
-import 'package:share_plus/share_plus.dart';
-import '../../models/event/event_model.dart';
-import '../../services/event/event_detail_service.dart';
-import 'package:logger/logger.dart';
 import 'package:flutter/material.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:share_plus/share_plus.dart';
+import 'dart:typed_data';
+import 'package:add_2_calendar/add_2_calendar.dart' as calendar;
+import 'package:devshabitat/app/models/event/event_model.dart';
+import 'package:devshabitat/app/models/event/event_registration_model.dart'
+    as registration_model;
+import 'package:devshabitat/app/services/event/event_registration_service.dart';
+import 'package:devshabitat/app/services/event/event_participation_service.dart';
+import 'package:devshabitat/app/services/event/event_reminder_service.dart';
+import 'package:devshabitat/app/services/event/event_detail_service.dart';
+import 'package:devshabitat/app/controllers/auth/auth_controller.dart';
 
 enum RSVPStatus { going, maybe, notGoing, notResponded }
 
@@ -50,450 +56,245 @@ class EventComment {
 
 class EventDetailController extends GetxController {
   final EventDetailService eventService;
-  final _firestore = FirebaseFirestore.instance;
-  final _auth = FirebaseAuth.instance;
-  final Logger _logger = Logger();
+  final EventRegistrationService _registrationService =
+      EventRegistrationService();
+  final EventParticipationService _participationService =
+      EventParticipationService();
+  final EventReminderService _reminderService = EventReminderService();
 
-  // Observable variables
-  final event = Rxn<EventModel>();
-  final isLoading = false.obs;
-  final comments = <EventComment>[].obs;
-  final rsvpStatus = RSVPStatus.notResponded.obs;
-  final isReminderSet = false.obs;
-  final isLiked = false.obs;
-  final isCommenting = false.obs;
-  final commentController = TextEditingController();
-  final isLoadingComments = false.obs;
-  final rsvpCounts = <RSVPStatus, int>{}.obs;
+  final Rx<EventModel?> event = Rx<EventModel?>(null);
+  final RxList<registration_model.EventRegistrationModel> registrations =
+      <registration_model.EventRegistrationModel>[].obs;
+  final RxBool isLoading = false.obs;
+  final RxBool isRegistered = false.obs;
+  final RxString registrationStatus = ''.obs;
+  final RxMap<String, dynamic> participationStats = <String, dynamic>{}.obs;
+  final Rx<RSVPStatus> rsvpStatus = RSVPStatus.notResponded.obs;
+  final RxMap<RSVPStatus, int> rsvpCounts = <RSVPStatus, int>{}.obs;
+
+  // Yorum özellikleri
+  final RxList<EventComment> comments = <EventComment>[].obs;
+  final RxBool isLoadingComments = false.obs;
+  final RxBool isCommenting = false.obs;
+  final TextEditingController commentController = TextEditingController();
+  final RxBool isReminderSet = false.obs;
 
   EventDetailController({required this.eventService});
 
   @override
   void onInit() {
     super.onInit();
-    _initializeRSVPCounts();
-  }
-
-  @override
-  void onClose() {
-    commentController.dispose();
-    super.onClose();
-  }
-
-  void _initializeRSVPCounts() {
-    rsvpCounts.value = {
-      RSVPStatus.going: 0,
-      RSVPStatus.maybe: 0,
-      RSVPStatus.notGoing: 0,
-      RSVPStatus.notResponded: 0,
-    };
-  }
-
-  Future<void> loadEventDetails(String eventId) async {
-    try {
-      isLoading.value = true;
-      event.value = await eventService.getEventDetails(eventId);
-
+    ever(event, (_) {
       if (event.value != null) {
-        // Increment view count
-        await eventService.incrementEventViews(eventId);
-
-        await Future.wait([
-          loadComments(eventId),
-          loadRSVPStatus(eventId),
-          loadReminderStatus(eventId),
-          loadRSVPCounts(eventId),
-        ]);
+        loadComments();
       }
+    });
+  }
+
+  // Etkinlik detaylarını yükle
+  Future<void> loadEventDetails(String eventId) async {
+    isLoading.value = true;
+    try {
+      event.value = await eventService.getEventById(eventId);
+      await loadRegistrations(eventId);
+      await checkRegistrationStatus(eventId);
+      await loadParticipationStats(eventId);
     } catch (e) {
-      _logger.e('Etkinlik detayları yüklenirken hata: $e');
       Get.snackbar('Hata', 'Etkinlik detayları yüklenirken bir hata oluştu');
     } finally {
       isLoading.value = false;
     }
   }
 
-  Future<void> loadComments(String eventId) async {
+  // Kayıtları yükle
+  Future<void> loadRegistrations(String eventId) async {
     try {
-      isLoadingComments.value = true;
-      final snapshot = await _firestore
-          .collection('events')
-          .doc(eventId)
-          .collection('comments')
-          .orderBy('createdAt', descending: true)
-          .get();
-
-      comments.value = snapshot.docs
-          .map((doc) => EventComment.fromMap({...doc.data(), 'id': doc.id}))
-          .toList();
+      registrations.value =
+          await _registrationService.getRegistrationsByEvent(eventId);
     } catch (e) {
-      _logger.e('Yorumlar yüklenirken hata: $e');
+      Get.snackbar('Hata', 'Kayıtlar yüklenirken bir hata oluştu');
+    }
+  }
+
+  // Kayıt durumunu kontrol et
+  Future<void> checkRegistrationStatus(String eventId) async {
+    final userId = Get.find<AuthController>().user.value?.id;
+    if (userId == null) return;
+
+    final registration = await _registrationService
+        .getRegistrationByEventAndUser(eventId, userId);
+    isRegistered.value = registration != null;
+    registrationStatus.value = registration?.status.toString() ?? '';
+  }
+
+  // Katılım istatistiklerini yükle
+  Future<void> loadParticipationStats(String eventId) async {
+    try {
+      participationStats.value =
+          await _participationService.getParticipationStats(eventId);
+    } catch (e) {
+      Get.snackbar('Hata', 'İstatistikler yüklenirken bir hata oluştu');
+    }
+  }
+
+  // Etkinliğe kayıt ol
+  Future<void> registerForEvent() async {
+    final userId = Get.find<AuthController>().user.value?.id;
+    if (userId == null || event.value == null) return;
+
+    isLoading.value = true;
+    try {
+      await _registrationService.registerForEvent(event.value!.id, userId);
+      await checkRegistrationStatus(event.value!.id);
+      await loadParticipationStats(event.value!.id);
+
+      // Varsayılan hatırlatıcıları oluştur
+      await _reminderService.createDefaultReminders(event.value!.id, userId);
+
+      Get.snackbar('Başarılı', 'Etkinliğe kaydınız alındı');
+    } catch (e) {
+      Get.snackbar('Hata', 'Kayıt işlemi sırasında bir hata oluştu');
     } finally {
-      isLoadingComments.value = false;
+      isLoading.value = false;
     }
   }
 
-  Future<void> loadRSVPStatus(String eventId) async {
+  // Katılımcı listesini dışa aktar
+  Future<void> exportParticipants() async {
+    if (event.value == null) return;
+
+    isLoading.value = true;
     try {
-      final userId = _auth.currentUser?.uid;
-      if (userId == null) return;
+      final csvData =
+          await _participationService.exportParticipantsToCSV(event.value!.id);
 
-      final doc = await _firestore
-          .collection('events')
-          .doc(eventId)
-          .collection('rsvp')
-          .doc(userId)
-          .get();
-
-      if (doc.exists) {
-        final status = doc.data()?['status'] as String?;
-        if (status != null) {
-          if (status == 'RSVPStatus.going') {
-            rsvpStatus.value = RSVPStatus.going;
-          } else if (status == 'RSVPStatus.maybe') {
-            rsvpStatus.value = RSVPStatus.maybe;
-          } else if (status == 'RSVPStatus.notGoing') {
-            rsvpStatus.value = RSVPStatus.notGoing;
-          } else {
-            rsvpStatus.value = RSVPStatus.notResponded;
-          }
-        }
-      }
-    } catch (e) {
-      _logger.e('RSVP durumu yüklenirken hata: $e');
-    }
-  }
-
-  Future<void> loadReminderStatus(String eventId) async {
-    try {
-      final userId = _auth.currentUser?.uid;
-      if (userId == null) return;
-
-      final doc = await _firestore
-          .collection('events')
-          .doc(eventId)
-          .collection('reminders')
-          .doc(userId)
-          .get();
-
-      isReminderSet.value = doc.exists;
-    } catch (e) {
-      _logger.e('Hatırlatıcı durumu yüklenirken hata: $e');
-    }
-  }
-
-  Future<void> loadRSVPCounts(String eventId) async {
-    try {
-      final snapshot = await _firestore
-          .collection('events')
-          .doc(eventId)
-          .collection('rsvp')
-          .get();
-
-      final counts = <RSVPStatus, int>{
-        RSVPStatus.going: 0,
-        RSVPStatus.maybe: 0,
-        RSVPStatus.notGoing: 0,
-        RSVPStatus.notResponded: 0,
-      };
-
-      for (final doc in snapshot.docs) {
-        final status = doc.data()['status'] as String?;
-        if (status != null) {
-          RSVPStatus rsvpStatus;
-          if (status == 'RSVPStatus.going') {
-            rsvpStatus = RSVPStatus.going;
-          } else if (status == 'RSVPStatus.maybe') {
-            rsvpStatus = RSVPStatus.maybe;
-          } else if (status == 'RSVPStatus.notGoing') {
-            rsvpStatus = RSVPStatus.notGoing;
-          } else {
-            rsvpStatus = RSVPStatus.notResponded;
-          }
-          counts[rsvpStatus] = (counts[rsvpStatus] ?? 0) + 1;
-        }
-      }
-
-      rsvpCounts.value = counts;
-    } catch (e) {
-      _logger.e('RSVP sayıları yüklenirken hata: $e');
-    }
-  }
-
-  Future<void> updateRSVPStatus(RSVPStatus status) async {
-    try {
-      final userId = _auth.currentUser?.uid;
-      if (userId == null) {
-        Get.snackbar('Hata', 'Giriş yapmanız gerekiyor');
-        return;
-      }
-
-      final eventId = event.value?.id;
-      if (eventId == null) return;
-
-      await _firestore
-          .collection('events')
-          .doc(eventId)
-          .collection('rsvp')
-          .doc(userId)
-          .set({
-        'status': 'RSVPStatus.${status.name}',
-        'userId': userId,
-        'updatedAt': FieldValue.serverTimestamp(),
-      });
-
-      rsvpStatus.value = status;
-      await loadRSVPCounts(eventId);
-
-      String message = '';
-      switch (status) {
-        case RSVPStatus.going:
-          message = 'Etkinliğe katılacağınızı belirttiniz';
-          break;
-        case RSVPStatus.maybe:
-          message = 'Belki katılacağınızı belirttiniz';
-          break;
-        case RSVPStatus.notGoing:
-          message = 'Katılmayacağınızı belirttiniz';
-          break;
-        case RSVPStatus.notResponded:
-          break;
-      }
-
-      if (message.isNotEmpty) {
-        Get.snackbar('Başarılı', message);
-      }
-    } catch (e) {
-      _logger.e('RSVP güncellenirken hata: $e');
-      Get.snackbar('Hata', 'RSVP durumu güncellenirken bir hata oluştu');
-    }
-  }
-
-  Future<void> toggleReminder() async {
-    try {
-      final userId = _auth.currentUser?.uid;
-      if (userId == null) {
-        Get.snackbar('Hata', 'Giriş yapmanız gerekiyor');
-        return;
-      }
-
-      final eventId = event.value?.id;
-      if (eventId == null) return;
-
-      if (isReminderSet.value) {
-        // Remove reminder
-        await _firestore
-            .collection('events')
-            .doc(eventId)
-            .collection('reminders')
-            .doc(userId)
-            .delete();
-        isReminderSet.value = false;
-        Get.snackbar('Başarılı', 'Hatırlatıcı kaldırıldı');
-      } else {
-        // Add reminder
-        await _firestore
-            .collection('events')
-            .doc(eventId)
-            .collection('reminders')
-            .doc(userId)
-            .set({
-          'userId': userId,
-          'eventId': eventId,
-          'createdAt': FieldValue.serverTimestamp(),
-          'reminderTime': FieldValue.serverTimestamp(),
-        });
-        isReminderSet.value = true;
-        Get.snackbar('Başarılı', 'Hatırlatıcı eklendi');
-      }
-    } catch (e) {
-      _logger.e('Hatırlatıcı güncellenirken hata: $e');
-      Get.snackbar('Hata', 'Hatırlatıcı güncellenirken bir hata oluştu');
-    }
-  }
-
-  Future<void> addComment() async {
-    try {
-      if (commentController.text.trim().isEmpty) return;
-
-      isCommenting.value = true;
-      final userId = _auth.currentUser?.uid;
-      if (userId == null) {
-        Get.snackbar('Hata', 'Giriş yapmanız gerekiyor');
-        return;
-      }
-
-      final eventId = event.value?.id;
-      if (eventId == null) return;
-
-      // Get user name
-      final userDoc = await _firestore.collection('users').doc(userId).get();
-      final userName = userDoc.data()?['displayName'] ?? 'Anonim';
-
-      final comment = EventComment(
-        id: '',
-        userId: userId,
-        userName: userName,
-        comment: commentController.text.trim(),
-        createdAt: DateTime.now(),
-        likes: [],
+      // CSV dosyasını paylaş
+      await Share.shareXFiles(
+        [
+          XFile.fromData(Uint8List.fromList(csvData.codeUnits),
+              name: 'participants.csv', mimeType: 'text/csv')
+        ],
+        subject: '${event.value!.title} - Katılımcı Listesi',
       );
 
-      await _firestore
-          .collection('events')
-          .doc(eventId)
-          .collection('comments')
-          .add(comment.toMap());
-
-      commentController.clear();
-      await loadComments(eventId);
-      Get.snackbar('Başarılı', 'Yorum eklendi');
+      Get.snackbar('Başarılı', 'Katılımcı listesi dışa aktarıldı');
     } catch (e) {
-      _logger.e('Yorum eklenirken hata: $e');
-      Get.snackbar('Hata', 'Yorum eklenirken bir hata oluştu');
+      Get.snackbar('Hata', 'Dışa aktarma işlemi sırasında bir hata oluştu');
     } finally {
-      isCommenting.value = false;
+      isLoading.value = false;
     }
   }
 
-  Future<void> likeComment(String commentId) async {
+  // Takvime ekle
+  Future<void> addToCalendar() async {
+    if (event.value == null) return;
+
     try {
-      final userId = _auth.currentUser?.uid;
-      if (userId == null) {
-        Get.snackbar('Hata', 'Giriş yapmanız gerekiyor');
-        return;
-      }
+      final calendarEvent = calendar.Event(
+        title: event.value!.title,
+        description: event.value!.description,
+        location: event.value!.location != null
+            ? '${event.value!.location!.latitude}, ${event.value!.location!.longitude}'
+            : '',
+        startDate: event.value!.startDate,
+        endDate: event.value!.endDate,
+        allDay: false,
+        iosParams: calendar.IOSParams(
+          reminder: Duration(minutes: 30),
+        ),
+        androidParams: calendar.AndroidParams(
+          emailInvites: [], // Opsiyonel: Davet edilecek e-postalar
+        ),
+      );
 
-      final eventId = event.value?.id;
-      if (eventId == null) return;
-
-      final commentRef = _firestore
-          .collection('events')
-          .doc(eventId)
-          .collection('comments')
-          .doc(commentId);
-
-      final commentDoc = await commentRef.get();
-      if (!commentDoc.exists) return;
-
-      final likes = List<String>.from(commentDoc.data()?['likes'] ?? []);
-
-      if (likes.contains(userId)) {
-        likes.remove(userId);
+      final success = await calendar.Add2Calendar.addEvent2Cal(calendarEvent);
+      if (success) {
+        Get.snackbar('Başarılı', 'Etkinlik takviminize eklendi');
       } else {
-        likes.add(userId);
+        Get.snackbar('Hata', 'Etkinlik takvime eklenemedi');
       }
-
-      await commentRef.update({'likes': likes});
-      await loadComments(eventId);
     } catch (e) {
-      _logger.e('Yorum beğenilirken hata: $e');
-      Get.snackbar('Hata', 'İşlem sırasında bir hata oluştu');
+      Get.snackbar('Hata', 'Takvime ekleme işlemi sırasında bir hata oluştu');
     }
   }
 
-  Future<void> deleteComment(String commentId) async {
+  // Özel hatırlatıcı oluştur
+  Future<void> createCustomReminder(DateTime reminderTime, String? note) async {
+    final userId = Get.find<AuthController>().user.value?.id;
+    if (userId == null || event.value == null) return;
+
     try {
-      final userId = _auth.currentUser?.uid;
-      if (userId == null) return;
-
-      final eventId = event.value?.id;
-      if (eventId == null) return;
-
-      // Check if user is the comment owner
-      final comment = comments.firstWhere((c) => c.id == commentId);
-      if (comment.userId != userId) {
-        Get.snackbar('Hata', 'Bu yorumu silemezsiniz');
-        return;
-      }
-
-      await _firestore
-          .collection('events')
-          .doc(eventId)
-          .collection('comments')
-          .doc(commentId)
-          .delete();
-
-      await loadComments(eventId);
-      Get.snackbar('Başarılı', 'Yorum silindi');
+      await _reminderService.createReminder(
+        eventId: event.value!.id,
+        userId: userId,
+        reminderTime: reminderTime,
+        note: note,
+        isCustom: true,
+      );
+      Get.snackbar('Başarılı', 'Hatırlatıcı oluşturuldu');
     } catch (e) {
-      _logger.e('Yorum silinirken hata: $e');
-      Get.snackbar('Hata', 'Yorum silinirken bir hata oluştu');
+      Get.snackbar('Hata', 'Hatırlatıcı oluşturulurken bir hata oluştu');
     }
   }
 
-  Future<void> shareEvent() async {
+  // Toplu katılımcı durumu güncelleme
+  Future<void> bulkUpdateParticipantStatus(
+    List<String> registrationIds,
+    registration_model.RegistrationStatus newStatus,
+  ) async {
+    if (event.value == null) return;
+
+    isLoading.value = true;
     try {
-      final eventData = event.value;
-      if (eventData == null) return;
-
-      final userId = _auth.currentUser?.uid;
-      if (userId != null) {
-        await eventService.addEventShare(eventData.id, userId);
-      }
-
-      final shareText = '''
-${eventData.title}
-
-${eventData.description}
-
-Tarih: ${_formatDate(eventData.startDate)}
-${eventData.type == EventType.online ? 'Online' : 'Yer: ${eventData.venueAddress}'}
-
-Katılımcılar: ${eventData.participants.length}/${eventData.participantLimit}
-
-DevShabitat uygulamasından paylaşıldı.
-      ''';
-
-      await Share.share(shareText, subject: eventData.title);
+      await _participationService.bulkUpdateStatus(
+        event.value!.id,
+        registrationIds,
+        newStatus,
+      );
+      await loadRegistrations(event.value!.id);
+      await loadParticipationStats(event.value!.id);
+      Get.snackbar('Başarılı', 'Katılımcı durumları güncellendi');
     } catch (e) {
-      _logger.e('Etkinlik paylaşılırken hata: $e');
-      Get.snackbar('Hata', 'Paylaşım sırasında bir hata oluştu');
+      Get.snackbar('Hata', 'Güncelleme işlemi sırasında bir hata oluştu');
+    } finally {
+      isLoading.value = false;
     }
   }
 
   Future<void> reportEvent() async {
     try {
-      final userId = _auth.currentUser?.uid;
-      if (userId == null) {
-        Get.snackbar('Hata', 'Giriş yapmanız gerekiyor');
-        return;
-      }
-
       final eventId = event.value?.id;
       if (eventId == null) return;
 
-      await _firestore.collection('reports').add({
-        'type': 'event',
-        'eventId': eventId,
-        'reportedBy': userId,
-        'reason': 'Inappropriate content',
-        'createdAt': FieldValue.serverTimestamp(),
-        'status': 'pending',
-      });
-
-      Get.snackbar('Başarılı', 'Rapor gönderildi. İnceleme sürecinde.');
+      await Get.dialog(
+        AlertDialog(
+          title: const Text('Etkinliği Raporla'),
+          content: const Text(
+              'Bu etkinliği uygunsuz içerik olarak bildirmek istediğinize emin misiniz?'),
+          actions: [
+            TextButton(
+              onPressed: () => Get.back(),
+              child: const Text('İptal'),
+            ),
+            ElevatedButton(
+              onPressed: () async {
+                Get.back();
+                await eventService.reportEvent(eventId);
+                Get.snackbar('Başarılı', 'Etkinlik rapor edildi');
+              },
+              child: const Text('Raporla'),
+            ),
+          ],
+        ),
+      );
     } catch (e) {
-      _logger.e('Etkinlik raporlanırken hata: $e');
-      Get.snackbar('Hata', 'Rapor gönderilirken bir hata oluştu');
+      Get.snackbar('Hata', 'Etkinlik raporlanırken bir hata oluştu');
     }
   }
 
-  String _formatDate(DateTime date) {
-    return '${date.day}/${date.month}/${date.year} ${date.hour}:${date.minute.toString().padLeft(2, '0')}';
-  }
-
-  String getRSVPStatusText(RSVPStatus status) {
-    switch (status) {
-      case RSVPStatus.going:
-        return 'Katılıyorum';
-      case RSVPStatus.maybe:
-        return 'Belki';
-      case RSVPStatus.notGoing:
-        return 'Katılmıyorum';
-      case RSVPStatus.notResponded:
-        return 'Yanıtlanmadı';
-    }
+  // RSVP durumunu güncelle
+  void updateRSVPStatus(RSVPStatus status) {
+    rsvpStatus.value = status;
   }
 
   Color getRSVPStatusColor(RSVPStatus status) {
@@ -509,168 +310,178 @@ DevShabitat uygulamasından paylaşıldı.
     }
   }
 
-  bool canJoinEvent() {
-    final eventData = event.value;
-    if (eventData == null) return false;
+  // Etkinliği paylaş
+  Future<void> shareEvent() async {
+    if (event.value == null) return;
 
-    return !eventData.isFull &&
-        !eventData.hasEnded &&
-        !eventData.isParticipant(_auth.currentUser?.uid ?? '');
-  }
-
-  bool canLeaveEvent() {
-    final eventData = event.value;
-    if (eventData == null) return false;
-
-    return eventData.isParticipant(_auth.currentUser?.uid ?? '');
-  }
-
-  bool isEventOwner() {
-    return event.value?.createdBy == _auth.currentUser?.uid;
-  }
-
-  Future<void> submitEventFeedback(int rating, String feedback) async {
     try {
-      final userId = _auth.currentUser?.uid;
-      if (userId == null) {
-        Get.snackbar('Hata', 'Giriş yapmanız gerekiyor');
-        return;
-      }
-
-      final eventId = event.value?.id;
-      if (eventId == null) return;
-
-      await _firestore
-          .collection('events')
-          .doc(eventId)
-          .collection('feedback')
-          .add({
-        'userId': userId,
-        'rating': rating,
-        'feedback': feedback,
-        'createdAt': FieldValue.serverTimestamp(),
-      });
-
-      Get.snackbar('Başarılı', 'Geri bildiriminiz için teşekkürler!');
+      final eventUrl = 'https://devshabitat.app/events/${event.value!.id}';
+      await Share.share(
+        '${event.value!.title}\n\n${event.value!.description}\n\nEtkinlik detayları için: $eventUrl',
+      );
     } catch (e) {
-      _logger.e('Geri bildirim gönderilirken hata: $e');
+      Get.snackbar('Hata', 'Etkinlik paylaşılırken bir hata oluştu');
+    }
+  }
+
+  // Etkinliğe katıl
+  Future<void> joinEvent() async {
+    if (event.value == null) return;
+    await registerForEvent();
+  }
+
+  // Etkinlikten ayrıl
+  Future<void> leaveEvent() async {
+    if (event.value == null) return;
+
+    try {
+      final userId = Get.find<AuthController>().user.value?.id;
+      if (userId == null) return;
+
+      final registration = await _registrationService
+          .getRegistrationByEventAndUser(event.value!.id, userId);
+      if (registration == null) return;
+
+      await _registrationService.cancelRegistration(registration.id);
+      await checkRegistrationStatus(event.value!.id);
+      await loadParticipationStats(event.value!.id);
+      Get.snackbar('Başarılı', 'Etkinlikten ayrıldınız');
+    } catch (e) {
+      Get.snackbar('Hata', 'Etkinlikten ayrılırken bir hata oluştu');
+    }
+  }
+
+  // Hatırlatıcıyı aç/kapat
+  Future<void> toggleReminder() async {
+    isReminderSet.value = !isReminderSet.value;
+    if (event.value == null) return;
+
+    try {
+      final userId = Get.find<AuthController>().user.value?.id;
+      if (userId == null) return;
+
+      if (isReminderSet.value) {
+        await _reminderService.createDefaultReminders(event.value!.id, userId);
+        Get.snackbar('Başarılı', 'Hatırlatıcı ayarlandı');
+      } else {
+        await _reminderService.removeAllReminders(event.value!.id, userId);
+        Get.snackbar('Başarılı', 'Hatırlatıcı kaldırıldı');
+      }
+    } catch (e) {
+      Get.snackbar('Hata', 'Hatırlatıcı ayarlanırken bir hata oluştu');
+    }
+  }
+
+  // Geri bildirim gönder
+  Future<void> submitEventFeedback(int rating, String comment) async {
+    if (event.value == null) return;
+
+    try {
+      final userId = Get.find<AuthController>().user.value?.id;
+      if (userId == null) return;
+
+      await eventService.submitFeedback(
+        eventId: event.value!.id,
+        userId: userId,
+        rating: rating,
+        comment: comment,
+      );
+      Get.snackbar('Başarılı', 'Geri bildiriminiz için teşekkürler');
+    } catch (e) {
       Get.snackbar('Hata', 'Geri bildirim gönderilirken bir hata oluştu');
     }
   }
 
-  Future<void> joinEvent() async {
+  // Yorum ekle
+  Future<void> addComment() async {
+    if (event.value == null || commentController.text.trim().isEmpty) return;
+
+    isCommenting.value = true;
     try {
-      final userId = _auth.currentUser?.uid;
-      if (userId == null) {
-        Get.snackbar('Hata', 'Giriş yapmanız gerekiyor');
-        return;
-      }
+      final userId = Get.find<AuthController>().user.value?.id;
+      final userName = Get.find<AuthController>().user.value?.displayName;
+      if (userId == null || userName == null) return;
 
-      final eventData = event.value;
-      if (eventData == null) return;
-
-      if (eventData.isFull) {
-        Get.snackbar('Hata', 'Etkinlik dolu');
-        return;
-      }
-
-      if (eventData.hasEnded) {
-        Get.snackbar('Hata', 'Etkinlik sona ermiş');
-        return;
-      }
-
-      if (eventData.isParticipant(userId)) {
-        Get.snackbar('Bilgi', 'Zaten bu etkinliğe katılıyorsunuz');
-        return;
-      }
-
-      // Add user to participants
-      await _firestore.collection('events').doc(eventData.id).update({
-        'participants': FieldValue.arrayUnion([userId]),
-      });
-
-      // Update local event data
-      final updatedParticipants = List<String>.from(eventData.participants)
-        ..add(userId);
-      event.value = EventModel(
-        id: eventData.id,
-        title: eventData.title,
-        description: eventData.description,
-        type: eventData.type,
-        onlineMeetingUrl: eventData.onlineMeetingUrl,
-        venueAddress: eventData.venueAddress,
-        startDate: eventData.startDate,
-        endDate: eventData.endDate,
-        participantLimit: eventData.participantLimit,
-        categories: eventData.categories,
-        participants: updatedParticipants,
-        communityId: eventData.communityId,
-        createdBy: eventData.createdBy,
-        createdAt: eventData.createdAt,
-        updatedAt: eventData.updatedAt,
-        location: eventData.location,
+      final comment = EventComment(
+        id: DateTime.now().millisecondsSinceEpoch.toString(),
+        userId: userId,
+        userName: userName,
+        comment: commentController.text.trim(),
+        createdAt: DateTime.now(),
+        likes: [],
       );
 
-      // Update RSVP status to going
-      rsvpStatus.value = RSVPStatus.going;
-
-      Get.snackbar('Başarılı', 'Etkinliğe başarıyla katıldınız!');
+      await eventService.addComment(event.value!.id, comment);
+      commentController.clear();
+      await loadComments();
+      Get.snackbar('Başarılı', 'Yorumunuz eklendi');
     } catch (e) {
-      _logger.e('Etkinliğe katılırken hata: $e');
-      Get.snackbar('Hata', 'Etkinliğe katılırken bir hata oluştu');
+      Get.snackbar('Hata', 'Yorum eklenirken bir hata oluştu');
+    } finally {
+      isCommenting.value = false;
     }
   }
 
-  Future<void> leaveEvent() async {
+  // Yorumu sil
+  Future<void> deleteComment(String commentId) async {
+    if (event.value == null) return;
+
     try {
-      final userId = _auth.currentUser?.uid;
-      if (userId == null) {
-        Get.snackbar('Hata', 'Giriş yapmanız gerekiyor');
-        return;
-      }
-
-      final eventData = event.value;
-      if (eventData == null) return;
-
-      if (!eventData.isParticipant(userId)) {
-        Get.snackbar('Bilgi', 'Bu etkinliğe katılmıyorsunuz');
-        return;
-      }
-
-      // Remove user from participants
-      await _firestore.collection('events').doc(eventData.id).update({
-        'participants': FieldValue.arrayRemove([userId]),
-      });
-
-      // Update local event data
-      final updatedParticipants = List<String>.from(eventData.participants)
-        ..remove(userId);
-      event.value = EventModel(
-        id: eventData.id,
-        title: eventData.title,
-        description: eventData.description,
-        type: eventData.type,
-        onlineMeetingUrl: eventData.onlineMeetingUrl,
-        venueAddress: eventData.venueAddress,
-        startDate: eventData.startDate,
-        endDate: eventData.endDate,
-        participantLimit: eventData.participantLimit,
-        categories: eventData.categories,
-        participants: updatedParticipants,
-        communityId: eventData.communityId,
-        createdBy: eventData.createdBy,
-        createdAt: eventData.createdAt,
-        updatedAt: eventData.updatedAt,
-        location: eventData.location,
-      );
-
-      // Update RSVP status to not going
-      rsvpStatus.value = RSVPStatus.notGoing;
-
-      Get.snackbar('Başarılı', 'Etkinlikten ayrıldınız');
+      await eventService.deleteComment(event.value!.id, commentId);
+      await loadComments();
+      Get.snackbar('Başarılı', 'Yorum silindi');
     } catch (e) {
-      _logger.e('Etkinlikten ayrılırken hata: $e');
-      Get.snackbar('Hata', 'Etkinlikten ayrılırken bir hata oluştu');
+      Get.snackbar('Hata', 'Yorum silinirken bir hata oluştu');
     }
+  }
+
+  // Yorumu beğen
+  Future<void> likeComment(String commentId) async {
+    if (event.value == null) return;
+
+    try {
+      final userId = Get.find<AuthController>().user.value?.id;
+      if (userId == null) return;
+
+      await eventService.toggleCommentLike(event.value!.id, commentId, userId);
+      await loadComments();
+    } catch (e) {
+      Get.snackbar('Hata', 'Yorum beğenilirken bir hata oluştu');
+    }
+  }
+
+  // Yorumları yükle
+  Future<void> loadComments() async {
+    if (event.value == null) return;
+
+    isLoadingComments.value = true;
+    try {
+      final loadedComments = await eventService.getComments(event.value!.id);
+      comments.value = loadedComments;
+    } catch (e) {
+      Get.snackbar('Hata', 'Yorumlar yüklenirken bir hata oluştu');
+    } finally {
+      isLoadingComments.value = false;
+    }
+  }
+
+  // RSVP durum metni
+  String getRSVPStatusText(RSVPStatus status) {
+    switch (status) {
+      case RSVPStatus.going:
+        return 'Katılıyor';
+      case RSVPStatus.maybe:
+        return 'Belki';
+      case RSVPStatus.notGoing:
+        return 'Katılmıyor';
+      case RSVPStatus.notResponded:
+        return 'Yanıt Yok';
+    }
+  }
+
+  @override
+  void onClose() {
+    commentController.dispose();
+    super.onClose();
   }
 }
