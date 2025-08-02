@@ -1,3 +1,5 @@
+// ignore_for_file: library_private_types_in_public_api
+
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
 import 'dart:io' show Platform;
@@ -423,6 +425,16 @@ class DevHabitatTheme {
     letterSpacing: 0,
     color: Colors.white,
   );
+
+  // Platform özel renk paleti
+  static final _PlatformColors platformColors = _PlatformColors();
+
+  // Platform özel metin stilleri
+  static final _PlatformTextStyles platformTextStyles = _PlatformTextStyles();
+
+  // Platform özel dekorasyon stilleri
+  static final _PlatformDecorations platformDecorations =
+      _PlatformDecorations();
 }
 
 class _PlatformColors {

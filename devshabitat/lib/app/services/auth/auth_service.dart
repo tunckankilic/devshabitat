@@ -64,11 +64,8 @@ class AuthService {
 
   // Google ile giriş yap
   Future<UserModel> signInWithGoogle() async {
-    final GoogleSignInAccount? googleUser = await _googleSignIn.authenticate();
-    if (googleUser == null) throw Exception('Google girişi iptal edildi');
-
-    final GoogleSignInAuthentication googleAuth =
-        await googleUser.authentication;
+    final GoogleSignInAccount googleUser = await _googleSignIn.authenticate();
+    final GoogleSignInAuthentication googleAuth = googleUser.authentication;
     final credential = GoogleAuthProvider.credential(
       accessToken: googleAuth.idToken,
       idToken: googleAuth.idToken,
@@ -121,8 +118,8 @@ class AuthService {
         email: user.email!,
         displayName:
             credential.givenName != null && credential.familyName != null
-                ? '${credential.givenName} ${credential.familyName}'
-                : null,
+            ? '${credential.givenName} ${credential.familyName}'
+            : null,
         photoURL: user.photoURL,
       );
       await _firestore
@@ -137,10 +134,7 @@ class AuthService {
 
   // Oturumu kapat
   Future<void> signOut() async {
-    await Future.wait([
-      _auth.signOut(),
-      _googleSignIn.signOut(),
-    ]);
+    await Future.wait([_auth.signOut(), _googleSignIn.signOut()]);
   }
 
   // Şifre sıfırlama

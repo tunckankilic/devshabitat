@@ -3,30 +3,11 @@ import 'package:json_annotation/json_annotation.dart';
 
 part 'moderation_model.g.dart';
 
-enum ContentType {
-  post,
-  comment,
-  message,
-  profile,
-  community,
-  event,
-}
+enum ContentType { post, comment, message, profile, community, event }
 
-enum ModerationAction {
-  warn,
-  delete,
-  ban,
-  mute,
-  approve,
-  reject,
-}
+enum ModerationAction { warn, delete, ban, mute, approve, reject }
 
-enum ModerationStatus {
-  pending,
-  approved,
-  rejected,
-  deleted,
-}
+enum ModerationStatus { pending, approved, rejected, deleted }
 
 enum ModerationReason {
   spam,
@@ -72,7 +53,7 @@ class ModerationModel {
     this.note,
     DateTime? createdAt,
     this.resolvedAt,
-  }) : this.createdAt = createdAt ?? DateTime.now();
+  }) : createdAt = createdAt ?? DateTime.now();
 
   factory ModerationModel.fromJson(Map<String, dynamic> json) {
     return ModerationModel(
@@ -124,10 +105,7 @@ class ModerationModel {
 
   factory ModerationModel.fromFirestore(DocumentSnapshot doc) {
     final data = doc.data() as Map<String, dynamic>;
-    return ModerationModel.fromJson({
-      'id': doc.id,
-      ...data,
-    });
+    return ModerationModel.fromJson({'id': doc.id, ...data});
   }
 
   Map<String, dynamic> toFirestore() {

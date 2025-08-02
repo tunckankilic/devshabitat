@@ -50,7 +50,7 @@ class RecommendationService extends GetxService {
     int? distance,
     bool? online,
   ) {
-    return 'recommendations_${userId}_${skills?.join('_')}_${distance}_${online}';
+    return 'recommendations_${userId}_${skills?.join('_')}_${distance}_$online';
   }
 
   Future<List<ConnectionModel>> _fetchRecommendations(

@@ -1,5 +1,4 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:devshabitat/app/models/event/event_model.dart';
 import 'package:devshabitat/app/models/event/event_registration_model.dart';
 import 'package:devshabitat/app/services/event/event_service.dart';
 import 'package:devshabitat/app/services/event/event_registration_service.dart';
@@ -116,19 +115,24 @@ class EventParticipationService {
 
   // Katılımcı listesi export (CSV)
   Future<String> exportParticipantsToCSV(String eventId) async {
-    final registrations = await _registrationService
-        .getRegistrationsByEvent(eventId, limit: 1000);
+    final registrations = await _registrationService.getRegistrationsByEvent(
+      eventId,
+      limit: 1000,
+    );
 
     final StringBuffer csv = StringBuffer();
     csv.writeln('ID,Ad Soyad,Email,Kayıt Tarihi,Durum');
 
     for (var registration in registrations) {
-      final userData =
-          await _firestore.collection('users').doc(registration.userId).get();
+      final userData = await _firestore
+          .collection('users')
+          .doc(registration.userId)
+          .get();
       final user = userData.data() ?? {};
 
       csv.writeln(
-          '${registration.id},${user['name']},${user['email']},${registration.registrationDate},${registration.status}');
+        '${registration.id},${user['name']},${user['email']},${registration.registrationDate},${registration.status}',
+      );
     }
 
     return csv.toString();
@@ -144,8 +148,10 @@ class EventParticipationService {
       'cancelled': 0,
     };
 
-    final registrations = await _registrationService
-        .getRegistrationsByEvent(eventId, limit: 1000);
+    final registrations = await _registrationService.getRegistrationsByEvent(
+      eventId,
+      limit: 1000,
+    );
 
     for (var registration in registrations) {
       stats['total'] = (stats['total'] as int) + 1;
@@ -180,8 +186,9 @@ class EventParticipationService {
     final batch = _firestore.batch();
 
     for (var registrationId in registrationIds) {
-      final ref =
-          _firestore.collection('event_registrations').doc(registrationId);
+      final ref = _firestore
+          .collection('event_registrations')
+          .doc(registrationId);
       batch.update(ref, {
         'status': newStatus.toString(),
         'updatedAt': FieldValue.serverTimestamp(),

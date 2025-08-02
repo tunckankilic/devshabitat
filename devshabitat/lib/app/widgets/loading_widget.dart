@@ -48,8 +48,8 @@ class LoadingList extends StatelessWidget {
       physics: const NeverScrollableScrollPhysics(),
       shrinkWrap: true,
       itemCount: itemCount,
-      separatorBuilder: (_, __) => SizedBox(height: spacing),
-      itemBuilder: (_, __) => LoadingListItem(height: itemHeight),
+      separatorBuilder: (_, _) => SizedBox(height: spacing),
+      itemBuilder: (_, _) => LoadingListItem(height: itemHeight),
     );
   }
 }
@@ -57,20 +57,14 @@ class LoadingList extends StatelessWidget {
 class LoadingAvatar extends StatelessWidget {
   final double size;
 
-  const LoadingAvatar({
-    super.key,
-    this.size = 48,
-  });
+  const LoadingAvatar({super.key, this.size = 48});
 
   @override
   Widget build(BuildContext context) {
     return Shimmer.fromColors(
       baseColor: Colors.grey[300]!,
       highlightColor: Colors.grey[100]!,
-      child: CircleAvatar(
-        radius: size / 2,
-        backgroundColor: Colors.white,
-      ),
+      child: CircleAvatar(radius: size / 2, backgroundColor: Colors.white),
     );
   }
 }

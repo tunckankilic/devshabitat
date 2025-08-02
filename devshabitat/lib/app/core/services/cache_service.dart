@@ -40,11 +40,8 @@ class CacheService extends GetxService {
   }
 
   void _cleanExpiredEntries() {
-    final now = DateTime.now();
     final expiredKeys = _cache.keys
-        .where(
-          (key) => _cache[key]?.isExpired ?? false,
-        )
+        .where((key) => _cache[key]?.isExpired ?? false)
         .toList();
 
     for (final key in expiredKeys) {
@@ -69,11 +66,7 @@ class CacheService extends GetxService {
     return entry.data as T;
   }
 
-  void set<T>(
-    String key,
-    T value, {
-    Duration? expiration,
-  }) {
+  void set<T>(String key, T value, {Duration? expiration}) {
     final expiresAt = DateTime.now().add(expiration ?? _defaultExpiration);
     _cache[key] = CacheEntry<T>(value, expiresAt);
   }
@@ -145,14 +138,15 @@ class CacheService extends GetxService {
   Map<String, dynamic> getStats() {
     final now = DateTime.now();
     final totalEntries = _cache.length;
-    final expiredEntries =
-        _cache.values.where((entry) => entry.isExpired).length;
+    final expiredEntries = _cache.values
+        .where((entry) => entry.isExpired)
+        .length;
     final avgTimeToExpiration = _cache.isEmpty
         ? 0.0
         : _cache.values
-                .map((entry) => entry.expiresAt.difference(now).inSeconds)
-                .reduce((a, b) => a + b) /
-            totalEntries;
+                  .map((entry) => entry.expiresAt.difference(now).inSeconds)
+                  .reduce((a, b) => a + b) /
+              totalEntries;
 
     return {
       'totalEntries': totalEntries,

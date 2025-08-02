@@ -68,7 +68,7 @@ class NotificationService extends GetxService {
       await _requestPermissions();
       await _configureFCM();
       await _setupNotificationChannels();
-      _setupTokenRefresh();
+      await _loadPreferences();
     } catch (e) {
       _logger.e('Bildirim servisi başlatılamadı: $e');
     }
@@ -91,7 +91,6 @@ class NotificationService extends GetxService {
   }
 
   Future<void> _initializeAndroid() async {
-    final androidSettings = _platformSettings['android'];
     const androidInitializationSettings = AndroidInitializationSettings(
       '@mipmap/ic_launcher',
     );
@@ -151,101 +150,49 @@ class NotificationService extends GetxService {
     }
   }
 
-  Future<void> _initializeFCMToken() async {
+  Future<void> _configureFCM() async {
     try {
-      if (Platform.isIOS && !await _firebaseMessaging.isSupported()) {
-        debugPrint('FCM is not supported on this device (probably simulator)');
-        return;
-      }
-
-      final fcmToken = await _firebaseMessaging.getToken();
-      if (fcmToken != null) {
-        await _updateFCMToken(fcmToken);
-      }
-    } catch (e) {
-      debugPrint('Error initializing FCM token: $e');
-    }
-  }
-
-  Future<void> _updateFCMToken(String token) async {
-    try {
-      final String? userId = Get.find<AuthRepository>().currentUser?.uid;
-      if (userId != null) {
-        // Eski token'ı al ve kaldır
-        final oldToken = _prefs.getString('fcm_token');
-        if (oldToken != null && oldToken != token) {
-          await _firestore.collection('users').doc(userId).update({
-            'fcmTokens': FieldValue.arrayRemove([oldToken]),
-          });
-        }
-
-        // Uygulama versiyonunu al
-        final PackageInfo packageInfo = await PackageInfo.fromPlatform();
-        final String appVersion =
-            '${packageInfo.version}+${packageInfo.buildNumber}';
-
-        // Yeni token'ı Firestore'a kaydet
-        await _firestore.collection('users').doc(userId).update({
-          'fcmTokens': FieldValue.arrayUnion([token]),
-          'lastTokenUpdate': FieldValue.serverTimestamp(),
-          'deviceInfo': {
-            'platform': GetPlatform.isIOS ? 'iOS' : 'Android',
-            'appVersion': appVersion,
-            'lastSeen': FieldValue.serverTimestamp(),
-          },
-        });
-
-        // Token'ı local'e kaydet
-        await _prefs.setString('fcm_token', token);
+      final token = await _firebaseMessaging.getToken();
+      if (token != null) {
         fcmToken.value = token;
-
-        _logger.i('FCM token updated successfully');
-      } else {
-        _logger.w('User not authenticated, token not saved to Firestore');
-        // Local'e kaydet
-        await _prefs.setString('fcm_token', token);
-        fcmToken.value = token;
+        await _saveFCMToken(token);
       }
-    } catch (e) {
-      _logger.e('Error updating FCM token: $e');
-      // Local'e kaydetmeyi dene
-      try {
-        await _prefs.setString('fcm_token', token);
-        fcmToken.value = token;
-      } catch (localError) {
-        _logger.e('Error saving token to local storage: $localError');
-      }
-    }
-  }
 
-  void _setupTokenRefreshListener() {
-    _firebaseMessaging.onTokenRefresh.listen(
-      (String token) async {
+      // Token yenileme dinleyicisi
+      _firebaseMessaging.onTokenRefresh.listen((token) async {
+        isTokenRefreshing.value = true;
         try {
-          _logger.i('FCM token refreshed');
-          await _updateFCMToken(token);
+          fcmToken.value = token;
+          await _saveFCMToken(token);
         } catch (e) {
-          _logger.e('Error in token refresh listener: $e');
-          // Retry mechanism
-          await Future.delayed(const Duration(seconds: 5));
-          try {
-            await _updateFCMToken(token);
-          } catch (retryError) {
-            _logger.e('Error in token refresh retry: $retryError');
-          }
+          _logger.e('Token yenileme hatası: $e');
+        } finally {
+          isTokenRefreshing.value = false;
         }
-      },
-      onError: (error) {
-        _logger.e('Token refresh stream error: $error');
-      },
-    );
+      });
+
+      // Bildirim dinleyicileri
+      FirebaseMessaging.onMessage.listen(_handleForegroundMessage);
+      FirebaseMessaging.onMessageOpenedApp.listen(_handleBackgroundMessage);
+      FirebaseMessaging.onBackgroundMessage(backgroundMessageHandler);
+    } catch (e) {
+      _logger.e('FCM yapılandırma hatası: $e');
+    }
   }
 
-  void _onSelectNotification(NotificationResponse response) {
-    if (response.payload != null) {
-      final Map<String, dynamic> payload = json.decode(response.payload!);
-      // Bildirime tıklandığında yönlendirme işlemleri burada yapılacak
-      handleNotificationNavigation(payload);
+  Future<void> _saveFCMToken(String token) async {
+    try {
+      final userId = Get.find<AuthRepository>().currentUser?.uid;
+      if (userId != null) {
+        await _firestore.collection('users').doc(userId).update({
+          'fcmToken': token,
+          'lastTokenUpdate': FieldValue.serverTimestamp(),
+          'platform': Platform.isIOS ? 'ios' : 'android',
+          'appVersion': (await PackageInfo.fromPlatform()).version,
+        });
+      }
+    } catch (e) {
+      _logger.e('Token kaydetme hatası: $e');
     }
   }
 
@@ -378,67 +325,6 @@ class NotificationService extends GetxService {
         );
   }
 
-  void _setupNotificationListeners() {
-    // Uygulama açıkken gelen bildirimler
-    FirebaseMessaging.onMessage.listen(_handleForegroundMessage);
-
-    // Uygulama arka plandayken tıklanan bildirimler
-    FirebaseMessaging.onMessageOpenedApp.listen(_handleBackgroundMessage);
-
-    // Uygulama kapalıyken gelen bildirimler için
-    _firebaseMessaging.getInitialMessage().then((message) {
-      if (message != null) {
-        _handleTerminatedMessage(message);
-      }
-    });
-  }
-
-  Future<void> _configureFCM() async {
-    try {
-      final token = await _firebaseMessaging.getToken();
-      if (token != null) {
-        fcmToken.value = token;
-        await _saveFCMToken(token);
-      }
-
-      FirebaseMessaging.onMessage.listen(_handleForegroundMessage);
-      FirebaseMessaging.onMessageOpenedApp.listen(_handleMessageOpenedApp);
-      FirebaseMessaging.onBackgroundMessage(backgroundMessageHandler);
-    } catch (e) {
-      _logger.e('FCM yapılandırma hatası: $e');
-    }
-  }
-
-  void _setupTokenRefresh() {
-    _firebaseMessaging.onTokenRefresh.listen((token) async {
-      isTokenRefreshing.value = true;
-      try {
-        fcmToken.value = token;
-        await _saveFCMToken(token);
-      } catch (e) {
-        _logger.e('Token yenileme hatası: $e');
-      } finally {
-        isTokenRefreshing.value = false;
-      }
-    });
-  }
-
-  Future<void> _saveFCMToken(String token) async {
-    try {
-      final userId = Get.find<AuthRepository>().currentUser?.uid;
-      if (userId != null) {
-        await _firestore.collection('users').doc(userId).update({
-          'fcmToken': token,
-          'lastTokenUpdate': FieldValue.serverTimestamp(),
-          'platform': Platform.isIOS ? 'ios' : 'android',
-          'appVersion': (await PackageInfo.fromPlatform()).version,
-        });
-      }
-    } catch (e) {
-      _logger.e('Token kaydetme hatası: $e');
-    }
-  }
-
   Future<void> _handleForegroundMessage(RemoteMessage message) async {
     try {
       if (!isPushEnabled.value) return;
@@ -451,6 +337,7 @@ class NotificationService extends GetxService {
           data,
         );
 
+        // Bildirim göster
         await _localNotifications.show(
           notification.hashCode,
           notification.title,
@@ -458,6 +345,19 @@ class NotificationService extends GetxService {
           platformChannelSpecifics,
           payload: json.encode(data),
         );
+
+        // In-app bildirim göster
+        if (isInAppEnabled.value) {
+          Get.snackbar(
+            notification.title ?? '',
+            notification.body ?? '',
+            duration: const Duration(seconds: 3),
+            snackPosition: SnackPosition.TOP,
+          );
+        }
+
+        // Bildirimi Firestore'a kaydet
+        await saveNotification(message);
       }
     } catch (e) {
       _logger.e('Bildirim işleme hatası: $e');
@@ -491,58 +391,8 @@ class NotificationService extends GetxService {
     }
   }
 
-  Future<void> _handleMessageOpenedApp(RemoteMessage message) async {
-    // Bildirime tıklandığında yapılacak işlemler
-    final data = message.data;
-    if (data.containsKey('route')) {
-      Get.toNamed(data['route']);
-    }
-  }
-
   Future<void> _handleBackgroundMessage(RemoteMessage message) async {
     await handleNotificationNavigation(message.data);
-  }
-
-  void _handleTerminatedMessage(RemoteMessage message) {
-    handleNotificationNavigation(message.data);
-  }
-
-  Future<void> _showLocalNotification(RemoteMessage message) async {
-    final androidDetails = AndroidNotificationDetails(
-      'default_channel',
-      'Default Channel',
-      channelDescription: 'Default notification channel',
-      importance: Importance.high,
-      priority: Priority.high,
-    );
-
-    final iosDetails = DarwinNotificationDetails(
-      presentAlert: true,
-      presentBadge: true,
-      presentSound: true,
-    );
-
-    final details = NotificationDetails(
-      android: androidDetails,
-      iOS: iosDetails,
-    );
-
-    await _localNotifications.show(
-      message.hashCode,
-      message.notification?.title,
-      message.notification?.body,
-      details,
-      payload: json.encode(message.data),
-    );
-  }
-
-  void _showInAppNotification(RemoteMessage message) {
-    Get.snackbar(
-      message.notification?.title ?? '',
-      message.notification?.body ?? '',
-      duration: const Duration(seconds: 3),
-      snackPosition: SnackPosition.TOP,
-    );
   }
 
   Future<void> handleNotificationNavigation(Map<String, dynamic> data) async {
@@ -651,7 +501,7 @@ class NotificationService extends GetxService {
   Future<void> markNotificationAsRead(String notificationId) async {
     final String? userId = Get.find<AuthRepository>().currentUser?.uid;
     if (userId != null) {
-      await FirebaseFirestore.instance
+      await _firestore
           .collection('users')
           .doc(userId)
           .collection('notifications')

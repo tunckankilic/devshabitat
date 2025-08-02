@@ -1,6 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:get/get.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:devshabitat/app/models/enhanced_user_model.dart' as enhanced;
 import 'package:devshabitat/app/models/profile_completion_model.dart';
 import 'package:devshabitat/app/models/user_profile_model.dart';
@@ -25,31 +24,53 @@ void main() {
 
   group('ProfileCompletionLevel', () {
     test('should return correct completion level from percentage', () {
-      expect(ProfileCompletionLevel.fromPercentage(10),
-          ProfileCompletionLevel.minimal);
-      expect(ProfileCompletionLevel.fromPercentage(15),
-          ProfileCompletionLevel.minimal);
-      expect(ProfileCompletionLevel.fromPercentage(30),
-          ProfileCompletionLevel.minimal);
-      expect(ProfileCompletionLevel.fromPercentage(40),
-          ProfileCompletionLevel.basic);
-      expect(ProfileCompletionLevel.fromPercentage(50),
-          ProfileCompletionLevel.basic);
-      expect(ProfileCompletionLevel.fromPercentage(70),
-          ProfileCompletionLevel.standard);
-      expect(ProfileCompletionLevel.fromPercentage(80),
-          ProfileCompletionLevel.standard);
-      expect(ProfileCompletionLevel.fromPercentage(100),
-          ProfileCompletionLevel.complete);
+      expect(
+        ProfileCompletionLevel.fromPercentage(10),
+        ProfileCompletionLevel.minimal,
+      );
+      expect(
+        ProfileCompletionLevel.fromPercentage(15),
+        ProfileCompletionLevel.minimal,
+      );
+      expect(
+        ProfileCompletionLevel.fromPercentage(30),
+        ProfileCompletionLevel.minimal,
+      );
+      expect(
+        ProfileCompletionLevel.fromPercentage(40),
+        ProfileCompletionLevel.basic,
+      );
+      expect(
+        ProfileCompletionLevel.fromPercentage(50),
+        ProfileCompletionLevel.basic,
+      );
+      expect(
+        ProfileCompletionLevel.fromPercentage(70),
+        ProfileCompletionLevel.standard,
+      );
+      expect(
+        ProfileCompletionLevel.fromPercentage(80),
+        ProfileCompletionLevel.standard,
+      );
+      expect(
+        ProfileCompletionLevel.fromPercentage(100),
+        ProfileCompletionLevel.complete,
+      );
     });
 
     test('should return correct next level', () {
-      expect(ProfileCompletionLevel.minimal.nextLevel,
-          ProfileCompletionLevel.basic);
-      expect(ProfileCompletionLevel.basic.nextLevel,
-          ProfileCompletionLevel.standard);
-      expect(ProfileCompletionLevel.standard.nextLevel,
-          ProfileCompletionLevel.complete);
+      expect(
+        ProfileCompletionLevel.minimal.nextLevel,
+        ProfileCompletionLevel.basic,
+      );
+      expect(
+        ProfileCompletionLevel.basic.nextLevel,
+        ProfileCompletionLevel.standard,
+      );
+      expect(
+        ProfileCompletionLevel.standard.nextLevel,
+        ProfileCompletionLevel.complete,
+      );
       expect(ProfileCompletionLevel.complete.nextLevel, null);
     });
 
@@ -138,8 +159,10 @@ void main() {
 
       final status = service.calculateCompletionLevel(user);
 
-      expect(status.level,
-          ProfileCompletionLevel.minimal); // Should not reach basic
+      expect(
+        status.level,
+        ProfileCompletionLevel.minimal,
+      ); // Should not reach basic
       expect(status.missingFields, contains('skills'));
     });
   });
@@ -169,7 +192,9 @@ void main() {
     test('should not allow community creation for standard level', () {
       expect(
         service.canAccessFeature(
-            'community_creation', ProfileCompletionLevel.standard),
+          'community_creation',
+          ProfileCompletionLevel.standard,
+        ),
         false,
       );
     });
@@ -177,7 +202,9 @@ void main() {
     test('should allow community creation for complete level', () {
       expect(
         service.canAccessFeature(
-            'community_creation', ProfileCompletionLevel.complete),
+          'community_creation',
+          ProfileCompletionLevel.complete,
+        ),
         true,
       );
     });
@@ -185,7 +212,9 @@ void main() {
     test('should allow access to unknown features', () {
       expect(
         service.canAccessFeature(
-            'unknown_feature', ProfileCompletionLevel.minimal),
+          'unknown_feature',
+          ProfileCompletionLevel.minimal,
+        ),
         true,
       );
     });
@@ -208,24 +237,19 @@ void main() {
             'title': 'Developer',
             'company': 'Test Company',
             'startDate': DateTime.now(),
-          }
+          },
         ],
         projects: [
-          {
-            'name': 'Test Project',
-            'description': 'A test project',
-          }
+          {'name': 'Test Project', 'description': 'A test project'},
         ],
         education: [
           {
             'school': 'Test University',
             'degree': 'Bachelor',
             'field': 'Computer Science',
-          }
+          },
         ],
-        socialLinks: {
-          'linkedin': 'https://linkedin.com/in/testuser',
-        },
+        socialLinks: {'linkedin': 'https://linkedin.com/in/testuser'},
         locationName: 'New York',
       );
 
@@ -244,8 +268,10 @@ void main() {
         displayName: 'Test User',
       );
 
-      final missingFields =
-          service.getMissingFields(user, ProfileCompletionLevel.basic);
+      final missingFields = service.getMissingFields(
+        user,
+        ProfileCompletionLevel.basic,
+      );
 
       expect(missingFields, contains('bio'));
       expect(missingFields, contains('skills'));
@@ -334,27 +360,34 @@ void main() {
 
       expect(featureInfo['community_creation']?['requiredLevel'], 'complete');
       expect(featureInfo['community_creation']?['requiredPercentage'], 100);
-      expect(featureInfo['community_creation']?['displayName'],
-          'Topluluk Oluşturma');
+      expect(
+        featureInfo['community_creation']?['displayName'],
+        'Topluluk Oluşturma',
+      );
     });
   });
 
   group('Required Fields', () {
     test('should return correct required fields for each level', () {
-      final minimalFields =
-          service.getRequiredFields(ProfileCompletionLevel.minimal);
+      final minimalFields = service.getRequiredFields(
+        ProfileCompletionLevel.minimal,
+      );
       expect(minimalFields, contains('uid'));
       expect(minimalFields, contains('email'));
       expect(minimalFields, contains('displayName'));
 
-      final basicFields =
-          service.getRequiredFields(ProfileCompletionLevel.basic);
+      final basicFields = service.getRequiredFields(
+        ProfileCompletionLevel.basic,
+      );
       expect(basicFields.length, 5); // minimal + bio + skills
 
-      final standardFields =
-          service.getRequiredFields(ProfileCompletionLevel.standard);
+      final standardFields = service.getRequiredFields(
+        ProfileCompletionLevel.standard,
+      );
       expect(
-          standardFields.length, 8); // basic + github + experience + location
+        standardFields.length,
+        8,
+      ); // basic + github + experience + location
     });
   });
 }

@@ -3,7 +3,6 @@ import 'package:get/get.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:logger/logger.dart';
 import 'package:location/location.dart';
-import '../../models/location/location_model.dart';
 import '../../models/location/geofence_model.dart';
 import 'location_tracking_service.dart';
 

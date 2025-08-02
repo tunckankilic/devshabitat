@@ -7,8 +7,7 @@ class CommunityAnnouncementsView
     extends GetView<CommunityAnnouncementController> {
   final String communityId;
 
-  const CommunityAnnouncementsView({Key? key, required this.communityId})
-    : super(key: key);
+  const CommunityAnnouncementsView({super.key, required this.communityId});
 
   @override
   Widget build(BuildContext context) {

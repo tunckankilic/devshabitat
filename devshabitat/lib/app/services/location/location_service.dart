@@ -69,30 +69,28 @@ class LocationService extends GetxService {
       await _updateUserLocation(position);
 
       // Start position stream
-      _positionStream = Geolocator.getPositionStream(
-        locationSettings: LocationSettings(
-          accuracy: LocationAccuracy.high,
-          distanceFilter: _minDistanceFilter.toInt(),
-        ),
-      ).listen(
-        (Position position) async {
-          currentPosition.value = position;
-          await _updateUserLocation(position);
-        },
-        onError: (error) {
-          _errorHandler.handleError(error, 'locationStream');
-        },
-      );
+      _positionStream =
+          Geolocator.getPositionStream(
+            locationSettings: LocationSettings(
+              accuracy: LocationAccuracy.high,
+              distanceFilter: _minDistanceFilter.toInt(),
+            ),
+          ).listen(
+            (Position position) async {
+              currentPosition.value = position;
+              await _updateUserLocation(position);
+            },
+            onError: (error) {
+              _errorHandler.handleError(error, 'locationStream');
+            },
+          );
 
       // Start periodic updates
-      _locationUpdateTimer = Timer.periodic(
-        _locationUpdateInterval,
-        (_) async {
-          if (currentPosition.value != null) {
-            await _updateUserLocation(currentPosition.value!);
-          }
-        },
-      );
+      _locationUpdateTimer = Timer.periodic(_locationUpdateInterval, (_) async {
+        if (currentPosition.value != null) {
+          await _updateUserLocation(currentPosition.value!);
+        }
+      });
 
       isTrackingEnabled.value = true;
       _memoryManager.optimizeMemory();
@@ -153,18 +151,18 @@ class LocationService extends GetxService {
           .get();
 
       return snapshot.docs
-          .map((doc) =>
-              LocationModel.fromJson(doc.data() as Map<String, dynamic>))
+          .map((doc) => LocationModel.fromJson(doc.data()))
           .where((location) {
-        // Calculate actual distance
-        final distance = Geolocator.distanceBetween(
-          latitude,
-          longitude,
-          location.latitude,
-          location.longitude,
-        );
-        return distance <= radius;
-      }).toList();
+            // Calculate actual distance
+            final distance = Geolocator.distanceBetween(
+              latitude,
+              longitude,
+              location.latitude,
+              location.longitude,
+            );
+            return distance <= radius;
+          })
+          .toList();
     } catch (e) {
       _errorHandler.handleError(e, 'getNearbyLocations');
       return [];
@@ -211,17 +209,18 @@ class LocationService extends GetxService {
         .where('location', isLessThan: GeoPoint(upperLat, upperLon))
         .snapshots()
         .map((snapshot) {
-      return snapshot.docs
-          .map((doc) => LocationModel.fromJson(doc.data()))
-          .where((location) {
-        final distance = Geolocator.distanceBetween(
-          latitude,
-          longitude,
-          location.latitude,
-          location.longitude,
-        );
-        return distance <= radius;
-      }).toList();
-    });
+          return snapshot.docs
+              .map((doc) => LocationModel.fromJson(doc.data()))
+              .where((location) {
+                final distance = Geolocator.distanceBetween(
+                  latitude,
+                  longitude,
+                  location.latitude,
+                  location.longitude,
+                );
+                return distance <= radius;
+              })
+              .toList();
+        });
   }
 }

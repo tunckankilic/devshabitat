@@ -13,7 +13,6 @@ class MemoryManagerService extends GetxService {
   final Map<String, Timer> _timers = {};
   final Map<String, dynamic> _resources = {};
   final _memoryThreshold = 100 * 1024 * 1024; // 100 MB
-  final _cacheTimeout = const Duration(minutes: 30);
   final _memoryUsage = 0.obs;
   Timer? _cleanupTimer;
 
