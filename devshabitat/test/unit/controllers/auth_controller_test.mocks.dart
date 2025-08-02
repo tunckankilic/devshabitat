@@ -3,11 +3,11 @@
 // Do not manually edit this file.
 
 // ignore_for_file: no_leading_underscores_for_library_prefixes
-import 'dart:async' as _i6;
+import 'dart:async' as _i8;
 import 'dart:ui' as _i10;
 
 import 'package:devshabitat/app/controllers/auth_state_controller.dart' as _i11;
-import 'package:devshabitat/app/controllers/email_auth_controller.dart' as _i7;
+import 'package:devshabitat/app/controllers/email_auth_controller.dart' as _i6;
 import 'package:devshabitat/app/core/services/error_handler_service.dart'
     as _i13;
 import 'package:devshabitat/app/repositories/auth_repository.dart' as _i12;
@@ -17,7 +17,7 @@ import 'package:get/get.dart' as _i3;
 import 'package:get/get_state_manager/src/simple/list_notifier.dart' as _i9;
 import 'package:google_sign_in/google_sign_in.dart' as _i5;
 import 'package:mockito/mockito.dart' as _i1;
-import 'package:mockito/src/dummies.dart' as _i8;
+import 'package:mockito/src/dummies.dart' as _i7;
 
 // ignore_for_file: type=lint
 // ignore_for_file: avoid_redundant_argument_values
@@ -86,8 +86,8 @@ class _FakeUserCredential_4 extends _i1.SmartFake
         );
 }
 
-class _FakeFuture_5<T1> extends _i1.SmartFake implements _i6.Future<T1> {
-  _FakeFuture_5(
+class _FakeUserMetadata_5 extends _i1.SmartFake implements _i4.UserMetadata {
+  _FakeUserMetadata_5(
     Object parent,
     Invocation parentInvocation,
   ) : super(
@@ -96,8 +96,8 @@ class _FakeFuture_5<T1> extends _i1.SmartFake implements _i6.Future<T1> {
         );
 }
 
-class _FakeUserMetadata_6 extends _i1.SmartFake implements _i4.UserMetadata {
-  _FakeUserMetadata_6(
+class _FakeMultiFactor_6 extends _i1.SmartFake implements _i4.MultiFactor {
+  _FakeMultiFactor_6(
     Object parent,
     Invocation parentInvocation,
   ) : super(
@@ -106,8 +106,8 @@ class _FakeUserMetadata_6 extends _i1.SmartFake implements _i4.UserMetadata {
         );
 }
 
-class _FakeMultiFactor_7 extends _i1.SmartFake implements _i4.MultiFactor {
-  _FakeMultiFactor_7(
+class _FakeIdTokenResult_7 extends _i1.SmartFake implements _i4.IdTokenResult {
+  _FakeIdTokenResult_7(
     Object parent,
     Invocation parentInvocation,
   ) : super(
@@ -116,19 +116,9 @@ class _FakeMultiFactor_7 extends _i1.SmartFake implements _i4.MultiFactor {
         );
 }
 
-class _FakeIdTokenResult_8 extends _i1.SmartFake implements _i4.IdTokenResult {
-  _FakeIdTokenResult_8(
-    Object parent,
-    Invocation parentInvocation,
-  ) : super(
-          parent,
-          parentInvocation,
-        );
-}
-
-class _FakeConfirmationResult_9 extends _i1.SmartFake
+class _FakeConfirmationResult_8 extends _i1.SmartFake
     implements _i4.ConfirmationResult {
-  _FakeConfirmationResult_9(
+  _FakeConfirmationResult_8(
     Object parent,
     Invocation parentInvocation,
   ) : super(
@@ -137,8 +127,8 @@ class _FakeConfirmationResult_9 extends _i1.SmartFake
         );
 }
 
-class _FakeUser_10 extends _i1.SmartFake implements _i4.User {
-  _FakeUser_10(
+class _FakeUser_9 extends _i1.SmartFake implements _i4.User {
+  _FakeUser_9(
     Object parent,
     Invocation parentInvocation,
   ) : super(
@@ -151,7 +141,7 @@ class _FakeUser_10 extends _i1.SmartFake implements _i4.User {
 ///
 /// See the documentation for Mockito's code generation for more information.
 class MockEmailAuthController extends _i1.Mock
-    implements _i7.EmailAuthController {
+    implements _i6.EmailAuthController {
   @override
   _i2.TextEditingController get emailController => (super.noSuchMethod(
         Invocation.getter(#emailController),
@@ -215,11 +205,11 @@ class MockEmailAuthController extends _i1.Mock
   @override
   String get lastError => (super.noSuchMethod(
         Invocation.getter(#lastError),
-        returnValue: _i8.dummyValue<String>(
+        returnValue: _i7.dummyValue<String>(
           this,
           Invocation.getter(#lastError),
         ),
-        returnValueForMissingStub: _i8.dummyValue<String>(
+        returnValueForMissingStub: _i7.dummyValue<String>(
           this,
           Invocation.getter(#lastError),
         ),
@@ -235,11 +225,11 @@ class MockEmailAuthController extends _i1.Mock
   @override
   String get emailVerificationStatus => (super.noSuchMethod(
         Invocation.getter(#emailVerificationStatus),
-        returnValue: _i8.dummyValue<String>(
+        returnValue: _i7.dummyValue<String>(
           this,
           Invocation.getter(#emailVerificationStatus),
         ),
-        returnValueForMissingStub: _i8.dummyValue<String>(
+        returnValueForMissingStub: _i7.dummyValue<String>(
           this,
           Invocation.getter(#emailVerificationStatus),
         ),
@@ -307,67 +297,67 @@ class MockEmailAuthController extends _i1.Mock
       ) as int);
 
   @override
-  _i6.Future<void> signInWithEmailAndPassword() => (super.noSuchMethod(
+  _i8.Future<void> signInWithEmailAndPassword() => (super.noSuchMethod(
         Invocation.method(
           #signInWithEmailAndPassword,
           [],
         ),
-        returnValue: _i6.Future<void>.value(),
-        returnValueForMissingStub: _i6.Future<void>.value(),
-      ) as _i6.Future<void>);
+        returnValue: _i8.Future<void>.value(),
+        returnValueForMissingStub: _i8.Future<void>.value(),
+      ) as _i8.Future<void>);
 
   @override
-  _i6.Future<void> createUserWithEmailAndPassword() => (super.noSuchMethod(
+  _i8.Future<void> createUserWithEmailAndPassword() => (super.noSuchMethod(
         Invocation.method(
           #createUserWithEmailAndPassword,
           [],
         ),
-        returnValue: _i6.Future<void>.value(),
-        returnValueForMissingStub: _i6.Future<void>.value(),
-      ) as _i6.Future<void>);
+        returnValue: _i8.Future<void>.value(),
+        returnValueForMissingStub: _i8.Future<void>.value(),
+      ) as _i8.Future<void>);
 
   @override
-  _i6.Future<void> sendPasswordResetEmail() => (super.noSuchMethod(
+  _i8.Future<void> sendPasswordResetEmail() => (super.noSuchMethod(
         Invocation.method(
           #sendPasswordResetEmail,
           [],
         ),
-        returnValue: _i6.Future<void>.value(),
-        returnValueForMissingStub: _i6.Future<void>.value(),
-      ) as _i6.Future<void>);
+        returnValue: _i8.Future<void>.value(),
+        returnValueForMissingStub: _i8.Future<void>.value(),
+      ) as _i8.Future<void>);
 
   @override
-  _i6.Future<void> sendEmailVerification() => (super.noSuchMethod(
+  _i8.Future<void> sendEmailVerification() => (super.noSuchMethod(
         Invocation.method(
           #sendEmailVerification,
           [],
         ),
-        returnValue: _i6.Future<void>.value(),
-        returnValueForMissingStub: _i6.Future<void>.value(),
-      ) as _i6.Future<void>);
+        returnValue: _i8.Future<void>.value(),
+        returnValueForMissingStub: _i8.Future<void>.value(),
+      ) as _i8.Future<void>);
 
   @override
-  _i6.Future<void> resendEmailVerification() => (super.noSuchMethod(
+  _i8.Future<void> resendEmailVerification() => (super.noSuchMethod(
         Invocation.method(
           #resendEmailVerification,
           [],
         ),
-        returnValue: _i6.Future<void>.value(),
-        returnValueForMissingStub: _i6.Future<void>.value(),
-      ) as _i6.Future<void>);
+        returnValue: _i8.Future<void>.value(),
+        returnValueForMissingStub: _i8.Future<void>.value(),
+      ) as _i8.Future<void>);
 
   @override
-  _i6.Future<void> updatePassword(String? newPassword) => (super.noSuchMethod(
+  _i8.Future<void> updatePassword(String? newPassword) => (super.noSuchMethod(
         Invocation.method(
           #updatePassword,
           [newPassword],
         ),
-        returnValue: _i6.Future<void>.value(),
-        returnValueForMissingStub: _i6.Future<void>.value(),
-      ) as _i6.Future<void>);
+        returnValue: _i8.Future<void>.value(),
+        returnValueForMissingStub: _i8.Future<void>.value(),
+      ) as _i8.Future<void>);
 
   @override
-  _i6.Future<void> reauthenticate(
+  _i8.Future<void> reauthenticate(
     String? email,
     String? password,
   ) =>
@@ -379,49 +369,49 @@ class MockEmailAuthController extends _i1.Mock
             password,
           ],
         ),
-        returnValue: _i6.Future<void>.value(),
-        returnValueForMissingStub: _i6.Future<void>.value(),
-      ) as _i6.Future<void>);
+        returnValue: _i8.Future<void>.value(),
+        returnValueForMissingStub: _i8.Future<void>.value(),
+      ) as _i8.Future<void>);
 
   @override
-  _i6.Future<void> addAdditionalEmail(String? email) => (super.noSuchMethod(
+  _i8.Future<void> addAdditionalEmail(String? email) => (super.noSuchMethod(
         Invocation.method(
           #addAdditionalEmail,
           [email],
         ),
-        returnValue: _i6.Future<void>.value(),
-        returnValueForMissingStub: _i6.Future<void>.value(),
-      ) as _i6.Future<void>);
+        returnValue: _i8.Future<void>.value(),
+        returnValueForMissingStub: _i8.Future<void>.value(),
+      ) as _i8.Future<void>);
 
   @override
-  _i6.Future<void> removeAdditionalEmail(String? email) => (super.noSuchMethod(
+  _i8.Future<void> removeAdditionalEmail(String? email) => (super.noSuchMethod(
         Invocation.method(
           #removeAdditionalEmail,
           [email],
         ),
-        returnValue: _i6.Future<void>.value(),
-        returnValueForMissingStub: _i6.Future<void>.value(),
-      ) as _i6.Future<void>);
+        returnValue: _i8.Future<void>.value(),
+        returnValueForMissingStub: _i8.Future<void>.value(),
+      ) as _i8.Future<void>);
 
   @override
-  _i6.Future<List<String>> getAdditionalEmails() => (super.noSuchMethod(
+  _i8.Future<List<String>> getAdditionalEmails() => (super.noSuchMethod(
         Invocation.method(
           #getAdditionalEmails,
           [],
         ),
-        returnValue: _i6.Future<List<String>>.value(<String>[]),
-        returnValueForMissingStub: _i6.Future<List<String>>.value(<String>[]),
-      ) as _i6.Future<List<String>>);
+        returnValue: _i8.Future<List<String>>.value(<String>[]),
+        returnValueForMissingStub: _i8.Future<List<String>>.value(<String>[]),
+      ) as _i8.Future<List<String>>);
 
   @override
-  _i6.Future<bool> isEmailVerified() => (super.noSuchMethod(
+  _i8.Future<bool> isEmailVerified() => (super.noSuchMethod(
         Invocation.method(
           #isEmailVerified,
           [],
         ),
-        returnValue: _i6.Future<bool>.value(false),
-        returnValueForMissingStub: _i6.Future<bool>.value(false),
-      ) as _i6.Future<bool>);
+        returnValue: _i8.Future<bool>.value(false),
+        returnValueForMissingStub: _i8.Future<bool>.value(false),
+      ) as _i8.Future<bool>);
 
   @override
   void validateEmailOnChange(String? email) => super.noSuchMethod(
@@ -433,24 +423,24 @@ class MockEmailAuthController extends _i1.Mock
       );
 
   @override
-  _i6.Future<void> checkEmailAvailability(String? email) => (super.noSuchMethod(
+  _i8.Future<void> checkEmailAvailability(String? email) => (super.noSuchMethod(
         Invocation.method(
           #checkEmailAvailability,
           [email],
         ),
-        returnValue: _i6.Future<void>.value(),
-        returnValueForMissingStub: _i6.Future<void>.value(),
-      ) as _i6.Future<void>);
+        returnValue: _i8.Future<void>.value(),
+        returnValueForMissingStub: _i8.Future<void>.value(),
+      ) as _i8.Future<void>);
 
   @override
-  _i6.Future<void> sendVerificationEmail() => (super.noSuchMethod(
+  _i8.Future<void> sendVerificationEmail() => (super.noSuchMethod(
         Invocation.method(
           #sendVerificationEmail,
           [],
         ),
-        returnValue: _i6.Future<void>.value(),
-        returnValueForMissingStub: _i6.Future<void>.value(),
-      ) as _i6.Future<void>);
+        returnValue: _i8.Future<void>.value(),
+        returnValueForMissingStub: _i8.Future<void>.value(),
+      ) as _i8.Future<void>);
 
   @override
   void onClose() => super.noSuchMethod(
@@ -678,44 +668,44 @@ class MockAuthStateController extends _i1.Mock
       );
 
   @override
-  _i6.Future<void> signOut() => (super.noSuchMethod(
+  _i8.Future<void> signOut() => (super.noSuchMethod(
         Invocation.method(
           #signOut,
           [],
         ),
-        returnValue: _i6.Future<void>.value(),
-        returnValueForMissingStub: _i6.Future<void>.value(),
-      ) as _i6.Future<void>);
+        returnValue: _i8.Future<void>.value(),
+        returnValueForMissingStub: _i8.Future<void>.value(),
+      ) as _i8.Future<void>);
 
   @override
-  _i6.Future<void> signOutFromAllDevices() => (super.noSuchMethod(
+  _i8.Future<void> signOutFromAllDevices() => (super.noSuchMethod(
         Invocation.method(
           #signOutFromAllDevices,
           [],
         ),
-        returnValue: _i6.Future<void>.value(),
-        returnValueForMissingStub: _i6.Future<void>.value(),
-      ) as _i6.Future<void>);
+        returnValue: _i8.Future<void>.value(),
+        returnValueForMissingStub: _i8.Future<void>.value(),
+      ) as _i8.Future<void>);
 
   @override
-  _i6.Future<void> deleteAccount() => (super.noSuchMethod(
+  _i8.Future<void> deleteAccount() => (super.noSuchMethod(
         Invocation.method(
           #deleteAccount,
           [],
         ),
-        returnValue: _i6.Future<void>.value(),
-        returnValueForMissingStub: _i6.Future<void>.value(),
-      ) as _i6.Future<void>);
+        returnValue: _i8.Future<void>.value(),
+        returnValueForMissingStub: _i8.Future<void>.value(),
+      ) as _i8.Future<void>);
 
   @override
-  _i6.Future<void> verifyEmail() => (super.noSuchMethod(
+  _i8.Future<void> verifyEmail() => (super.noSuchMethod(
         Invocation.method(
           #verifyEmail,
           [],
         ),
-        returnValue: _i6.Future<void>.value(),
-        returnValueForMissingStub: _i6.Future<void>.value(),
-      ) as _i6.Future<void>);
+        returnValue: _i8.Future<void>.value(),
+        returnValueForMissingStub: _i8.Future<void>.value(),
+      ) as _i8.Future<void>);
 
   @override
   void update([
@@ -889,14 +879,14 @@ class MockAuthRepository extends _i1.Mock implements _i12.AuthRepository {
       ) as _i5.GoogleSignIn);
 
   @override
-  _i6.Stream<_i4.User?> get authStateChanges => (super.noSuchMethod(
+  _i8.Stream<_i4.User?> get authStateChanges => (super.noSuchMethod(
         Invocation.getter(#authStateChanges),
-        returnValue: _i6.Stream<_i4.User?>.empty(),
-        returnValueForMissingStub: _i6.Stream<_i4.User?>.empty(),
-      ) as _i6.Stream<_i4.User?>);
+        returnValue: _i8.Stream<_i4.User?>.empty(),
+        returnValueForMissingStub: _i8.Stream<_i4.User?>.empty(),
+      ) as _i8.Stream<_i4.User?>);
 
   @override
-  _i6.Future<_i4.UserCredential> signInWithEmailAndPassword(
+  _i8.Future<_i4.UserCredential> signInWithEmailAndPassword(
     String? email,
     String? password,
   ) =>
@@ -908,7 +898,7 @@ class MockAuthRepository extends _i1.Mock implements _i12.AuthRepository {
             password,
           ],
         ),
-        returnValue: _i6.Future<_i4.UserCredential>.value(_FakeUserCredential_4(
+        returnValue: _i8.Future<_i4.UserCredential>.value(_FakeUserCredential_4(
           this,
           Invocation.method(
             #signInWithEmailAndPassword,
@@ -919,7 +909,7 @@ class MockAuthRepository extends _i1.Mock implements _i12.AuthRepository {
           ),
         )),
         returnValueForMissingStub:
-            _i6.Future<_i4.UserCredential>.value(_FakeUserCredential_4(
+            _i8.Future<_i4.UserCredential>.value(_FakeUserCredential_4(
           this,
           Invocation.method(
             #signInWithEmailAndPassword,
@@ -929,10 +919,10 @@ class MockAuthRepository extends _i1.Mock implements _i12.AuthRepository {
             ],
           ),
         )),
-      ) as _i6.Future<_i4.UserCredential>);
+      ) as _i8.Future<_i4.UserCredential>);
 
   @override
-  _i6.Future<_i4.UserCredential> createUserWithEmailAndPassword(
+  _i8.Future<_i4.UserCredential> createUserWithEmailAndPassword(
     String? email,
     String? password,
     String? username,
@@ -946,7 +936,7 @@ class MockAuthRepository extends _i1.Mock implements _i12.AuthRepository {
             username,
           ],
         ),
-        returnValue: _i6.Future<_i4.UserCredential>.value(_FakeUserCredential_4(
+        returnValue: _i8.Future<_i4.UserCredential>.value(_FakeUserCredential_4(
           this,
           Invocation.method(
             #createUserWithEmailAndPassword,
@@ -958,7 +948,7 @@ class MockAuthRepository extends _i1.Mock implements _i12.AuthRepository {
           ),
         )),
         returnValueForMissingStub:
-            _i6.Future<_i4.UserCredential>.value(_FakeUserCredential_4(
+            _i8.Future<_i4.UserCredential>.value(_FakeUserCredential_4(
           this,
           Invocation.method(
             #createUserWithEmailAndPassword,
@@ -969,15 +959,15 @@ class MockAuthRepository extends _i1.Mock implements _i12.AuthRepository {
             ],
           ),
         )),
-      ) as _i6.Future<_i4.UserCredential>);
+      ) as _i8.Future<_i4.UserCredential>);
 
   @override
-  _i6.Future<_i4.UserCredential> signInWithGoogle() => (super.noSuchMethod(
+  _i8.Future<_i4.UserCredential> signInWithGoogle() => (super.noSuchMethod(
         Invocation.method(
           #signInWithGoogle,
           [],
         ),
-        returnValue: _i6.Future<_i4.UserCredential>.value(_FakeUserCredential_4(
+        returnValue: _i8.Future<_i4.UserCredential>.value(_FakeUserCredential_4(
           this,
           Invocation.method(
             #signInWithGoogle,
@@ -985,22 +975,22 @@ class MockAuthRepository extends _i1.Mock implements _i12.AuthRepository {
           ),
         )),
         returnValueForMissingStub:
-            _i6.Future<_i4.UserCredential>.value(_FakeUserCredential_4(
+            _i8.Future<_i4.UserCredential>.value(_FakeUserCredential_4(
           this,
           Invocation.method(
             #signInWithGoogle,
             [],
           ),
         )),
-      ) as _i6.Future<_i4.UserCredential>);
+      ) as _i8.Future<_i4.UserCredential>);
 
   @override
-  _i6.Future<_i4.UserCredential> signInWithApple() => (super.noSuchMethod(
+  _i8.Future<_i4.UserCredential> signInWithApple() => (super.noSuchMethod(
         Invocation.method(
           #signInWithApple,
           [],
         ),
-        returnValue: _i6.Future<_i4.UserCredential>.value(_FakeUserCredential_4(
+        returnValue: _i8.Future<_i4.UserCredential>.value(_FakeUserCredential_4(
           this,
           Invocation.method(
             #signInWithApple,
@@ -1008,22 +998,22 @@ class MockAuthRepository extends _i1.Mock implements _i12.AuthRepository {
           ),
         )),
         returnValueForMissingStub:
-            _i6.Future<_i4.UserCredential>.value(_FakeUserCredential_4(
+            _i8.Future<_i4.UserCredential>.value(_FakeUserCredential_4(
           this,
           Invocation.method(
             #signInWithApple,
             [],
           ),
         )),
-      ) as _i6.Future<_i4.UserCredential>);
+      ) as _i8.Future<_i4.UserCredential>);
 
   @override
-  _i6.Future<_i4.UserCredential> signInWithGitHub() => (super.noSuchMethod(
+  _i8.Future<_i4.UserCredential> signInWithGitHub() => (super.noSuchMethod(
         Invocation.method(
           #signInWithGitHub,
           [],
         ),
-        returnValue: _i6.Future<_i4.UserCredential>.value(_FakeUserCredential_4(
+        returnValue: _i8.Future<_i4.UserCredential>.value(_FakeUserCredential_4(
           this,
           Invocation.method(
             #signInWithGitHub,
@@ -1031,22 +1021,22 @@ class MockAuthRepository extends _i1.Mock implements _i12.AuthRepository {
           ),
         )),
         returnValueForMissingStub:
-            _i6.Future<_i4.UserCredential>.value(_FakeUserCredential_4(
+            _i8.Future<_i4.UserCredential>.value(_FakeUserCredential_4(
           this,
           Invocation.method(
             #signInWithGitHub,
             [],
           ),
         )),
-      ) as _i6.Future<_i4.UserCredential>);
+      ) as _i8.Future<_i4.UserCredential>);
 
   @override
-  _i6.Future<_i4.UserCredential> signInWithGithub() => (super.noSuchMethod(
+  _i8.Future<_i4.UserCredential> signInWithGithub() => (super.noSuchMethod(
         Invocation.method(
           #signInWithGithub,
           [],
         ),
-        returnValue: _i6.Future<_i4.UserCredential>.value(_FakeUserCredential_4(
+        returnValue: _i8.Future<_i4.UserCredential>.value(_FakeUserCredential_4(
           this,
           Invocation.method(
             #signInWithGithub,
@@ -1054,77 +1044,77 @@ class MockAuthRepository extends _i1.Mock implements _i12.AuthRepository {
           ),
         )),
         returnValueForMissingStub:
-            _i6.Future<_i4.UserCredential>.value(_FakeUserCredential_4(
+            _i8.Future<_i4.UserCredential>.value(_FakeUserCredential_4(
           this,
           Invocation.method(
             #signInWithGithub,
             [],
           ),
         )),
-      ) as _i6.Future<_i4.UserCredential>);
+      ) as _i8.Future<_i4.UserCredential>);
 
   @override
-  _i6.Future<void> signOut() => (super.noSuchMethod(
+  _i8.Future<void> signOut() => (super.noSuchMethod(
         Invocation.method(
           #signOut,
           [],
         ),
-        returnValue: _i6.Future<void>.value(),
-        returnValueForMissingStub: _i6.Future<void>.value(),
-      ) as _i6.Future<void>);
+        returnValue: _i8.Future<void>.value(),
+        returnValueForMissingStub: _i8.Future<void>.value(),
+      ) as _i8.Future<void>);
 
   @override
-  _i6.Future<void> signOutFromAllDevices() => (super.noSuchMethod(
+  _i8.Future<void> signOutFromAllDevices() => (super.noSuchMethod(
         Invocation.method(
           #signOutFromAllDevices,
           [],
         ),
-        returnValue: _i6.Future<void>.value(),
-        returnValueForMissingStub: _i6.Future<void>.value(),
-      ) as _i6.Future<void>);
+        returnValue: _i8.Future<void>.value(),
+        returnValueForMissingStub: _i8.Future<void>.value(),
+      ) as _i8.Future<void>);
 
   @override
-  _i6.Future<void> sendPasswordResetEmail(String? email) => (super.noSuchMethod(
+  _i8.Future<void> sendPasswordResetEmail(String? email) => (super.noSuchMethod(
         Invocation.method(
           #sendPasswordResetEmail,
           [email],
         ),
-        returnValue: _i6.Future<void>.value(),
-        returnValueForMissingStub: _i6.Future<void>.value(),
-      ) as _i6.Future<void>);
+        returnValue: _i8.Future<void>.value(),
+        returnValueForMissingStub: _i8.Future<void>.value(),
+      ) as _i8.Future<void>);
 
   @override
-  _i6.Future<void> verifyEmail() => (super.noSuchMethod(
+  _i8.Future<void> verifyEmail() => (super.noSuchMethod(
         Invocation.method(
           #verifyEmail,
           [],
         ),
-        returnValue: _i6.Future<void>.value(),
-        returnValueForMissingStub: _i6.Future<void>.value(),
-      ) as _i6.Future<void>);
+        returnValue: _i8.Future<void>.value(),
+        returnValueForMissingStub: _i8.Future<void>.value(),
+      ) as _i8.Future<void>);
 
   @override
-  _i6.Future<void> updatePassword(String? newPassword) => (super.noSuchMethod(
+  _i8.Future<void> updatePassword(String? newPassword) => (super.noSuchMethod(
         Invocation.method(
           #updatePassword,
           [newPassword],
         ),
-        returnValue: _i6.Future<void>.value(),
-        returnValueForMissingStub: _i6.Future<void>.value(),
-      ) as _i6.Future<void>);
+        returnValue: _i8.Future<void>.value(),
+        returnValueForMissingStub: _i8.Future<void>.value(),
+      ) as _i8.Future<void>);
 
   @override
-  _i6.Future<void> deleteAccount() => (super.noSuchMethod(
+  _i8.Future<void> deleteAccount() => (super.noSuchMethod(
         Invocation.method(
           #deleteAccount,
           [],
         ),
-        returnValue: _i6.Future<void>.value(),
-        returnValueForMissingStub: _i6.Future<void>.value(),
-      ) as _i6.Future<void>);
+        returnValue: _i8.Future<void>.value(),
+        returnValueForMissingStub: _i8.Future<void>.value(),
+      ) as _i8.Future<void>);
 
   @override
-  _i6.Future<void> reauthenticate(
+  _i8.Future<void> reauthenticate(
     String? email,
     String? password,
   ) =>
@@ -1136,84 +1126,84 @@ class MockAuthRepository extends _i1.Mock implements _i12.AuthRepository {
             password,
           ],
         ),
-        returnValue: _i6.Future<void>.value(),
-        returnValueForMissingStub: _i6.Future<void>.value(),
-      ) as _i6.Future<void>);
+        returnValue: _i8.Future<void>.value(),
+        returnValueForMissingStub: _i8.Future<void>.value(),
+      ) as _i8.Future<void>);
 
   @override
-  _i6.Future<List<String>> getUserConnections() => (super.noSuchMethod(
+  _i8.Future<List<String>> getUserConnections() => (super.noSuchMethod(
         Invocation.method(
           #getUserConnections,
           [],
         ),
-        returnValue: _i6.Future<List<String>>.value(<String>[]),
-        returnValueForMissingStub: _i6.Future<List<String>>.value(<String>[]),
-      ) as _i6.Future<List<String>>);
+        returnValue: _i8.Future<List<String>>.value(<String>[]),
+        returnValueForMissingStub: _i8.Future<List<String>>.value(<String>[]),
+      ) as _i8.Future<List<String>>);
 
   @override
-  _i6.Future<void> addConnection(String? userId) => (super.noSuchMethod(
+  _i8.Future<void> addConnection(String? userId) => (super.noSuchMethod(
         Invocation.method(
           #addConnection,
           [userId],
         ),
-        returnValue: _i6.Future<void>.value(),
-        returnValueForMissingStub: _i6.Future<void>.value(),
-      ) as _i6.Future<void>);
+        returnValue: _i8.Future<void>.value(),
+        returnValueForMissingStub: _i8.Future<void>.value(),
+      ) as _i8.Future<void>);
 
   @override
-  _i6.Future<void> removeConnection(String? userId) => (super.noSuchMethod(
+  _i8.Future<void> removeConnection(String? userId) => (super.noSuchMethod(
         Invocation.method(
           #removeConnection,
           [userId],
         ),
-        returnValue: _i6.Future<void>.value(),
-        returnValueForMissingStub: _i6.Future<void>.value(),
-      ) as _i6.Future<void>);
+        returnValue: _i8.Future<void>.value(),
+        returnValueForMissingStub: _i8.Future<void>.value(),
+      ) as _i8.Future<void>);
 
   @override
-  _i6.Future<Map<String, dynamic>?> getUserProfile(String? userId) =>
+  _i8.Future<Map<String, dynamic>?> getUserProfile(String? userId) =>
       (super.noSuchMethod(
         Invocation.method(
           #getUserProfile,
           [userId],
         ),
-        returnValue: _i6.Future<Map<String, dynamic>?>.value(),
-        returnValueForMissingStub: _i6.Future<Map<String, dynamic>?>.value(),
-      ) as _i6.Future<Map<String, dynamic>?>);
+        returnValue: _i8.Future<Map<String, dynamic>?>.value(),
+        returnValueForMissingStub: _i8.Future<Map<String, dynamic>?>.value(),
+      ) as _i8.Future<Map<String, dynamic>?>);
 
   @override
-  _i6.Future<void> linkWithGithub() => (super.noSuchMethod(
+  _i8.Future<void> linkWithGithub() => (super.noSuchMethod(
         Invocation.method(
           #linkWithGithub,
           [],
         ),
-        returnValue: _i6.Future<void>.value(),
-        returnValueForMissingStub: _i6.Future<void>.value(),
-      ) as _i6.Future<void>);
+        returnValue: _i8.Future<void>.value(),
+        returnValueForMissingStub: _i8.Future<void>.value(),
+      ) as _i8.Future<void>);
 
   @override
-  _i6.Future<void> unlinkProvider(String? providerId) => (super.noSuchMethod(
+  _i8.Future<void> unlinkProvider(String? providerId) => (super.noSuchMethod(
         Invocation.method(
           #unlinkProvider,
           [providerId],
         ),
-        returnValue: _i6.Future<void>.value(),
-        returnValueForMissingStub: _i6.Future<void>.value(),
-      ) as _i6.Future<void>);
+        returnValue: _i8.Future<void>.value(),
+        returnValueForMissingStub: _i8.Future<void>.value(),
+      ) as _i8.Future<void>);
 
   @override
-  _i6.Future<void> updateUserProfile(Map<String, dynamic>? data) =>
+  _i8.Future<void> updateUserProfile(Map<String, dynamic>? data) =>
       (super.noSuchMethod(
         Invocation.method(
           #updateUserProfile,
           [data],
         ),
-        returnValue: _i6.Future<void>.value(),
-        returnValueForMissingStub: _i6.Future<void>.value(),
-      ) as _i6.Future<void>);
+        returnValue: _i8.Future<void>.value(),
+        returnValueForMissingStub: _i8.Future<void>.value(),
+      ) as _i8.Future<void>);
 
   @override
-  _i6.Future<void> handleSocialSignIn(
+  _i8.Future<void> handleSocialSignIn(
     _i4.User? user,
     String? provider, {
     Map<String, dynamic>? additionalData,
@@ -1227,30 +1217,30 @@ class MockAuthRepository extends _i1.Mock implements _i12.AuthRepository {
           ],
           {#additionalData: additionalData},
         ),
-        returnValue: _i6.Future<void>.value(),
-        returnValueForMissingStub: _i6.Future<void>.value(),
-      ) as _i6.Future<void>);
+        returnValue: _i8.Future<void>.value(),
+        returnValueForMissingStub: _i8.Future<void>.value(),
+      ) as _i8.Future<void>);
 
   @override
-  _i6.Future<String?> getGithubAccessToken() => (super.noSuchMethod(
+  _i8.Future<String?> getGithubAccessToken() => (super.noSuchMethod(
         Invocation.method(
           #getGithubAccessToken,
           [],
         ),
-        returnValue: _i6.Future<String?>.value(),
-        returnValueForMissingStub: _i6.Future<String?>.value(),
-      ) as _i6.Future<String?>);
+        returnValue: _i8.Future<String?>.value(),
+        returnValueForMissingStub: _i8.Future<String?>.value(),
+      ) as _i8.Future<String?>);
 
   @override
-  _i6.Future<Map<String, dynamic>?> getGithubUserInfo(String? accessToken) =>
+  _i8.Future<Map<String, dynamic>?> getGithubUserInfo(String? accessToken) =>
       (super.noSuchMethod(
         Invocation.method(
           #getGithubUserInfo,
           [accessToken],
         ),
-        returnValue: _i6.Future<Map<String, dynamic>?>.value(),
-        returnValueForMissingStub: _i6.Future<Map<String, dynamic>?>.value(),
-      ) as _i6.Future<Map<String, dynamic>?>);
+        returnValue: _i8.Future<Map<String, dynamic>?>.value(),
+        returnValueForMissingStub: _i8.Future<Map<String, dynamic>?>.value(),
+      ) as _i8.Future<Map<String, dynamic>?>);
 }
 
 /// A class which mocks [ErrorHandlerService].
@@ -1299,247 +1289,75 @@ class MockErrorHandlerService extends _i1.Mock
       ) as bool);
 
   @override
-  _i6.Future<void> handleError(
-    dynamic error,
-    String? errorType, {
-    StackTrace? stackTrace,
+  void handleSuccess(String? message) => super.noSuchMethod(
+        Invocation.method(
+          #handleSuccess,
+          [message],
+        ),
+        returnValueForMissingStub: null,
+      );
+
+  @override
+  _i8.Future<void> handleError(
+    dynamic error, [
+    String? context,
     Map<String, dynamic>? metadata,
-  }) =>
+    StackTrace? stackTrace,
+  ]) =>
       (super.noSuchMethod(
         Invocation.method(
           #handleError,
           [
             error,
-            errorType,
-          ],
-          {
-            #stackTrace: stackTrace,
-            #metadata: metadata,
-          },
-        ),
-        returnValue: _i6.Future<void>.value(),
-        returnValueForMissingStub: _i6.Future<void>.value(),
-      ) as _i6.Future<void>);
-
-  @override
-  String? validateInput(
-    String? input, {
-    bool? sanitize = true,
-  }) =>
-      (super.noSuchMethod(
-        Invocation.method(
-          #validateInput,
-          [input],
-          {#sanitize: sanitize},
-        ),
-        returnValueForMissingStub: null,
-      ) as String?);
-
-  @override
-  String? validateEmail(String? email) => (super.noSuchMethod(
-        Invocation.method(
-          #validateEmail,
-          [email],
-        ),
-        returnValueForMissingStub: null,
-      ) as String?);
-
-  @override
-  String? validatePassword(String? password) => (super.noSuchMethod(
-        Invocation.method(
-          #validatePassword,
-          [password],
-        ),
-        returnValueForMissingStub: null,
-      ) as String?);
-
-  @override
-  String? validateFile(
-    String? fileName,
-    int? fileSize,
-  ) =>
-      (super.noSuchMethod(
-        Invocation.method(
-          #validateFile,
-          [
-            fileName,
-            fileSize,
-          ],
-        ),
-        returnValueForMissingStub: null,
-      ) as String?);
-
-  @override
-  _i6.Future<T> handleApiError<T>(_i6.Future<T> Function()? apiCall) =>
-      (super.noSuchMethod(
-        Invocation.method(
-          #handleApiError,
-          [apiCall],
-        ),
-        returnValue: _i8.ifNotNull(
-              _i8.dummyValueOrNull<T>(
-                this,
-                Invocation.method(
-                  #handleApiError,
-                  [apiCall],
-                ),
-              ),
-              (T v) => _i6.Future<T>.value(v),
-            ) ??
-            _FakeFuture_5<T>(
-              this,
-              Invocation.method(
-                #handleApiError,
-                [apiCall],
-              ),
-            ),
-        returnValueForMissingStub: _i8.ifNotNull(
-              _i8.dummyValueOrNull<T>(
-                this,
-                Invocation.method(
-                  #handleApiError,
-                  [apiCall],
-                ),
-              ),
-              (T v) => _i6.Future<T>.value(v),
-            ) ??
-            _FakeFuture_5<T>(
-              this,
-              Invocation.method(
-                #handleApiError,
-                [apiCall],
-              ),
-            ),
-      ) as _i6.Future<T>);
-
-  @override
-  void handleSuccess(
-    String? message, {
-    _i3.SnackPosition? position = _i3.SnackPosition.BOTTOM,
-  }) =>
-      super.noSuchMethod(
-        Invocation.method(
-          #handleSuccess,
-          [message],
-          {#position: position},
-        ),
-        returnValueForMissingStub: null,
-      );
-
-  @override
-  void handleWarning(
-    String? message, {
-    _i3.SnackPosition? position = _i3.SnackPosition.BOTTOM,
-  }) =>
-      super.noSuchMethod(
-        Invocation.method(
-          #handleWarning,
-          [message],
-          {#position: position},
-        ),
-        returnValueForMissingStub: null,
-      );
-
-  @override
-  void handleInfo(
-    String? message, {
-    _i3.SnackPosition? position = _i3.SnackPosition.BOTTOM,
-  }) =>
-      super.noSuchMethod(
-        Invocation.method(
-          #handleInfo,
-          [message],
-          {#position: position},
-        ),
-        returnValueForMissingStub: null,
-      );
-
-  @override
-  void showErrorDialog(
-    String? title,
-    String? message,
-  ) =>
-      super.noSuchMethod(
-        Invocation.method(
-          #showErrorDialog,
-          [
-            title,
-            message,
-          ],
-        ),
-        returnValueForMissingStub: null,
-      );
-
-  @override
-  void showSuccessDialog(
-    String? title,
-    String? message,
-  ) =>
-      super.noSuchMethod(
-        Invocation.method(
-          #showSuccessDialog,
-          [
-            title,
-            message,
-          ],
-        ),
-        returnValueForMissingStub: null,
-      );
-
-  @override
-  void showConfirmationDialog({
-    required String? title,
-    required String? message,
-    required _i10.VoidCallback? onConfirm,
-    String? confirmText = 'Yes',
-    String? cancelText = 'No',
-  }) =>
-      super.noSuchMethod(
-        Invocation.method(
-          #showConfirmationDialog,
-          [],
-          {
-            #title: title,
-            #message: message,
-            #onConfirm: onConfirm,
-            #confirmText: confirmText,
-            #cancelText: cancelText,
-          },
-        ),
-        returnValueForMissingStub: null,
-      );
-
-  @override
-  void logError(
-    String? message, [
-    dynamic error,
-    StackTrace? stackTrace,
-  ]) =>
-      super.noSuchMethod(
-        Invocation.method(
-          #logError,
-          [
-            message,
-            error,
+            context,
+            metadata,
             stackTrace,
           ],
         ),
-        returnValueForMissingStub: null,
-      );
+        returnValue: _i8.Future<void>.value(),
+        returnValueForMissingStub: _i8.Future<void>.value(),
+      ) as _i8.Future<void>);
 
   @override
-  void logInfo(String? message) => super.noSuchMethod(
+  void handleInfo(String? message) => super.noSuchMethod(
         Invocation.method(
-          #logInfo,
+          #handleInfo,
           [message],
         ),
         returnValueForMissingStub: null,
       );
 
   @override
-  void logWarning(String? message) => super.noSuchMethod(
+  void showError(String? message) => super.noSuchMethod(
         Invocation.method(
-          #logWarning,
+          #showError,
+          [message],
+        ),
+        returnValueForMissingStub: null,
+      );
+
+  @override
+  void showSuccess(String? message) => super.noSuchMethod(
+        Invocation.method(
+          #showSuccess,
+          [message],
+        ),
+        returnValueForMissingStub: null,
+      );
+
+  @override
+  void showWarning(String? message) => super.noSuchMethod(
+        Invocation.method(
+          #showWarning,
+          [message],
+        ),
+        returnValueForMissingStub: null,
+      );
+
+  @override
+  void showInfo(String? message) => super.noSuchMethod(
+        Invocation.method(
+          #showInfo,
           [message],
         ),
         returnValueForMissingStub: null,
@@ -1603,11 +1421,11 @@ class MockUser extends _i1.Mock implements _i4.User {
   @override
   _i4.UserMetadata get metadata => (super.noSuchMethod(
         Invocation.getter(#metadata),
-        returnValue: _FakeUserMetadata_6(
+        returnValue: _FakeUserMetadata_5(
           this,
           Invocation.getter(#metadata),
         ),
-        returnValueForMissingStub: _FakeUserMetadata_6(
+        returnValueForMissingStub: _FakeUserMetadata_5(
           this,
           Invocation.getter(#metadata),
         ),
@@ -1623,11 +1441,11 @@ class MockUser extends _i1.Mock implements _i4.User {
   @override
   String get uid => (super.noSuchMethod(
         Invocation.getter(#uid),
-        returnValue: _i8.dummyValue<String>(
+        returnValue: _i7.dummyValue<String>(
           this,
           Invocation.getter(#uid),
         ),
-        returnValueForMissingStub: _i8.dummyValue<String>(
+        returnValueForMissingStub: _i7.dummyValue<String>(
           this,
           Invocation.getter(#uid),
         ),
@@ -1636,46 +1454,46 @@ class MockUser extends _i1.Mock implements _i4.User {
   @override
   _i4.MultiFactor get multiFactor => (super.noSuchMethod(
         Invocation.getter(#multiFactor),
-        returnValue: _FakeMultiFactor_7(
+        returnValue: _FakeMultiFactor_6(
           this,
           Invocation.getter(#multiFactor),
         ),
-        returnValueForMissingStub: _FakeMultiFactor_7(
+        returnValueForMissingStub: _FakeMultiFactor_6(
           this,
           Invocation.getter(#multiFactor),
         ),
       ) as _i4.MultiFactor);
 
   @override
-  _i6.Future<void> delete() => (super.noSuchMethod(
+  _i8.Future<void> delete() => (super.noSuchMethod(
         Invocation.method(
           #delete,
           [],
         ),
-        returnValue: _i6.Future<void>.value(),
-        returnValueForMissingStub: _i6.Future<void>.value(),
-      ) as _i6.Future<void>);
+        returnValue: _i8.Future<void>.value(),
+        returnValueForMissingStub: _i8.Future<void>.value(),
+      ) as _i8.Future<void>);
 
   @override
-  _i6.Future<String?> getIdToken([bool? forceRefresh = false]) =>
+  _i8.Future<String?> getIdToken([bool? forceRefresh = false]) =>
       (super.noSuchMethod(
         Invocation.method(
           #getIdToken,
           [forceRefresh],
         ),
-        returnValue: _i6.Future<String?>.value(),
-        returnValueForMissingStub: _i6.Future<String?>.value(),
-      ) as _i6.Future<String?>);
+        returnValue: _i8.Future<String?>.value(),
+        returnValueForMissingStub: _i8.Future<String?>.value(),
+      ) as _i8.Future<String?>);
 
   @override
-  _i6.Future<_i4.IdTokenResult> getIdTokenResult(
+  _i8.Future<_i4.IdTokenResult> getIdTokenResult(
           [bool? forceRefresh = false]) =>
       (super.noSuchMethod(
         Invocation.method(
           #getIdTokenResult,
           [forceRefresh],
         ),
-        returnValue: _i6.Future<_i4.IdTokenResult>.value(_FakeIdTokenResult_8(
+        returnValue: _i8.Future<_i4.IdTokenResult>.value(_FakeIdTokenResult_7(
           this,
           Invocation.method(
             #getIdTokenResult,
@@ -1683,24 +1501,24 @@ class MockUser extends _i1.Mock implements _i4.User {
           ),
         )),
         returnValueForMissingStub:
-            _i6.Future<_i4.IdTokenResult>.value(_FakeIdTokenResult_8(
+            _i8.Future<_i4.IdTokenResult>.value(_FakeIdTokenResult_7(
           this,
           Invocation.method(
             #getIdTokenResult,
             [forceRefresh],
           ),
         )),
-      ) as _i6.Future<_i4.IdTokenResult>);
+      ) as _i8.Future<_i4.IdTokenResult>);
 
   @override
-  _i6.Future<_i4.UserCredential> linkWithCredential(
+  _i8.Future<_i4.UserCredential> linkWithCredential(
           _i4.AuthCredential? credential) =>
       (super.noSuchMethod(
         Invocation.method(
           #linkWithCredential,
           [credential],
         ),
-        returnValue: _i6.Future<_i4.UserCredential>.value(_FakeUserCredential_4(
+        returnValue: _i8.Future<_i4.UserCredential>.value(_FakeUserCredential_4(
           this,
           Invocation.method(
             #linkWithCredential,
@@ -1708,23 +1526,23 @@ class MockUser extends _i1.Mock implements _i4.User {
           ),
         )),
         returnValueForMissingStub:
-            _i6.Future<_i4.UserCredential>.value(_FakeUserCredential_4(
+            _i8.Future<_i4.UserCredential>.value(_FakeUserCredential_4(
           this,
           Invocation.method(
             #linkWithCredential,
             [credential],
           ),
         )),
-      ) as _i6.Future<_i4.UserCredential>);
+      ) as _i8.Future<_i4.UserCredential>);
 
   @override
-  _i6.Future<_i4.UserCredential> linkWithProvider(_i4.AuthProvider? provider) =>
+  _i8.Future<_i4.UserCredential> linkWithProvider(_i4.AuthProvider? provider) =>
       (super.noSuchMethod(
         Invocation.method(
           #linkWithProvider,
           [provider],
         ),
-        returnValue: _i6.Future<_i4.UserCredential>.value(_FakeUserCredential_4(
+        returnValue: _i8.Future<_i4.UserCredential>.value(_FakeUserCredential_4(
           this,
           Invocation.method(
             #linkWithProvider,
@@ -1732,24 +1550,24 @@ class MockUser extends _i1.Mock implements _i4.User {
           ),
         )),
         returnValueForMissingStub:
-            _i6.Future<_i4.UserCredential>.value(_FakeUserCredential_4(
+            _i8.Future<_i4.UserCredential>.value(_FakeUserCredential_4(
           this,
           Invocation.method(
             #linkWithProvider,
             [provider],
           ),
         )),
-      ) as _i6.Future<_i4.UserCredential>);
+      ) as _i8.Future<_i4.UserCredential>);
 
   @override
-  _i6.Future<_i4.UserCredential> reauthenticateWithProvider(
+  _i8.Future<_i4.UserCredential> reauthenticateWithProvider(
           _i4.AuthProvider? provider) =>
       (super.noSuchMethod(
         Invocation.method(
           #reauthenticateWithProvider,
           [provider],
         ),
-        returnValue: _i6.Future<_i4.UserCredential>.value(_FakeUserCredential_4(
+        returnValue: _i8.Future<_i4.UserCredential>.value(_FakeUserCredential_4(
           this,
           Invocation.method(
             #reauthenticateWithProvider,
@@ -1757,24 +1575,24 @@ class MockUser extends _i1.Mock implements _i4.User {
           ),
         )),
         returnValueForMissingStub:
-            _i6.Future<_i4.UserCredential>.value(_FakeUserCredential_4(
+            _i8.Future<_i4.UserCredential>.value(_FakeUserCredential_4(
           this,
           Invocation.method(
             #reauthenticateWithProvider,
             [provider],
           ),
         )),
-      ) as _i6.Future<_i4.UserCredential>);
+      ) as _i8.Future<_i4.UserCredential>);
 
   @override
-  _i6.Future<_i4.UserCredential> reauthenticateWithPopup(
+  _i8.Future<_i4.UserCredential> reauthenticateWithPopup(
           _i4.AuthProvider? provider) =>
       (super.noSuchMethod(
         Invocation.method(
           #reauthenticateWithPopup,
           [provider],
         ),
-        returnValue: _i6.Future<_i4.UserCredential>.value(_FakeUserCredential_4(
+        returnValue: _i8.Future<_i4.UserCredential>.value(_FakeUserCredential_4(
           this,
           Invocation.method(
             #reauthenticateWithPopup,
@@ -1782,34 +1600,34 @@ class MockUser extends _i1.Mock implements _i4.User {
           ),
         )),
         returnValueForMissingStub:
-            _i6.Future<_i4.UserCredential>.value(_FakeUserCredential_4(
+            _i8.Future<_i4.UserCredential>.value(_FakeUserCredential_4(
           this,
           Invocation.method(
             #reauthenticateWithPopup,
             [provider],
           ),
         )),
-      ) as _i6.Future<_i4.UserCredential>);
+      ) as _i8.Future<_i4.UserCredential>);
 
   @override
-  _i6.Future<void> reauthenticateWithRedirect(_i4.AuthProvider? provider) =>
+  _i8.Future<void> reauthenticateWithRedirect(_i4.AuthProvider? provider) =>
       (super.noSuchMethod(
         Invocation.method(
           #reauthenticateWithRedirect,
           [provider],
         ),
-        returnValue: _i6.Future<void>.value(),
-        returnValueForMissingStub: _i6.Future<void>.value(),
-      ) as _i6.Future<void>);
+        returnValue: _i8.Future<void>.value(),
+        returnValueForMissingStub: _i8.Future<void>.value(),
+      ) as _i8.Future<void>);
 
   @override
-  _i6.Future<_i4.UserCredential> linkWithPopup(_i4.AuthProvider? provider) =>
+  _i8.Future<_i4.UserCredential> linkWithPopup(_i4.AuthProvider? provider) =>
       (super.noSuchMethod(
         Invocation.method(
           #linkWithPopup,
           [provider],
         ),
-        returnValue: _i6.Future<_i4.UserCredential>.value(_FakeUserCredential_4(
+        returnValue: _i8.Future<_i4.UserCredential>.value(_FakeUserCredential_4(
           this,
           Invocation.method(
             #linkWithPopup,
@@ -1817,28 +1635,28 @@ class MockUser extends _i1.Mock implements _i4.User {
           ),
         )),
         returnValueForMissingStub:
-            _i6.Future<_i4.UserCredential>.value(_FakeUserCredential_4(
+            _i8.Future<_i4.UserCredential>.value(_FakeUserCredential_4(
           this,
           Invocation.method(
             #linkWithPopup,
             [provider],
           ),
         )),
-      ) as _i6.Future<_i4.UserCredential>);
+      ) as _i8.Future<_i4.UserCredential>);
 
   @override
-  _i6.Future<void> linkWithRedirect(_i4.AuthProvider? provider) =>
+  _i8.Future<void> linkWithRedirect(_i4.AuthProvider? provider) =>
       (super.noSuchMethod(
         Invocation.method(
           #linkWithRedirect,
           [provider],
         ),
-        returnValue: _i6.Future<void>.value(),
-        returnValueForMissingStub: _i6.Future<void>.value(),
-      ) as _i6.Future<void>);
+        returnValue: _i8.Future<void>.value(),
+        returnValueForMissingStub: _i8.Future<void>.value(),
+      ) as _i8.Future<void>);
 
   @override
-  _i6.Future<_i4.ConfirmationResult> linkWithPhoneNumber(
+  _i8.Future<_i4.ConfirmationResult> linkWithPhoneNumber(
     String? phoneNumber, [
     _i4.RecaptchaVerifier? verifier,
   ]) =>
@@ -1851,7 +1669,7 @@ class MockUser extends _i1.Mock implements _i4.User {
           ],
         ),
         returnValue:
-            _i6.Future<_i4.ConfirmationResult>.value(_FakeConfirmationResult_9(
+            _i8.Future<_i4.ConfirmationResult>.value(_FakeConfirmationResult_8(
           this,
           Invocation.method(
             #linkWithPhoneNumber,
@@ -1862,7 +1680,7 @@ class MockUser extends _i1.Mock implements _i4.User {
           ),
         )),
         returnValueForMissingStub:
-            _i6.Future<_i4.ConfirmationResult>.value(_FakeConfirmationResult_9(
+            _i8.Future<_i4.ConfirmationResult>.value(_FakeConfirmationResult_8(
           this,
           Invocation.method(
             #linkWithPhoneNumber,
@@ -1872,17 +1690,17 @@ class MockUser extends _i1.Mock implements _i4.User {
             ],
           ),
         )),
-      ) as _i6.Future<_i4.ConfirmationResult>);
+      ) as _i8.Future<_i4.ConfirmationResult>);
 
   @override
-  _i6.Future<_i4.UserCredential> reauthenticateWithCredential(
+  _i8.Future<_i4.UserCredential> reauthenticateWithCredential(
           _i4.AuthCredential? credential) =>
       (super.noSuchMethod(
         Invocation.method(
           #reauthenticateWithCredential,
           [credential],
         ),
-        returnValue: _i6.Future<_i4.UserCredential>.value(_FakeUserCredential_4(
+        returnValue: _i8.Future<_i4.UserCredential>.value(_FakeUserCredential_4(
           this,
           Invocation.method(
             #reauthenticateWithCredential,
@@ -1890,104 +1708,104 @@ class MockUser extends _i1.Mock implements _i4.User {
           ),
         )),
         returnValueForMissingStub:
-            _i6.Future<_i4.UserCredential>.value(_FakeUserCredential_4(
+            _i8.Future<_i4.UserCredential>.value(_FakeUserCredential_4(
           this,
           Invocation.method(
             #reauthenticateWithCredential,
             [credential],
           ),
         )),
-      ) as _i6.Future<_i4.UserCredential>);
+      ) as _i8.Future<_i4.UserCredential>);
 
   @override
-  _i6.Future<void> reload() => (super.noSuchMethod(
+  _i8.Future<void> reload() => (super.noSuchMethod(
         Invocation.method(
           #reload,
           [],
         ),
-        returnValue: _i6.Future<void>.value(),
-        returnValueForMissingStub: _i6.Future<void>.value(),
-      ) as _i6.Future<void>);
+        returnValue: _i8.Future<void>.value(),
+        returnValueForMissingStub: _i8.Future<void>.value(),
+      ) as _i8.Future<void>);
 
   @override
-  _i6.Future<void> sendEmailVerification(
+  _i8.Future<void> sendEmailVerification(
           [_i4.ActionCodeSettings? actionCodeSettings]) =>
       (super.noSuchMethod(
         Invocation.method(
           #sendEmailVerification,
           [actionCodeSettings],
         ),
-        returnValue: _i6.Future<void>.value(),
-        returnValueForMissingStub: _i6.Future<void>.value(),
-      ) as _i6.Future<void>);
+        returnValue: _i8.Future<void>.value(),
+        returnValueForMissingStub: _i8.Future<void>.value(),
+      ) as _i8.Future<void>);
 
   @override
-  _i6.Future<_i4.User> unlink(String? providerId) => (super.noSuchMethod(
+  _i8.Future<_i4.User> unlink(String? providerId) => (super.noSuchMethod(
         Invocation.method(
           #unlink,
           [providerId],
         ),
-        returnValue: _i6.Future<_i4.User>.value(_FakeUser_10(
+        returnValue: _i8.Future<_i4.User>.value(_FakeUser_9(
           this,
           Invocation.method(
             #unlink,
             [providerId],
           ),
         )),
-        returnValueForMissingStub: _i6.Future<_i4.User>.value(_FakeUser_10(
+        returnValueForMissingStub: _i8.Future<_i4.User>.value(_FakeUser_9(
           this,
           Invocation.method(
             #unlink,
             [providerId],
           ),
         )),
-      ) as _i6.Future<_i4.User>);
+      ) as _i8.Future<_i4.User>);
 
   @override
-  _i6.Future<void> updatePassword(String? newPassword) => (super.noSuchMethod(
+  _i8.Future<void> updatePassword(String? newPassword) => (super.noSuchMethod(
         Invocation.method(
           #updatePassword,
           [newPassword],
         ),
-        returnValue: _i6.Future<void>.value(),
-        returnValueForMissingStub: _i6.Future<void>.value(),
-      ) as _i6.Future<void>);
+        returnValue: _i8.Future<void>.value(),
+        returnValueForMissingStub: _i8.Future<void>.value(),
+      ) as _i8.Future<void>);
 
   @override
-  _i6.Future<void> updatePhoneNumber(
+  _i8.Future<void> updatePhoneNumber(
           _i4.PhoneAuthCredential? phoneCredential) =>
       (super.noSuchMethod(
         Invocation.method(
           #updatePhoneNumber,
           [phoneCredential],
         ),
-        returnValue: _i6.Future<void>.value(),
-        returnValueForMissingStub: _i6.Future<void>.value(),
-      ) as _i6.Future<void>);
+        returnValue: _i8.Future<void>.value(),
+        returnValueForMissingStub: _i8.Future<void>.value(),
+      ) as _i8.Future<void>);
 
   @override
-  _i6.Future<void> updateDisplayName(String? displayName) =>
+  _i8.Future<void> updateDisplayName(String? displayName) =>
       (super.noSuchMethod(
         Invocation.method(
           #updateDisplayName,
           [displayName],
         ),
-        returnValue: _i6.Future<void>.value(),
-        returnValueForMissingStub: _i6.Future<void>.value(),
-      ) as _i6.Future<void>);
+        returnValue: _i8.Future<void>.value(),
+        returnValueForMissingStub: _i8.Future<void>.value(),
+      ) as _i8.Future<void>);
 
   @override
-  _i6.Future<void> updatePhotoURL(String? photoURL) => (super.noSuchMethod(
+  _i8.Future<void> updatePhotoURL(String? photoURL) => (super.noSuchMethod(
         Invocation.method(
           #updatePhotoURL,
           [photoURL],
         ),
-        returnValue: _i6.Future<void>.value(),
-        returnValueForMissingStub: _i6.Future<void>.value(),
-      ) as _i6.Future<void>);
+        returnValue: _i8.Future<void>.value(),
+        returnValueForMissingStub: _i8.Future<void>.value(),
+      ) as _i8.Future<void>);
 
   @override
-  _i6.Future<void> updateProfile({
+  _i8.Future<void> updateProfile({
     String? displayName,
     String? photoURL,
   }) =>
@@ -2000,12 +1818,12 @@ class MockUser extends _i1.Mock implements _i4.User {
             #photoURL: photoURL,
           },
         ),
-        returnValue: _i6.Future<void>.value(),
-        returnValueForMissingStub: _i6.Future<void>.value(),
-      ) as _i6.Future<void>);
+        returnValue: _i8.Future<void>.value(),
+        returnValueForMissingStub: _i8.Future<void>.value(),
+      ) as _i8.Future<void>);
 
   @override
-  _i6.Future<void> verifyBeforeUpdateEmail(
+  _i8.Future<void> verifyBeforeUpdateEmail(
     String? newEmail, [
     _i4.ActionCodeSettings? actionCodeSettings,
   ]) =>
@@ -2017,7 +1835,7 @@ class MockUser extends _i1.Mock implements _i4.User {
             actionCodeSettings,
           ],
         ),
-        returnValue: _i6.Future<void>.value(),
-        returnValueForMissingStub: _i6.Future<void>.value(),
-      ) as _i6.Future<void>);
+        returnValue: _i8.Future<void>.value(),
+        returnValueForMissingStub: _i8.Future<void>.value(),
+      ) as _i8.Future<void>);
 }

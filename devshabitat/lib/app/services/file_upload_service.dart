@@ -73,7 +73,8 @@ class FileUploadService extends GetxService {
       await _errorHandler.handleError(
         e,
         ErrorHandlerService.FILE_ERROR,
-        stackTrace: stackTrace,
+        null,
+        stackTrace,
       );
       return null;
     }
@@ -103,7 +104,8 @@ class FileUploadService extends GetxService {
       await _errorHandler.handleError(
         e,
         ErrorHandlerService.FILE_ERROR,
-        stackTrace: stackTrace,
+        null,
+        stackTrace,
       );
     }
   }
@@ -117,7 +119,8 @@ class FileUploadService extends GetxService {
       await _errorHandler.handleError(
         e,
         ErrorHandlerService.FILE_ERROR,
-        stackTrace: stackTrace,
+        null,
+        stackTrace,
       );
       return null;
     }

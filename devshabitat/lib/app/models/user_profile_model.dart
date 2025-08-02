@@ -31,98 +31,132 @@ class Experience {
 class UserProfile {
   final String id;
   final String email;
-  final String fullName;
+  final String? displayName;
   final String? photoUrl;
   final String? bio;
-  final String? title;
-  final String? company;
-  final GeoPoint? location;
-  final String? locationName;
-  final String? githubUsername;
   final List<String> skills;
   final List<String> interests;
-  final List<String> languages;
+  final String? githubUsername;
   final int yearsOfExperience;
-  final bool isAvailableForWork;
+  final GeoPoint? location;
+  final DateTime? lastActive;
+  final bool isOnline;
+  final Map<String, dynamic>? metadata;
   final bool isRemote;
   final bool isFullTime;
   final bool isPartTime;
   final bool isFreelance;
-  final bool isInternship;
-  final DateTime? lastActive;
-  final bool isOnline;
-  final Map<String, String> socialLinks;
-  final List<String> portfolioUrls;
+  final String? title;
+  final String? company;
+  final String? locationName;
   final List<Map<String, dynamic>> workExperience;
-  final List<Map<String, dynamic>> education;
+  final Map<String, String> socialLinks;
+  final List<String> languages;
   final List<Map<String, dynamic>> projects;
-  final List<Map<String, dynamic>> certificates;
+  final List<Map<String, dynamic>> education;
+
+  String get fullName => displayName ?? email.split('@')[0];
 
   UserProfile({
     required this.id,
     required this.email,
-    required this.fullName,
+    this.displayName,
     this.photoUrl,
     this.bio,
-    this.title,
-    this.company,
-    this.location,
-    this.locationName,
+    required this.skills,
+    required this.interests,
     this.githubUsername,
-    this.skills = const [],
-    this.interests = const [],
-    this.languages = const [],
-    this.yearsOfExperience = 0,
-    this.isAvailableForWork = true,
+    required this.yearsOfExperience,
+    this.location,
+    this.lastActive,
+    required this.isOnline,
+    this.metadata,
     this.isRemote = false,
     this.isFullTime = false,
     this.isPartTime = false,
     this.isFreelance = false,
-    this.isInternship = false,
-    this.lastActive,
-    this.isOnline = false,
-    this.socialLinks = const {},
-    this.portfolioUrls = const [],
+    this.title,
+    this.company,
+    this.locationName,
     this.workExperience = const [],
-    this.education = const [],
+    this.socialLinks = const {},
+    this.languages = const [],
     this.projects = const [],
-    this.certificates = const [],
+    this.education = const [],
   });
+
+  Map<String, dynamic>? get locationMap {
+    if (location == null) return null;
+    return {
+      'latitude': location!.latitude,
+      'longitude': location!.longitude,
+    };
+  }
+
+  factory UserProfile.fromJson(Map<String, dynamic> json) {
+    return UserProfile(
+      id: json['id'] as String,
+      email: json['email'] as String,
+      displayName: json['displayName'] as String?,
+      photoUrl: json['photoUrl'] as String?,
+      bio: json['bio'] as String?,
+      skills: List<String>.from(json['skills'] ?? []),
+      interests: List<String>.from(json['interests'] ?? []),
+      githubUsername: json['githubUsername'] as String?,
+      yearsOfExperience: json['yearsOfExperience'] as int? ?? 0,
+      location: json['location'] as GeoPoint?,
+      lastActive: json['lastActive'] != null
+          ? (json['lastActive'] as Timestamp).toDate()
+          : null,
+      isOnline: json['isOnline'] as bool? ?? false,
+      metadata: json['metadata'] as Map<String, dynamic>?,
+      isRemote: json['isRemote'] as bool? ?? false,
+      isFullTime: json['isFullTime'] as bool? ?? false,
+      isPartTime: json['isPartTime'] as bool? ?? false,
+      isFreelance: json['isFreelance'] as bool? ?? false,
+      title: json['title'] as String?,
+      company: json['company'] as String?,
+      locationName: json['locationName'] as String?,
+      workExperience:
+          List<Map<String, dynamic>>.from(json['workExperience'] ?? []),
+      socialLinks: Map<String, String>.from(json['socialLinks'] ?? {}),
+      languages: List<String>.from(json['languages'] ?? []),
+      projects: List<Map<String, dynamic>>.from(json['projects'] ?? []),
+      education: List<Map<String, dynamic>>.from(json['education'] ?? []),
+    );
+  }
 
   factory UserProfile.fromFirestore(DocumentSnapshot doc) {
     final data = doc.data() as Map<String, dynamic>;
     return UserProfile(
       id: doc.id,
       email: data['email'] ?? '',
-      fullName: data['fullName'] ?? '',
+      displayName: data['displayName'],
       photoUrl: data['photoUrl'],
       bio: data['bio'],
-      title: data['title'],
-      company: data['company'],
-      location: data['location'] as GeoPoint?,
-      locationName: data['locationName'],
-      githubUsername: data['githubUsername'],
       skills: List<String>.from(data['skills'] ?? []),
       interests: List<String>.from(data['interests'] ?? []),
-      languages: List<String>.from(data['languages'] ?? []),
+      githubUsername: data['githubUsername'],
       yearsOfExperience: data['yearsOfExperience'] ?? 0,
-      isAvailableForWork: data['isAvailableForWork'] ?? true,
-      isRemote: data['isRemote'] ?? false,
-      isFullTime: data['isFullTime'] ?? false,
-      isPartTime: data['isPartTime'] ?? false,
-      isFreelance: data['isFreelance'] ?? false,
-      isInternship: data['isInternship'] ?? false,
+      location: data['location'],
       lastActive: data['lastActive'] != null
           ? (data['lastActive'] as Timestamp).toDate()
           : null,
       isOnline: data['isOnline'] ?? false,
-      socialLinks: Map<String, String>.from(data['socialLinks'] ?? {}),
-      portfolioUrls: List<String>.from(data['portfolioUrls'] ?? []),
+      metadata: data['metadata'],
+      isRemote: data['isRemote'] ?? false,
+      isFullTime: data['isFullTime'] ?? false,
+      isPartTime: data['isPartTime'] ?? false,
+      isFreelance: data['isFreelance'] ?? false,
+      title: data['title'],
+      company: data['company'],
+      locationName: data['locationName'],
       workExperience:
           List<Map<String, dynamic>>.from(data['workExperience'] ?? []),
-      education: List<Map<String, dynamic>>.from(data['education'] ?? []),
+      socialLinks: Map<String, String>.from(data['socialLinks'] ?? {}),
+      languages: List<String>.from(data['languages'] ?? []),
       projects: List<Map<String, dynamic>>.from(data['projects'] ?? []),
-      certificates: List<Map<String, dynamic>>.from(data['certificates'] ?? []),
+      education: List<Map<String, dynamic>>.from(data['education'] ?? []),
     );
   }
 
@@ -130,127 +164,76 @@ class UserProfile {
     return {
       'id': id,
       'email': email,
-      'fullName': fullName,
+      'displayName': displayName,
       'photoUrl': photoUrl,
       'bio': bio,
-      'title': title,
-      'company': company,
-      'location': location,
-      'locationName': locationName,
-      'githubUsername': githubUsername,
       'skills': skills,
       'interests': interests,
-      'languages': languages,
+      'githubUsername': githubUsername,
       'yearsOfExperience': yearsOfExperience,
-      'isAvailableForWork': isAvailableForWork,
+      'location': location,
+      'lastActive': lastActive != null ? Timestamp.fromDate(lastActive!) : null,
+      'isOnline': isOnline,
+      'metadata': metadata,
       'isRemote': isRemote,
       'isFullTime': isFullTime,
       'isPartTime': isPartTime,
       'isFreelance': isFreelance,
-      'isInternship': isInternship,
-      'lastActive': lastActive != null ? Timestamp.fromDate(lastActive!) : null,
-      'isOnline': isOnline,
-      'socialLinks': socialLinks,
-      'portfolioUrls': portfolioUrls,
+      'title': title,
+      'company': company,
+      'locationName': locationName,
       'workExperience': workExperience,
-      'education': education,
+      'socialLinks': socialLinks,
+      'languages': languages,
       'projects': projects,
-      'certificates': certificates,
+      'education': education,
     };
   }
 
   UserProfile copyWith({
     String? id,
     String? email,
-    String? fullName,
+    String? displayName,
     String? photoUrl,
     String? bio,
-    String? title,
-    String? company,
-    GeoPoint? location,
-    String? locationName,
-    String? githubUsername,
     List<String>? skills,
     List<String>? interests,
-    List<String>? languages,
+    String? githubUsername,
     int? yearsOfExperience,
-    bool? isAvailableForWork,
+    GeoPoint? location,
+    DateTime? lastActive,
+    bool? isOnline,
+    Map<String, dynamic>? metadata,
     bool? isRemote,
     bool? isFullTime,
     bool? isPartTime,
     bool? isFreelance,
-    bool? isInternship,
-    DateTime? lastActive,
-    bool? isOnline,
-    Map<String, String>? socialLinks,
-    List<String>? portfolioUrls,
-    List<Map<String, dynamic>>? workExperience,
-    List<Map<String, dynamic>>? education,
-    List<Map<String, dynamic>>? projects,
-    List<Map<String, dynamic>>? certificates,
   }) {
     return UserProfile(
       id: id ?? this.id,
       email: email ?? this.email,
-      fullName: fullName ?? this.fullName,
+      displayName: displayName ?? this.displayName,
       photoUrl: photoUrl ?? this.photoUrl,
       bio: bio ?? this.bio,
-      title: title ?? this.title,
-      company: company ?? this.company,
-      location: location ?? this.location,
-      locationName: locationName ?? this.locationName,
-      githubUsername: githubUsername ?? this.githubUsername,
       skills: skills ?? this.skills,
       interests: interests ?? this.interests,
-      languages: languages ?? this.languages,
+      githubUsername: githubUsername ?? this.githubUsername,
       yearsOfExperience: yearsOfExperience ?? this.yearsOfExperience,
-      isAvailableForWork: isAvailableForWork ?? this.isAvailableForWork,
+      location: location ?? this.location,
+      lastActive: lastActive ?? this.lastActive,
+      isOnline: isOnline ?? this.isOnline,
+      metadata: metadata ?? this.metadata,
       isRemote: isRemote ?? this.isRemote,
       isFullTime: isFullTime ?? this.isFullTime,
       isPartTime: isPartTime ?? this.isPartTime,
       isFreelance: isFreelance ?? this.isFreelance,
-      isInternship: isInternship ?? this.isInternship,
-      lastActive: lastActive ?? this.lastActive,
-      isOnline: isOnline ?? this.isOnline,
-      socialLinks: socialLinks ?? this.socialLinks,
-      portfolioUrls: portfolioUrls ?? this.portfolioUrls,
-      workExperience: workExperience ?? this.workExperience,
-      education: education ?? this.education,
-      projects: projects ?? this.projects,
-      certificates: certificates ?? this.certificates,
     );
   }
 
-  double calculateCompatibility(UserProfile other) {
-    // Basit bir uyumluluk hesaplama algoritması
-    double skillMatch = _calculateSkillMatch(other.skills);
-    double experienceMatch = _calculateExperienceMatch(other.yearsOfExperience);
-    double interestMatch = _calculateInterestMatch(other.interests);
-
-    return (skillMatch * 0.5) + (experienceMatch * 0.3) + (interestMatch * 0.2);
+  @override
+  String toString() {
+    return 'UserProfile(id: $id, email: $email, displayName: $displayName)';
   }
-
-  double _calculateSkillMatch(List<String> otherSkills) {
-    if (skills.isEmpty || otherSkills.isEmpty) return 0.0;
-    int matchCount =
-        skills.where((skill) => otherSkills.contains(skill)).length;
-    return matchCount / skills.length;
-  }
-
-  double _calculateExperienceMatch(int otherExperience) {
-    if (yearsOfExperience == 0 || otherExperience == 0) return 0.0;
-    int diff = (yearsOfExperience - otherExperience).abs();
-    return 1.0 - (diff / max(yearsOfExperience, otherExperience));
-  }
-
-  double _calculateInterestMatch(List<String> otherInterests) {
-    if (interests.isEmpty || otherInterests.isEmpty) return 0.0;
-    int matchCount =
-        interests.where((interest) => otherInterests.contains(interest)).length;
-    return matchCount / interests.length;
-  }
-
-  int max(int a, int b) => a > b ? a : b;
 }
 
 class WorkExperience {

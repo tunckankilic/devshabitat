@@ -2,6 +2,8 @@ import 'dart:async';
 import 'package:get/get.dart';
 import 'package:logger/logger.dart';
 import '../interfaces/disposable.dart';
+import 'package:flutter/foundation.dart';
+import 'package:flutter/painting.dart';
 
 class MemoryManagerService extends GetxService {
   static MemoryManagerService get to => Get.find();
@@ -10,6 +12,10 @@ class MemoryManagerService extends GetxService {
   final Map<String, StreamSubscription> _subscriptions = {};
   final Map<String, Timer> _timers = {};
   final Map<String, dynamic> _resources = {};
+  final _memoryThreshold = 100 * 1024 * 1024; // 100 MB
+  final _cacheTimeout = const Duration(minutes: 30);
+  final _memoryUsage = 0.obs;
+  Timer? _cleanupTimer;
 
   // Stream subscription'ları yönet
   void registerSubscription(String id, StreamSubscription subscription) {
@@ -154,10 +160,56 @@ class MemoryManagerService extends GetxService {
   }
 
   @override
+  void onInit() {
+    super.onInit();
+    _startMemoryMonitoring();
+  }
+
+  @override
   void onClose() {
-    disposeAll();
+    _cleanupTimer?.cancel();
     super.onClose();
   }
+
+  void _startMemoryMonitoring() {
+    _cleanupTimer = Timer.periodic(const Duration(minutes: 5), (timer) {
+      optimizeMemory();
+    });
+  }
+
+  Future<void> optimizeMemory() async {
+    try {
+      if (kDebugMode) {
+        print('Optimizing memory...');
+      }
+
+      // Clear image cache if memory usage is high
+      if (_memoryUsage.value > _memoryThreshold) {
+        PaintingBinding.instance.imageCache.clear();
+        PaintingBinding.instance.imageCache.clearLiveImages();
+      }
+
+      // Trigger garbage collection
+      await Future.delayed(const Duration(milliseconds: 100));
+
+      if (kDebugMode) {
+        print('Memory optimization completed');
+      }
+    } catch (e) {
+      if (kDebugMode) {
+        print('Memory optimization error: $e');
+      }
+    }
+  }
+
+  void updateMemoryUsage(int bytes) {
+    _memoryUsage.value = bytes;
+    if (bytes > _memoryThreshold) {
+      optimizeMemory();
+    }
+  }
+
+  bool get isMemoryOptimal => _memoryUsage.value <= _memoryThreshold;
 }
 
 // Controller'lar için mixin

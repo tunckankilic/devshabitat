@@ -1014,7 +1014,11 @@ class ProfessionalInsightsService extends GetxService {
     if (userProfile.title?.isNotEmpty ?? false) score += 0.1;
     if (userProfile.company?.isNotEmpty ?? false) score += 0.1;
     if (userProfile.location != null) score += 0.1;
-    if (userProfile.isAvailableForWork) score += 0.1;
+    if (userProfile.isFullTime ||
+        userProfile.isPartTime ||
+        userProfile.isFreelance) {
+      score += 0.1;
+    }
     if (userProfile.lastActive != null) {
       final daysSinceLastActive =
           DateTime.now().difference(userProfile.lastActive!).inDays;

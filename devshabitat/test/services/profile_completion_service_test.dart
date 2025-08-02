@@ -1,5 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:get/get.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:devshabitat/app/models/enhanced_user_model.dart' as enhanced;
 import 'package:devshabitat/app/models/profile_completion_model.dart';
 import 'package:devshabitat/app/models/user_profile_model.dart';
@@ -106,8 +107,12 @@ void main() {
           enhanced.WorkExperience(title: 'Developer', company: 'Test Company'),
         ],
         location: LocationModel(
-          latitude: 40.7128,
-          longitude: -74.0060,
+          userId: 'test-user',
+          location: GeoPoint(40.7128, -74.0060),
+          accuracy: 10.0,
+          speed: 0.0,
+          heading: 0.0,
+          timestamp: DateTime.now(),
           address: 'New York, NY',
         ),
       );
@@ -190,9 +195,12 @@ void main() {
       final profile = UserProfile(
         id: 'test-id',
         email: 'test@example.com',
-        fullName: 'Test User',
+        displayName: 'Test User',
         bio: 'I am a developer',
         skills: ['Flutter', 'Dart', 'JavaScript'],
+        interests: ['Mobile Development', 'Web Development'],
+        yearsOfExperience: 3,
+        isOnline: true,
         githubUsername: 'testuser',
         workExperience: [
           {
@@ -268,8 +276,12 @@ void main() {
           enhanced.WorkExperience(title: 'Developer', company: 'Test Company'),
         ],
         location: LocationModel(
-          latitude: 40.7128,
-          longitude: -74.0060,
+          userId: 'test-user',
+          location: GeoPoint(40.7128, -74.0060),
+          accuracy: 10.0,
+          speed: 0.0,
+          heading: 0.0,
+          timestamp: DateTime.now(),
           address: 'New York, NY',
         ),
         education: [

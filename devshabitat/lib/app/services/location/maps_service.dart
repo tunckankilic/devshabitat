@@ -1,13 +1,13 @@
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:geocoding/geocoding.dart';
 import 'package:get/get.dart';
-import '../../models/location/location_model.dart';
+import '../../models/location/location_data_model.dart';
 import '../../models/location/map_marker_model.dart';
 import 'dart:math';
 
 class MapsService extends GetxService {
   final markers = <Marker>{}.obs;
-  final selectedLocation = Rxn<LocationModel>();
+  final selectedLocation = Rxn<LocationDataModel>();
 
   Future<String?> getAddressFromCoordinates(double lat, double lng) async {
     try {
@@ -23,15 +23,15 @@ class MapsService extends GetxService {
     }
   }
 
-  Future<LocationModel?> getCoordinatesFromAddress(String address) async {
+  Future<LocationDataModel?> getCoordinatesFromAddress(String address) async {
     try {
       final locations = await locationFromAddress(address);
       if (locations.isNotEmpty) {
         final location = locations.first;
-        return LocationModel(
+        return LocationDataModel(
           latitude: location.latitude,
           longitude: location.longitude,
-          address: address,
+          timestamp: DateTime.now(),
         );
       }
       return null;
@@ -53,9 +53,8 @@ class MapsService extends GetxService {
     markers.clear();
   }
 
-  double calculateDistance(LocationModel start, LocationModel end) {
-    // Haversine formülü ile mesafe hesaplama
-    const double earthRadius = 6371; // km cinsinden
+  double calculateDistance(LocationDataModel start, LocationDataModel end) {
+    const double earthRadius = 6371;
     final double lat1 = start.latitude * (pi / 180);
     final double lat2 = end.latitude * (pi / 180);
     final double deltaLat = (end.latitude - start.latitude) * (pi / 180);

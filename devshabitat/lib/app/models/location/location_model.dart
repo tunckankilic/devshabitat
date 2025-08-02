@@ -1,35 +1,72 @@
-import 'package:json_annotation/json_annotation.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'location_data_model.dart';
 
-part 'location_model.g.dart';
-
-@JsonSerializable()
 class LocationModel {
-  final double latitude;
-  final double longitude;
+  final String userId;
+  final GeoPoint location;
+  final double accuracy;
+  final DateTime timestamp;
+  final double speed;
+  final double heading;
   final String? address;
-  final double? accuracy;
-  final double? altitude;
-  final double? speed;
-  final double? heading;
-  final DateTime? timestamp;
+
+  double get latitude => location.latitude;
+  double get longitude => location.longitude;
 
   LocationModel({
-    required this.latitude,
-    required this.longitude,
+    required this.userId,
+    required this.location,
+    required this.accuracy,
+    required this.timestamp,
+    required this.speed,
+    required this.heading,
     this.address,
-    this.accuracy,
-    this.altitude,
-    this.speed,
-    this.heading,
-    this.timestamp,
   });
 
-  factory LocationModel.fromJson(Map<String, dynamic> json) =>
-      _$LocationModelFromJson(json);
+  factory LocationModel.fromJson(Map<String, dynamic> json) {
+    return LocationModel(
+      userId: json['userId'] as String,
+      location: json['location'] as GeoPoint,
+      accuracy: (json['accuracy'] as num).toDouble(),
+      timestamp: (json['timestamp'] as Timestamp).toDate(),
+      speed: (json['speed'] as num).toDouble(),
+      heading: (json['heading'] as num).toDouble(),
+      address: json['address'] as String?,
+    );
+  }
 
-  Map<String, dynamic> toJson() => _$LocationModelToJson(this);
+  factory LocationModel.fromLocationData(LocationDataModel data) {
+    return LocationModel(
+      userId:
+          '', // Boş string olarak bırakıyoruz çünkü bu bilgi LocationDataModel'de yok
+      location: GeoPoint(data.latitude, data.longitude),
+      accuracy: data.accuracy ?? 0.0,
+      timestamp: data.timestamp ?? DateTime.now(),
+      speed: data.speed ?? 0.0,
+      heading: data.heading ?? 0.0,
+    );
+  }
 
-  @override
-  String toString() =>
-      'LocationModel(lat: $latitude, lng: $longitude, address: $address)';
+  Map<String, dynamic> toJson() {
+    return {
+      'userId': userId,
+      'location': location,
+      'accuracy': accuracy,
+      'timestamp': Timestamp.fromDate(timestamp),
+      'speed': speed,
+      'heading': heading,
+      'address': address,
+    };
+  }
+
+  LocationDataModel toLocationData() {
+    return LocationDataModel(
+      latitude: location.latitude,
+      longitude: location.longitude,
+      accuracy: accuracy,
+      speed: speed,
+      heading: heading,
+      timestamp: timestamp,
+    );
+  }
 }

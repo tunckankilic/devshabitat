@@ -1283,6 +1283,13 @@ class MockFeedService extends _i1.Mock implements _i14.FeedService {
 /// See the documentation for Mockito's code generation for more information.
 class MockConnectionService extends _i1.Mock implements _i17.ConnectionService {
   @override
+  bool get hasMoreData => (super.noSuchMethod(
+        Invocation.getter(#hasMoreData),
+        returnValue: false,
+        returnValueForMissingStub: false,
+      ) as bool);
+
+  @override
   _i2.InternalFinalCallback<void> get onStart => (super.noSuchMethod(
         Invocation.getter(#onStart),
         returnValue: _FakeInternalFinalCallback_0<void>(
@@ -1323,20 +1330,14 @@ class MockConnectionService extends _i1.Mock implements _i17.ConnectionService {
       ) as bool);
 
   @override
-  _i8.Future<int> getConnectionCount() => (super.noSuchMethod(
-        Invocation.method(
-          #getConnectionCount,
-          [],
-        ),
-        returnValue: _i8.Future<int>.value(0),
-        returnValueForMissingStub: _i8.Future<int>.value(0),
-      ) as _i8.Future<int>);
-
-  @override
   _i8.Future<List<_i18.ConnectionModel>> getConnections({
-    required String? userId,
-    String? status = 'accepted',
-    int? limit = 10,
+    String? userId,
+    String? searchQuery,
+    List<String>? skills,
+    int? maxDistance,
+    bool? isOnline,
+    _i6.DocumentSnapshot<Object?>? startAfter,
+    int? limit = 20,
   }) =>
       (super.noSuchMethod(
         Invocation.method(
@@ -1344,7 +1345,11 @@ class MockConnectionService extends _i1.Mock implements _i17.ConnectionService {
           [],
           {
             #userId: userId,
-            #status: status,
+            #searchQuery: searchQuery,
+            #skills: skills,
+            #maxDistance: maxDistance,
+            #isOnline: isOnline,
+            #startAfter: startAfter,
             #limit: limit,
           },
         ),
@@ -1355,33 +1360,34 @@ class MockConnectionService extends _i1.Mock implements _i17.ConnectionService {
       ) as _i8.Future<List<_i18.ConnectionModel>>);
 
   @override
-  _i8.Future<void> sendConnectionRequest(String? targetUserId) =>
+  _i8.Future<List<_i18.ConnectionModel>> loadMoreConnections({
+    String? searchQuery,
+    List<String>? skills,
+    int? maxDistance,
+    bool? isOnline,
+  }) =>
       (super.noSuchMethod(
         Invocation.method(
-          #sendConnectionRequest,
-          [targetUserId],
+          #loadMoreConnections,
+          [],
+          {
+            #searchQuery: searchQuery,
+            #skills: skills,
+            #maxDistance: maxDistance,
+            #isOnline: isOnline,
+          },
         ),
-        returnValue: _i8.Future<void>.value(),
-        returnValueForMissingStub: _i8.Future<void>.value(),
-      ) as _i8.Future<void>);
+        returnValue: _i8.Future<List<_i18.ConnectionModel>>.value(
+            <_i18.ConnectionModel>[]),
+        returnValueForMissingStub: _i8.Future<List<_i18.ConnectionModel>>.value(
+            <_i18.ConnectionModel>[]),
+      ) as _i8.Future<List<_i18.ConnectionModel>>);
 
   @override
-  _i8.Future<void> acceptConnectionRequest(String? connectionId) =>
-      (super.noSuchMethod(
+  _i8.Future<void> resetPagination() => (super.noSuchMethod(
         Invocation.method(
-          #acceptConnectionRequest,
-          [connectionId],
-        ),
-        returnValue: _i8.Future<void>.value(),
-        returnValueForMissingStub: _i8.Future<void>.value(),
-      ) as _i8.Future<void>);
-
-  @override
-  _i8.Future<void> rejectConnectionRequest(String? connectionId) =>
-      (super.noSuchMethod(
-        Invocation.method(
-          #rejectConnectionRequest,
-          [connectionId],
+          #resetPagination,
+          [],
         ),
         returnValue: _i8.Future<void>.value(),
         returnValueForMissingStub: _i8.Future<void>.value(),
@@ -1397,6 +1403,35 @@ class MockConnectionService extends _i1.Mock implements _i17.ConnectionService {
         returnValue: _i8.Future<void>.value(),
         returnValueForMissingStub: _i8.Future<void>.value(),
       ) as _i8.Future<void>);
+
+  @override
+  _i8.Future<void> addConnection(String? connectionId) => (super.noSuchMethod(
+        Invocation.method(
+          #addConnection,
+          [connectionId],
+        ),
+        returnValue: _i8.Future<void>.value(),
+        returnValueForMissingStub: _i8.Future<void>.value(),
+      ) as _i8.Future<void>);
+
+  @override
+  Map<String, dynamic> getCacheStats() => (super.noSuchMethod(
+        Invocation.method(
+          #getCacheStats,
+          [],
+        ),
+        returnValue: <String, dynamic>{},
+        returnValueForMissingStub: <String, dynamic>{},
+      ) as Map<String, dynamic>);
+
+  @override
+  void clearCache() => super.noSuchMethod(
+        Invocation.method(
+          #clearCache,
+          [],
+        ),
+        returnValueForMissingStub: null,
+      );
 
   @override
   void onInit() => super.noSuchMethod(

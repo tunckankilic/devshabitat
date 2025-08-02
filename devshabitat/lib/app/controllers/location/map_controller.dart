@@ -135,7 +135,10 @@ class MapController extends GetxController {
   }
 
   Future<LocationModel?> getLocationFromAddress(String address) async {
-    return _mapsService.getCoordinatesFromAddress(address);
+    final locationData = await _mapsService.getCoordinatesFromAddress(address);
+    return locationData != null
+        ? LocationModel.fromLocationData(locationData)
+        : null;
   }
 
   void onCameraMove(CameraPosition position) {

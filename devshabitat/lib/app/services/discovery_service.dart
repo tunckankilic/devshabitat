@@ -202,8 +202,8 @@ class DiscoveryService extends GetxService {
 
         // Check if connection already exists
         final existingConnection = await _connectionsCollection
-            .where('senderId', isEqualTo: senderId)
-            .where('recipientId', isEqualTo: recipientId)
+            .where('userId', isEqualTo: senderId)
+            .where('targetUserId', isEqualTo: recipientId)
             .get();
 
         if (existingConnection.docs.isNotEmpty) {
@@ -213,14 +213,17 @@ class DiscoveryService extends GetxService {
         // Create new connection request
         final connection = ConnectionModel(
           id: '',
-          fromUserId: senderId,
-          toUserId: recipientId,
-          status: ConnectionStatus.pending,
+          userId: senderId,
+          targetUserId: recipientId,
+          status: ConnectionStatus.pending.toString().split('.').last,
           createdAt: DateTime.now(),
-          updatedAt: DateTime.now(),
+          lastActive: DateTime.now(),
+          skills: [],
+          isOnline: false,
+          yearsOfExperience: 0,
         );
 
-        await _connectionsCollection.add(connection.toMap());
+        await _connectionsCollection.add(connection.toJson());
 
         // Update analytics
         await _updateConnectionAnalytics(senderId);
@@ -247,8 +250,8 @@ class DiscoveryService extends GetxService {
         final data = request.data() as Map<String, dynamic>;
 
         // Update analytics for both users
-        await _updateConnectionAnalytics(data['senderId']);
-        await _updateConnectionAnalytics(data['recipientId']);
+        await _updateConnectionAnalytics(data['userId']);
+        await _updateConnectionAnalytics(data['targetUserId']);
       }
 
       return true;
@@ -260,13 +263,15 @@ class DiscoveryService extends GetxService {
 
   // Get connection requests
   Stream<List<ConnectionModel>> getConnectionRequests(String userId) {
-    return _connectionsCollection
-        .where('recipientId', isEqualTo: userId)
+    return _firestore
+        .collection('connections')
+        .where('targetUserId', isEqualTo: userId)
         .where('status',
             isEqualTo: ConnectionStatus.pending.toString().split('.').last)
         .snapshots()
         .map((snapshot) => snapshot.docs
-            .map((doc) => ConnectionModel.fromFirestore(doc))
+            .map((doc) =>
+                ConnectionModel.fromJson(doc.data() as Map<String, dynamic>))
             .toList());
   }
 
@@ -276,28 +281,24 @@ class DiscoveryService extends GetxService {
         .where('status',
             isEqualTo: ConnectionStatus.accepted.toString().split('.').last)
         .where(Filter.or(
-          Filter('senderId', isEqualTo: userId),
-          Filter('recipientId', isEqualTo: userId),
+          Filter('userId', isEqualTo: userId),
+          Filter('targetUserId', isEqualTo: userId),
         ))
         .snapshots()
         .asyncMap((snapshot) async {
-      final connections = snapshot.docs;
-      final connectedUserIds = connections.map((doc) {
-        final data = doc.data() as Map<String, dynamic>;
-        return data['senderId'] == userId
-            ? data['recipientId']
-            : data['senderId'];
-      }).toList();
-
-      if (connectedUserIds.isEmpty) return [];
-
-      final userDocs = await _usersCollection
-          .where(FieldPath.documentId, whereIn: connectedUserIds)
-          .get();
-
-      return userDocs.docs
-          .map((doc) => UserProfile.fromFirestore(doc))
-          .toList();
+      final List<UserProfile> connections = [];
+      for (var doc in snapshot.docs) {
+        final connection =
+            ConnectionModel.fromJson(doc.data() as Map<String, dynamic>);
+        final userDoc = await _firestore
+            .collection('users')
+            .doc(connection.targetUserId)
+            .get();
+        if (userDoc.exists) {
+          connections.add(UserProfile.fromFirestore(userDoc));
+        }
+      }
+      return connections;
     });
   }
 
@@ -309,24 +310,27 @@ class DiscoveryService extends GetxService {
       // Create blocking connection
       final connection = ConnectionModel(
         id: '',
-        fromUserId: currentUserId,
-        toUserId: userId,
-        status: ConnectionStatus.blocked,
+        userId: currentUserId,
+        targetUserId: userId,
+        status: ConnectionStatus.blocked.toString().split('.').last,
         createdAt: DateTime.now(),
-        updatedAt: DateTime.now(),
+        lastActive: DateTime.now(),
+        skills: [],
+        isOnline: false,
+        yearsOfExperience: 0,
       );
 
-      await _connectionsCollection.add(connection.toMap());
+      await _connectionsCollection.add(connection.toJson());
 
       // Remove any existing connections
       final existingConnections = await _connectionsCollection
           .where(Filter.or(
-            Filter('senderId', isEqualTo: currentUserId),
-            Filter('recipientId', isEqualTo: currentUserId),
+            Filter('userId', isEqualTo: currentUserId),
+            Filter('targetUserId', isEqualTo: currentUserId),
           ))
           .where(Filter.or(
-            Filter('senderId', isEqualTo: userId),
-            Filter('recipientId', isEqualTo: userId),
+            Filter('userId', isEqualTo: userId),
+            Filter('targetUserId', isEqualTo: userId),
           ))
           .get();
 
@@ -378,7 +382,7 @@ class DiscoveryService extends GetxService {
             isEqualTo: ConnectionStatus.pending.toString().split('.').last)
         .snapshots()
         .map((snapshot) => snapshot.docs
-            .map((doc) => ConnectionModel.fromFirestore(doc))
+            .map((doc) => ConnectionModel.fromJson(doc.data()))
             .toList());
   }
 
@@ -392,9 +396,11 @@ class DiscoveryService extends GetxService {
         .asyncMap((snapshot) async {
       final List<UserProfile> connections = [];
       for (var doc in snapshot.docs) {
-        final connection = ConnectionModel.fromFirestore(doc);
-        final userDoc =
-            await _firestore.collection('users').doc(connection.toUserId).get();
+        final connection = ConnectionModel.fromJson(doc.data());
+        final userDoc = await _firestore
+            .collection('users')
+            .doc(connection.targetUserId)
+            .get();
         if (userDoc.exists) {
           connections.add(UserProfile.fromFirestore(userDoc));
         }

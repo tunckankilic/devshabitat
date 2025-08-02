@@ -2,7 +2,7 @@
 // in devshabitat/test/test_helper.dart.
 // Do not manually edit this file.
 
-// ignore_for_file: no_leading_underscores_for_library_prefixes, duplicate_ignore
+// ignore_for_file: no_leading_underscores_for_library_prefixes
 import 'dart:async' as _i5;
 import 'dart:typed_data' as _i14;
 import 'dart:ui' as _i19;
@@ -2869,247 +2869,75 @@ class MockErrorHandlerService extends _i1.Mock
       ) as bool);
 
   @override
+  void handleSuccess(String? message) => super.noSuchMethod(
+        Invocation.method(
+          #handleSuccess,
+          [message],
+        ),
+        returnValueForMissingStub: null,
+      );
+
+  @override
   _i5.Future<void> handleError(
-    dynamic error,
-    String? errorType, {
-    StackTrace? stackTrace,
+    dynamic error, [
+    String? context,
     Map<String, dynamic>? metadata,
-  }) =>
+    StackTrace? stackTrace,
+  ]) =>
       (super.noSuchMethod(
         Invocation.method(
           #handleError,
           [
             error,
-            errorType,
+            context,
+            metadata,
+            stackTrace,
           ],
-          {
-            #stackTrace: stackTrace,
-            #metadata: metadata,
-          },
         ),
         returnValue: _i5.Future<void>.value(),
         returnValueForMissingStub: _i5.Future<void>.value(),
       ) as _i5.Future<void>);
 
   @override
-  String? validateInput(
-    String? input, {
-    bool? sanitize = true,
-  }) =>
-      (super.noSuchMethod(
-        Invocation.method(
-          #validateInput,
-          [input],
-          {#sanitize: sanitize},
-        ),
-        returnValueForMissingStub: null,
-      ) as String?);
-
-  @override
-  String? validateEmail(String? email) => (super.noSuchMethod(
-        Invocation.method(
-          #validateEmail,
-          [email],
-        ),
-        returnValueForMissingStub: null,
-      ) as String?);
-
-  @override
-  String? validatePassword(String? password) => (super.noSuchMethod(
-        Invocation.method(
-          #validatePassword,
-          [password],
-        ),
-        returnValueForMissingStub: null,
-      ) as String?);
-
-  @override
-  String? validateFile(
-    String? fileName,
-    int? fileSize,
-  ) =>
-      (super.noSuchMethod(
-        Invocation.method(
-          #validateFile,
-          [
-            fileName,
-            fileSize,
-          ],
-        ),
-        returnValueForMissingStub: null,
-      ) as String?);
-
-  @override
-  _i5.Future<T> handleApiError<T>(_i5.Future<T> Function()? apiCall) =>
-      (super.noSuchMethod(
-        Invocation.method(
-          #handleApiError,
-          [apiCall],
-        ),
-        returnValue: _i13.ifNotNull(
-              _i13.dummyValueOrNull<T>(
-                this,
-                Invocation.method(
-                  #handleApiError,
-                  [apiCall],
-                ),
-              ),
-              (T v) => _i5.Future<T>.value(v),
-            ) ??
-            _FakeFuture_12<T>(
-              this,
-              Invocation.method(
-                #handleApiError,
-                [apiCall],
-              ),
-            ),
-        returnValueForMissingStub: _i13.ifNotNull(
-              _i13.dummyValueOrNull<T>(
-                this,
-                Invocation.method(
-                  #handleApiError,
-                  [apiCall],
-                ),
-              ),
-              (T v) => _i5.Future<T>.value(v),
-            ) ??
-            _FakeFuture_12<T>(
-              this,
-              Invocation.method(
-                #handleApiError,
-                [apiCall],
-              ),
-            ),
-      ) as _i5.Future<T>);
-
-  @override
-  void handleSuccess(
-    String? message, {
-    _i11.SnackPosition? position = _i11.SnackPosition.BOTTOM,
-  }) =>
-      super.noSuchMethod(
-        Invocation.method(
-          #handleSuccess,
-          [message],
-          {#position: position},
-        ),
-        returnValueForMissingStub: null,
-      );
-
-  @override
-  void handleWarning(
-    String? message, {
-    _i11.SnackPosition? position = _i11.SnackPosition.BOTTOM,
-  }) =>
-      super.noSuchMethod(
-        Invocation.method(
-          #handleWarning,
-          [message],
-          {#position: position},
-        ),
-        returnValueForMissingStub: null,
-      );
-
-  @override
-  void handleInfo(
-    String? message, {
-    _i11.SnackPosition? position = _i11.SnackPosition.BOTTOM,
-  }) =>
-      super.noSuchMethod(
+  void handleInfo(String? message) => super.noSuchMethod(
         Invocation.method(
           #handleInfo,
           [message],
-          {#position: position},
         ),
         returnValueForMissingStub: null,
       );
 
   @override
-  void showErrorDialog(
-    String? title,
-    String? message,
-  ) =>
-      super.noSuchMethod(
+  void showError(String? message) => super.noSuchMethod(
         Invocation.method(
-          #showErrorDialog,
-          [
-            title,
-            message,
-          ],
-        ),
-        returnValueForMissingStub: null,
-      );
-
-  @override
-  void showSuccessDialog(
-    String? title,
-    String? message,
-  ) =>
-      super.noSuchMethod(
-        Invocation.method(
-          #showSuccessDialog,
-          [
-            title,
-            message,
-          ],
-        ),
-        returnValueForMissingStub: null,
-      );
-
-  @override
-  void showConfirmationDialog({
-    required String? title,
-    required String? message,
-    required _i19.VoidCallback? onConfirm,
-    String? confirmText = 'Yes',
-    String? cancelText = 'No',
-  }) =>
-      super.noSuchMethod(
-        Invocation.method(
-          #showConfirmationDialog,
-          [],
-          {
-            #title: title,
-            #message: message,
-            #onConfirm: onConfirm,
-            #confirmText: confirmText,
-            #cancelText: cancelText,
-          },
-        ),
-        returnValueForMissingStub: null,
-      );
-
-  @override
-  void logError(
-    String? message, [
-    dynamic error,
-    StackTrace? stackTrace,
-  ]) =>
-      super.noSuchMethod(
-        Invocation.method(
-          #logError,
-          [
-            message,
-            error,
-            stackTrace,
-          ],
-        ),
-        returnValueForMissingStub: null,
-      );
-
-  @override
-  void logInfo(String? message) => super.noSuchMethod(
-        Invocation.method(
-          #logInfo,
+          #showError,
           [message],
         ),
         returnValueForMissingStub: null,
       );
 
   @override
-  void logWarning(String? message) => super.noSuchMethod(
+  void showSuccess(String? message) => super.noSuchMethod(
         Invocation.method(
-          #logWarning,
+          #showSuccess,
+          [message],
+        ),
+        returnValueForMissingStub: null,
+      );
+
+  @override
+  void showWarning(String? message) => super.noSuchMethod(
+        Invocation.method(
+          #showWarning,
+          [message],
+        ),
+        returnValueForMissingStub: null,
+      );
+
+  @override
+  void showInfo(String? message) => super.noSuchMethod(
+        Invocation.method(
+          #showInfo,
           [message],
         ),
         returnValueForMissingStub: null,

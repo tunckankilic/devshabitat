@@ -59,8 +59,8 @@ class NearbyDevelopersController extends GetxController {
         if (developer.location == null) continue;
 
         final distance = _mapsService.calculateDistance(
-          currentLocation.value!,
-          developer.location!,
+          currentLocation.value!.toLocationData(),
+          developer.location!.toLocationData(),
         );
 
         if (distance <= searchRadius.value) {
@@ -71,12 +71,12 @@ class NearbyDevelopersController extends GetxController {
       // Mesafeye göre sırala
       nearbyDevs.sort((a, b) {
         final distanceA = _mapsService.calculateDistance(
-          currentLocation.value!,
-          a.location!,
+          currentLocation.value!.toLocationData(),
+          a.location!.toLocationData(),
         );
         final distanceB = _mapsService.calculateDistance(
-          currentLocation.value!,
-          b.location!,
+          currentLocation.value!.toLocationData(),
+          b.location!.toLocationData(),
         );
         return distanceA.compareTo(distanceB);
       });
@@ -104,8 +104,8 @@ class NearbyDevelopersController extends GetxController {
     }
 
     final distance = _mapsService.calculateDistance(
-      currentLocation.value!,
-      developer.location!,
+      currentLocation.value!.toLocationData(),
+      developer.location!.toLocationData(),
     );
 
     if (distance < 1) {
@@ -238,12 +238,12 @@ class NearbyDevelopersController extends GetxController {
         developers.sort((a, b) {
           if (currentLocation.value == null) return 0;
           final distanceA = _mapsService.calculateDistance(
-            currentLocation.value!,
-            a.location!,
+            currentLocation.value!.toLocationData(),
+            a.location!.toLocationData(),
           );
           final distanceB = _mapsService.calculateDistance(
-            currentLocation.value!,
-            b.location!,
+            currentLocation.value!.toLocationData(),
+            b.location!.toLocationData(),
           );
           return distanceA.compareTo(distanceB);
         });
