@@ -1,6 +1,5 @@
 import 'package:devshabitat/app/controllers/auth_controller.dart';
 import 'package:devshabitat/app/repositories/auth_repository.dart';
-import 'package:devshabitat/app/services/sound_service.dart';
 import 'package:get/get.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../core/services/error_handler_service.dart';
@@ -61,7 +60,6 @@ class AppBinding extends Bindings {
     Get.put(ApiOptimizationService());
     Get.put(DeepLinkingService());
     Get.put(NetworkAnalyticsService());
-    Get.put(SoundService(), permanent: true);
     // Location Services
     Get.put(MapsService());
 

@@ -1,16 +1,23 @@
 class GitHubConfig {
-  static String get clientId =>
-      'YOUR_GITHUB_CLIENT_ID'; // GitHub Developer Settings'den alınacak
-  static String get clientSecret =>
-      'YOUR_GITHUB_CLIENT_SECRET'; // GitHub Developer Settings'den alınacak
+  // GitHub OAuth App credentials
+  static String get clientId => 'Ov23liXVAiwWDSST2Sun';
 
-  // Firebase Auth handler URL'i
-  static String get redirectUrl =>
-      'devshabitat://oauth/github'; // iOS URL scheme ile eşleşmeli
+  static String get clientSecret => 'a7ba81a9fee6c2a2f4935e0498c47dfa183f984d';
 
-  // İhtiyaç duyulan yetkileri genişletelim
-  static String get scope => 'read:user,user:email,user:follow,repo,gist';
+  // OAuth callback URL
+  static String get redirectUrl => 'devshabitat://oauth/github';
 
+  // Gerekli izinler
+  static String get scope => 'user:email,repo,read:user';
+
+  // Config kontrolü
   static bool get isConfigured =>
       clientId.isNotEmpty && clientSecret.isNotEmpty && redirectUrl.isNotEmpty;
+
+  // Debug için
+  static void validateConfig() {
+    assert(clientId.isNotEmpty, 'GitHub Client ID eksik!');
+    assert(clientSecret.isNotEmpty, 'GitHub Client Secret eksik!');
+    assert(redirectUrl.isNotEmpty, 'GitHub Redirect URL eksik!');
+  }
 }

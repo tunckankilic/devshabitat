@@ -109,7 +109,10 @@
                 <action android:name="android.intent.action.VIEW" />
                 <category android:name="android.intent.category.DEFAULT" />
                 <category android:name="android.intent.category.BROWSABLE" />
-                <data android:scheme="devshabitat" android:host="github-auth" />
+                <data 
+                    android:scheme="https" 
+                    android:host="devshabitat-23119.firebaseapp.com"
+                    android:pathPattern="/__/auth/handler" />
             </intent-filter>
             
             <!-- Share Intent Filter -->

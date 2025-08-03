@@ -17,11 +17,7 @@ class PostCard extends StatelessWidget {
   final VoidCallback? onTap;
   final feedController = Get.find<FeedController>();
 
-  PostCard({
-    super.key,
-    required this.post,
-    this.onTap,
-  });
+  PostCard({super.key, required this.post, this.onTap});
 
   void _showPostMenu(BuildContext context) {
     showModalBottomSheet(
@@ -151,9 +147,7 @@ class PostCard extends StatelessWidget {
                     const SizedBox(height: 8),
                     SizedBox(
                       height: 200,
-                      child: GitHubCodeViewer(
-                        githubUrl: post.githubRepoUrl!,
-                      ),
+                      child: GitHubCodeViewer(githubUrl: post.githubRepoUrl!),
                     ),
                   ],
                 ),
@@ -167,14 +161,17 @@ class PostCard extends StatelessWidget {
                 child: Wrap(
                   spacing: 8,
                   children: (post.metadata!['tags'] as List)
-                      .map((tag) => Chip(
-                            label: Text(tag),
-                            backgroundColor:
-                                Theme.of(context).primaryColor.withOpacity(0.1),
-                            labelStyle: TextStyle(
-                              color: Theme.of(context).primaryColor,
-                            ),
-                          ))
+                      .map(
+                        (tag) => Chip(
+                          label: Text(tag),
+                          backgroundColor: Theme.of(
+                            context,
+                          ).primaryColor.withOpacity(0.1),
+                          labelStyle: TextStyle(
+                            color: Theme.of(context).primaryColor,
+                          ),
+                        ),
+                      )
                       .toList(),
                 ),
               ),
@@ -186,18 +183,19 @@ class PostCard extends StatelessWidget {
               child: Row(
                 children: [
                   // Beğeni butonu
-                  Obx(() => IconButton(
-                        icon: Icon(
-                          post.likes.contains(feedController.currentUserId)
-                              ? Icons.favorite
-                              : Icons.favorite_border,
-                          color:
-                              post.likes.contains(feedController.currentUserId)
-                                  ? Colors.red
-                                  : null,
-                        ),
-                        onPressed: () => feedController.toggleLike(post.id),
-                      )),
+                  Obx(
+                    () => IconButton(
+                      icon: Icon(
+                        post.likes.contains(feedController.currentUserId)
+                            ? Icons.favorite
+                            : Icons.favorite_border,
+                        color: post.likes.contains(feedController.currentUserId)
+                            ? Colors.red
+                            : null,
+                      ),
+                      onPressed: () => feedController.toggleLike(post.id),
+                    ),
+                  ),
                   Text(
                     post.likes.length.toString(),
                     style: TextStyle(color: Colors.grey[600]),
@@ -227,7 +225,9 @@ class PostCard extends StatelessWidget {
                     onPressed: () {
                       Share.share(
                         AppStrings.postSharingmessage(
-                            content: post.content, postId: post.id),
+                          content: post.content,
+                          postId: post.id,
+                        ),
                         subject: AppStrings.postSharing,
                       );
                     },

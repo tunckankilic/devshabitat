@@ -36,14 +36,14 @@
 			<string>GitHub OAuth</string>
 			<key>CFBundleURLSchemes</key>
 			<array>
-				<string>devshabitat</string>
+				<string>https</string>
 			</array>
 			<key>CFBundleURLTypes</key>
 			<array>
 				<dict>
 					<key>CFBundleURLSchemes</key>
 					<array>
-						<string>devshabitat.oauth.github</string>
+						<string>devshabitat-23119.firebaseapp.com</string>
 					</array>
 				</dict>
 			</array>

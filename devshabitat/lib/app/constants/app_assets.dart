@@ -19,25 +19,20 @@ class AppAssets {
   static const String communityMarker = '$_iconsPath/community_marker.png';
   static const String placeMarker = '$_iconsPath/place_marker.png';
 
-  // Lottie animasyonları - Boş durum (EmptyStateWidget'ta kullanılıyor)
-  static const String emptyAnimation = '$_animationsPath/empty.json';
-  static const String noEventsAnimation = '$_animationsPath/no_events.json';
-  static const String noCommunityAnimation =
-      '$_animationsPath/no_community.json';
+  // Boş durum görselleri (EmptyStateWidget'ta kullanılıyor)
+  static const String emptyImage = '$_imagesPath/empty.png';
+  static const String noEventsImage = '$_imagesPath/no_events.png';
+  static const String noCommunityImage = '$_imagesPath/no_community.png';
 
-  // Lottie animasyonları - Hata durumu (ErrorStateWidget'ta kullanılıyor)
-  static const String errorAnimation = '$_animationsPath/error.json';
-  static const String noConnectionAnimation =
-      '$_animationsPath/no_connection.json';
-  static const String serverErrorAnimation =
-      '$_animationsPath/server_error.json';
+  // Hata durumu görselleri (ErrorStateWidget'ta kullanılıyor)
+  static const String errorImage = '$_imagesPath/error.png';
+  static const String noConnectionImage = '$_imagesPath/no_connection.png';
+  static const String serverErrorImage = '$_imagesPath/server_error.png';
 
-  // Lottie animasyonları - Başarı durumu (SuccessAnimationWidget'ta kullanılıyor)
-  static const String successAnimation = '$_animationsPath/success.json';
-  static const String saveSuccessAnimation =
-      '$_animationsPath/save_success.json';
-  static const String updateSuccessAnimation =
-      '$_animationsPath/update_success.json';
+  // Başarı durumu görselleri (SuccessStateWidget'ta kullanılıyor)
+  static const String successImage = '$_imagesPath/success.png';
+  static const String saveSuccessImage = '$_imagesPath/save_success.png';
+  static const String updateSuccessImage = '$_imagesPath/update_success.png';
 
   // Harita stilleri (MapController ve MapTheme'de kullanılıyor)
   static const String darkMapStyle = '$_mapStylesPath/dark_style.json';
