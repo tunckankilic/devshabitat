@@ -1,3 +1,4 @@
+import 'package:devshabitat/app/constants/app_assets.dart';
 import 'package:devshabitat/app/constants/app_strings.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -32,7 +33,7 @@ class LargePhoneLogin extends GetView<AuthController> {
             children: [
               SizedBox(height: MediaQuery.of(context).padding.top + 20),
               SvgPicture.asset(
-                'assets/images/logo.svg',
+                AppAssets.logo,
                 height: _responsiveController.responsiveValue(
                   mobile: 120.0,
                   tablet: 160.0,

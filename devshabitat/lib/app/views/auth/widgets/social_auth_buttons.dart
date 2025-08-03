@@ -1,3 +1,4 @@
+import 'package:devshabitat/app/constants/app_assets.dart';
 import 'package:devshabitat/app/constants/app_strings.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -39,7 +40,7 @@ class SocialAuthButtons extends StatelessWidget {
             responsive,
             context,
             'With Google ${isLogin ? AppStrings.login : AppStrings.register}',
-            'assets/icons/baseline_google_black_48dp.png',
+            AppAssets.googleIcon,
             onGoogleAuth!,
           ),
 
@@ -51,20 +52,8 @@ class SocialAuthButtons extends StatelessWidget {
             responsive,
             context,
             'With Apple ${isLogin ? AppStrings.login : AppStrings.register}',
-            'assets/icons/apple-logo.png',
+            AppAssets.appleIcon,
             onAppleAuth!,
-          ),
-
-        SizedBox(height: responsive.responsiveValue(mobile: 12, tablet: 16)),
-
-        // Facebook Button
-        if (onFacebookAuth != null)
-          _buildSocialButton(
-            responsive,
-            context,
-            'With Facebook ${isLogin ? AppStrings.login : AppStrings.register}',
-            'assets/icons/f_logo_RGB_Blue_58.png',
-            onFacebookAuth!,
           ),
       ],
     );

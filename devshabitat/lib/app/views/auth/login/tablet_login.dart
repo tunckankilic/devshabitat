@@ -1,3 +1,4 @@
+import 'package:devshabitat/app/constants/app_assets.dart';
 import 'package:devshabitat/app/constants/app_strings.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -37,7 +38,7 @@ class TabletLogin extends GetView<AuthController> {
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
                       SvgPicture.asset(
-                        'assets/images/logo.svg',
+                        AppAssets.logo,
                         height: _responsiveController.responsiveValue(
                           mobile: 160.0,
                           tablet: 200.0,

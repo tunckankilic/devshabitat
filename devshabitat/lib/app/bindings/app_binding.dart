@@ -1,5 +1,6 @@
 import 'package:devshabitat/app/controllers/auth_controller.dart';
 import 'package:devshabitat/app/repositories/auth_repository.dart';
+import 'package:devshabitat/app/services/sound_service.dart';
 import 'package:get/get.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../core/services/error_handler_service.dart';
@@ -33,7 +34,6 @@ import '../controllers/network_controller.dart';
 import 'message_binding.dart';
 import '../services/network_analytics_service.dart';
 import '../services/location/maps_service.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import '../services/fcm_service.dart';
 import '../services/user_service.dart';
 import '../services/progressive_onboarding_service.dart';
@@ -61,7 +61,7 @@ class AppBinding extends Bindings {
     Get.put(ApiOptimizationService());
     Get.put(DeepLinkingService());
     Get.put(NetworkAnalyticsService());
-
+    Get.put(SoundService(), permanent: true);
     // Location Services
     Get.put(MapsService());
 
