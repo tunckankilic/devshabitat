@@ -1,12 +1,15 @@
 class GitHubConfig {
-  static String get clientId => 'Ov23liXVAiwWDSST2Sun';
-  static String get clientSecret => 'a7ba81a9fee6c2a2f4935e0498c47dfa183f984d';
+  static String get clientId =>
+      'YOUR_GITHUB_CLIENT_ID'; // GitHub Developer Settings'den alınacak
+  static String get clientSecret =>
+      'YOUR_GITHUB_CLIENT_SECRET'; // GitHub Developer Settings'den alınacak
 
-  // Hem web hem iOS için Firebase Auth handler URL kullan
+  // Firebase Auth handler URL'i
   static String get redirectUrl =>
-      'https://devshabitat-23119.firebaseapp.com/__/auth/handler';
+      'devshabitat://oauth/github'; // iOS URL scheme ile eşleşmeli
 
-  static String get scope => 'read:user,user:email';
+  // İhtiyaç duyulan yetkileri genişletelim
+  static String get scope => 'read:user,user:email,user:follow,repo,gist';
 
   static bool get isConfigured =>
       clientId.isNotEmpty && clientSecret.isNotEmpty && redirectUrl.isNotEmpty;

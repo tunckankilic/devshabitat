@@ -19,13 +19,11 @@ class AuthController extends GetxController {
   final AuthRepository _authRepository;
   final ErrorHandlerService _errorHandler;
   final Logger _logger = Get.find<Logger>();
-
-  // Authentication optimization services
-
-  final FeatureGateService _featureGateService = FeatureGateService.to;
-
+  final FeatureGateService _featureGateService;
   final AuthMigrationService _migrationService =
       Get.find<AuthMigrationService>();
+
+  // Authentication optimization services
 
   final Rx<User?> _firebaseUser = Rx<User?>(null);
   final RxMap<String, dynamic> _userProfile = RxMap<String, dynamic>();
@@ -43,10 +41,12 @@ class AuthController extends GetxController {
     required AuthStateController authState,
     required AuthRepository authRepository,
     required ErrorHandlerService errorHandler,
-  })  : _emailAuth = emailAuth,
-        _authState = authState,
-        _authRepository = authRepository,
-        _errorHandler = errorHandler;
+    required FeatureGateService featureGateService,
+  }) : _emailAuth = emailAuth,
+       _authState = authState,
+       _authRepository = authRepository,
+       _errorHandler = errorHandler,
+       _featureGateService = featureGateService;
 
   User? get currentUser => _firebaseUser.value;
   Map<String, dynamic> get userProfile => _userProfile;
@@ -91,7 +91,7 @@ class AuthController extends GetxController {
       '/home',
       '/profile',
       '/settings',
-      '/notifications'
+      '/notifications',
     ];
 
     // Sadece korumalı sayfalardaysa login sayfasına yönlendir
@@ -192,7 +192,6 @@ class AuthController extends GetxController {
   }
 
   Future<void> _checkAvailableSignInMethods() async {
-    // iOS'ta Apple Sign In zorunlu
     if (Platform.isIOS) {
       _isAppleSignInAvailable.value = true;
       _isGoogleSignInAvailable.value = false; // iOS'ta Google Sign In gizli
@@ -273,8 +272,9 @@ class AuthController extends GetxController {
   Future<String?> getGithubToken() async {
     try {
       if (_firebaseUser.value != null) {
-        final profile =
-            await _authRepository.getUserProfile(_firebaseUser.value!.uid);
+        final profile = await _authRepository.getUserProfile(
+          _firebaseUser.value!.uid,
+        );
         return profile?['githubToken'];
       }
       return null;
@@ -287,8 +287,9 @@ class AuthController extends GetxController {
   Future<String?> getGithubUsername() async {
     try {
       if (_firebaseUser.value != null) {
-        final profile =
-            await _authRepository.getUserProfile(_firebaseUser.value!.uid);
+        final profile = await _authRepository.getUserProfile(
+          _firebaseUser.value!.uid,
+        );
         return profile?['githubUsername'];
       }
       return null;

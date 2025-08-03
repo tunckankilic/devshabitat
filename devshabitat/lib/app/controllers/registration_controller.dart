@@ -14,7 +14,7 @@ enum RegistrationStep {
   personalInfo, // Bio, konum, fotoğraf (opsiyonel)
   professionalInfo, // İş deneyimi, eğitim (opsiyonel)
   skillsInfo, // Yetenekler, diller (opsiyonel)
-  completed
+  completed,
 }
 
 class RegistrationController extends GetxController {
@@ -135,10 +135,11 @@ class RegistrationController extends GetxController {
 
   bool get canGoNext {
     switch (_currentPageIndex.value) {
-      case 0: // Basic info - sadece temel bilgiler zorunlu, GitHub opsiyonel
+      case 0: // Basic info - GitHub bağlantısı zorunlu
         return _isEmailValid.value &&
             _isDisplayNameValid.value &&
-            allPasswordRequirementsMet;
+            allPasswordRequirementsMet &&
+            _isGithubConnected.value;
       case 1: // Personal info - opsiyonel
       case 2: // Professional info - opsiyonel
       case 3: // Skills info - opsiyonel
@@ -179,9 +180,9 @@ class RegistrationController extends GetxController {
     required AuthRepository authRepository,
     required ErrorHandlerService errorHandler,
     required AuthController authController,
-  })  : _authRepository = authRepository,
-        _errorHandler = errorHandler,
-        _authController = authController;
+  }) : _authRepository = authRepository,
+       _errorHandler = errorHandler,
+       _authController = authController;
 
   @override
   void onInit() {
@@ -208,7 +209,7 @@ class RegistrationController extends GetxController {
     _isDisplayNameValid.value = name.isNotEmpty && name.length >= 3;
   }
 
-  // GitHub verilerini çek (sadece veri çekme amaçlı)
+  // GitHub verilerini çek
   Future<void> importGithubData() async {
     try {
       _isGithubLoading.value = true;
@@ -216,7 +217,7 @@ class RegistrationController extends GetxController {
       final githubOAuthService = Get.find<GitHubOAuthService>();
 
       // GitHub OAuth ile token al
-      final accessToken = await githubOAuthService.signInWithGitHub();
+      final accessToken = await githubOAuthService.getGithubAccessToken();
       if (accessToken == null) {
         Get.snackbar(
           'Bilgi',
@@ -232,14 +233,32 @@ class RegistrationController extends GetxController {
       // GitHub kullanıcı bilgilerini çek
       final userInfo = await githubOAuthService.getUserInfo(accessToken);
       if (userInfo != null) {
-        // Form alanlarını doldur (sadece boş olanları)
+        // Form alanlarını doldur
         _populateFormFromGithubData(userInfo);
 
-        // GitHub verilerini sakla (opsiyonel)
+        // GitHub verilerini sakla
         _githubUsername.value = userInfo['login'];
         _githubToken.value = accessToken;
         _githubUserData.value = userInfo;
         _isGithubConnected.value = true;
+
+        // Repository bilgilerini çek
+        final repos = await githubOAuthService.getUserRepositories(accessToken);
+        if (repos != null) {
+          _githubUserData.value = {
+            ..._githubUserData.value ?? {},
+            'repositories': repos,
+          };
+        }
+
+        // Email bilgilerini çek
+        final emails = await githubOAuthService.getUserEmails(accessToken);
+        if (emails != null &&
+            emails.isNotEmpty &&
+            emailController.text.isEmpty) {
+          emailController.text = emails.first;
+          _validateEmail();
+        }
 
         Get.snackbar(
           'Başarılı!',
@@ -314,8 +333,9 @@ class RegistrationController extends GetxController {
         final githubService = Get.find<GithubService>();
 
         // GitHub stats'ları çek
-        final githubStats =
-            await githubService.getGithubStats(_githubUsername.value!);
+        final githubStats = await githubService.getGithubStats(
+          _githubUsername.value!,
+        );
 
         if (githubStats != null) {
           // Bio bilgisini GitHub'dan al
@@ -340,8 +360,9 @@ class RegistrationController extends GetxController {
           }
 
           // Tech stack'i skills olarak ekle
-          final techStack =
-              await githubService.getTechStack(_githubUsername.value!);
+          final techStack = await githubService.getTechStack(
+            _githubUsername.value!,
+          );
           if (techStack.isNotEmpty) {
             for (final tech in techStack.take(10)) {
               // İlk 10 teknolojiyi al
@@ -500,8 +521,9 @@ class RegistrationController extends GetxController {
     _hasUppercase.value = password.contains(RegExp(r'[A-Z]'));
     _hasLowercase.value = password.contains(RegExp(r'[a-z]'));
     _hasNumber.value = password.contains(RegExp(r'[0-9]'));
-    _hasSpecialChar.value =
-        password.contains(RegExp(r'[!@#$%^&*(),.?":{}|<>]'));
+    _hasSpecialChar.value = password.contains(
+      RegExp(r'[!@#$%^&*(),.?":{}|<>]'),
+    );
 
     _isPasswordValid.value = allPasswordRequirementsMet;
 
@@ -526,12 +548,12 @@ class RegistrationController extends GetxController {
         // Sadece validasyon yap, kayıt etme
         if (_validateBasicInfo()) {
           // Kullanıcıyı oluştur ve geçici ID'yi kaydet
-          final userCredential =
-              await _authRepository.createUserWithEmailAndPassword(
-            emailController.text,
-            passwordController.text,
-            displayNameController.text,
-          );
+          final userCredential = await _authRepository
+              .createUserWithEmailAndPassword(
+                emailController.text,
+                passwordController.text,
+                displayNameController.text,
+              );
 
           if (userCredential.user != null) {
             _tempUserId.value = userCredential.user!.uid;
@@ -575,13 +597,27 @@ class RegistrationController extends GetxController {
     try {
       _isLoading.value = true;
 
+      // GitHub bağlantısı kontrolü
+      if (!_isGithubConnected.value || _githubUsername.value == null) {
+        Get.snackbar(
+          'Hata',
+          'Devam etmek için GitHub hesabınızı bağlamanız gerekmektedir.',
+          backgroundColor: Colors.red.withOpacity(0.8),
+          colorText: Colors.white,
+          snackPosition: SnackPosition.BOTTOM,
+          duration: const Duration(seconds: 4),
+          icon: const Icon(Icons.error, color: Colors.white),
+        );
+        return false;
+      }
+
       // 1. Önce kullanıcıyı kaydet
-      final userCredential =
-          await _authRepository.createUserWithEmailAndPassword(
-        emailController.text,
-        passwordController.text,
-        displayNameController.text,
-      );
+      final userCredential = await _authRepository
+          .createUserWithEmailAndPassword(
+            emailController.text,
+            passwordController.text,
+            displayNameController.text,
+          );
 
       if (userCredential.user == null) {
         throw Exception('Kullanıcı oluşturulamadı');
@@ -664,12 +700,11 @@ class RegistrationController extends GetxController {
       final currentUser = _authController.currentUser;
       if (currentUser == null) {
         throw Exception(
-            'Kullanıcı oturumu bulunamadı. Lütfen tekrar giriş yapın.');
+          'Kullanıcı oturumu bulunamadı. Lütfen tekrar giriş yapın.',
+        );
       }
 
-      await _authRepository.updateUserProfile({
-        'photoURL': photoUrl,
-      });
+      await _authRepository.updateUserProfile({'photoURL': photoUrl});
 
       // AuthController'daki profil bilgilerini güncelle
       await _authController.refreshUserProfile();
@@ -727,13 +762,27 @@ class RegistrationController extends GetxController {
     try {
       _isLoading.value = true;
 
+      // GitHub bağlantısı kontrolü
+      if (!_isGithubConnected.value || _githubUsername.value == null) {
+        Get.snackbar(
+          'Hata',
+          'Devam etmek için GitHub hesabınızı bağlamanız gerekmektedir.',
+          backgroundColor: Colors.red.withOpacity(0.8),
+          colorText: Colors.white,
+          snackPosition: SnackPosition.BOTTOM,
+          duration: const Duration(seconds: 4),
+          icon: const Icon(Icons.error, color: Colors.white),
+        );
+        return;
+      }
+
       // 1. Firebase Authentication'da kullanıcı oluştur
-      final userCredential =
-          await _authRepository.createUserWithEmailAndPassword(
-        emailController.text,
-        passwordController.text,
-        displayNameController.text,
-      );
+      final userCredential = await _authRepository
+          .createUserWithEmailAndPassword(
+            emailController.text,
+            passwordController.text,
+            displayNameController.text,
+          );
 
       if (userCredential.user == null) {
         throw Exception('Kullanıcı oluşturulamadı');
@@ -770,8 +819,10 @@ class RegistrationController extends GetxController {
     if (photoUrlController.text.isNotEmpty &&
         !photoUrlController.text.startsWith('http')) {
       try {
-        final uploadedUrl = await Get.find<StorageService>()
-            .uploadProfileImage(userId, photoUrlController.text);
+        final uploadedUrl = await Get.find<StorageService>().uploadProfileImage(
+          userId,
+          photoUrlController.text,
+        );
         if (uploadedUrl != null) {
           updates['photoUrl'] = uploadedUrl;
         }
@@ -818,6 +869,83 @@ class RegistrationController extends GetxController {
 
     if (updates.isNotEmpty) {
       await _authRepository.updateUserProfile(updates);
+    }
+  }
+
+  // Google ile kayıt
+  Future<void> signUpWithGoogle() async {
+    try {
+      _isLoading.value = true;
+
+      // Google ile giriş yap
+      final userCredential = await _authRepository.signInWithGoogle();
+      if (userCredential.user == null) {
+        throw Exception('Google ile giriş başarısız oldu');
+      }
+
+      // Otomatik form doldurma
+      emailController.text = userCredential.user!.email ?? '';
+      displayNameController.text = userCredential.user!.displayName ?? '';
+      photoUrlController.text = userCredential.user!.photoURL ?? '';
+
+      // Email ve display name validasyonlarını çalıştır
+      _validateEmail();
+      _validateDisplayName();
+
+      // GitHub bağlantısı kontrolü
+      if (!_isGithubConnected.value) {
+        Get.snackbar(
+          'GitHub Bağlantısı Gerekli',
+          'Lütfen devam etmek için GitHub hesabınızı bağlayın.',
+          backgroundColor: Colors.orange.withOpacity(0.8),
+          colorText: Colors.white,
+          snackPosition: SnackPosition.BOTTOM,
+          duration: const Duration(seconds: 4),
+          icon: const Icon(Icons.warning, color: Colors.white),
+        );
+      }
+    } catch (e) {
+      _errorHandler.handleError(e, ErrorHandlerService.AUTH_ERROR);
+    } finally {
+      _isLoading.value = false;
+    }
+  }
+
+  // Apple ile kayıt
+  Future<void> signUpWithApple() async {
+    try {
+      _isLoading.value = true;
+
+      // Apple ile giriş yap
+      final userCredential = await _authRepository.signInWithApple();
+      if (userCredential.user == null) {
+        throw Exception('Apple ile giriş başarısız oldu');
+      }
+
+      // Otomatik form doldurma
+      emailController.text = userCredential.user!.email ?? '';
+      displayNameController.text = userCredential.user!.displayName ?? '';
+
+      // Email ve display name validasyonlarını çalıştır
+      _validateEmail();
+      _validateDisplayName();
+
+      // GitHub bağlantısı kontrolü
+      if (!_isGithubConnected.value) {
+        Get.snackbar(
+          'GitHub Bağlantısı Gerekli',
+          'Lütfen devam etmek için GitHub hesabınızı bağlayın.',
+          backgroundColor: Colors.orange.withOpacity(0.8),
+          colorText: Colors.white,
+          snackPosition: SnackPosition.BOTTOM,
+          duration: const Duration(seconds: 4),
+          icon: const Icon(Icons.warning, color: Colors.white),
+        );
+      }
+    } catch (e) {
+      _errorHandler.handleError(e, ErrorHandlerService.AUTH_ERROR);
+    } finally {
+      _isLoading.value = false;
     }
   }
 

@@ -55,53 +55,10 @@ class ModerationModel {
     this.resolvedAt,
   }) : createdAt = createdAt ?? DateTime.now();
 
-  factory ModerationModel.fromJson(Map<String, dynamic> json) {
-    return ModerationModel(
-      id: json['id'] as String,
-      communityId: json['communityId'] as String,
-      contentId: json['contentId'] as String,
-      reporterId: json['reporterId'] as String,
-      contentType: ContentType.values.firstWhere(
-        (e) => e.toString() == json['contentType'],
-      ),
-      category: json['category'] as String,
-      description: json['description'] as String,
-      tags: List<String>.from(json['tags'] ?? []),
-      attachments: List<String>.from(json['attachments'] ?? []),
-      metadata: Map<String, dynamic>.from(json['metadata'] ?? {}),
-      status: ModerationStatus.values.firstWhere(
-        (e) => e.toString() == json['status'],
-      ),
-      reason: ModerationReason.values.firstWhere(
-        (e) => e.toString() == json['reason'],
-      ),
-      customReason: json['customReason'] as String?,
-      note: json['note'] as String?,
-      createdAt: (json['createdAt'] as Timestamp).toDate(),
-      resolvedAt: (json['resolvedAt'] as Timestamp?)?.toDate(),
-    );
-  }
+  factory ModerationModel.fromJson(Map<String, dynamic> json) =>
+      _$ModerationModelFromJson(json);
 
-  Map<String, dynamic> toJson() {
-    return {
-      'id': id,
-      'communityId': communityId,
-      'contentId': contentId,
-      'reporterId': reporterId,
-      'contentType': contentType.toString(),
-      'category': category,
-      'description': description,
-      'tags': tags,
-      'attachments': attachments,
-      'metadata': metadata,
-      'status': status.toString(),
-      'reason': reason.toString(),
-      'customReason': customReason,
-      'note': note,
-      'createdAt': Timestamp.fromDate(createdAt),
-      'resolvedAt': resolvedAt != null ? Timestamp.fromDate(resolvedAt!) : null,
-    };
-  }
+  Map<String, dynamic> toJson() => _$ModerationModelToJson(this);
 
   factory ModerationModel.fromFirestore(DocumentSnapshot doc) {
     final data = doc.data() as Map<String, dynamic>;

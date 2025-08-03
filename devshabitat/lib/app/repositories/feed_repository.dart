@@ -14,7 +14,6 @@ class FeedRepository {
     githubOAuthService: GitHubOAuthService(
       logger: Get.find<Logger>(),
       errorHandler: Get.find<ErrorHandlerService>(),
-      auth: FirebaseAuth.instance,
     ),
   );
 

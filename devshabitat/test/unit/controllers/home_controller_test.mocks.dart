@@ -679,6 +679,15 @@ class MockAuthRepository extends _i1.Mock implements _i10.AuthRepository {
                 _i8.Future<Map<String, dynamic>?>.value(),
           )
           as _i8.Future<Map<String, dynamic>?>);
+
+  @override
+  _i8.Future<void> setPersistence(bool? isPersistent) =>
+      (super.noSuchMethod(
+            Invocation.method(#setPersistence, [isPersistent]),
+            returnValue: _i8.Future<void>.value(),
+            returnValueForMissingStub: _i8.Future<void>.value(),
+          )
+          as _i8.Future<void>);
 }
 
 /// A class which mocks [NotificationService].

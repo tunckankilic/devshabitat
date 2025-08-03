@@ -2,7 +2,7 @@
 // in devshabitat/test/unit/controllers/auth_state_controller_test.dart.
 // Do not manually edit this file.
 
-// ignore_for_file: no_leading_underscores_for_library_prefixes, duplicate_ignore
+// ignore_for_file: no_leading_underscores_for_library_prefixes
 import 'dart:async' as _i6;
 import 'dart:typed_data' as _i9;
 
@@ -493,6 +493,15 @@ class MockAuthRepository extends _i1.Mock implements _i7.AuthRepository {
                 _i6.Future<Map<String, dynamic>?>.value(),
           )
           as _i6.Future<Map<String, dynamic>?>);
+
+  @override
+  _i6.Future<void> setPersistence(bool? isPersistent) =>
+      (super.noSuchMethod(
+            Invocation.method(#setPersistence, [isPersistent]),
+            returnValue: _i6.Future<void>.value(),
+            returnValueForMissingStub: _i6.Future<void>.value(),
+          )
+          as _i6.Future<void>);
 }
 
 /// A class which mocks [User].

@@ -8,6 +8,7 @@ import 'package:mockito/mockito.dart';
 import 'package:mockito/annotations.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import '../../test_helper.dart';
+import 'package:devshabitat/app/services/feature_gate_service.dart';
 
 @GenerateNiceMocks([
   MockSpec<AuthRepository>(),
@@ -15,7 +16,8 @@ import '../../test_helper.dart';
   MockSpec<EmailAuthController>(),
   MockSpec<AuthStateController>(),
   MockSpec<User>(),
-  MockSpec<UserCredential>()
+  MockSpec<UserCredential>(),
+  MockSpec<FeatureGateService>(),
 ])
 import 'social_auth_controller_test.mocks.dart';
 
@@ -27,6 +29,7 @@ void main() {
   late MockAuthStateController mockAuthState;
   late MockUser mockUser;
   late MockUserCredential mockUserCredential;
+  late MockFeatureGateService mockFeatureGateService;
 
   setUpAll(() async {
     await setupTestEnvironment();
@@ -39,12 +42,14 @@ void main() {
     mockAuthState = MockAuthStateController();
     mockUser = MockUser();
     mockUserCredential = MockUserCredential();
+    mockFeatureGateService = MockFeatureGateService();
 
     controller = AuthController(
       authRepository: mockAuthRepository,
       errorHandler: mockErrorHandler,
       emailAuth: mockEmailAuth,
       authState: mockAuthState,
+      featureGateService: mockFeatureGateService,
     );
   });
 
@@ -89,8 +94,9 @@ void main() {
     group('Apple Sign In Tests', () {
       test('should handle successful Apple sign in', () async {
         // Arrange
-        when(mockAuthRepository.signInWithApple())
-            .thenAnswer((_) => Future.value(mockUserCredential));
+        when(
+          mockAuthRepository.signInWithApple(),
+        ).thenAnswer((_) => Future.value(mockUserCredential));
         when(mockUserCredential.user).thenReturn(mockUser);
         when(mockUser.email).thenReturn('test@apple.com');
 
@@ -105,18 +111,18 @@ void main() {
 
       test('should handle Apple sign in failure', () async {
         // Arrange
-        when(mockAuthRepository.signInWithApple())
-            .thenThrow(Exception('Apple login failed'));
+        when(
+          mockAuthRepository.signInWithApple(),
+        ).thenThrow(Exception('Apple login failed'));
 
         // Act
         await controller.signInWithApple();
 
         // Assert
         verify(mockAuthRepository.signInWithApple()).called(1);
-        verify(mockErrorHandler.handleError(
-          any,
-          ErrorHandlerService.AUTH_ERROR,
-        )).called(1);
+        verify(
+          mockErrorHandler.handleError(any, ErrorHandlerService.AUTH_ERROR),
+        ).called(1);
         expect(controller.lastError, isNotEmpty);
         expect(controller.isLoading, false);
       });
@@ -125,8 +131,9 @@ void main() {
     group('GitHub Sign In Tests', () {
       test('should handle successful GitHub sign in', () async {
         // Arrange
-        when(mockAuthRepository.signInWithGithub())
-            .thenAnswer((_) => Future.value(mockUserCredential));
+        when(
+          mockAuthRepository.signInWithGithub(),
+        ).thenAnswer((_) => Future.value(mockUserCredential));
         when(mockUserCredential.user).thenReturn(mockUser);
         when(mockUser.email).thenReturn('test@github.com');
 
@@ -141,18 +148,18 @@ void main() {
 
       test('should handle GitHub sign in failure', () async {
         // Arrange
-        when(mockAuthRepository.signInWithGithub())
-            .thenThrow(Exception('GitHub login failed'));
+        when(
+          mockAuthRepository.signInWithGithub(),
+        ).thenThrow(Exception('GitHub login failed'));
 
         // Act
         await controller.signInWithGithub();
 
         // Assert
         verify(mockAuthRepository.signInWithGithub()).called(1);
-        verify(mockErrorHandler.handleError(
-          any,
-          ErrorHandlerService.AUTH_ERROR,
-        )).called(1);
+        verify(
+          mockErrorHandler.handleError(any, ErrorHandlerService.AUTH_ERROR),
+        ).called(1);
         expect(controller.lastError, isNotEmpty);
         expect(controller.isLoading, false);
       });
@@ -160,17 +167,17 @@ void main() {
       test('should handle GitHub OAuth cancellation', () async {
         // Arrange
         when(mockAuthRepository.signInWithGithub()).thenThrow(
-            Exception('GitHub OAuth flow failed or was cancelled by user'));
+          Exception('GitHub OAuth flow failed or was cancelled by user'),
+        );
 
         // Act
         await controller.signInWithGithub();
 
         // Assert
         verify(mockAuthRepository.signInWithGithub()).called(1);
-        verify(mockErrorHandler.handleError(
-          any,
-          ErrorHandlerService.AUTH_ERROR,
-        )).called(1);
+        verify(
+          mockErrorHandler.handleError(any, ErrorHandlerService.AUTH_ERROR),
+        ).called(1);
         expect(controller.lastError, isNotEmpty);
       });
     });
@@ -178,8 +185,9 @@ void main() {
     group('Google Sign In Tests', () {
       test('should handle successful Google sign in', () async {
         // Arrange
-        when(mockAuthRepository.signInWithGoogle())
-            .thenAnswer((_) => Future.value(mockUserCredential));
+        when(
+          mockAuthRepository.signInWithGoogle(),
+        ).thenAnswer((_) => Future.value(mockUserCredential));
         when(mockUserCredential.user).thenReturn(mockUser);
         when(mockUser.email).thenReturn('test@gmail.com');
 
@@ -194,18 +202,18 @@ void main() {
 
       test('should handle Google sign in failure', () async {
         // Arrange
-        when(mockAuthRepository.signInWithGoogle())
-            .thenThrow(Exception('Google login failed'));
+        when(
+          mockAuthRepository.signInWithGoogle(),
+        ).thenThrow(Exception('Google login failed'));
 
         // Act
         await controller.signInWithGoogle();
 
         // Assert
         verify(mockAuthRepository.signInWithGoogle()).called(1);
-        verify(mockErrorHandler.handleError(
-          any,
-          ErrorHandlerService.AUTH_ERROR,
-        )).called(1);
+        verify(
+          mockErrorHandler.handleError(any, ErrorHandlerService.AUTH_ERROR),
+        ).called(1);
         expect(controller.lastError, isNotEmpty);
         expect(controller.isLoading, false);
       });
@@ -219,7 +227,7 @@ void main() {
         expect(mockErrorHandler, isNotNull);
       });
 
-/*
+      /*
       test(
         'should handle loading states during social auth',
         () async {

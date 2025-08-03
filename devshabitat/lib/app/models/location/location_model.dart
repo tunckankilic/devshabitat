@@ -74,3 +74,41 @@ class LocationModel extends HiveObject {
     );
   }
 }
+
+class LocationModelAdapter extends TypeAdapter<LocationModel> {
+  @override
+  final int typeId = 1;
+
+  @override
+  LocationModel read(BinaryReader reader) {
+    return LocationModel(
+      latitude: reader.readDouble(),
+      longitude: reader.readDouble(),
+      accuracy: reader.readDouble(),
+      timestamp: DateTime.fromMillisecondsSinceEpoch(reader.readInt()),
+      speed: reader.readBool() ? reader.readDouble() : null,
+      heading: reader.readBool() ? reader.readDouble() : null,
+      altitude: reader.readBool() ? reader.readDouble() : null,
+      address: reader.readBool() ? reader.readString() : null,
+      userId: reader.readBool() ? reader.readString() : null,
+    );
+  }
+
+  @override
+  void write(BinaryWriter writer, LocationModel obj) {
+    writer.writeDouble(obj.latitude);
+    writer.writeDouble(obj.longitude);
+    writer.writeDouble(obj.accuracy);
+    writer.writeInt(obj.timestamp.millisecondsSinceEpoch);
+    writer.writeBool(obj.speed != null);
+    if (obj.speed != null) writer.writeDouble(obj.speed!);
+    writer.writeBool(obj.heading != null);
+    if (obj.heading != null) writer.writeDouble(obj.heading!);
+    writer.writeBool(obj.altitude != null);
+    if (obj.altitude != null) writer.writeDouble(obj.altitude!);
+    writer.writeBool(obj.address != null);
+    if (obj.address != null) writer.writeString(obj.address!);
+    writer.writeBool(obj.userId != null);
+    if (obj.userId != null) writer.writeString(obj.userId!);
+  }
+}

@@ -7,6 +7,7 @@ import 'package:devshabitat/app/controllers/email_auth_controller.dart';
 import 'package:devshabitat/app/controllers/auth_state_controller.dart';
 import 'package:devshabitat/app/repositories/auth_repository.dart';
 import 'package:devshabitat/app/core/services/error_handler_service.dart';
+import 'package:devshabitat/app/services/feature_gate_service.dart';
 import 'package:mockito/mockito.dart';
 import 'package:mockito/annotations.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -17,7 +18,8 @@ import '../../test_helper.dart';
   MockSpec<AuthStateController>(),
   MockSpec<AuthRepository>(),
   MockSpec<ErrorHandlerService>(),
-  MockSpec<User>()
+  MockSpec<User>(),
+  MockSpec<FeatureGateService>(),
 ])
 import 'auth_controller_test.mocks.dart';
 
@@ -28,6 +30,7 @@ void main() {
   late MockAuthRepository mockAuthRepository;
   late MockErrorHandlerService mockErrorHandler;
   late MockUser mockUser;
+  late MockFeatureGateService mockFeatureGateService;
 
   setUpAll(() async {
     await setupTestEnvironment();
@@ -39,12 +42,14 @@ void main() {
     mockAuthRepository = MockAuthRepository();
     mockErrorHandler = MockErrorHandlerService();
     mockUser = MockUser();
+    mockFeatureGateService = MockFeatureGateService();
 
     controller = AuthController(
       emailAuth: mockEmailAuth,
       authState: mockAuthState,
       authRepository: mockAuthRepository,
       errorHandler: mockErrorHandler,
+      featureGateService: mockFeatureGateService,
     );
   });
 
@@ -62,8 +67,9 @@ void main() {
     });
 
     test('should bind to auth state changes', () {
-      when(mockAuthRepository.authStateChanges)
-          .thenAnswer((_) => Stream.value(null));
+      when(
+        mockAuthRepository.authStateChanges,
+      ).thenAnswer((_) => Stream.value(null));
 
       controller.onInit();
 
@@ -93,8 +99,9 @@ void main() {
     });
 
     test('should handle sign out error', () async {
-      when(mockAuthRepository.signOut())
-          .thenThrow(Exception('Sign out failed'));
+      when(
+        mockAuthRepository.signOut(),
+      ).thenThrow(Exception('Sign out failed'));
 
       await controller.signOut();
 
@@ -109,13 +116,15 @@ void main() {
       await controller.deleteAccount();
 
       verify(mockAuthRepository.deleteAccount()).called(1);
-      verify(mockErrorHandler.handleSuccess('Hesabınız başarıyla silindi'))
-          .called(1);
+      verify(
+        mockErrorHandler.handleSuccess('Hesabınız başarıyla silindi'),
+      ).called(1);
     });
 
     test('should handle delete account error', () async {
-      when(mockAuthRepository.deleteAccount())
-          .thenThrow(Exception('Delete account failed'));
+      when(
+        mockAuthRepository.deleteAccount(),
+      ).thenThrow(Exception('Delete account failed'));
 
       await controller.deleteAccount();
 
@@ -135,8 +144,9 @@ void main() {
       verify(mockEmailAuth.updatePassword('newpassword')).called(1);
 
       await controller.reauthenticate('test@example.com', 'password');
-      verify(mockEmailAuth.reauthenticate('test@example.com', 'password'))
-          .called(1);
+      verify(
+        mockEmailAuth.reauthenticate('test@example.com', 'password'),
+      ).called(1);
     });
 
     test('should delegate email verification', () async {

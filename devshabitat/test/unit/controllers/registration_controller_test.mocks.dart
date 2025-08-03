@@ -2,7 +2,7 @@
 // in devshabitat/test/unit/controllers/registration_controller_test.dart.
 // Do not manually edit this file.
 
-// ignore_for_file: no_leading_underscores_for_library_prefixes, duplicate_ignore
+// ignore_for_file: no_leading_underscores_for_library_prefixes
 import 'dart:async' as _i8;
 import 'dart:typed_data' as _i17;
 import 'dart:ui' as _i15;
@@ -502,6 +502,15 @@ class MockAuthRepository extends _i1.Mock implements _i9.AuthRepository {
                 _i8.Future<Map<String, dynamic>?>.value(),
           )
           as _i8.Future<Map<String, dynamic>?>);
+
+  @override
+  _i8.Future<void> setPersistence(bool? isPersistent) =>
+      (super.noSuchMethod(
+            Invocation.method(#setPersistence, [isPersistent]),
+            returnValue: _i8.Future<void>.value(),
+            returnValueForMissingStub: _i8.Future<void>.value(),
+          )
+          as _i8.Future<void>);
 }
 
 /// A class which mocks [ErrorHandlerService].
