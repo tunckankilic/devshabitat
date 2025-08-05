@@ -1,3 +1,5 @@
+// ignore_for_file: unused_field
+
 import 'package:devshabitat/app/repositories/auth_repository.dart';
 import 'package:get/get.dart';
 import 'package:flutter/material.dart';

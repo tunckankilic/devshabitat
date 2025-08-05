@@ -2,7 +2,7 @@
 // in devshabitat/test/unit/controllers/registration_controller_test.dart.
 // Do not manually edit this file.
 
-// ignore_for_file: no_leading_underscores_for_library_prefixes
+// ignore_for_file: no_leading_underscores_for_library_prefixes, override_on_non_overriding_member, duplicate_ignore
 import 'dart:async' as _i8;
 import 'dart:typed_data' as _i17;
 import 'dart:ui' as _i15;

@@ -9,10 +9,10 @@ class CodeCollaborationWidget extends StatelessWidget {
   final CollaborationRequestModel? existingRequest;
 
   const CodeCollaborationWidget({
-    Key? key,
+    super.key,
     required this.repository,
     this.existingRequest,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {

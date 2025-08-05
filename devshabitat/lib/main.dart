@@ -81,7 +81,7 @@ void main() async {
 }
 
 Future<void> initBasicDependencies() async {
-  // Temel servisler
+  // Sadece kritik servisleri yükle, AppBinding'den çakışmaları kaldır
   Get.put(Logger(), permanent: true);
   Get.put(MemoryManagerService(), permanent: true);
   Get.put(ResponsiveController(), permanent: true);
@@ -154,14 +154,12 @@ Future<void> initBasicDependencies() async {
   final prefs = await SharedPreferences.getInstance();
   Get.put(prefs, permanent: true);
 
-  // Diğer servisler - parametreleri explicit belirtin
+  // Messaging Service
   Get.put(NotificationService(prefs), permanent: true);
   Get.put(
     MessagingService(
       logger: Get.find<Logger>(),
       errorHandler: Get.find<ErrorHandlerService>(),
-      firestore: null, // Varsayılan değer
-      auth: null, // Varsayılan değer
     ),
     permanent: true,
   );
@@ -173,7 +171,7 @@ Future<void> initBasicDependencies() async {
   Get.put(ConnectionService(), permanent: true);
   Get.put(FeedRepository(), permanent: true);
 
-  // Ana sayfa controller'ları - sadece bunları bırakın:
+  // Ana sayfa controller'ları
   Get.put(HomeController(), permanent: true);
   Get.put(DiscoveryController(), permanent: true);
   Get.put(

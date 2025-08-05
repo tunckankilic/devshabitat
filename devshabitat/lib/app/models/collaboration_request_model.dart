@@ -1,5 +1,3 @@
-import 'package:get/get.dart';
-
 class CollaborationRequestModel {
   final String id;
   final String repositoryOwner;

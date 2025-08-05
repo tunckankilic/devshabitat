@@ -58,6 +58,7 @@ dependencies:
   flutter_local_notifications: ^19.4.0
   flutter_localizations:
     sdk: flutter
+  flutter_markdown: ^0.6.20
   flutter_secure_storage: ^9.2.4
   flutter_svg: ^2.2.0
   flutter_webrtc: ^1.0.0
@@ -68,6 +69,7 @@ dependencies:
   google_fonts: ^6.3.0
   google_maps_flutter: ^2.12.3
   google_sign_in: ^7.1.1
+  highlight: ^0.7.0
   hive: ^2.2.3
   hive_flutter: ^1.1.0
   html: ^0.15.6
@@ -79,9 +81,8 @@ dependencies:
   intl: ^0.20.2
   json_annotation: ^4.9.0
   location: ^8.0.1
-  markdown: ^7.2.1
-  flutter_markdown: ^0.6.20
   logger: ^2.0.2+1
+  markdown: ^7.2.1
   mime: ^2.0.0
   package_info_plus: ^8.3.0
   path: ^1.9.1

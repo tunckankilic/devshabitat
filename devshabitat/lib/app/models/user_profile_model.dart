@@ -2,6 +2,78 @@ import 'package:cloud_firestore/cloud_firestore.dart'
     show DocumentSnapshot, GeoPoint, Timestamp;
 
 class UserProfile {
+  Map<String, dynamic> toJson() {
+    return {
+      'id': id,
+      'email': email,
+      'fullName': fullName,
+      'title': title,
+      'projects': projects,
+      'education': education,
+      'workExperience': workExperience,
+      'company': company,
+      'bio': bio,
+      'photoUrl': photoUrl,
+      'locationName': locationName,
+      'githubUsername': githubUsername,
+      'skills': skills,
+      'interests': interests,
+      'languages': languages,
+      'workExperiences': workExperiences,
+      'socialLinks': socialLinks,
+      'lastActive': lastActive?.toIso8601String(),
+      'isOnline': isOnline,
+      'isRemote': isRemote,
+      'isFullTime': isFullTime,
+      'isPartTime': isPartTime,
+      'isFreelance': isFreelance,
+      'yearsOfExperience': yearsOfExperience,
+      'location': location != null
+          ? {'latitude': location!.latitude, 'longitude': location!.longitude}
+          : null,
+    };
+  }
+
+  factory UserProfile.fromJson(Map<String, dynamic> json) {
+    return UserProfile(
+      id: json['id'] as String,
+      email: json['email'] as String,
+      fullName: json['fullName'] as String,
+      title: json['title'] as String?,
+      projects: List<Map<String, dynamic>>.from(json['projects'] ?? []),
+      education: List<Map<String, dynamic>>.from(json['education'] ?? []),
+      workExperience: List<Map<String, dynamic>>.from(
+        json['workExperience'] ?? [],
+      ),
+      company: json['company'] as String?,
+      bio: json['bio'] as String?,
+      photoUrl: json['photoUrl'] as String?,
+      locationName: json['locationName'] as String?,
+      githubUsername: json['githubUsername'] as String?,
+      skills: List<String>.from(json['skills'] ?? []),
+      interests: List<String>.from(json['interests'] ?? []),
+      languages: List<String>.from(json['languages'] ?? []),
+      workExperiences: List<Map<String, dynamic>>.from(
+        json['workExperiences'] ?? [],
+      ),
+      socialLinks: Map<String, String>.from(json['socialLinks'] ?? {}),
+      lastActive: json['lastActive'] != null
+          ? DateTime.parse(json['lastActive'])
+          : null,
+      isOnline: json['isOnline'] as bool? ?? false,
+      isRemote: json['isRemote'] as bool? ?? false,
+      isFullTime: json['isFullTime'] as bool? ?? false,
+      isPartTime: json['isPartTime'] as bool? ?? false,
+      isFreelance: json['isFreelance'] as bool? ?? false,
+      yearsOfExperience: json['yearsOfExperience'] as int? ?? 0,
+      location: json['location'] != null
+          ? GeoPoint(
+              json['location']['latitude'],
+              json['location']['longitude'],
+            )
+          : null,
+    );
+  }
   final String id;
   final String email;
   final String fullName;
@@ -57,7 +129,7 @@ class UserProfile {
   });
 
   factory UserProfile.fromFirestore(DocumentSnapshot doc) {
-    final data = doc.data() as Map<String, dynamic>;
+    doc.data() as Map<String, dynamic>;
     return UserProfile.fromDocument(doc);
   }
 

@@ -3,7 +3,6 @@
 import 'package:devshabitat/app/controllers/registration_controller.dart';
 import 'package:devshabitat/app/views/auth/register/register_view.dart';
 import 'package:devshabitat/app/views/messaging/message_search_view.dart';
-import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../views/auth/login_view.dart';
 import '../views/auth/forgot_password/forgot_password_view.dart';
@@ -77,6 +76,10 @@ import '../bindings/message_binding.dart';
 import '../bindings/registration_binding.dart';
 import '../views/messaging/message_view.dart';
 import '../bindings/messaging_binding.dart';
+import '../views/messaging/new_chat_view.dart';
+import '../bindings/chat_binding.dart';
+import '../views/content/comments_view.dart';
+import '../bindings/comment_binding.dart';
 
 part 'app_routes.dart';
 
@@ -279,21 +282,13 @@ class AppPages {
     GetPage(
       name: AppRoutes.messageSearch,
       page: () => MessageSearchView(),
-      binding: BindingsBuilder(() {
-        // Controller zaten global yüklü, sadece lazy put
-      }),
+      binding: MessageBinding(),
+      middlewares: [AuthMiddleware()],
     ),
     GetPage(
       name: AppRoutes.NEW_CHAT,
-      page: () => Scaffold(
-        appBar: AppBar(title: Text('Yeni Sohbet')),
-        body: Center(
-          child: Text(
-            'Yeni sohbet sayfası yakında...',
-            style: TextStyle(fontSize: 18),
-          ),
-        ),
-      ),
+      page: () => const NewChatView(),
+      binding: ChatBinding(),
       middlewares: [AuthMiddleware()],
     ),
     // Eksik route'lar eklendi
@@ -375,6 +370,16 @@ class AppPages {
       name: AppRoutes.CHAT,
       page: () => MessageView(),
       binding: MessagingBinding(),
+      middlewares: [AuthMiddleware()],
+    ),
+    // Comments route eklendi
+    GetPage(
+      name: AppRoutes.comments,
+      page: () => CommentsView(
+        postId: Get.parameters['postId'] ?? '',
+        postTitle: Get.parameters['title'] ?? 'Yorumlar',
+      ),
+      binding: CommentBinding(),
       middlewares: [AuthMiddleware()],
     ),
   ];

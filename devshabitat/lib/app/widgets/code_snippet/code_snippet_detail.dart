@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../../models/code_snippet_model.dart';
-import '../../models/code_snippet_version.dart';
 import '../../controllers/code_snippet_controller.dart';
 import 'code_editor.dart';
 import 'code_snippet_comments.dart';

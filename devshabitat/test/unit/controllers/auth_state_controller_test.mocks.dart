@@ -2,7 +2,7 @@
 // in devshabitat/test/unit/controllers/auth_state_controller_test.dart.
 // Do not manually edit this file.
 
-// ignore_for_file: no_leading_underscores_for_library_prefixes
+// ignore_for_file: no_leading_underscores_for_library_prefixes, duplicate_ignore
 import 'dart:async' as _i6;
 import 'dart:typed_data' as _i9;
 

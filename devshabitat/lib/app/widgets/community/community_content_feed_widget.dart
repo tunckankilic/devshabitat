@@ -12,8 +12,7 @@ import '../../services/responsive_performance_service.dart';
 class CommunityContentFeedWidget extends StatelessWidget {
   final CommunityContentController controller;
 
-  const CommunityContentFeedWidget({Key? key, required this.controller})
-    : super(key: key);
+  const CommunityContentFeedWidget({super.key, required this.controller});
 
   @override
   Widget build(BuildContext context) {

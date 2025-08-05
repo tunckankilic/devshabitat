@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../../controllers/blog_controller.dart';
-import '../../models/blog_model.dart';
 import '../../widgets/blog/blog_card.dart';
 import '../../widgets/blog/blog_search_bar.dart';
 import 'blog_detail_view.dart';

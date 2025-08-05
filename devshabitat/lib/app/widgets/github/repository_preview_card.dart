@@ -5,10 +5,10 @@ class RepositoryPreviewCard extends StatelessWidget {
   final VoidCallback onTap;
 
   const RepositoryPreviewCard({
-    Key? key,
+    super.key,
     required this.repository,
     required this.onTap,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {

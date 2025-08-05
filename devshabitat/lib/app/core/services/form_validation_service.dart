@@ -98,7 +98,9 @@ class FormValidationService extends GetxService {
 
   // Tüm form field'larını resetle
   void resetAllFields() {
-    _debounceTimers.values.forEach((timer) => timer.cancel());
+    for (var timer in _debounceTimers.values) {
+      timer.cancel();
+    }
     _debounceTimers.clear();
     _fieldStates.clear();
     _fieldErrors.clear();
@@ -106,7 +108,9 @@ class FormValidationService extends GetxService {
 
   @override
   void onClose() {
-    _debounceTimers.values.forEach((timer) => timer.cancel());
+    for (var timer in _debounceTimers.values) {
+      timer.cancel();
+    }
     _debounceTimers.clear();
     super.onClose();
   }

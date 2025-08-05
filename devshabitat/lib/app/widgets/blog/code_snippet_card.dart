@@ -28,8 +28,9 @@ class CodeSnippetCard extends StatelessWidget {
               snippet.title,
               style: const TextStyle(fontWeight: FontWeight.bold),
             ),
-            subtitle: snippet.description != null
-                ? Text(snippet.description!)
+            subtitle:
+                snippet.description != "" && snippet.description.isNotEmpty
+                ? Text(snippet.description)
                 : null,
             trailing: onDelete != null
                 ? IconButton(

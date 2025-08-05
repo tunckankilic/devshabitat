@@ -8,6 +8,8 @@ import '../../widgets/responsive/responsive_text.dart';
 class GithubIntegrationView extends StatelessWidget {
   final _controller = Get.find<GitHubContentController>();
 
+  GithubIntegrationView({super.key});
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(

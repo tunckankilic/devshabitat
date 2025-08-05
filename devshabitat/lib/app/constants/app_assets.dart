@@ -2,7 +2,6 @@ class AppAssets {
   // Temel dosya yolları
   static const String _imagesPath = 'assets/images';
   static const String _iconsPath = 'assets/icons';
-  static const String _animationsPath = 'assets/animations';
   static const String _mapStylesPath = 'assets/map_styles';
   static const String _soundsPath = 'assets/sounds';
 

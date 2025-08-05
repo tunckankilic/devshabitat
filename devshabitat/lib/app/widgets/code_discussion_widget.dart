@@ -29,10 +29,10 @@ class CodeDiscussionWidget extends StatelessWidget {
                 snippet.title,
                 style: Theme.of(context).textTheme.titleLarge,
               ),
-              if (snippet.description != null) ...[
+              if (snippet.description != "") ...[
                 const SizedBox(height: 8),
                 Text(
-                  snippet.description!,
+                  snippet.description,
                   style: Theme.of(context).textTheme.bodyMedium,
                 ),
               ],

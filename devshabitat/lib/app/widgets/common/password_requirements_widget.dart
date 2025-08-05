@@ -10,7 +10,7 @@ class PasswordRequirementsWidget extends StatelessWidget {
   final bool isVisible;
 
   const PasswordRequirementsWidget({
-    Key? key,
+    super.key,
     required this.hasMinLength,
     required this.hasUppercase,
     required this.hasLowercase,
@@ -18,7 +18,7 @@ class PasswordRequirementsWidget extends StatelessWidget {
     required this.hasSpecialChar,
     required this.passwordsMatch,
     required this.isVisible,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
