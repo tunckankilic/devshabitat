@@ -1,12 +1,14 @@
 import 'package:get/get.dart';
-import '../controllers/message/message_search_controller.dart';
+import '../controllers/search_controller.dart';
+import '../services/search_service.dart';
 
 class SearchBinding extends Bindings {
   @override
   void dependencies() {
-    Get.lazyPut<MessageSearchController>(() => MessageSearchController(
-          messagingService: Get.find(),
-          errorHandler: Get.find(),
-        ));
+    // Service
+    Get.lazyPut<SearchService>(() => SearchService(), fenix: true);
+
+    // Controller
+    Get.lazyPut<SearchController>(() => SearchController(), fenix: true);
   }
 }

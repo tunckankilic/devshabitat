@@ -7,11 +7,11 @@ class LoadingDialog extends StatelessWidget {
   final VoidCallback? onTimeout;
 
   const LoadingDialog({
-    Key? key,
+    super.key,
     required this.message,
     this.timeout = const Duration(seconds: 30),
     this.onTimeout,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {

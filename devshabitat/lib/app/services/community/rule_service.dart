@@ -1,3 +1,5 @@
+// ignore_for_file: prefer_interpolation_to_compose_strings
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:get/get.dart';
 import '../../models/community/rule_model.dart';

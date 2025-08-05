@@ -13,14 +13,14 @@ class ContentPortfolioWidget extends StatelessWidget {
   final Function() onViewAllContent;
 
   const ContentPortfolioWidget({
-    Key? key,
+    super.key,
     required this.developer,
     required this.blogs,
     required this.repositories,
     required this.onBlogTap,
     required this.onRepoTap,
     required this.onViewAllContent,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {

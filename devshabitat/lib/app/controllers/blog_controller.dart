@@ -2,6 +2,7 @@ import 'dart:async';
 import 'package:get/get.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:logger/logger.dart';
 import '../models/blog_model.dart';
 import '../models/code_snippet_model.dart';
@@ -273,7 +274,7 @@ class BlogController extends GetxController {
     }
   }
 
-  Future<BlogModel> _prepareBlogData(user, bool isPublished) async {
+  Future<BlogModel> _prepareBlogData(User user, bool isPublished) async {
     final tags = blogTags.value
         .split(',')
         .map((tag) => tag.trim())

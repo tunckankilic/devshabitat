@@ -10,11 +10,11 @@ class RepositoryShowcaseWidget extends StatelessWidget {
   final bool enableInteractions;
 
   const RepositoryShowcaseWidget({
-    Key? key,
+    super.key,
     required this.repository,
     this.showFullDescription = false,
     this.enableInteractions = true,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {

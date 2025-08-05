@@ -24,7 +24,6 @@ void main() {
   late MockLogger mockLogger;
   late MockErrorHandlerService mockErrorHandler;
   late MockDeepLinkingService mockDeepLinkingService;
-  late MockFirebaseAuth mockFirebaseAuth;
 
   setUpAll(() async {
     await setupTestEnvironment();
@@ -34,7 +33,6 @@ void main() {
     mockLogger = MockLogger();
     mockErrorHandler = MockErrorHandlerService();
     mockDeepLinkingService = MockDeepLinkingService();
-    mockFirebaseAuth = MockFirebaseAuth();
 
     service = GitHubOAuthService(
       logger: mockLogger,

@@ -5,8 +5,7 @@ class BlogPreviewCard extends StatelessWidget {
   final BlogModel blog;
   final Function() onTap;
 
-  const BlogPreviewCard({Key? key, required this.blog, required this.onTap})
-    : super(key: key);
+  const BlogPreviewCard({super.key, required this.blog, required this.onTap});
 
   @override
   Widget build(BuildContext context) {

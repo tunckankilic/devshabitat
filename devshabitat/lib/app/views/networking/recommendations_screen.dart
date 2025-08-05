@@ -2,12 +2,12 @@ import 'package:devshabitat/app/constants/app_strings.dart';
 import 'package:devshabitat/app/repositories/auth_repository.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import '../../services/simple_recommendation_service.dart';
 import '../../models/enhanced_user_model.dart';
 import '../../controllers/responsive_controller.dart';
+import '../../services/recommendation_service.dart';
 
 class RecommendationsScreen extends StatelessWidget {
-  final SimpleRecommendationService _recommendationService = Get.find();
+  final RecommendationService _recommendationService = Get.find();
   final AuthRepository _authRepository = Get.find();
   final RxList<EnhancedUserModel> _recommendations = <EnhancedUserModel>[].obs;
   final RxBool _isLoading = false.obs;
@@ -17,9 +17,24 @@ class RecommendationsScreen extends StatelessWidget {
   Future<void> _loadRecommendations() async {
     try {
       _isLoading.value = true;
-      final recommendations =
-          await _recommendationService.getRecommendedConnections();
-      _recommendations.value = recommendations;
+      final recommendations = await _recommendationService
+          .getUserRecommendations();
+      _recommendations.value = recommendations
+          .map(
+            (user) => EnhancedUserModel(
+              uid: user.id,
+              email: user.email,
+              displayName: user.fullName,
+              photoURL: user.photoUrl,
+              bio: user.bio,
+              title: user.title,
+              company: user.company,
+              skills: user.skills,
+              yearsOfExperience: user.yearsOfExperience,
+              experience: user.workExperience,
+            ),
+          )
+          .toList();
     } catch (e) {
       Get.snackbar(
         AppStrings.error,
@@ -42,7 +57,8 @@ class RecommendationsScreen extends StatelessWidget {
         title: Text(
           AppStrings.peopleYouMayKnow,
           style: TextStyle(
-              fontSize: responsive.responsiveValue(mobile: 18, tablet: 20)),
+            fontSize: responsive.responsiveValue(mobile: 18, tablet: 20),
+          ),
         ),
         centerTitle: true,
       ),
@@ -52,8 +68,8 @@ class RecommendationsScreen extends StatelessWidget {
           () => _isLoading.value
               ? const Center(child: CircularProgressIndicator())
               : _recommendations.isEmpty
-                  ? _buildEmptyState()
-                  : _buildRecommendationsList(),
+              ? _buildEmptyState()
+              : _buildRecommendationsList(),
         ),
       ),
     );
@@ -76,7 +92,8 @@ class RecommendationsScreen extends StatelessWidget {
                 color: Get.theme.colorScheme.primary,
               ),
               SizedBox(
-                  height: responsive.responsiveValue(mobile: 16, tablet: 24)),
+                height: responsive.responsiveValue(mobile: 16, tablet: 24),
+              ),
               Text(
                 AppStrings.noRecommendations,
                 style: Get.textTheme.headlineSmall?.copyWith(
@@ -85,7 +102,8 @@ class RecommendationsScreen extends StatelessWidget {
                 textAlign: TextAlign.center,
               ),
               SizedBox(
-                  height: responsive.responsiveValue(mobile: 8, tablet: 12)),
+                height: responsive.responsiveValue(mobile: 8, tablet: 12),
+              ),
               Text(
                 AppStrings.updateProfileForMoreRecommendations,
                 style: Get.textTheme.bodyLarge?.copyWith(
@@ -94,16 +112,22 @@ class RecommendationsScreen extends StatelessWidget {
                 textAlign: TextAlign.center,
               ),
               SizedBox(
-                  height: responsive.responsiveValue(mobile: 24, tablet: 32)),
+                height: responsive.responsiveValue(mobile: 24, tablet: 32),
+              ),
               FilledButton.icon(
                 onPressed: () => Get.toNamed('/profile/edit'),
-                icon: Icon(Icons.edit,
-                    size: responsive.responsiveValue(mobile: 20, tablet: 24)),
+                icon: Icon(
+                  Icons.edit,
+                  size: responsive.responsiveValue(mobile: 20, tablet: 24),
+                ),
                 label: Text(
                   AppStrings.editProfile,
                   style: TextStyle(
-                      fontSize:
-                          responsive.responsiveValue(mobile: 16, tablet: 18)),
+                    fontSize: responsive.responsiveValue(
+                      mobile: 16,
+                      tablet: 18,
+                    ),
+                  ),
                 ),
               ),
             ],
@@ -127,17 +151,22 @@ class RecommendationsScreen extends StatelessWidget {
                 Text(
                   AppStrings.recommendedConnections,
                   style: Get.textTheme.titleLarge?.copyWith(
-                    fontSize:
-                        responsive.responsiveValue(mobile: 20, tablet: 24),
+                    fontSize: responsive.responsiveValue(
+                      mobile: 20,
+                      tablet: 24,
+                    ),
                   ),
                 ),
                 SizedBox(
-                    height: responsive.responsiveValue(mobile: 8, tablet: 12)),
+                  height: responsive.responsiveValue(mobile: 8, tablet: 12),
+                ),
                 Text(
                   AppStrings.recommendationsBasedOnSkills,
                   style: Get.textTheme.bodyMedium?.copyWith(
-                    fontSize:
-                        responsive.responsiveValue(mobile: 14, tablet: 16),
+                    fontSize: responsive.responsiveValue(
+                      mobile: 14,
+                      tablet: 16,
+                    ),
                   ),
                 ),
               ],
@@ -152,15 +181,15 @@ class RecommendationsScreen extends StatelessWidget {
               mainAxisSpacing: responsive.gridSpacing,
               crossAxisSpacing: responsive.gridSpacing,
               childAspectRatio: responsive.responsiveValue(
-                  mobile: 0.75, tablet: 0.85, desktop: 1.0),
+                mobile: 0.75,
+                tablet: 0.85,
+                desktop: 1.0,
+              ),
             ),
-            delegate: SliverChildBuilderDelegate(
-              (context, index) {
-                final user = _recommendations[index];
-                return _buildRecommendationCard(user);
-              },
-              childCount: _recommendations.length,
-            ),
+            delegate: SliverChildBuilderDelegate((context, index) {
+              final user = _recommendations[index];
+              return _buildRecommendationCard(user);
+            }, childCount: _recommendations.length),
           ),
         ),
       ],
@@ -189,14 +218,18 @@ class RecommendationsScreen extends StatelessWidget {
                       ? Text(
                           user.displayName?[0].toUpperCase() ?? 'A',
                           style: TextStyle(
-                              fontSize: responsive.responsiveValue(
-                                  mobile: 24, tablet: 28)),
+                            fontSize: responsive.responsiveValue(
+                              mobile: 24,
+                              tablet: 28,
+                            ),
+                          ),
                         )
                       : null,
                 ),
               ),
               SizedBox(
-                  height: responsive.responsiveValue(mobile: 12, tablet: 16)),
+                height: responsive.responsiveValue(mobile: 12, tablet: 16),
+              ),
               Text(
                 user.displayName ?? AppStrings.unknownUser,
                 style: Get.textTheme.titleMedium?.copyWith(
@@ -207,12 +240,15 @@ class RecommendationsScreen extends StatelessWidget {
               ),
               if (user.experience?.isNotEmpty ?? false) ...[
                 SizedBox(
-                    height: responsive.responsiveValue(mobile: 4, tablet: 6)),
+                  height: responsive.responsiveValue(mobile: 4, tablet: 6),
+                ),
                 Text(
                   user.experience!.first['role'] ?? '',
                   style: Get.textTheme.bodyMedium?.copyWith(
-                    fontSize:
-                        responsive.responsiveValue(mobile: 14, tablet: 16),
+                    fontSize: responsive.responsiveValue(
+                      mobile: 14,
+                      tablet: 16,
+                    ),
                   ),
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
@@ -220,8 +256,10 @@ class RecommendationsScreen extends StatelessWidget {
                 Text(
                   user.experience!.first['company'] ?? '',
                   style: Get.textTheme.bodySmall?.copyWith(
-                    fontSize:
-                        responsive.responsiveValue(mobile: 12, tablet: 14),
+                    fontSize: responsive.responsiveValue(
+                      mobile: 12,
+                      tablet: 14,
+                    ),
                   ),
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
@@ -230,17 +268,24 @@ class RecommendationsScreen extends StatelessWidget {
               const Spacer(),
               FilledButton.icon(
                 onPressed: () => _sendConnectionRequest(user),
-                icon: Icon(Icons.person_add,
-                    size: responsive.responsiveValue(mobile: 18, tablet: 20)),
+                icon: Icon(
+                  Icons.person_add,
+                  size: responsive.responsiveValue(mobile: 18, tablet: 20),
+                ),
                 label: Text(
                   AppStrings.connect,
                   style: TextStyle(
-                      fontSize:
-                          responsive.responsiveValue(mobile: 14, tablet: 16)),
+                    fontSize: responsive.responsiveValue(
+                      mobile: 14,
+                      tablet: 16,
+                    ),
+                  ),
                 ),
                 style: FilledButton.styleFrom(
-                  minimumSize: Size(double.infinity,
-                      responsive.responsiveValue(mobile: 36, tablet: 44)),
+                  minimumSize: Size(
+                    double.infinity,
+                    responsive.responsiveValue(mobile: 36, tablet: 44),
+                  ),
                 ),
               ),
             ],

@@ -1,196 +1,216 @@
 import 'package:get/get.dart';
+import 'package:flutter/material.dart';
 import '../models/comment_model.dart';
-import '../models/feed_item.dart';
-import '../services/feed_service.dart';
+import '../services/comment_service.dart';
 import '../core/services/error_handler_service.dart';
-import '../controllers/auth_controller.dart';
+import '../repositories/auth_repository.dart';
 
 class CommentsController extends GetxController {
-  final FeedService _feedService = Get.find();
-  final ErrorHandlerService _errorHandler = Get.find();
+  final CommentService _commentService = Get.find<CommentService>();
+  final ErrorHandlerService _errorHandler = Get.find<ErrorHandlerService>();
+  final AuthRepository _authRepository = Get.find<AuthRepository>();
 
-  final RxList<CommentModel> comments = <CommentModel>[].obs;
-  final Rx<FeedItem?> currentFeedItem = Rx<FeedItem?>(null);
+  // Form Controllers
+  late TextEditingController commentController;
+  late ScrollController scrollController;
+
+  // State Management
   final RxBool isLoading = false.obs;
-  final RxString error = ''.obs;
   final RxBool isAddingComment = false.obs;
+  final RxString errorMessage = ''.obs;
+  final RxString postId = ''.obs;
+
+  // Comments Data
+  final RxList<CommentModel> comments = <CommentModel>[].obs;
+  final RxList<String> likedComments = <String>[].obs;
+  final Rx<CommentModel?> replyingTo = Rx<CommentModel?>(null);
 
   @override
   void onInit() {
     super.onInit();
-    _initializeFromArguments();
+    _initializeControllers();
   }
 
-  void _initializeFromArguments() {
-    try {
-      // Route'dan gelen feed item'ı al ve validate et
-      final arguments = Get.arguments;
-
-      if (arguments == null) {
-        _handleInvalidArguments('Geçersiz feed öğesi: Argüman bulunamadı');
-        return;
-      }
-
-      if (arguments is! FeedItem) {
-        _handleInvalidArguments('Geçersiz feed öğesi: Yanlış veri tipi');
-        return;
-      }
-
-      // Valid FeedItem - initialize
-      currentFeedItem.value = arguments;
-      loadComments();
-    } catch (e) {
-      _handleInvalidArguments('Feed öğesi yüklenirken bir hata oluştu: $e');
-    }
+  @override
+  void onClose() {
+    _disposeControllers();
+    super.onClose();
   }
 
-  void _handleInvalidArguments(String errorMessage) {
-    error.value = errorMessage;
-
-    Get.snackbar(
-      'Hata',
-      errorMessage,
-      snackPosition: SnackPosition.BOTTOM,
-      backgroundColor: Get.theme.colorScheme.error,
-      colorText: Get.theme.colorScheme.onError,
-      duration: const Duration(seconds: 3),
-    );
-
-    // Navigate back after a short delay
-    Future.delayed(const Duration(seconds: 2), () {
-      try {
-        Get.back();
-      } catch (e) {
-        // If back navigation fails, go to home
-        Get.offAllNamed('/home');
-      }
-    });
+  void _initializeControllers() {
+    commentController = TextEditingController();
+    scrollController = ScrollController();
   }
 
+  void _disposeControllers() {
+    commentController.dispose();
+    scrollController.dispose();
+  }
+
+  // Post ID'yi ayarla ve yorumları yükle
+  void setPostId(String id) {
+    postId.value = id;
+    loadComments();
+  }
+
+  // Yorumları yükle
   Future<void> loadComments() async {
+    if (postId.value.isEmpty) return;
+
+    isLoading.value = true;
+    errorMessage.value = '';
+
     try {
-      isLoading.value = true;
-      error.value = '';
-
-      final feedItem = currentFeedItem.value;
-      if (feedItem == null) {
-        error.value = 'Feed öğesi bulunamadı';
-        return;
-      }
-
-      final commentsData = await _feedService.getComments(feedItem.id);
-      final commentModels = commentsData.map((data) {
-        return CommentModel.fromMap({
-          ...data,
-          'feedItemId': feedItem.id,
-        });
-      }).toList();
-
-      comments.assignAll(commentModels);
+      final commentList = await _commentService.getComments(postId.value);
+      comments.value = commentList;
     } catch (e) {
-      error.value = 'Yorumlar yüklenirken bir hata oluştu: $e';
-      _errorHandler.handleError(e, ErrorHandlerService.SERVER_ERROR);
+      errorMessage.value = 'Yorumlar yüklenemedi';
+      _errorHandler.handleError('Yorum yükleme hatası: $e', 'COMMENT_LOAD_ERROR');
     } finally {
       isLoading.value = false;
     }
   }
 
-  Future<void> addComment(String commentText) async {
+  // Yorum ekleme
+  Future<void> addComment() async {
+    final content = commentController.text.trim();
+    if (content.isEmpty || postId.value.isEmpty) return;
+
+    isAddingComment.value = true;
+    
     try {
-      isAddingComment.value = true;
-      error.value = '';
-
-      final feedItem = currentFeedItem.value;
-      if (feedItem == null) {
-        error.value = 'Feed öğesi bulunamadı';
-        return;
-      }
-
-      if (commentText.trim().isEmpty) {
-        error.value = 'Yorum boş olamaz';
-        return;
-      }
-
-      await _feedService.addComment(feedItem.id, commentText.trim());
-
-      // Yorumları yenile
-      await loadComments();
-
-      Get.snackbar(
-        'Başarılı',
-        'Yorum başarıyla eklendi',
-        snackPosition: SnackPosition.BOTTOM,
+      final commentId = await _commentService.addComment(
+        postId: postId.value,
+        content: content,
+        parentCommentId: replyingTo.value?.id,
       );
+
+      if (commentId != null) {
+        commentController.clear();
+        replyingTo.value = null;
+        await loadComments(); // Yorumları yenile
+        _scrollToBottom();
+        
+        Get.snackbar(
+          'Başarılı',
+          'Yorum eklendi',
+          snackPosition: SnackPosition.BOTTOM,
+          backgroundColor: Get.theme.colorScheme.primary,
+          colorText: Get.theme.colorScheme.onPrimary,
+        );
+      }
     } catch (e) {
-      error.value = 'Yorum eklenirken bir hata oluştu: $e';
-      _errorHandler.handleError(e, ErrorHandlerService.SERVER_ERROR);
+      errorMessage.value = 'Yorum eklenemedi';
+      _errorHandler.handleError('Yorum ekleme hatası: $e', 'COMMENT_ADD_ERROR');
     } finally {
       isAddingComment.value = false;
     }
   }
 
-  Future<void> likeComment(String commentId) async {
+  // Yorum beğeni/beğenmeme
+  Future<void> toggleLike(String commentId) async {
     try {
-      final feedItem = currentFeedItem.value;
-      if (feedItem == null) {
-        error.value = 'Feed öğesi bulunamadı';
-        return;
+      final isLiked = await _commentService.toggleLike(commentId);
+      
+      if (isLiked) {
+        likedComments.add(commentId);
+      } else {
+        likedComments.remove(commentId);
       }
-
-      await _feedService.likeComment(feedItem.id, commentId);
-
+      
       // Yorumları yenile
       await loadComments();
     } catch (e) {
-      error.value = 'Yorum beğenilirken bir hata oluştu: $e';
-      _errorHandler.handleError(e, ErrorHandlerService.SERVER_ERROR);
+      errorMessage.value = 'Beğeni işlemi başarısız';
+      _errorHandler.handleError('Beğeni hatası: $e', 'COMMENT_LIKE_ERROR');
     }
   }
 
+  // Yorum düzenleme
+  Future<void> editComment(String commentId, String newContent) async {
+    if (newContent.trim().isEmpty) return;
+
+    try {
+      final success = await _commentService.editComment(commentId, newContent.trim());
+      
+      if (success) {
+        await loadComments(); // Yorumları yenile
+        
+        Get.snackbar(
+          'Başarılı',
+          'Yorum düzenlendi',
+          snackPosition: SnackPosition.BOTTOM,
+          backgroundColor: Get.theme.colorScheme.primary,
+          colorText: Get.theme.colorScheme.onPrimary,
+        );
+      }
+    } catch (e) {
+      errorMessage.value = 'Yorum düzenlenemedi';
+      _errorHandler.handleError('Yorum düzenleme hatası: $e', 'COMMENT_EDIT_ERROR');
+    }
+  }
+
+  // Yorum silme
   Future<void> deleteComment(String commentId) async {
     try {
-      final feedItem = currentFeedItem.value;
-      if (feedItem == null) {
-        error.value = 'Feed öğesi bulunamadı';
-        return;
+      final success = await _commentService.deleteComment(commentId, postId.value);
+      
+      if (success) {
+        await loadComments(); // Yorumları yenile
+        
+        Get.snackbar(
+          'Başarılı',
+          'Yorum silindi',
+          snackPosition: SnackPosition.BOTTOM,
+          backgroundColor: Get.theme.colorScheme.primary,
+          colorText: Get.theme.colorScheme.onPrimary,
+        );
       }
-
-      await _feedService.deleteComment(feedItem.id, commentId);
-
-      // Yorumları yenile
-      await loadComments();
-
-      Get.snackbar(
-        'Başarılı',
-        'Yorum başarıyla silindi',
-        snackPosition: SnackPosition.BOTTOM,
-      );
     } catch (e) {
-      error.value = 'Yorum silinirken bir hata oluştu: $e';
-      _errorHandler.handleError(e, ErrorHandlerService.SERVER_ERROR);
+      errorMessage.value = 'Yorum silinemedi';
+      _errorHandler.handleError('Yorum silme hatası: $e', 'COMMENT_DELETE_ERROR');
     }
   }
 
-  void refreshComments() {
-    loadComments();
+  // Yanıtla işlemi
+  void setReplyTo(CommentModel comment) {
+    replyingTo.value = comment;
+    commentController.text = '@${comment.authorName} ';
+    // Input'a focus ver
   }
 
-  String formatDate(DateTime date) {
-    final now = DateTime.now();
-    final difference = now.difference(date);
-
-    if (difference.inDays > 0) {
-      return '${difference.inDays} gün önce';
-    } else if (difference.inHours > 0) {
-      return '${difference.inHours} saat önce';
-    } else if (difference.inMinutes > 0) {
-      return '${difference.inMinutes} dakika önce';
-    } else {
-      return 'Az önce';
-    }
+  // Yanıtlamayı iptal et
+  void cancelReply() {
+    replyingTo.value = null;
+    commentController.clear();
   }
 
-  String? get currentUserId {
-    return Get.find<AuthController>().currentUser?.uid;
+  // En alta kaydır
+  void _scrollToBottom() {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (scrollController.hasClients) {
+        scrollController.animateTo(
+          scrollController.position.maxScrollExtent,
+          duration: const Duration(milliseconds: 300),
+          curve: Curves.easeOut,
+        );
+      }
+    });
   }
+
+  // Yorum beğenildi mi kontrol et
+  bool isCommentLiked(String commentId) {
+    return likedComments.contains(commentId);
+  }
+
+  // Kullanıcı yorumu düzenleyebilir mi
+  bool canEditComment(CommentModel comment) {
+    final currentUser = _authRepository.currentUser;
+    return currentUser != null && currentUser.uid == comment.authorId;
+  }
+
+  // Getters
+  bool get hasComments => comments.isNotEmpty;
+  bool get isReplying => replyingTo.value != null;
+  String get replyingToName => replyingTo.value?.authorName ?? '';
 }

@@ -35,7 +35,7 @@ class CodeSnippetService extends GetxService {
           .update(snippet.toMap());
 
       // Önbelleği güncelle
-      final cacheKey = '${CACHE_KEY_PREFIX}${snippet.id}';
+      final cacheKey = '$CACHE_KEY_PREFIX${snippet.id}';
       await _cacheService.setData(cacheKey, snippet.toMap());
     } catch (e) {
       _errorHandler.handleError(e, 'updateSnippet');
@@ -48,7 +48,7 @@ class CodeSnippetService extends GetxService {
       await _firestore.collection('code_snippets').doc(snippetId).delete();
 
       // Önbelleği temizle
-      final cacheKey = '${CACHE_KEY_PREFIX}$snippetId';
+      final cacheKey = '$CACHE_KEY_PREFIX$snippetId';
       await _cacheService.removeData(cacheKey);
     } catch (e) {
       _errorHandler.handleError(e, 'deleteSnippet');

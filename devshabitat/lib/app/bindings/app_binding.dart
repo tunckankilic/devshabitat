@@ -1,27 +1,17 @@
-import 'package:devshabitat/app/controllers/auth_controller.dart';
-import 'package:devshabitat/app/repositories/auth_repository.dart';
 import 'package:get/get.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import '../core/services/error_handler_service.dart';
-import '../core/services/memory_manager_service.dart';
-import '../core/services/api_optimization_service.dart';
-import '../services/github_oauth_service.dart';
-import '../services/github_service.dart';
+
 import '../services/developer_matching_service.dart';
 import '../services/post_service.dart';
 import '../services/lazy_loading_service.dart';
 import '../services/asset_optimization_service.dart';
-import '../services/notification_service.dart';
 import '../services/audio_service.dart';
 import '../services/image_upload_service.dart';
-import '../services/storage_service.dart';
 import '../services/community/resource_service.dart';
 import '../services/file_storage_service.dart';
 import '../services/deep_linking_service.dart';
 import '../controllers/app_controller.dart';
-import '../controllers/responsive_controller.dart';
-import '../controllers/auth_state_controller.dart';
-import '../controllers/email_auth_controller.dart';
+
 import '../controllers/developer_matching_controller.dart';
 import '../controllers/networking_controller.dart';
 import '../services/responsive_performance_service.dart';
@@ -34,12 +24,8 @@ import 'message_binding.dart';
 import '../services/network_analytics_service.dart';
 import '../services/location/maps_service.dart';
 import '../services/fcm_service.dart';
-import '../services/user_service.dart';
 import '../services/progressive_onboarding_service.dart';
-import '../services/profile_completion_service.dart';
-import '../services/feature_gate_service.dart';
-import '../services/auth_migration_service.dart';
-import '../services/analytics_service.dart';
+
 import '../controllers/progressive_onboarding_controller.dart';
 import '../controllers/feature_gate_controller.dart';
 import '../core/services/cache_service.dart';
@@ -55,20 +41,15 @@ class AppBinding extends Bindings {
   }
 
   void initSynchronousDependencies() {
-    // Core Services
-    final errorHandler = Get.put(ErrorHandlerService());
-    Get.put(MemoryManagerService());
-    Get.put(ApiOptimizationService());
+    // Sadece AppBinding'e özel servisleri yükle
+    // Core servisler main.dart'ta yüklendi
     Get.put(DeepLinkingService());
     Get.put(NetworkAnalyticsService());
+
     // Location Services
     Get.put(MapsService());
 
-    // Storage Service
-    Get.put(StorageService());
-
-    // Responsive system (immediately needed for theme)
-    Get.put<ResponsiveController>(ResponsiveController(), permanent: true);
+    // Responsive Performance Service
     Get.put<ResponsivePerformanceService>(
       ResponsivePerformanceService(),
       permanent: true,
@@ -81,11 +62,8 @@ class AppBinding extends Bindings {
     // Form Validation Service
     Get.put<FormValidationService>(FormValidationService(), permanent: true);
 
-    // Cache Service
-    Get.put<CacheService>(CacheService(), permanent: true);
-
     // Image Upload Service
-    Get.put(ImageUploadService(errorHandler: errorHandler));
+    Get.put(ImageUploadService(errorHandler: Get.find()));
 
     // Developer Matching Service
     Get.put(DeveloperMatchingService());
@@ -107,64 +85,21 @@ class AppBinding extends Bindings {
     // FCM Service
     Get.put(FCMService());
 
-    // Profile Completion & Feature Gate Services
-    Get.put(ProfileCompletionService());
+    // Progressive Onboarding Service (diğerleri main.dart'ta)
     Get.put(ProgressiveOnboardingService());
-    Get.put(AuthMigrationService());
-    Get.put(AnalyticsService());
   }
 
   Future<void> _initAsynchronousDependencies() async {
     final errorHandler = Get.find<ErrorHandlerService>();
 
     try {
-      // SharedPreferences & Cache Service
-      final prefs = await SharedPreferences.getInstance();
-      Get.put<SharedPreferences>(prefs);
+      // Cache Service initialization (SharedPreferences main.dart'ta)
       await Get.find<CacheService>().init();
-
-      // Notification Service
-      final notificationService = Get.put(NotificationService(prefs));
-      await notificationService.init();
 
       // Audio Service
       Get.put(AudioService());
 
-      // Auth Related Services
-      Get.lazyPut<GitHubOAuthService>(
-        () => GitHubOAuthService(logger: Get.find(), errorHandler: Get.find()),
-      );
-
-      final authRepository = Get.put(
-        AuthRepository(githubOAuthService: Get.find()),
-      );
-
-      // GitHub Services (after AuthRepository)
-      Get.put(GithubService());
-
-      // Auth Related Controllers
-      final authStateController = Get.put(
-        AuthStateController(authRepository: authRepository),
-      );
-
-      final emailAuthController = Get.put(
-        EmailAuthController(
-          authRepository: authRepository,
-          errorHandler: errorHandler,
-        ),
-      );
-
-      Get.put(
-        AuthController(
-          authRepository: authRepository,
-          errorHandler: errorHandler,
-          emailAuth: emailAuthController,
-          authState: authStateController,
-          featureGateService: Get.find<FeatureGateService>(),
-        ),
-      );
-
-      // App Controllers
+      // App Controllers (Auth zaten main.dart'ta)
       Get.put(AppController(errorHandler: errorHandler));
 
       // Developer Matching Controller
@@ -182,18 +117,7 @@ class AppBinding extends Bindings {
       // Post Service
       Get.put(PostService(errorHandler: errorHandler));
 
-      // User Service
-      Get.put(UserService());
-
-      // Feature Gate Service
-      Get.put(
-        FeatureGateService(
-          profileCompletionService: Get.find<ProfileCompletionService>(),
-          userService: Get.find<UserService>(),
-        ),
-      );
-
-      // Feature Gate & Progressive Onboarding Controllers
+      // Feature Gate & Progressive Onboarding Controllers (diğerleri main.dart'ta)
       Get.put(FeatureGateController());
       Get.put(ProgressiveOnboardingController());
 

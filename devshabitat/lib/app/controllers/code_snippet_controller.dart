@@ -302,7 +302,7 @@ class CodeSnippetController extends GetxController {
       isLoading.value = true;
       error.value = '';
 
-      final sharedId = await _snippetService.shareSnippet(snippet);
+      await _snippetService.shareSnippet(snippet);
 
       Get.snackbar(
         'Başarılı',

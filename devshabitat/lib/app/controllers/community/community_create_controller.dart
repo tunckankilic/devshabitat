@@ -120,7 +120,6 @@ class CommunityCreateController extends GetxController
     _selectedImagePath = imagePath;
   }
 
-  @override
   Future<bool> validateForm() async {
     try {
       // Tüm validasyonları çalıştır

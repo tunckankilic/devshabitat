@@ -44,7 +44,7 @@ class EnhancedFormField extends StatefulWidget {
   final String? semanticHint;
 
   const EnhancedFormField({
-    Key? key,
+    super.key,
     required this.fieldId,
     this.controller,
     this.labelText,
@@ -83,7 +83,7 @@ class EnhancedFormField extends StatefulWidget {
     this.validator,
     this.semanticLabel,
     this.semanticHint,
-  }) : super(key: key);
+  });
 
   @override
   State<EnhancedFormField> createState() => _EnhancedFormFieldState();

@@ -1,3 +1,4 @@
+import 'package:devshabitat/app/controllers/auth_controller.dart';
 import 'package:get/get.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -11,7 +12,6 @@ import 'package:devshabitat/app/services/event/event_registration_service.dart';
 import 'package:devshabitat/app/services/event/event_participation_service.dart';
 import 'package:devshabitat/app/services/event/event_reminder_service.dart';
 import 'package:devshabitat/app/services/event/event_detail_service.dart';
-import 'package:devshabitat/app/controllers/auth/auth_controller.dart';
 
 enum RSVPStatus { going, maybe, notGoing, notResponded }
 
@@ -109,8 +109,9 @@ class EventDetailController extends GetxController {
   // Kayıtları yükle
   Future<void> loadRegistrations(String eventId) async {
     try {
-      registrations.value =
-          await _registrationService.getRegistrationsByEvent(eventId);
+      registrations.value = await _registrationService.getRegistrationsByEvent(
+        eventId,
+      );
     } catch (e) {
       Get.snackbar('Hata', 'Kayıtlar yüklenirken bir hata oluştu');
     }
@@ -118,7 +119,7 @@ class EventDetailController extends GetxController {
 
   // Kayıt durumunu kontrol et
   Future<void> checkRegistrationStatus(String eventId) async {
-    final userId = Get.find<AuthController>().user.value?.id;
+    final userId = Get.find<AuthController>().currentUser?.uid;
     if (userId == null) return;
 
     final registration = await _registrationService
@@ -130,8 +131,8 @@ class EventDetailController extends GetxController {
   // Katılım istatistiklerini yükle
   Future<void> loadParticipationStats(String eventId) async {
     try {
-      participationStats.value =
-          await _participationService.getParticipationStats(eventId);
+      participationStats.value = await _participationService
+          .getParticipationStats(eventId);
     } catch (e) {
       Get.snackbar('Hata', 'İstatistikler yüklenirken bir hata oluştu');
     }
@@ -139,7 +140,7 @@ class EventDetailController extends GetxController {
 
   // Etkinliğe kayıt ol
   Future<void> registerForEvent() async {
-    final userId = Get.find<AuthController>().user.value?.id;
+    final userId = Get.find<AuthController>().currentUser?.uid;
     if (userId == null || event.value == null) return;
 
     isLoading.value = true;
@@ -165,17 +166,18 @@ class EventDetailController extends GetxController {
 
     isLoading.value = true;
     try {
-      final csvData =
-          await _participationService.exportParticipantsToCSV(event.value!.id);
+      final csvData = await _participationService.exportParticipantsToCSV(
+        event.value!.id,
+      );
 
       // CSV dosyasını paylaş
-      await Share.shareXFiles(
-        [
-          XFile.fromData(Uint8List.fromList(csvData.codeUnits),
-              name: 'participants.csv', mimeType: 'text/csv')
-        ],
-        subject: '${event.value!.title} - Katılımcı Listesi',
-      );
+      await Share.shareXFiles([
+        XFile.fromData(
+          Uint8List.fromList(csvData.codeUnits),
+          name: 'participants.csv',
+          mimeType: 'text/csv',
+        ),
+      ], subject: '${event.value!.title} - Katılımcı Listesi');
 
       Get.snackbar('Başarılı', 'Katılımcı listesi dışa aktarıldı');
     } catch (e) {
@@ -199,9 +201,7 @@ class EventDetailController extends GetxController {
         startDate: event.value!.startDate,
         endDate: event.value!.endDate,
         allDay: false,
-        iosParams: calendar.IOSParams(
-          reminder: Duration(minutes: 30),
-        ),
+        iosParams: calendar.IOSParams(reminder: Duration(minutes: 30)),
         androidParams: calendar.AndroidParams(
           emailInvites: [], // Opsiyonel: Davet edilecek e-postalar
         ),
@@ -220,7 +220,7 @@ class EventDetailController extends GetxController {
 
   // Özel hatırlatıcı oluştur
   Future<void> createCustomReminder(DateTime reminderTime, String? note) async {
-    final userId = Get.find<AuthController>().user.value?.id;
+    final userId = Get.find<AuthController>().currentUser?.uid;
     if (userId == null || event.value == null) return;
 
     try {
@@ -270,12 +270,10 @@ class EventDetailController extends GetxController {
         AlertDialog(
           title: const Text('Etkinliği Raporla'),
           content: const Text(
-              'Bu etkinliği uygunsuz içerik olarak bildirmek istediğinize emin misiniz?'),
+            'Bu etkinliği uygunsuz içerik olarak bildirmek istediğinize emin misiniz?',
+          ),
           actions: [
-            TextButton(
-              onPressed: () => Get.back(),
-              child: const Text('İptal'),
-            ),
+            TextButton(onPressed: () => Get.back(), child: const Text('İptal')),
             ElevatedButton(
               onPressed: () async {
                 Get.back();
@@ -335,7 +333,7 @@ class EventDetailController extends GetxController {
     if (event.value == null) return;
 
     try {
-      final userId = Get.find<AuthController>().user.value?.id;
+      final userId = Get.find<AuthController>().currentUser?.uid;
       if (userId == null) return;
 
       final registration = await _registrationService
@@ -357,7 +355,7 @@ class EventDetailController extends GetxController {
     if (event.value == null) return;
 
     try {
-      final userId = Get.find<AuthController>().user.value?.id;
+      final userId = Get.find<AuthController>().currentUser?.uid;
       if (userId == null) return;
 
       if (isReminderSet.value) {
@@ -377,7 +375,7 @@ class EventDetailController extends GetxController {
     if (event.value == null) return;
 
     try {
-      final userId = Get.find<AuthController>().user.value?.id;
+      final userId = Get.find<AuthController>().currentUser?.uid;
       if (userId == null) return;
 
       await eventService.submitFeedback(
@@ -398,8 +396,8 @@ class EventDetailController extends GetxController {
 
     isCommenting.value = true;
     try {
-      final userId = Get.find<AuthController>().user.value?.id;
-      final userName = Get.find<AuthController>().user.value?.displayName;
+      final userId = Get.find<AuthController>().currentUser?.uid;
+      final userName = Get.find<AuthController>().currentUser?.displayName;
       if (userId == null || userName == null) return;
 
       final comment = EventComment(
@@ -440,7 +438,7 @@ class EventDetailController extends GetxController {
     if (event.value == null) return;
 
     try {
-      final userId = Get.find<AuthController>().user.value?.id;
+      final userId = Get.find<AuthController>().currentUser?.uid;
       if (userId == null) return;
 
       await eventService.toggleCommentLike(event.value!.id, commentId, userId);
