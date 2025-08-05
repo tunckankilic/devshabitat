@@ -1,3 +1,4 @@
+import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../../models/community/announcement_model.dart';
 import '../../services/community/announcement_service.dart';
@@ -9,6 +10,22 @@ class CommunityAnnouncementController extends GetxController {
   final RxList<AnnouncementModel> announcements = <AnnouncementModel>[].obs;
   final RxBool isLoading = false.obs;
   final RxString selectedCategory = 'all'.obs;
+  late final TextEditingController titleController;
+  late final TextEditingController contentController;
+
+  @override
+  void onInit() {
+    super.onInit();
+    titleController = TextEditingController();
+    contentController = TextEditingController();
+  }
+
+  @override
+  void onClose() {
+    titleController.dispose();
+    contentController.dispose();
+    super.onClose();
+  }
 
   // Duyuruları yükle
   Future<void> loadAnnouncements(String communityId) async {

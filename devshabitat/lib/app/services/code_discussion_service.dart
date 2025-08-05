@@ -2,6 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:get/get.dart';
 import '../models/code_snippet_model.dart';
 import '../repositories/auth_repository.dart';
+import '../models/code_comment_model.dart';
 import 'package:uuid/uuid.dart';
 
 class CodeDiscussionService extends GetxService {
@@ -26,11 +27,12 @@ class CodeDiscussionService extends GetxService {
     required String code,
     required String language,
     required String title,
-    String? description,
+    required String description,
   }) async {
     final String snippetId = _uuid.v4();
     final authRepo = Get.find<AuthRepository>();
     final userId = authRepo.currentUser?.uid;
+    final userName = authRepo.currentUser?.displayName;
 
     if (userId == null) {
       throw Exception('Kullanıcı oturum açmamış');
@@ -43,10 +45,11 @@ class CodeDiscussionService extends GetxService {
       title: title,
       description: description,
       authorId: userId,
+      authorName: userName ?? 'Anonim Kullanıcı',
       createdAt: DateTime.now(),
     );
 
-    await _snippetsCollection.doc(snippetId).set(snippet.toJson());
+    await _snippetsCollection.doc(snippetId).set(snippet.toMap());
     return snippet;
   }
 
@@ -68,13 +71,13 @@ class CodeDiscussionService extends GetxService {
       id: commentId,
       comment: comment,
       authorId: userId,
-      lineNumber: lineNumber,
+      lineNumber: lineNumber != null ? int.parse(lineNumber) : null,
       createdAt: DateTime.now(),
     );
 
-    await _commentsCollection.doc(commentId).set(codeComment.toJson());
+    await _commentsCollection.doc(commentId).set(codeComment.toMap());
     await _snippetsCollection.doc(snippetId).update({
-      'comments': FieldValue.arrayUnion([commentId])
+      'comments': FieldValue.arrayUnion([commentId]),
     });
   }
 
@@ -85,19 +88,25 @@ class CodeDiscussionService extends GetxService {
     required String explanation,
   }) async {
     final String solutionId = _uuid.v4();
-    final String userId = Get.find<String>();
+    final authRepo = Get.find<AuthRepository>();
+    final userId = authRepo.currentUser?.uid;
+
+    if (userId == null) {
+      throw Exception('Kullanıcı oturum açmamış');
+    }
 
     final solution = CodeSolution(
       id: solutionId,
       code: code,
       explanation: explanation,
       authorId: userId,
+      votes: 0,
       createdAt: DateTime.now(),
     );
 
-    await _solutionsCollection.doc(solutionId).set(solution.toJson());
+    await _solutionsCollection.doc(solutionId).set(solution.toMap());
     await _snippetsCollection.doc(discussionId).update({
-      'solutions': FieldValue.arrayUnion([solutionId])
+      'solutions': FieldValue.arrayUnion([solutionId]),
     });
   }
 
@@ -108,8 +117,7 @@ class CodeDiscussionService extends GetxService {
       throw Exception('Tartışma bulunamadı');
     }
 
-    final data = doc.data() as Map<String, dynamic>;
-    return CodeSnippetModel.fromJson(data);
+    return CodeSnippetModel.fromDocument(doc);
   }
 
   // Çözüm oylaması
@@ -117,9 +125,9 @@ class CodeDiscussionService extends GetxService {
     required String solutionId,
     required bool isUpvote,
   }) async {
-    await _solutionsCollection
-        .doc(solutionId)
-        .update({'votes': FieldValue.increment(isUpvote ? 1 : -1)});
+    await _solutionsCollection.doc(solutionId).update({
+      'votes': FieldValue.increment(isUpvote ? 1 : -1),
+    });
   }
 
   // Tartışmaları listele
@@ -147,8 +155,7 @@ class CodeDiscussionService extends GetxService {
 
     final querySnapshot = await query.get();
     return querySnapshot.docs
-        .map((doc) =>
-            CodeSnippetModel.fromJson(doc.data() as Map<String, dynamic>))
+        .map((doc) => CodeSnippetModel.fromDocument(doc))
         .toList();
   }
 }

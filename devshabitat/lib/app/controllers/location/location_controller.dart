@@ -115,7 +115,8 @@ class LocationController extends GetxController with MemoryManagementMixin {
       }
 
       _logger.i(
-          'Device capability: ${isLowEndDevice.value ? "Low-end" : "High-end"}');
+        'Device capability: ${isLowEndDevice.value ? "Low-end" : "High-end"}',
+      );
     } catch (e) {
       _logger.e('Device capability check failed: $e');
     }
@@ -369,6 +370,68 @@ class LocationController extends GetxController with MemoryManagementMixin {
     await _initializeLocation();
   }
 
+  Future<bool> checkLocationServices() async {
+    try {
+      final location = Location();
+      final servicesEnabled = await location.serviceEnabled();
+      return servicesEnabled;
+    } catch (e) {
+      _logger.e('Location services check error: $e');
+      return false;
+    }
+  }
+
+  Future<bool> checkLocationPermission() async {
+    try {
+      final location = Location();
+      final permissionStatus = await location.hasPermission();
+      return permissionStatus == PermissionStatus.granted;
+    } catch (e) {
+      _logger.e('Location permission check error: $e');
+      return false;
+    }
+  }
+
+  Future<void> openLocationSettings() async {
+    try {
+      final location = Location();
+      await location.requestService();
+    } catch (e) {
+      _logger.e('Open location settings error: $e');
+    }
+  }
+
+  Future<void> requestLocationPermission() async {
+    try {
+      final location = Location();
+      final permissionStatus = await location.requestPermission();
+      if (permissionStatus == PermissionStatus.granted) {
+        locationPermissionGranted.value = true;
+      }
+    } catch (e) {
+      _logger.e('Location permission request error: $e');
+    }
+  }
+
+  Future<LocationData?> getCurrentLocation() async {
+    try {
+      if (!await checkLocationPermission()) {
+        await requestLocationPermission();
+      }
+
+      if (!await checkLocationServices()) {
+        await openLocationSettings();
+      }
+
+      final location = Location();
+      final locationData = await location.getLocation();
+      return locationData;
+    } catch (e) {
+      _logger.e('Get current location error: $e');
+      return null;
+    }
+  }
+
   // Get comprehensive status
   Map<String, dynamic> getLocationStatus() {
     return {
@@ -406,15 +469,18 @@ class LocationController extends GetxController with MemoryManagementMixin {
 
       // Calculate date range
       final endDate = DateTime.now();
-      final startDate =
-          endDate.subtract(Duration(days: historyRetentionDays.value));
+      final startDate = endDate.subtract(
+        Duration(days: historyRetentionDays.value),
+      );
 
       // Query location history from Firestore
       final querySnapshot = await FirebaseFirestore.instance
           .collection('location_history')
           .where('userId', isEqualTo: currentUser.uid)
-          .where('timestamp',
-              isGreaterThanOrEqualTo: Timestamp.fromDate(startDate))
+          .where(
+            'timestamp',
+            isGreaterThanOrEqualTo: Timestamp.fromDate(startDate),
+          )
           .where('timestamp', isLessThanOrEqualTo: Timestamp.fromDate(endDate))
           .orderBy('timestamp', descending: true)
           .limit(100)
@@ -585,7 +651,10 @@ class LocationController extends GetxController with MemoryManagementMixin {
 
   // Navigate to location on map
   Future<void> navigateToLocation(
-      double latitude, double longitude, String placeName) async {
+    double latitude,
+    double longitude,
+    String placeName,
+  ) async {
     try {
       // This would open a map application or navigate within the app
       Get.snackbar(

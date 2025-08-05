@@ -25,7 +25,7 @@ import '../controllers/email_auth_controller.dart';
 import '../controllers/developer_matching_controller.dart';
 import '../controllers/networking_controller.dart';
 import '../services/responsive_performance_service.dart';
-import '../controllers/enhanced_form_validation_controller.dart';
+import '../core/services/form_validation_service.dart';
 import '../controllers/file_upload_controller.dart';
 import '../controllers/integration/notification_controller.dart';
 import '../controllers/location/nearby_developers_controller.dart';
@@ -42,6 +42,7 @@ import '../services/auth_migration_service.dart';
 import '../services/analytics_service.dart';
 import '../controllers/progressive_onboarding_controller.dart';
 import '../controllers/feature_gate_controller.dart';
+import '../core/services/cache_service.dart';
 
 class AppBinding extends Bindings {
   @override
@@ -77,11 +78,11 @@ class AppBinding extends Bindings {
     final performanceService = Get.find<ResponsivePerformanceService>();
     performanceService.preCalculateCommonValues();
 
-    // Enhanced Form Validation Controller
-    Get.put<EnhancedFormValidationController>(
-      EnhancedFormValidationController(),
-      permanent: true,
-    );
+    // Form Validation Service
+    Get.put<FormValidationService>(FormValidationService(), permanent: true);
+
+    // Cache Service
+    Get.put<CacheService>(CacheService(), permanent: true);
 
     // Image Upload Service
     Get.put(ImageUploadService(errorHandler: errorHandler));
@@ -117,9 +118,10 @@ class AppBinding extends Bindings {
     final errorHandler = Get.find<ErrorHandlerService>();
 
     try {
-      // SharedPreferences
+      // SharedPreferences & Cache Service
       final prefs = await SharedPreferences.getInstance();
       Get.put<SharedPreferences>(prefs);
+      await Get.find<CacheService>().init();
 
       // Notification Service
       final notificationService = Get.put(NotificationService(prefs));

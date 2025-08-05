@@ -10,7 +10,6 @@ import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import '../packages/github_signin_promax/github_signin_promax.dart';
 import 'package:webview_flutter/webview_flutter.dart';
-import 'package:flutter/widgets.dart';
 
 class GitHubOAuthService extends GetxService {
   final Logger _logger;

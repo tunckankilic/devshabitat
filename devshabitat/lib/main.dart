@@ -29,6 +29,8 @@ import 'app/services/feed_service.dart';
 import 'app/services/connection_service.dart';
 import 'app/repositories/feed_repository.dart';
 import 'app/services/github_service.dart';
+import 'app/services/github/content_sharing_service.dart';
+import 'app/controllers/github_content_controller.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'app/services/notification_service.dart';
 import 'app/controllers/message/message_list_controller.dart';
@@ -112,8 +114,22 @@ Future<void> initBasicDependencies() async {
   // AuthRepository
   Get.put(AuthRepository(githubOAuthService: Get.find()), permanent: true);
 
-  // GitHub Service
+  // GitHub Services
   Get.put(GithubService(), permanent: true);
+  Get.put(
+    GitHubContentSharingService(logger: Get.find(), errorHandler: Get.find()),
+    permanent: true,
+  );
+
+  // GitHub Controllers
+  Get.put(
+    GitHubContentController(
+      contentService: Get.find(),
+      logger: Get.find(),
+      errorHandler: Get.find(),
+    ),
+    permanent: true,
+  );
 
   // Auth Controllers
   Get.put(

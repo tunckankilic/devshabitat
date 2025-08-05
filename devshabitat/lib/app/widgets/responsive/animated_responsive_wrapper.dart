@@ -3,14 +3,14 @@ import 'package:get/get.dart';
 import '../../controllers/responsive_controller.dart';
 
 enum ScreenBreakpoint {
-  smallPhone,
-  largePhone,
-  tablet,
+  compact, // 0-600dp
+  medium, // 600-840dp
+  expanded, // 840dp+
 }
 
 class AnimatedResponsiveWrapper extends StatefulWidget {
   final Widget Function(BuildContext context, ScreenBreakpoint breakpoint)
-      builder;
+  builder;
   final Duration animationDuration;
   final Curve animationCurve;
 
@@ -45,13 +45,12 @@ class _AnimatedResponsiveWrapperState extends State<AnimatedResponsiveWrapper>
       vsync: this,
     );
 
-    _fadeAnimation = Tween<double>(
-      begin: 0.0,
-      end: 1.0,
-    ).animate(CurvedAnimation(
-      parent: _animationController,
-      curve: widget.animationCurve,
-    ));
+    _fadeAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
+      CurvedAnimation(
+        parent: _animationController,
+        curve: widget.animationCurve,
+      ),
+    );
 
     _currentBreakpoint = _responsiveController.currentBreakpoint.value;
     _currentWidget = widget.builder(context, _currentBreakpoint!);
@@ -120,16 +119,16 @@ class _AnimatedResponsiveWrapperState extends State<AnimatedResponsiveWrapper>
 
 // Specific animated responsive layouts
 class AnimatedResponsiveLayout extends StatelessWidget {
-  final Widget mobile;
-  final Widget tablet;
-  final Widget? desktop;
+  final Widget compact;
+  final Widget medium;
+  final Widget expanded;
   final Duration animationDuration;
 
   const AnimatedResponsiveLayout({
     super.key,
-    required this.mobile,
-    required this.tablet,
-    this.desktop,
+    required this.compact,
+    required this.medium,
+    required this.expanded,
     this.animationDuration = const Duration(milliseconds: 300),
   });
 
@@ -139,11 +138,12 @@ class AnimatedResponsiveLayout extends StatelessWidget {
       animationDuration: animationDuration,
       builder: (context, breakpoint) {
         switch (breakpoint) {
-          case ScreenBreakpoint.smallPhone:
-          case ScreenBreakpoint.largePhone:
-            return mobile;
-          case ScreenBreakpoint.tablet:
-            return desktop ?? tablet;
+          case ScreenBreakpoint.compact:
+            return compact;
+          case ScreenBreakpoint.medium:
+            return medium;
+          case ScreenBreakpoint.expanded:
+            return expanded;
         }
       },
     );
@@ -153,18 +153,20 @@ class AnimatedResponsiveLayout extends StatelessWidget {
 // Animated responsive padding
 class AnimatedResponsivePadding extends StatelessWidget {
   final Widget child;
-  final EdgeInsets mobilePadding;
-  final EdgeInsets tabletPadding;
-  final EdgeInsets? desktopPadding;
+  final EdgeInsets compactPadding;
+  final EdgeInsets mediumPadding;
+  final EdgeInsets expandedPadding;
   final Duration animationDuration;
+  final bool includeSafeArea;
 
   const AnimatedResponsivePadding({
     super.key,
     required this.child,
-    required this.mobilePadding,
-    required this.tabletPadding,
-    this.desktopPadding,
+    required this.compactPadding,
+    required this.mediumPadding,
+    required this.expandedPadding,
     this.animationDuration = const Duration(milliseconds: 200),
+    this.includeSafeArea = true,
   });
 
   @override
@@ -172,15 +174,30 @@ class AnimatedResponsivePadding extends StatelessWidget {
     final responsive = Get.find<ResponsiveController>();
 
     return Obx(() {
-      EdgeInsets targetPadding = mobilePadding;
+      EdgeInsets targetPadding;
       switch (responsive.currentBreakpoint.value) {
-        case ScreenBreakpoint.smallPhone:
-        case ScreenBreakpoint.largePhone:
-          targetPadding = mobilePadding;
+        case ScreenBreakpoint.compact:
+          targetPadding = compactPadding;
           break;
-        case ScreenBreakpoint.tablet:
-          targetPadding = desktopPadding ?? tabletPadding;
+        case ScreenBreakpoint.medium:
+          targetPadding = mediumPadding;
           break;
+        case ScreenBreakpoint.expanded:
+          targetPadding = expandedPadding;
+          break;
+      }
+
+      if (includeSafeArea) {
+        final mediaQuery = MediaQuery.of(context);
+        targetPadding = targetPadding.copyWith(
+          top: targetPadding.top + mediaQuery.padding.top,
+          bottom:
+              targetPadding.bottom +
+              mediaQuery.padding.bottom +
+              (mediaQuery.viewInsets.bottom > 0
+                  ? mediaQuery.viewInsets.bottom
+                  : 0),
+        );
       }
 
       return AnimatedPadding(
@@ -196,23 +213,23 @@ class AnimatedResponsivePadding extends StatelessWidget {
 // Animated responsive container
 class AnimatedResponsiveContainer extends StatelessWidget {
   final Widget child;
-  final double? mobileWidth;
-  final double? tabletWidth;
-  final double? desktopWidth;
-  final double? mobileHeight;
-  final double? tabletHeight;
-  final double? desktopHeight;
+  final double? compactWidth;
+  final double? mediumWidth;
+  final double? expandedWidth;
+  final double? compactHeight;
+  final double? mediumHeight;
+  final double? expandedHeight;
   final Duration animationDuration;
 
   const AnimatedResponsiveContainer({
     super.key,
     required this.child,
-    this.mobileWidth,
-    this.tabletWidth,
-    this.desktopWidth,
-    this.mobileHeight,
-    this.tabletHeight,
-    this.desktopHeight,
+    this.compactWidth,
+    this.mediumWidth,
+    this.expandedWidth,
+    this.compactHeight,
+    this.mediumHeight,
+    this.expandedHeight,
     this.animationDuration = const Duration(milliseconds: 200),
   });
 
@@ -225,14 +242,17 @@ class AnimatedResponsiveContainer extends StatelessWidget {
       double? targetHeight;
 
       switch (responsive.currentBreakpoint.value) {
-        case ScreenBreakpoint.smallPhone:
-        case ScreenBreakpoint.largePhone:
-          targetWidth = mobileWidth;
-          targetHeight = mobileHeight;
+        case ScreenBreakpoint.compact:
+          targetWidth = compactWidth;
+          targetHeight = compactHeight;
           break;
-        case ScreenBreakpoint.tablet:
-          targetWidth = desktopWidth ?? tabletWidth;
-          targetHeight = desktopHeight ?? tabletHeight;
+        case ScreenBreakpoint.medium:
+          targetWidth = mediumWidth;
+          targetHeight = mediumHeight;
+          break;
+        case ScreenBreakpoint.expanded:
+          targetWidth = expandedWidth;
+          targetHeight = expandedHeight;
           break;
       }
 
@@ -244,5 +264,71 @@ class AnimatedResponsiveContainer extends StatelessWidget {
         child: child,
       );
     });
+  }
+}
+
+// Keyboard aware container
+class KeyboardAwareContainer extends StatelessWidget {
+  final Widget child;
+  final bool maintainBottomViewPadding;
+  final bool maintainState;
+
+  const KeyboardAwareContainer({
+    super.key,
+    required this.child,
+    this.maintainBottomViewPadding = true,
+    this.maintainState = true,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return SingleChildScrollView(
+      physics: const ClampingScrollPhysics(),
+      keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
+      child: AnimatedPadding(
+        duration: const Duration(milliseconds: 100),
+        padding: EdgeInsets.only(
+          bottom: maintainBottomViewPadding
+              ? MediaQuery.of(context).viewInsets.bottom
+              : 0,
+        ),
+        child: child,
+      ),
+    );
+  }
+}
+
+// Safe area container
+class SafeAreaContainer extends StatelessWidget {
+  final Widget child;
+  final bool top;
+  final bool bottom;
+  final bool left;
+  final bool right;
+  final EdgeInsets minimum;
+  final bool maintainBottomViewPadding;
+
+  const SafeAreaContainer({
+    super.key,
+    required this.child,
+    this.top = true,
+    this.bottom = true,
+    this.left = true,
+    this.right = true,
+    this.minimum = EdgeInsets.zero,
+    this.maintainBottomViewPadding = true,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return SafeArea(
+      top: top,
+      bottom: bottom,
+      left: left,
+      right: right,
+      minimum: minimum,
+      maintainBottomViewPadding: maintainBottomViewPadding,
+      child: child,
+    );
   }
 }

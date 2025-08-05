@@ -27,7 +27,7 @@ class CodeDiscussionController extends GetxController {
         code: code,
         language: language,
         title: title,
-        description: description,
+        description: description!,
       );
 
       codeSnippets.add(snippet);

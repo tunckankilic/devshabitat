@@ -1,5 +1,3 @@
-import 'dart:developer';
-
 import 'package:devshabitat/app/repositories/auth_repository.dart';
 import 'package:get/get.dart';
 import 'package:flutter/material.dart';
@@ -8,7 +6,9 @@ import 'package:devshabitat/app/models/community/community_model.dart';
 import 'package:devshabitat/app/services/community/community_service.dart';
 import 'package:devshabitat/app/services/community/membership_service.dart';
 
-class CommunityDiscoveryController extends GetxController {
+import '../../core/base/base_community_controller.dart';
+
+class CommunityDiscoveryController extends BaseCommunityController {
   final CommunityService _communityService = Get.find<CommunityService>();
   final MembershipService _membershipService = MembershipService();
   final AuthRepository _authService = Get.find<AuthRepository>();
@@ -19,9 +19,6 @@ class CommunityDiscoveryController extends GetxController {
   final selectedType = Rx<CommunityType?>(null);
   final selectedCategory = Rx<CommunityCategory?>(null);
   final searchTerm = ''.obs;
-  final isLoading = false.obs;
-  final hasError = false.obs;
-  final errorMessage = ''.obs;
 
   DocumentSnapshot? _lastDocument;
   bool _hasMoreData = true;
@@ -34,6 +31,7 @@ class CommunityDiscoveryController extends GetxController {
   @override
   void onInit() {
     super.onInit();
+    searchController = TextEditingController();
     loadInitialData();
   }
 
@@ -50,64 +48,63 @@ class CommunityDiscoveryController extends GetxController {
   Future<void> loadCommunities({bool refresh = false}) async {
     if (!_hasMoreData && !refresh) return;
 
-    try {
-      isLoading.value = true;
-      hasError.value = false;
-
-      if (refresh) {
-        communities.clear();
-        _lastDocument = null;
-        _hasMoreData = true;
-      }
-
-      final results = await _communityService.getCommunities(
-        type: selectedType.value,
-        category: selectedCategory.value,
-        startAfter: _lastDocument,
-      );
-
-      if (results.isEmpty) {
-        _hasMoreData = false;
-      } else {
-        _lastDocument = results.last as DocumentSnapshot?;
-        communities.addAll(results);
-      }
-    } catch (e) {
-      hasError.value = true;
-      errorMessage.value = e.toString();
-    } finally {
-      isLoading.value = false;
+    if (refresh) {
+      communities.clear();
+      _lastDocument = null;
+      _hasMoreData = true;
     }
+
+    await handleAsync(
+      operation: () async {
+        final results = await _communityService.getCommunities(
+          type: selectedType.value,
+          category: selectedCategory.value,
+          startAfter: _lastDocument,
+        );
+
+        if (results.isEmpty) {
+          _hasMoreData = false;
+        } else {
+          _lastDocument = results.last as DocumentSnapshot?;
+          communities.addAll(results);
+        }
+      },
+      showLoading: !refresh,
+    );
   }
 
   // Load trending communities
   Future<void> loadTrendingCommunities() async {
-    try {
-      final results = await _communityService.getTrendingCommunities();
-      trendingCommunities.value = results;
-    } catch (e) {
-      log('Error loading trending communities: $e');
-    }
+    await handleAsync(
+      operation: () async {
+        final results = await _communityService.getTrendingCommunities();
+        trendingCommunities.value = results;
+      },
+      showLoading: false,
+    );
   }
 
   // Load user's communities
   Future<void> loadUserCommunities() async {
-    try {
-      final currentUser = _authService.currentUser;
-      if (currentUser == null) return;
+    final currentUser = _authService.currentUser;
+    if (currentUser == null) return;
 
-      final communityIds = await _membershipService.getUserCommunities(
-        userId: currentUser.uid,
-      );
+    await handleAsync(
+      operation: () async {
+        final communityIds = await _membershipService.getUserCommunities(
+          userId: currentUser.uid,
+        );
 
-      final communities = await Future.wait(
-        communityIds.map((id) => _communityService.getCommunity(id)),
-      );
+        final communities = await Future.wait(
+          communityIds.map((id) => _communityService.getCommunity(id)),
+        );
 
-      userCommunities.value = communities.whereType<CommunityModel>().toList();
-    } catch (e) {
-      log('Error loading user communities: $e');
-    }
+        userCommunities.value = communities
+            .whereType<CommunityModel>()
+            .toList();
+      },
+      showLoading: false,
+    );
   }
 
   // Search communities
@@ -117,18 +114,13 @@ class CommunityDiscoveryController extends GetxController {
       return;
     }
 
-    try {
-      isLoading.value = true;
-      hasError.value = false;
-
-      final results = await _communityService.searchCommunities(term);
-      communities.value = results;
-    } catch (e) {
-      hasError.value = true;
-      errorMessage.value = e.toString();
-    } finally {
-      isLoading.value = false;
-    }
+    await handleAsync(
+      operation: () async {
+        final results = await _communityService.searchCommunities(term);
+        communities.value = results;
+      },
+      successMessage: 'Arama tamamlandı',
+    );
   }
 
   // Update filters
@@ -166,18 +158,13 @@ class CommunityDiscoveryController extends GetxController {
         padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
           color: Get.theme.scaffoldBackgroundColor,
-          borderRadius: const BorderRadius.vertical(
-            top: Radius.circular(20),
-          ),
+          borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
         ),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(
-              'Filtreler',
-              style: Get.textTheme.titleLarge,
-            ),
+            Text('Filtreler', style: Get.textTheme.titleLarge),
             const SizedBox(height: 16),
             // Sıralama seçenekleri
             DropdownButtonFormField<String>(
@@ -187,18 +174,9 @@ class CommunityDiscoveryController extends GetxController {
                 border: OutlineInputBorder(),
               ),
               items: const [
-                DropdownMenuItem(
-                  value: 'newest',
-                  child: Text('En Yeni'),
-                ),
-                DropdownMenuItem(
-                  value: 'popular',
-                  child: Text('En Popüler'),
-                ),
-                DropdownMenuItem(
-                  value: 'active',
-                  child: Text('En Aktif'),
-                ),
+                DropdownMenuItem(value: 'newest', child: Text('En Yeni')),
+                DropdownMenuItem(value: 'popular', child: Text('En Popüler')),
+                DropdownMenuItem(value: 'active', child: Text('En Aktif')),
               ],
               onChanged: (value) {
                 if (value != null) {
@@ -232,20 +210,21 @@ class CommunityDiscoveryController extends GetxController {
     );
   }
 
+  late final TextEditingController searchController;
+
   void showSearch() {
     Get.bottomSheet(
       Container(
         padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
           color: Get.theme.scaffoldBackgroundColor,
-          borderRadius: const BorderRadius.vertical(
-            top: Radius.circular(20),
-          ),
+          borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
         ),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
             TextField(
+              controller: searchController,
               onChanged: (value) {
                 searchQuery.value = value;
                 loadCommunities();

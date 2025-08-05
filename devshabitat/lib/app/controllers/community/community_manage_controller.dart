@@ -16,8 +16,8 @@ class CommunityManageController extends GetxController {
   final RuleService _ruleService = Get.find<RuleService>();
 
   final formKey = GlobalKey<FormState>();
-  final nameController = TextEditingController();
-  final descriptionController = TextEditingController();
+  late final TextEditingController nameController;
+  late final TextEditingController descriptionController;
   final coverImageUrl = RxnString();
   final selectedCategories = <String>[].obs;
   final requiresApproval = true.obs;
@@ -38,6 +38,8 @@ class CommunityManageController extends GetxController {
   @override
   void onInit() {
     super.onInit();
+    nameController = TextEditingController();
+    descriptionController = TextEditingController();
     communityId = Get.arguments as String;
     loadCommunity();
   }
@@ -59,8 +61,9 @@ class CommunityManageController extends GetxController {
       nameController.text = community.name;
       descriptionController.text = community.description;
       coverImageUrl.value = community.coverImageUrl;
-      selectedCategories.value =
-          List<String>.from(community.settings['categories'] ?? []);
+      selectedCategories.value = List<String>.from(
+        community.settings['categories'] ?? [],
+      );
       requiresApproval.value = community.settings['requiresApproval'] ?? true;
       isPrivate.value = community.settings['isPrivate'] ?? false;
 
@@ -77,8 +80,9 @@ class CommunityManageController extends GetxController {
 
   Future<void> loadMembers() async {
     try {
-      final membersList =
-          await _membershipService.getCommunityMembersDetailed(communityId);
+      final membersList = await _membershipService.getCommunityMembersDetailed(
+        communityId,
+      );
       members.assignAll(membersList);
     } catch (e) {
       error.value = 'Üyeler yüklenirken bir hata oluştu: $e';
@@ -87,8 +91,9 @@ class CommunityManageController extends GetxController {
 
   Future<void> loadPendingMembers() async {
     try {
-      final pendingList =
-          await _membershipService.getPendingMembers(communityId);
+      final pendingList = await _membershipService.getPendingMembers(
+        communityId,
+      );
       pendingMembers.assignAll(pendingList);
     } catch (e) {
       error.value = 'Bekleyen üyeler yüklenirken bir hata oluştu: $e';
@@ -132,8 +137,9 @@ class CommunityManageController extends GetxController {
       isLoading.value = true;
 
       // Önce mevcut community verisini alalım
-      final currentCommunity =
-          await _communityService.getCommunity(communityId);
+      final currentCommunity = await _communityService.getCommunity(
+        communityId,
+      );
 
       String? newCoverImageUrl = coverImageUrl.value;
       if (_selectedImagePath != null) {

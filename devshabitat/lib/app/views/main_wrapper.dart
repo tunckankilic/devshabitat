@@ -26,10 +26,7 @@ class FeaturePromptService {
             'Bu işlem 30 saniye sürüyor.',
           ),
           actions: [
-            TextButton(
-              onPressed: () => Get.back(),
-              child: Text('Daha Sonra'),
-            ),
+            TextButton(onPressed: () => Get.back(), child: Text('Daha Sonra')),
             ElevatedButton(
               onPressed: () {
                 Get.back();
@@ -54,7 +51,8 @@ class FeaturePromptService {
               Text('🎯 Yeteneklerini Ekle', style: TextStyle(fontSize: 18)),
               SizedBox(height: 10),
               Text(
-                  'Sana uygun toplulukları bulmak için yeteneklerini belirtir misin?'),
+                'Sana uygun toplulukları bulmak için yeteneklerini belirtir misin?',
+              ),
               SizedBox(height: 20),
               Row(
                 children: [
@@ -124,70 +122,115 @@ class MainWrapper extends StatelessWidget {
         child: Row(
           children: [
             // Navigation Rail for tablet
-            Obx(() => NavigationRail(
-                  selectedIndex: navigationController.currentIndex.value,
-                  onDestinationSelected: navigationController.changePage,
-                  labelType: NavigationRailLabelType.selected,
-                  useIndicator: true,
-                  indicatorColor: Get.theme.colorScheme.primaryContainer,
-                  backgroundColor: Get.theme.colorScheme.surface,
-                  destinations: [
-                    NavigationRailDestination(
-                      icon: Icon(Icons.home_outlined,
-                          size: responsiveController.minTouchTarget),
-                      selectedIcon: Icon(Icons.home,
-                          size: responsiveController.minTouchTarget),
-                      label: Text(AppStrings.home,
-                          style: TextStyle(
-                              fontSize: responsiveController.responsiveValue(
-                                  mobile: 12, tablet: 14))),
+            Obx(
+              () => NavigationRail(
+                selectedIndex: navigationController.currentIndex.value,
+                onDestinationSelected: navigationController.changePage,
+                labelType: NavigationRailLabelType.selected,
+                useIndicator: true,
+                indicatorColor: Get.theme.colorScheme.primaryContainer,
+                backgroundColor: Get.theme.colorScheme.surface,
+                destinations: [
+                  NavigationRailDestination(
+                    icon: Icon(
+                      Icons.home_outlined,
+                      size: responsiveController.minTouchTarget,
                     ),
-                    NavigationRailDestination(
-                      icon: Icon(Icons.explore_outlined,
-                          size: responsiveController.minTouchTarget),
-                      selectedIcon: Icon(Icons.explore,
-                          size: responsiveController.minTouchTarget),
-                      label: Text(AppStrings.discover,
-                          style: TextStyle(
-                              fontSize: responsiveController.responsiveValue(
-                                  mobile: 12, tablet: 14))),
+                    selectedIcon: Icon(
+                      Icons.home,
+                      size: responsiveController.minTouchTarget,
                     ),
-                    NavigationRailDestination(
-                      icon: Icon(Icons.favorite_outline,
-                          size: responsiveController.minTouchTarget),
-                      selectedIcon: Icon(Icons.favorite,
-                          size: responsiveController.minTouchTarget),
-                      label: Text('Eşleştirme',
-                          style: TextStyle(
-                              fontSize: responsiveController.responsiveValue(
-                                  mobile: 12, tablet: 14))),
+                    label: Text(
+                      AppStrings.home,
+                      style: TextStyle(
+                        fontSize: responsiveController.responsiveValue(
+                          mobile: 12,
+                          tablet: 14,
+                        ),
+                      ),
                     ),
-                    NavigationRailDestination(
-                      icon: Icon(Icons.message_outlined,
-                          size: responsiveController.minTouchTarget),
-                      selectedIcon: Icon(Icons.message,
-                          size: responsiveController.minTouchTarget),
-                      label: Text(AppStrings.messages,
-                          style: TextStyle(
-                              fontSize: responsiveController.responsiveValue(
-                                  mobile: 12, tablet: 14))),
+                  ),
+                  NavigationRailDestination(
+                    icon: Icon(
+                      Icons.explore_outlined,
+                      size: responsiveController.minTouchTarget,
                     ),
-                    NavigationRailDestination(
-                      icon: Icon(Icons.person_outline,
-                          size: responsiveController.minTouchTarget),
-                      selectedIcon: Icon(Icons.person,
-                          size: responsiveController.minTouchTarget),
-                      label: Text(AppStrings.profile,
-                          style: TextStyle(
-                              fontSize: responsiveController.responsiveValue(
-                                  mobile: 12, tablet: 14))),
+                    selectedIcon: Icon(
+                      Icons.explore,
+                      size: responsiveController.minTouchTarget,
                     ),
-                  ],
-                )),
-            // Main content area
-            Expanded(
-              child: _buildCurrentPage(),
+                    label: Text(
+                      AppStrings.discover,
+                      style: TextStyle(
+                        fontSize: responsiveController.responsiveValue(
+                          mobile: 12,
+                          tablet: 14,
+                        ),
+                      ),
+                    ),
+                  ),
+                  NavigationRailDestination(
+                    icon: Icon(
+                      Icons.favorite_outline,
+                      size: responsiveController.minTouchTarget,
+                    ),
+                    selectedIcon: Icon(
+                      Icons.favorite,
+                      size: responsiveController.minTouchTarget,
+                    ),
+                    label: Text(
+                      'Eşleştirme',
+                      style: TextStyle(
+                        fontSize: responsiveController.responsiveValue(
+                          mobile: 12,
+                          tablet: 14,
+                        ),
+                      ),
+                    ),
+                  ),
+                  NavigationRailDestination(
+                    icon: Icon(
+                      Icons.message_outlined,
+                      size: responsiveController.minTouchTarget,
+                    ),
+                    selectedIcon: Icon(
+                      Icons.message,
+                      size: responsiveController.minTouchTarget,
+                    ),
+                    label: Text(
+                      AppStrings.messages,
+                      style: TextStyle(
+                        fontSize: responsiveController.responsiveValue(
+                          mobile: 12,
+                          tablet: 14,
+                        ),
+                      ),
+                    ),
+                  ),
+                  NavigationRailDestination(
+                    icon: Icon(
+                      Icons.person_outline,
+                      size: responsiveController.minTouchTarget,
+                    ),
+                    selectedIcon: Icon(
+                      Icons.person,
+                      size: responsiveController.minTouchTarget,
+                    ),
+                    label: Text(
+                      AppStrings.profile,
+                      style: TextStyle(
+                        fontSize: responsiveController.responsiveValue(
+                          mobile: 12,
+                          tablet: 14,
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
             ),
+            // Main content area
+            Expanded(child: _buildCurrentPage()),
           ],
         ),
       ),
@@ -197,61 +240,100 @@ class MainWrapper extends StatelessWidget {
   Widget _buildMobileLayout() {
     return Scaffold(
       body: _buildCurrentPage(),
-      bottomNavigationBar: Obx(() => NavigationBar(
-            selectedIndex: navigationController.currentIndex.value,
-            onDestinationSelected: navigationController.changePage,
-            height: responsiveController.responsiveValue(
-              mobile: 80,
-              tablet: 90,
+      bottomNavigationBar: Obx(
+        () => NavigationBar(
+          selectedIndex: navigationController.currentIndex.value,
+          onDestinationSelected: navigationController.changePage,
+          height: responsiveController.responsiveValue(mobile: 80, tablet: 90),
+          destinations: [
+            NavigationDestination(
+              icon: Icon(
+                Icons.home_outlined,
+                size: responsiveController.responsiveValue(
+                  mobile: 24,
+                  tablet: 28,
+                ),
+              ),
+              selectedIcon: Icon(
+                Icons.home,
+                size: responsiveController.responsiveValue(
+                  mobile: 24,
+                  tablet: 28,
+                ),
+              ),
+              label: 'Ana Sayfa',
             ),
-            destinations: [
-              NavigationDestination(
-                icon: Icon(Icons.home_outlined,
-                    size: responsiveController.responsiveValue(
-                        mobile: 24, tablet: 28)),
-                selectedIcon: Icon(Icons.home,
-                    size: responsiveController.responsiveValue(
-                        mobile: 24, tablet: 28)),
-                label: 'Ana Sayfa',
+            NavigationDestination(
+              icon: Icon(
+                Icons.explore_outlined,
+                size: responsiveController.responsiveValue(
+                  mobile: 24,
+                  tablet: 28,
+                ),
               ),
-              NavigationDestination(
-                icon: Icon(Icons.explore_outlined,
-                    size: responsiveController.responsiveValue(
-                        mobile: 24, tablet: 28)),
-                selectedIcon: Icon(Icons.explore,
-                    size: responsiveController.responsiveValue(
-                        mobile: 24, tablet: 28)),
-                label: 'Keşfet',
+              selectedIcon: Icon(
+                Icons.explore,
+                size: responsiveController.responsiveValue(
+                  mobile: 24,
+                  tablet: 28,
+                ),
               ),
-              NavigationDestination(
-                icon: Icon(Icons.favorite_outline,
-                    size: responsiveController.responsiveValue(
-                        mobile: 24, tablet: 28)),
-                selectedIcon: Icon(Icons.favorite,
-                    size: responsiveController.responsiveValue(
-                        mobile: 24, tablet: 28)),
-                label: 'Eşleştirme',
+              label: 'Keşfet',
+            ),
+            NavigationDestination(
+              icon: Icon(
+                Icons.favorite_outline,
+                size: responsiveController.responsiveValue(
+                  mobile: 24,
+                  tablet: 28,
+                ),
               ),
-              NavigationDestination(
-                icon: Icon(Icons.message_outlined,
-                    size: responsiveController.responsiveValue(
-                        mobile: 24, tablet: 28)),
-                selectedIcon: Icon(Icons.message,
-                    size: responsiveController.responsiveValue(
-                        mobile: 24, tablet: 28)),
-                label: 'Mesajlar',
+              selectedIcon: Icon(
+                Icons.favorite,
+                size: responsiveController.responsiveValue(
+                  mobile: 24,
+                  tablet: 28,
+                ),
               ),
-              NavigationDestination(
-                icon: Icon(Icons.person_outline,
-                    size: responsiveController.responsiveValue(
-                        mobile: 24, tablet: 28)),
-                selectedIcon: Icon(Icons.person,
-                    size: responsiveController.responsiveValue(
-                        mobile: 24, tablet: 28)),
-                label: 'Profil',
+              label: 'Eşleştirme',
+            ),
+            NavigationDestination(
+              icon: Icon(
+                Icons.message_outlined,
+                size: responsiveController.responsiveValue(
+                  mobile: 24,
+                  tablet: 28,
+                ),
               ),
-            ],
-          )),
+              selectedIcon: Icon(
+                Icons.message,
+                size: responsiveController.responsiveValue(
+                  mobile: 24,
+                  tablet: 28,
+                ),
+              ),
+              label: 'Mesajlar',
+            ),
+            NavigationDestination(
+              icon: Icon(
+                Icons.person_outline,
+                size: responsiveController.responsiveValue(
+                  mobile: 24,
+                  tablet: 28,
+                ),
+              ),
+              selectedIcon: Icon(
+                Icons.person,
+                size: responsiveController.responsiveValue(
+                  mobile: 24,
+                  tablet: 28,
+                ),
+              ),
+              label: 'Profil',
+            ),
+          ],
+        ),
+      ),
     );
   }
 
@@ -304,7 +386,9 @@ class MainWrapper extends StatelessWidget {
 
   // Show upgrade prompt for locked features
   Future<void> _showUpgradePrompt(
-      String feature, EnhancedUserModel user) async {
+    String feature,
+    EnhancedUserModel user,
+  ) async {
     final result = await ProgressiveOnboardingService.showUpgradePrompt(
       feature,
       user,

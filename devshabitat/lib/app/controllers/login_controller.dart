@@ -1,11 +1,8 @@
 import 'package:devshabitat/app/repositories/auth_repository.dart';
-import 'package:devshabitat/app/services/storage_service.dart';
 import 'package:get/get.dart';
 import 'package:flutter/material.dart';
 import '../core/services/error_handler_service.dart';
 import '../controllers/auth_controller.dart';
-import '../services/github_oauth_service.dart';
-import '../services/github_service.dart';
 import 'package:logger/logger.dart';
 
 class LoginController extends GetxController {

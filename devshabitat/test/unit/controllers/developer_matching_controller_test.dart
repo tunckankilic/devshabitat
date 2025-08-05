@@ -7,16 +7,20 @@ void main() {
       final user = UserProfile(
         id: 'test-id',
         email: 'test@example.com',
-        displayName: 'Test User',
+        fullName: 'Test User',
         skills: ['Flutter', 'Dart'],
         interests: ['Mobile Development'],
         yearsOfExperience: 2,
         isOnline: false,
+        isRemote: false,
+        isFullTime: false,
+        isPartTime: false,
+        isFreelance: false,
       );
 
       expect(user.id, 'test-id');
       expect(user.email, 'test@example.com');
-      expect(user.displayName, 'Test User');
+      expect(user.fullName, 'Test User');
       expect(user.skills, ['Flutter', 'Dart']);
       expect(user.yearsOfExperience, 2);
     });
@@ -25,16 +29,18 @@ void main() {
       final user = UserProfile(
         id: 'test-id',
         email: 'test@example.com',
-        displayName: 'Test User',
+        fullName: 'Test User',
         skills: [],
         interests: [],
         yearsOfExperience: 0,
         isOnline: false,
+        isRemote: true,
+        isFullTime: true,
+        isPartTime: false,
+        isFreelance: false,
         title: 'Flutter Developer',
         company: 'Tech Corp',
         locationName: 'Istanbul, Turkey',
-        isRemote: true,
-        isFullTime: true,
       );
 
       expect(user.title, 'Flutter Developer');
@@ -43,13 +49,16 @@ void main() {
       expect(user.isRemote, true);
       expect(user.isFullTime, true);
     });
-
     test('should have default values', () {
       final user = UserProfile(
         id: 'test-id',
         email: 'test@example.com',
-        displayName: 'Test User',
+        fullName: 'Test User',
         skills: [],
+        isRemote: false,
+        isFullTime: false,
+        isPartTime: false,
+        isFreelance: false,
         interests: [],
         yearsOfExperience: 0,
         isOnline: false,

@@ -1,36 +1,9 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:devshabitat/app/models/work_experience_model.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:get/get.dart';
 import 'location/location_model.dart';
 import 'profile_completion_model.dart';
-
-class WorkExperience {
-  final String title;
-  final String company;
-  final bool isCurrentRole;
-
-  WorkExperience({
-    required this.title,
-    required this.company,
-    this.isCurrentRole = false,
-  });
-
-  factory WorkExperience.fromJson(Map<String, dynamic> json) {
-    return WorkExperience(
-      title: json['title'] as String,
-      company: json['company'] as String,
-      isCurrentRole: json['isCurrentRole'] as bool? ?? false,
-    );
-  }
-
-  Map<String, dynamic> toJson() {
-    return {
-      'title': title,
-      'company': company,
-      'isCurrentRole': isCurrentRole,
-    };
-  }
-}
 
 class Education {
   final String school;
@@ -148,29 +121,29 @@ class EnhancedUserModel {
     this.completionLevel = ProfileCompletionLevel.minimal,
     this.completionPercentage = 15.0,
     this.missingFields = const [],
-  })  : id = uid.obs,
-        emailRx = email.obs,
-        displayNameRx = displayName?.obs,
-        photoURLRx = photoURL?.obs,
-        titleRx = title?.obs,
-        companyRx = company?.obs,
-        preferencesRx = preferences?.obs,
-        createdAtRx = Rx<DateTime?>(createdAt),
-        updatedAtRx = Rx<DateTime?>(updatedAt),
-        lastSeenRx = Rx<DateTime?>(lastSeen),
-        connectionsRx = connections?.obs,
-        githubUsernameRx = githubUsername?.obs,
-        githubAvatarUrlRx = githubAvatarUrl?.obs,
-        githubIdRx = githubId?.obs,
-        githubDataRx = githubData?.obs,
-        skillsRx = skills?.obs,
-        experienceRx = experience?.obs,
-        languagesRx = languages?.obs,
-        frameworksRx = frameworks?.obs,
-        workExperienceRx = workExperience?.obs,
-        educationRx = education?.obs,
-        locationRx = Rx<LocationModel?>(location),
-        yearsOfExperienceRx = yearsOfExperience.obs;
+  }) : id = uid.obs,
+       emailRx = email.obs,
+       displayNameRx = displayName?.obs,
+       photoURLRx = photoURL?.obs,
+       titleRx = title?.obs,
+       companyRx = company?.obs,
+       preferencesRx = preferences?.obs,
+       createdAtRx = Rx<DateTime?>(createdAt),
+       updatedAtRx = Rx<DateTime?>(updatedAt),
+       lastSeenRx = Rx<DateTime?>(lastSeen),
+       connectionsRx = connections?.obs,
+       githubUsernameRx = githubUsername?.obs,
+       githubAvatarUrlRx = githubAvatarUrl?.obs,
+       githubIdRx = githubId?.obs,
+       githubDataRx = githubData?.obs,
+       skillsRx = skills?.obs,
+       experienceRx = experience?.obs,
+       languagesRx = languages?.obs,
+       frameworksRx = frameworks?.obs,
+       workExperienceRx = workExperience?.obs,
+       educationRx = education?.obs,
+       locationRx = Rx<LocationModel?>(location),
+       yearsOfExperienceRx = yearsOfExperience.obs;
 
   factory EnhancedUserModel.fromFirebase(User user) {
     return EnhancedUserModel(

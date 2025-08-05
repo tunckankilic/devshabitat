@@ -27,7 +27,7 @@ class RegisterView extends GetView<RegistrationController> {
           ),
         ),
         leading: Obx(() {
-          if (controller.currentPageIndex == 0) {
+          if (controller.currentStepIndex == 0) {
             return IconButton(
               icon: Icon(
                 Icons.close,
@@ -61,10 +61,11 @@ class RegisterView extends GetView<RegistrationController> {
             // Progress Stepper
             _buildProgressStepper(),
             SizedBox(
-                height: _responsiveController.responsiveValue(
-              mobile: 16.0,
-              tablet: 24.0,
-            )),
+              height: _responsiveController.responsiveValue(
+                mobile: 16.0,
+                tablet: 24.0,
+              ),
+            ),
 
             // Step Title
             Padding(
@@ -83,10 +84,11 @@ class RegisterView extends GetView<RegistrationController> {
               ),
             ),
             SizedBox(
-                height: _responsiveController.responsiveValue(
-              mobile: 24.0,
-              tablet: 32.0,
-            )),
+              height: _responsiveController.responsiveValue(
+                mobile: 24.0,
+                tablet: 32.0,
+              ),
+            ),
 
             // Step Content
             Expanded(
@@ -99,15 +101,15 @@ class RegisterView extends GetView<RegistrationController> {
             ),
 
             // Bottom Buttons
-            if (!controller.isLastPage || controller.isLastPage)
+            if (!controller.isLastStep || controller.isLastStep)
               Padding(
                 padding: _responsiveController.responsivePadding(all: 16.0),
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    if (!controller.isFirstPage && !controller.isLastPage)
+                    if (!controller.isFirstStep && !controller.isLastStep)
                       TextButton(
-                        onPressed: () => controller.skipCurrentPage(),
+                        onPressed: () => controller.skipCurrentStep(),
                         child: Text(AppStrings.skipStep),
                       ),
                     SizedBox(height: 8.0),
@@ -123,7 +125,7 @@ class RegisterView extends GetView<RegistrationController> {
                             ? () => controller.nextPage()
                             : null,
                         child: Text(
-                          controller.isLastPage
+                          controller.isLastStep
                               ? AppStrings.completeRegistration
                               : AppStrings.continueRegistration,
                           style: TextStyle(
@@ -173,39 +175,37 @@ class RegisterView extends GetView<RegistrationController> {
                     ),
                   ),
                   SizedBox(
-                      height: _responsiveController.responsiveValue(
-                    mobile: 16.0,
-                    tablet: 24.0,
-                  )),
+                    height: _responsiveController.responsiveValue(
+                      mobile: 16.0,
+                      tablet: 24.0,
+                    ),
+                  ),
                   _buildStepIndicator(
                     AppStrings.basicInfo,
                     0,
-                    controller.currentPageIndex,
+                    controller.currentStepIndex,
                   ),
                   _buildStepIndicator(
                     AppStrings.personalInfo,
                     1,
-                    controller.currentPageIndex,
+                    controller.currentStepIndex,
                   ),
                   _buildStepIndicator(
                     AppStrings.professionalInfo,
                     2,
-                    controller.currentPageIndex,
+                    controller.currentStepIndex,
                   ),
                   _buildStepIndicator(
                     AppStrings.skillsInfo,
                     3,
-                    controller.currentPageIndex,
+                    controller.currentStepIndex,
                   ),
                 ],
               ),
             ),
           ),
         ),
-        Expanded(
-          flex: 2,
-          child: _buildCurrentStep(),
-        ),
+        Expanded(flex: 2, child: _buildCurrentStep()),
       ],
     );
   }
@@ -231,10 +231,7 @@ class RegisterView extends GetView<RegistrationController> {
             ? Theme.of(Get.context!).primaryColor.withOpacity(0.1)
             : null,
         borderRadius: BorderRadius.circular(
-          _responsiveController.responsiveValue(
-            mobile: 8.0,
-            tablet: 12.0,
-          ),
+          _responsiveController.responsiveValue(mobile: 8.0, tablet: 12.0),
         ),
         border: Border.all(
           color: isCompleted
@@ -255,10 +252,11 @@ class RegisterView extends GetView<RegistrationController> {
             ),
           ),
           SizedBox(
-              width: _responsiveController.responsiveValue(
-            mobile: 12.0,
-            tablet: 16.0,
-          )),
+            width: _responsiveController.responsiveValue(
+              mobile: 12.0,
+              tablet: 16.0,
+            ),
+          ),
           Expanded(
             child: Text(
               title,
@@ -278,7 +276,7 @@ class RegisterView extends GetView<RegistrationController> {
   }
 
   Widget _buildCurrentStep() {
-    switch (controller.currentPageIndex) {
+    switch (controller.currentStepIndex) {
       case 0:
         return BasicInfoStep();
       case 1:
@@ -307,8 +305,8 @@ class RegisterView extends GetView<RegistrationController> {
       ),
       child: Row(
         children: List.generate(steps.length, (index) {
-          final isCompleted = index < controller.currentPageIndex;
-          final isCurrent = index == controller.currentPageIndex;
+          final isCompleted = index < controller.currentStepIndex;
+          final isCurrent = index == controller.currentStepIndex;
 
           return Expanded(
             child: Row(
@@ -328,8 +326,8 @@ class RegisterView extends GetView<RegistrationController> {
                     color: isCompleted
                         ? Colors.green
                         : isCurrent
-                            ? Theme.of(Get.context!).primaryColor
-                            : Colors.grey[300],
+                        ? Theme.of(Get.context!).primaryColor
+                        : Colors.grey[300],
                   ),
                   child: Center(
                     child: isCompleted
@@ -344,8 +342,9 @@ class RegisterView extends GetView<RegistrationController> {
                         : Text(
                             '${index + 1}',
                             style: TextStyle(
-                              color:
-                                  isCurrent ? Colors.white : Colors.grey[600],
+                              color: isCurrent
+                                  ? Colors.white
+                                  : Colors.grey[600],
                               fontWeight: FontWeight.bold,
                               fontSize: _responsiveController.responsiveValue(
                                 mobile: 14.0,
@@ -358,7 +357,9 @@ class RegisterView extends GetView<RegistrationController> {
 
                 // Step info
                 if (_responsiveController.responsiveValue(
-                    mobile: false, tablet: true))
+                  mobile: false,
+                  tablet: true,
+                ))
                   Expanded(
                     child: Padding(
                       padding: const EdgeInsets.only(left: 8.0),
@@ -373,8 +374,9 @@ class RegisterView extends GetView<RegistrationController> {
                                 mobile: 12.0,
                                 tablet: 14.0,
                               ),
-                              fontWeight:
-                                  isCurrent ? FontWeight.bold : FontWeight.w500,
+                              fontWeight: isCurrent
+                                  ? FontWeight.bold
+                                  : FontWeight.w500,
                               color: isCurrent
                                   ? Theme.of(Get.context!).primaryColor
                                   : Colors.grey[700],
@@ -418,7 +420,7 @@ class RegisterView extends GetView<RegistrationController> {
   }
 
   String _getStepTitle() {
-    switch (controller.currentPageIndex) {
+    switch (controller.currentStepIndex) {
       case 0:
         return AppStrings.basicInfo;
       case 1:

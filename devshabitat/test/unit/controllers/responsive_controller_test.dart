@@ -19,7 +19,7 @@ void main() {
 
   group('ResponsiveController - Temel Fonksiyonlar', () {
     test('başlangıç değerleri doğru olmalı', () {
-      expect(controller.currentBreakpoint.value, ScreenBreakpoint.largePhone);
+      expect(controller.currentBreakpoint.value, ScreenBreakpoint.compact);
       expect(controller.screenWidth.value, 0.0);
       expect(controller.screenHeight.value, 0.0);
       expect(controller.devicePixelRatio.value, 1.0);
@@ -379,14 +379,16 @@ void main() {
   group('ResponsiveController - Screen Metrics Güncellemeleri', () {
     test('screen metrics değişikliklerinde breakpoint güncellenmeli', () {
       controller.screenWidth.value = 320.0;
-      expect(controller.currentBreakpoint.value, ScreenBreakpoint.smallPhone);
+      expect(controller.currentBreakpoint.value, ScreenBreakpoint.compact);
 
       controller.screenWidth.value = 768.0;
-      expect(controller.currentBreakpoint.value, ScreenBreakpoint.tablet);
+      expect(controller.currentBreakpoint.value, ScreenBreakpoint.medium);
 
       controller.screenWidth.value = 1024.0;
-      expect(controller.currentBreakpoint.value,
-          ScreenBreakpoint.tablet); // Tablet breakpoint'e kadar
+      expect(
+        controller.currentBreakpoint.value,
+        ScreenBreakpoint.expanded,
+      ); // Tablet breakpoint'e kadar
     });
 
     test('threshold değeri ile gereksiz güncellemeler önlenmeli', () {
@@ -455,7 +457,11 @@ void main() {
         controller.responsivePadding(all: 16.0);
         controller.responsivePadding(horizontal: 16.0, vertical: 8.0);
         controller.responsivePadding(
-            left: 16.0, top: 8.0, right: 12.0, bottom: 4.0);
+          left: 16.0,
+          top: 8.0,
+          right: 12.0,
+          bottom: 4.0,
+        );
       }
 
       stopwatch.stop();

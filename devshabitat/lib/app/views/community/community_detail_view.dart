@@ -1,13 +1,17 @@
 import 'package:devshabitat/app/constants/app_strings.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 import '../../controllers/community/community_controller.dart';
 import '../../controllers/community/resource_controller.dart';
+import '../../controllers/community/community_content_controller.dart';
 import '../../controllers/responsive_controller.dart';
 import '../../services/responsive_performance_service.dart';
 import '../../widgets/community/community_stats_widget.dart';
 import '../../widgets/community/member_list_widget.dart';
 import '../../widgets/community/membership_request_widget.dart';
+import '../../widgets/community/community_detail_skeleton.dart';
+import '../../widgets/community/community_content_feed_widget.dart';
 import '../../routes/app_pages.dart';
 import '../base/base_view.dart';
 import '../../widgets/adaptive_touch_target.dart';
@@ -26,7 +30,7 @@ class CommunityDetailView extends BaseView<CommunityController> {
   @override
   Widget buildView(BuildContext context) {
     return DefaultTabController(
-      length: 4,
+      length: 5,
       child: Scaffold(
         appBar: AppBar(
           bottom: TabBar(
@@ -35,6 +39,7 @@ class CommunityDetailView extends BaseView<CommunityController> {
               Tab(text: AppStrings.members),
               Tab(text: AppStrings.events),
               Tab(text: 'Kaynaklar'),
+              Tab(text: 'İçerik'),
             ],
           ),
         ),
@@ -44,6 +49,7 @@ class CommunityDetailView extends BaseView<CommunityController> {
             _buildMembersTab(context),
             const CommunityEventsView(),
             _buildResourcesTab(context),
+            _buildContentFeedTab(context),
           ],
         ),
       ),
@@ -52,44 +58,40 @@ class CommunityDetailView extends BaseView<CommunityController> {
 
   Widget _buildAboutTab(BuildContext context) {
     return ResponsiveSafeArea(
-      child: Obx(
-        () {
-          if (controller.isLoading.value) {
-            return const Center(child: CircularProgressIndicator());
-          }
+      child: Obx(() {
+        if (controller.isLoading.value) {
+          return const CommunityDetailSkeleton();
+        }
 
-          if (controller.error.value.isNotEmpty) {
-            return Center(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Text(controller.error.value),
-                  ElevatedButton(
-                    onPressed: () =>
-                        controller.loadCommunity(Get.arguments as String),
-                    child: Text(AppStrings.retry),
-                  ),
-                ],
-              ),
-            );
-          }
-
-          final community = controller.community.value;
-          if (community == null) {
-            return Center(
-              child: Text(AppStrings.communityNotFound),
-            );
-          }
-
-          return ResponsiveOverflowHandler(
-            child: AnimatedResponsiveLayout(
-              mobile: _buildMobileCommunityDetail(community, context),
-              tablet: _buildTabletCommunityDetail(community, context),
-              animationDuration: const Duration(milliseconds: 300),
+        if (controller.errorMessage.value != null) {
+          return Center(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Text(controller.errorMessage.value ?? ''),
+                ElevatedButton(
+                  onPressed: () =>
+                      controller.loadCommunity(Get.arguments as String),
+                  child: Text(AppStrings.retry),
+                ),
+              ],
             ),
           );
-        },
-      ),
+        }
+
+        final community = controller.community.value;
+        if (community == null) {
+          return Center(child: Text(AppStrings.communityNotFound));
+        }
+
+        return ResponsiveOverflowHandler(
+          child: AnimatedResponsiveLayout(
+            mobile: _buildMobileCommunityDetail(community, context),
+            tablet: _buildTabletCommunityDetail(community, context),
+            animationDuration: const Duration(milliseconds: 300),
+          ),
+        );
+      }),
     );
   }
 
@@ -122,6 +124,15 @@ class CommunityDetailView extends BaseView<CommunityController> {
     );
   }
 
+  Widget _buildContentFeedTab(BuildContext context) {
+    return GetBuilder<CommunityContentController>(
+      init: CommunityContentController(),
+      builder: (contentController) {
+        return CommunityContentFeedWidget(controller: contentController);
+      },
+    );
+  }
+
   Widget _buildMobileCommunityDetail(dynamic community, BuildContext context) {
     final responsive = Get.find<ResponsiveController>();
 
@@ -136,22 +147,16 @@ class CommunityDetailView extends BaseView<CommunityController> {
               children: [
                 _buildDescription(community, context),
                 SizedBox(
-                    height: responsive.responsiveValue(
-                  mobile: 24,
-                  tablet: 32,
-                )),
+                  height: responsive.responsiveValue(mobile: 24, tablet: 32),
+                ),
                 _buildStats(community),
                 SizedBox(
-                    height: responsive.responsiveValue(
-                  mobile: 24,
-                  tablet: 32,
-                )),
+                  height: responsive.responsiveValue(mobile: 24, tablet: 32),
+                ),
                 _buildMembershipButton(),
                 SizedBox(
-                    height: responsive.responsiveValue(
-                  mobile: 24,
-                  tablet: 32,
-                )),
+                  height: responsive.responsiveValue(mobile: 24, tablet: 32),
+                ),
                 _buildMembershipRequests(),
                 _buildMembersList(context),
               ],
@@ -181,25 +186,25 @@ class CommunityDetailView extends BaseView<CommunityController> {
                     children: [
                       _buildDescription(community, context),
                       SizedBox(
-                          height: responsive.responsiveValue(
-                        mobile: 24,
-                        tablet: 32,
-                      )),
+                        height: responsive.responsiveValue(
+                          mobile: 24,
+                          tablet: 32,
+                        ),
+                      ),
                       _buildStats(community),
                       SizedBox(
-                          height: responsive.responsiveValue(
-                        mobile: 24,
-                        tablet: 32,
-                      )),
+                        height: responsive.responsiveValue(
+                          mobile: 24,
+                          tablet: 32,
+                        ),
+                      ),
                       _buildMembershipButton(),
                     ],
                   ),
                 ),
                 SizedBox(
-                    width: responsive.responsiveValue(
-                  mobile: 16,
-                  tablet: 32,
-                )),
+                  width: responsive.responsiveValue(mobile: 16, tablet: 32),
+                ),
                 Expanded(
                   flex: 3,
                   child: Column(
@@ -223,10 +228,7 @@ class CommunityDetailView extends BaseView<CommunityController> {
     final performanceService = Get.find<ResponsivePerformanceService>();
 
     return SliverAppBar(
-      expandedHeight: responsive.responsiveValue(
-        mobile: 200,
-        tablet: 300,
-      ),
+      expandedHeight: responsive.responsiveValue(mobile: 200, tablet: 300),
       pinned: true,
       flexibleSpace: FlexibleSpaceBar(
         title: ResponsiveText(
@@ -240,25 +242,23 @@ class CommunityDetailView extends BaseView<CommunityController> {
           ),
         ),
         background: community.coverImageUrl != null
-            ? Image.network(
-                community.coverImageUrl!,
+            ? CachedNetworkImage(
+                imageUrl: community.coverImageUrl!,
                 fit: BoxFit.cover,
+                placeholder: (context, url) => Container(
+                  color: Theme.of(context).primaryColor.withOpacity(0.3),
+                ),
+                errorWidget: (context, url, error) =>
+                    Container(color: Theme.of(context).primaryColor),
               )
-            : Container(
-                color: Theme.of(context).primaryColor,
-              ),
+            : Container(color: Theme.of(context).primaryColor),
       ),
       actions: [
         if (controller.isUserModerator.value)
           AdaptiveTouchTarget(
-            onTap: () => Get.toNamed(
-              AppRoutes.COMMUNITY_MANAGE,
-              arguments: community,
-            ),
-            child: Icon(
-              Icons.settings,
-              size: responsive.minTouchTarget,
-            ),
+            onTap: () =>
+                Get.toNamed(AppRoutes.COMMUNITY_MANAGE, arguments: community),
+            child: Icon(Icons.settings, size: responsive.minTouchTarget),
           ),
       ],
     );
@@ -270,12 +270,12 @@ class CommunityDetailView extends BaseView<CommunityController> {
     return ResponsiveText(
       community.description,
       style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-            fontSize: performanceService.getOptimizedTextSize(
-              cacheKey: 'community_detail_description',
-              mobileSize: 16,
-              tabletSize: 18,
-            ),
-          ),
+        fontSize: performanceService.getOptimizedTextSize(
+          cacheKey: 'community_detail_description',
+          mobileSize: 16,
+          tabletSize: 18,
+        ),
+      ),
     );
   }
 
@@ -317,10 +317,7 @@ class CommunityDetailView extends BaseView<CommunityController> {
           ),
           style: ElevatedButton.styleFrom(
             backgroundColor: controller.isMember.value ? Colors.red : null,
-            padding: responsive.responsivePadding(
-              horizontal: 16,
-              vertical: 8,
-            ),
+            padding: responsive.responsivePadding(horizontal: 16, vertical: 8),
           ),
         ),
       ),
@@ -343,11 +340,7 @@ class CommunityDetailView extends BaseView<CommunityController> {
           onAccept: controller.acceptMember,
           onReject: controller.rejectMember,
         ),
-        SizedBox(
-            height: responsive.responsiveValue(
-          mobile: 24,
-          tablet: 32,
-        )),
+        SizedBox(height: responsive.responsiveValue(mobile: 24, tablet: 32)),
       ],
     );
   }
@@ -362,24 +355,23 @@ class CommunityDetailView extends BaseView<CommunityController> {
         ResponsiveText(
           AppStrings.members,
           style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                fontSize: performanceService.getOptimizedTextSize(
-                  cacheKey: 'community_detail_members_title',
-                  mobileSize: 20,
-                  tabletSize: 24,
-                ),
-              ),
+            fontSize: performanceService.getOptimizedTextSize(
+              cacheKey: 'community_detail_members_title',
+              mobileSize: 20,
+              tabletSize: 24,
+            ),
+          ),
         ),
-        SizedBox(
-            height: responsive.responsiveValue(
-          mobile: 16,
-          tablet: 20,
-        )),
-        MemberListWidget(
-          members: controller.members,
-          isAdmin: controller.isUserModerator.value,
-          onMemberTap: controller.showMemberProfile,
-          onRemoveMember: controller.removeMember,
-          onPromoteToModerator: controller.promoteToModerator,
+        SizedBox(height: responsive.responsiveValue(mobile: 16, tablet: 20)),
+        Obx(
+          () => MemberListWidget(
+            key: ValueKey('members_list_${controller.members.length}'),
+            members: controller.members,
+            isAdmin: controller.isUserModerator.value,
+            onMemberTap: controller.showMemberProfile,
+            onRemoveMember: controller.removeMember,
+            onPromoteToModerator: controller.promoteToModerator,
+          ),
         ),
       ],
     );
