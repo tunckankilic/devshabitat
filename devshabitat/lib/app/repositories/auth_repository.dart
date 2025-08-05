@@ -12,12 +12,17 @@ import 'package:flutter/material.dart'; // Added for snackbar
 
 abstract class IAuthRepository {
   Future<UserCredential> signInWithEmailAndPassword(
-      String email, String password);
+    String email,
+    String password,
+  );
   Future<UserCredential> createUserWithEmailAndPassword(
-      String email, String password, String username);
+    String email,
+    String password,
+    String username,
+  );
   Future<UserCredential> signInWithGoogle();
   Future<UserCredential> signInWithGithub();
-//  Future<UserCredential> signInWithFacebook();
+  //  Future<UserCredential> signInWithFacebook();
   Future<UserCredential> signInWithApple();
   Future<void> signOut();
   Future<void> signOutFromAllDevices();
@@ -54,11 +59,11 @@ class AuthRepository implements IAuthRepository {
     FirebaseFirestore? firestore,
     GoogleSignIn? googleSignIn,
     required GitHubOAuthService githubOAuthService,
-  })  : _auth = auth ?? FirebaseAuth.instance,
-        _firestore = firestore ?? FirebaseFirestore.instance,
-        _googleSignIn = googleSignIn ?? GoogleSignIn.instance,
-        _githubOAuthService = githubOAuthService,
-        _logger = Get.find<Logger>() {
+  }) : _auth = auth ?? FirebaseAuth.instance,
+       _firestore = firestore ?? FirebaseFirestore.instance,
+       _googleSignIn = googleSignIn ?? GoogleSignIn.instance,
+       _githubOAuthService = githubOAuthService,
+       _logger = Get.find<Logger>() {
     _initializeGoogleSignIn();
   }
 
@@ -68,7 +73,9 @@ class AuthRepository implements IAuthRepository {
 
   @override
   Future<UserCredential> signInWithEmailAndPassword(
-      String email, String password) async {
+    String email,
+    String password,
+  ) async {
     try {
       final credential = await _auth.signInWithEmailAndPassword(
         email: email,
@@ -120,7 +127,9 @@ class AuthRepository implements IAuthRepository {
 
   // Sosyal giriş öncesi email kontrolü
   Future<void> _checkEmailBeforeSocialSignIn(
-      String email, String provider) async {
+    String email,
+    String provider,
+  ) async {
     try {
       await _handleEmailCollision(email, provider);
     } catch (e) {
@@ -155,7 +164,7 @@ class AuthRepository implements IAuthRepository {
     }
   }
 
-/*
+  /*
   @override
 
 */
@@ -172,7 +181,9 @@ class AuthRepository implements IAuthRepository {
       // Email çakışmasını kontrol et
       if (appleCredential.email != null) {
         await _checkEmailBeforeSocialSignIn(
-            appleCredential.email!, 'apple.com');
+          appleCredential.email!,
+          'apple.com',
+        );
       }
 
       final oauthCredential = OAuthProvider('apple.com').credential(
@@ -190,11 +201,12 @@ class AuthRepository implements IAuthRepository {
 
   Future<UserCredential> signInWithGitHub() async {
     try {
-      final accessToken = await _githubOAuthService.getAccessToken();
+      final accessToken = await _githubOAuthService.getGithubAccessToken();
 
       if (accessToken == null) {
         _logger.w(
-            'GitHub OAuth akışı başarısız oldu veya kullanıcı tarafından iptal edildi');
+          'GitHub OAuth akışı başarısız oldu veya kullanıcı tarafından iptal edildi',
+        );
         throw Exception('GitHub girişi başarısız oldu');
       }
 
@@ -202,8 +214,9 @@ class AuthRepository implements IAuthRepository {
       final userInfo = await _githubOAuthService.getUserInfo(accessToken);
 
       final githubAuthCredential = GithubAuthProvider.credential(accessToken);
-      final userCredential =
-          await _auth.signInWithCredential(githubAuthCredential);
+      final userCredential = await _auth.signInWithCredential(
+        githubAuthCredential,
+      );
 
       if (userCredential.user == null) {
         _logger.e('Firebase kimlik doğrulaması başarısız oldu');
@@ -227,8 +240,11 @@ class AuthRepository implements IAuthRepository {
             }
           : null;
 
-      await handleSocialSignIn(userCredential.user!, 'github',
-          additionalData: additionalData);
+      await handleSocialSignIn(
+        userCredential.user!,
+        'github',
+        additionalData: additionalData,
+      );
       return userCredential;
     } catch (e) {
       _logger.e('GitHub girişi sırasında hata: $e');
@@ -242,10 +258,7 @@ class AuthRepository implements IAuthRepository {
   @override
   Future<void> signOut() async {
     try {
-      await Future.wait([
-        _auth.signOut(),
-        _googleSignIn.signOut(),
-      ]);
+      await Future.wait([_auth.signOut(), _googleSignIn.signOut()]);
     } catch (e) {
       throw _handleAuthException(e);
     }
@@ -254,10 +267,7 @@ class AuthRepository implements IAuthRepository {
   @override
   Future<void> signOutFromAllDevices() async {
     try {
-      await Future.wait([
-        _auth.signOut(),
-        _googleSignIn.signOut(),
-      ]);
+      await Future.wait([_auth.signOut(), _googleSignIn.signOut()]);
     } catch (e) {
       throw _handleAuthException(e);
     }
@@ -341,22 +351,16 @@ class AuthRepository implements IAuthRepository {
       final batch = _firestore.batch();
 
       // Mevcut kullanıcının bağlantılarını güncelle
-      batch.update(
-        _firestore.collection('users').doc(user.uid),
-        {
-          'connections': FieldValue.arrayUnion([userId]),
-          'updatedAt': FieldValue.serverTimestamp(),
-        },
-      );
+      batch.update(_firestore.collection('users').doc(user.uid), {
+        'connections': FieldValue.arrayUnion([userId]),
+        'updatedAt': FieldValue.serverTimestamp(),
+      });
 
       // Hedef kullanıcının bağlantılarını güncelle
-      batch.update(
-        _firestore.collection('users').doc(userId),
-        {
-          'connections': FieldValue.arrayUnion([user.uid]),
-          'updatedAt': FieldValue.serverTimestamp(),
-        },
-      );
+      batch.update(_firestore.collection('users').doc(userId), {
+        'connections': FieldValue.arrayUnion([user.uid]),
+        'updatedAt': FieldValue.serverTimestamp(),
+      });
 
       await batch.commit();
     } catch (e) {
@@ -374,22 +378,16 @@ class AuthRepository implements IAuthRepository {
       final batch = _firestore.batch();
 
       // Mevcut kullanıcının bağlantılarını güncelle
-      batch.update(
-        _firestore.collection('users').doc(user.uid),
-        {
-          'connections': FieldValue.arrayRemove([userId]),
-          'updatedAt': FieldValue.serverTimestamp(),
-        },
-      );
+      batch.update(_firestore.collection('users').doc(user.uid), {
+        'connections': FieldValue.arrayRemove([userId]),
+        'updatedAt': FieldValue.serverTimestamp(),
+      });
 
       // Hedef kullanıcının bağlantılarını güncelle
-      batch.update(
-        _firestore.collection('users').doc(userId),
-        {
-          'connections': FieldValue.arrayRemove([user.uid]),
-          'updatedAt': FieldValue.serverTimestamp(),
-        },
-      );
+      batch.update(_firestore.collection('users').doc(userId), {
+        'connections': FieldValue.arrayRemove([user.uid]),
+        'updatedAt': FieldValue.serverTimestamp(),
+      });
 
       await batch.commit();
     } catch (e) {
@@ -418,7 +416,7 @@ class AuthRepository implements IAuthRepository {
       }
 
       // GitHub OAuth akışını başlat
-      final accessToken = await _githubOAuthService.getAccessToken();
+      final accessToken = await _githubOAuthService.getGithubAccessToken();
 
       if (accessToken == null) {
         _logger.w('GitHub OAuth flow failed or was cancelled by user');
@@ -484,15 +482,21 @@ class AuthRepository implements IAuthRepository {
   User? get currentUser => _auth.currentUser;
 
   // Sosyal giriş sonrası kullanıcı profili oluştur veya güncelle
-  Future<void> handleSocialSignIn(User user, String provider,
-      {Map<String, dynamic>? additionalData}) async {
+  Future<void> handleSocialSignIn(
+    User user,
+    String provider, {
+    Map<String, dynamic>? additionalData,
+  }) async {
     try {
       final userDoc = await _firestore.collection('users').doc(user.uid).get();
 
       if (!userDoc.exists) {
         // Yeni kullanıcı - minimal profil oluştur
-        await _createMinimalSocialProfile(user, provider,
-            additionalData: additionalData);
+        await _createMinimalSocialProfile(
+          user,
+          provider,
+          additionalData: additionalData,
+        );
         Get.offAllNamed('/home'); // Direkt home'a git
       } else {
         // Mevcut kullanıcı kontrolü
@@ -512,8 +516,11 @@ class AuthRepository implements IAuthRepository {
   }
 
   // Sosyal giriş için minimal profil oluştur
-  Future<void> _createMinimalSocialProfile(User user, String provider,
-      {Map<String, dynamic>? additionalData}) async {
+  Future<void> _createMinimalSocialProfile(
+    User user,
+    String provider, {
+    Map<String, dynamic>? additionalData,
+  }) async {
     try {
       final userData = {
         'id': user.uid,
@@ -531,11 +538,7 @@ class AuthRepository implements IAuthRepository {
         'skills': [],
         'interests': [],
         'connections': [],
-        'notifications': {
-          'email': true,
-          'push': true,
-          'marketing': false,
-        },
+        'notifications': {'email': true, 'push': true, 'marketing': false},
         'privacySettings': {
           'profileVisibility': 'public',
           'showEmail': false,
@@ -557,7 +560,8 @@ class AuthRepository implements IAuthRepository {
 
   // Map'ten ProfileCompletionLevel hesapla
   ProfileCompletionLevel _calculateCompletionLevelFromMap(
-      Map<String, dynamic> userData) {
+    Map<String, dynamic> userData,
+  ) {
     final profileCompletionLevel =
         userData['profileCompletionLevel'] as String?;
     switch (profileCompletionLevel) {
@@ -594,7 +598,10 @@ class AuthRepository implements IAuthRepository {
 
   // Smart social defaults for modern social login
   Future<void> _addSmartSocialDefaults(
-      Map<String, dynamic> userData, User user, String provider) async {
+    Map<String, dynamic> userData,
+    User user,
+    String provider,
+  ) async {
     switch (provider) {
       case 'google':
         await _addGoogleSmartDefaults(userData, user);
@@ -610,7 +617,9 @@ class AuthRepository implements IAuthRepository {
 
   // Google People API'dan akıllı defaults
   Future<void> _addGoogleSmartDefaults(
-      Map<String, dynamic> userData, User user) async {
+    Map<String, dynamic> userData,
+    User user,
+  ) async {
     try {
       // Basic Google data
       userData.addAll({
@@ -641,7 +650,9 @@ class AuthRepository implements IAuthRepository {
 
   // Apple UserInfo'dan akıllı defaults
   Future<void> _addAppleSmartDefaults(
-      Map<String, dynamic> userData, User user) async {
+    Map<String, dynamic> userData,
+    User user,
+  ) async {
     try {
       userData.addAll({
         'isEmailVerified': true,
@@ -678,7 +689,9 @@ class AuthRepository implements IAuthRepository {
 
   // GitHub için gelişmiş defaults
   Future<void> _addGitHubSmartDefaults(
-      Map<String, dynamic> userData, User user) async {
+    Map<String, dynamic> userData,
+    User user,
+  ) async {
     try {
       userData.addAll({
         'isEmailVerified': true,
@@ -686,11 +699,7 @@ class AuthRepository implements IAuthRepository {
           'theme': 'dark',
           'language': 'tr',
           'timezone': 'Europe/Istanbul',
-          'codeEditor': {
-            'theme': 'monokai',
-            'fontSize': 14,
-            'tabSize': 2,
-          },
+          'codeEditor': {'theme': 'monokai', 'fontSize': 14, 'tabSize': 2},
         },
         'skills': ['Git'], // Base skill
       });
@@ -758,7 +767,7 @@ class AuthRepository implements IAuthRepository {
   // GitHub metodları
   Future<String?> getGithubAccessToken() async {
     try {
-      return await _githubOAuthService.getAccessToken();
+      return await _githubOAuthService.getGithubAccessToken();
     } catch (e) {
       _logger.e('GitHub access token not found: $e');
       throw _handleAuthException(e);
@@ -771,6 +780,19 @@ class AuthRepository implements IAuthRepository {
     } catch (e) {
       _logger.e('GitHub user info not found: $e');
       throw _handleAuthException(e);
+    }
+  }
+
+  // Oturum kalıcılığını ayarla
+  Future<void> setPersistence(bool isPersistent) async {
+    try {
+      if (isPersistent) {
+        await _auth.setPersistence(Persistence.LOCAL);
+      } else {
+        await _auth.setPersistence(Persistence.SESSION);
+      }
+    } catch (e) {
+      throw Exception('Oturum kalıcılığı ayarlanırken bir hata oluştu: $e');
     }
   }
 }

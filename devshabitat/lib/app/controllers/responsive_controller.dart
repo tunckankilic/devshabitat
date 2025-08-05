@@ -6,10 +6,14 @@ class ResponsiveController extends GetxController {
   static ResponsiveController get to => Get.find();
 
   // Current breakpoint
-  final Rx<ScreenBreakpoint> currentBreakpoint =
-      ScreenBreakpoint.largePhone.obs;
+  final Rx<ScreenBreakpoint> currentBreakpoint = ScreenBreakpoint.compact.obs;
 
-  // Breakpoints
+  // Breakpoints (Material Design 3 breakpoints)
+  final double compactBreakpoint = 0.0; // 0-600dp
+  final double mediumBreakpoint = 600.0; // 600-840dp
+  final double expandedBreakpoint = 840.0; // 840dp+
+
+  // Legacy breakpoints (for backward compatibility)
   final double smallPhoneBreakpoint = 360.0;
   final double largePhoneBreakpoint = 480.0;
   final double tabletBreakpoint = 768.0;
@@ -30,7 +34,14 @@ class ResponsiveController extends GetxController {
   final RxDouble devicePixelRatio = 1.0.obs;
   final Rx<Orientation> orientation = Orientation.portrait.obs;
 
-  // Breakpoint states
+  // Material Design 3 breakpoint states
+  bool get isCompact => screenWidth.value < mediumBreakpoint;
+  bool get isMedium =>
+      screenWidth.value >= mediumBreakpoint &&
+      screenWidth.value < expandedBreakpoint;
+  bool get isExpanded => screenWidth.value >= expandedBreakpoint;
+
+  // Legacy breakpoint states (for backward compatibility)
   bool get isSmallPhone => screenWidth.value < smallPhoneBreakpoint;
   bool get isLargePhone =>
       screenWidth.value >= smallPhoneBreakpoint &&
@@ -43,9 +54,16 @@ class ResponsiveController extends GetxController {
       screenWidth.value < largeDesktopBreakpoint;
   bool get isLargeDesktop => screenWidth.value >= largeDesktopBreakpoint;
 
-  bool get isMobile => isSmallPhone || isLargePhone;
+  bool get isMobile => isCompact;
   bool get isLandscape => orientation.value == Orientation.landscape;
   bool get isPortrait => orientation.value == Orientation.portrait;
+
+  // Safe area and keyboard handling
+  final RxDouble keyboardHeight = 0.0.obs;
+  final RxDouble bottomSafeArea = 0.0.obs;
+  final RxDouble topSafeArea = 0.0.obs;
+
+  bool get isKeyboardVisible => keyboardHeight.value > 0;
 
   @override
   void onInit() {
@@ -63,6 +81,8 @@ class ResponsiveController extends GetxController {
     final size = mediaQuery.size;
     final pixelRatio = mediaQuery.devicePixelRatio;
     final newOrientation = mediaQuery.orientation;
+    final viewInsets = mediaQuery.viewInsets;
+    final padding = mediaQuery.padding;
 
     // Only update if significant change
     if ((size.width - _lastWidth.value).abs() > _breakpointThreshold ||
@@ -71,14 +91,17 @@ class ResponsiveController extends GetxController {
       screenHeight.value = size.height;
       devicePixelRatio.value = pixelRatio;
       orientation.value = newOrientation;
+      keyboardHeight.value = viewInsets.bottom;
+      bottomSafeArea.value = padding.bottom;
+      topSafeArea.value = padding.top;
 
-      // Update current breakpoint
-      if (size.width < smallPhoneBreakpoint) {
-        currentBreakpoint.value = ScreenBreakpoint.smallPhone;
-      } else if (size.width < tabletBreakpoint) {
-        currentBreakpoint.value = ScreenBreakpoint.largePhone;
+      // Update current breakpoint based on Material Design 3
+      if (size.width < mediumBreakpoint) {
+        currentBreakpoint.value = ScreenBreakpoint.compact;
+      } else if (size.width < expandedBreakpoint) {
+        currentBreakpoint.value = ScreenBreakpoint.medium;
       } else {
-        currentBreakpoint.value = ScreenBreakpoint.tablet;
+        currentBreakpoint.value = ScreenBreakpoint.expanded;
       }
 
       _lastWidth.value = size.width;
@@ -99,10 +122,24 @@ class ResponsiveController extends GetxController {
     T? desktop,
     T? largeDesktop,
   }) {
-    if (isLargeDesktop && largeDesktop != null) return largeDesktop;
-    if (isDesktop && desktop != null) return desktop;
-    if (isTablet) return tablet;
+    // Material Design 3 breakpoints
+    if (isExpanded) {
+      return largeDesktop ?? desktop ?? tablet;
+    } else if (isMedium) {
+      return tablet;
+    }
     return mobile;
+  }
+
+  // Material Design 3 specific responsive value
+  T md3ResponsiveValue<T>({
+    required T compact,
+    required T medium,
+    required T expanded,
+  }) {
+    if (isExpanded) return expanded;
+    if (isMedium) return medium;
+    return compact;
   }
 
   EdgeInsets responsivePadding({
@@ -113,12 +150,13 @@ class ResponsiveController extends GetxController {
     double? horizontal,
     double? vertical,
     double? all,
+    bool includeSafeArea = true,
   }) {
     if (all != null) {
-      final value = responsiveValue(
-        mobile: all,
-        tablet: all * 1.5,
-        desktop: all * 2,
+      final value = md3ResponsiveValue(
+        compact: all,
+        medium: all * 1.5,
+        expanded: all * 2,
       );
       return EdgeInsets.all(value);
     }
@@ -126,96 +164,114 @@ class ResponsiveController extends GetxController {
     if (horizontal != null || vertical != null) {
       return EdgeInsets.symmetric(
         horizontal: horizontal != null
-            ? responsiveValue(
-                mobile: horizontal,
-                tablet: horizontal * 1.5,
-                desktop: horizontal * 2,
+            ? md3ResponsiveValue(
+                compact: horizontal,
+                medium: horizontal * 1.5,
+                expanded: horizontal * 2,
               )
             : 0,
         vertical: vertical != null
-            ? responsiveValue(
-                mobile: vertical,
-                tablet: vertical * 1.5,
-                desktop: vertical * 2,
+            ? md3ResponsiveValue(
+                compact: vertical,
+                medium: vertical * 1.5,
+                expanded: vertical * 2,
               )
             : 0,
       );
     }
 
+    double effectiveTop = top ?? 0;
+    double effectiveBottom = bottom ?? 0;
+
+    if (includeSafeArea) {
+      effectiveTop += topSafeArea.value;
+      effectiveBottom += bottomSafeArea.value;
+
+      // Add keyboard height to bottom padding if keyboard is visible
+      if (isKeyboardVisible) {
+        effectiveBottom += keyboardHeight.value;
+      }
+    }
+
     return EdgeInsets.only(
       left: left != null
-          ? responsiveValue(
-              mobile: left,
-              tablet: left * 1.5,
-              desktop: left * 2,
+          ? md3ResponsiveValue(
+              compact: left,
+              medium: left * 1.5,
+              expanded: left * 2,
             )
           : 0,
-      top: top != null
-          ? responsiveValue(
-              mobile: top,
-              tablet: top * 1.5,
-              desktop: top * 2,
+      top: effectiveTop != 0
+          ? md3ResponsiveValue(
+              compact: effectiveTop,
+              medium: effectiveTop * 1.5,
+              expanded: effectiveTop * 2,
             )
           : 0,
       right: right != null
-          ? responsiveValue(
-              mobile: right,
-              tablet: right * 1.5,
-              desktop: right * 2,
+          ? md3ResponsiveValue(
+              compact: right,
+              medium: right * 1.5,
+              expanded: right * 2,
             )
           : 0,
-      bottom: bottom != null
-          ? responsiveValue(
-              mobile: bottom,
-              tablet: bottom * 1.5,
-              desktop: bottom * 2,
+      bottom: effectiveBottom != 0
+          ? md3ResponsiveValue(
+              compact: effectiveBottom,
+              medium: effectiveBottom * 1.5,
+              expanded: effectiveBottom * 2,
             )
           : 0,
     );
   }
 
-  // Performance optimized scaling functions
-  double get textScaleFactor => responsiveValue(
-        mobile: 1.0,
-        tablet: 1.1,
-        desktop: 1.2,
-        largeDesktop: 1.3,
-      );
+  // Material Design 3 optimized scaling functions
+  double get textScaleFactor =>
+      md3ResponsiveValue(compact: 1.0, medium: 1.1, expanded: 1.2);
 
-  double get iconScaleFactor => responsiveValue(
-        mobile: 1.0,
-        tablet: 1.2,
-        desktop: 1.4,
-        largeDesktop: 1.6,
-      );
+  double get iconScaleFactor =>
+      md3ResponsiveValue(compact: 1.0, medium: 1.2, expanded: 1.4);
 
   // Touch target optimization
-  double get minTouchTargetSize => responsiveValue(
-        mobile: minTouchTarget,
-        tablet: minTouchTarget * 1.2,
-        desktop: minTouchTarget * 1.4,
-      );
+  double get minTouchTargetSize => md3ResponsiveValue(
+    compact: minTouchTarget,
+    medium: minTouchTarget * 1.2,
+    expanded: minTouchTarget * 1.4,
+  );
 
   // Animation duration optimization
   Duration get transitionDuration => Duration(
-        milliseconds: responsiveValue(
-          mobile: 200,
-          tablet: 250,
-          desktop: 300,
-        ),
-      );
+    milliseconds: md3ResponsiveValue(compact: 200, medium: 250, expanded: 300),
+  );
 
-  // Layout grid optimization
-  double get gridSpacing => responsiveValue(
-        mobile: 8,
-        tablet: 16,
-        desktop: 24,
-      );
+  // Layout grid optimization based on Material Design 3
+  double get gridSpacing =>
+      md3ResponsiveValue(compact: 8, medium: 16, expanded: 24);
 
-  int get gridColumns => responsiveValue(
-        mobile: 2,
-        tablet: 3,
-        desktop: 4,
-        largeDesktop: 6,
-      );
+  int get gridColumns => md3ResponsiveValue(
+    compact: 4, // 0-600dp: 4 columns
+    medium: 8, // 600-840dp: 8 columns
+    expanded: 12, // 840dp+: 12 columns
+  );
+
+  // Material Design 3 margins
+  double get horizontalMargin => md3ResponsiveValue(
+    compact: 16, // 0-600dp: 16dp
+    medium: 24, // 600-840dp: 24dp
+    expanded: 24, // 840dp+: 24dp
+  );
+
+  // Material Design 3 gutters
+  double get horizontalGutter => md3ResponsiveValue(
+    compact: 16, // 0-600dp: 16dp
+    medium: 24, // 600-840dp: 24dp
+    expanded: 24, // 840dp+: 24dp
+  );
+
+  // Material Design 3 layout body width
+  double get layoutBodyWidth => md3ResponsiveValue(
+    compact: screenWidth.value, // 0-600dp: full width
+    medium: screenWidth.value, // 600-840dp: full width
+    expanded: 840.0, // 840dp+: fixed width
+  );
 }

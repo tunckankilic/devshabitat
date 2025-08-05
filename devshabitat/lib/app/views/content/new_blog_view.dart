@@ -1,7 +1,9 @@
-import 'package:devshabitat/app/constants/app_strings.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../../controllers/blog_controller.dart';
+import '../../widgets/blog/rich_text_editor.dart';
+import '../../widgets/blog/code_snippet_card.dart';
+import '../../models/code_snippet_model.dart';
 
 class NewBlogView extends GetView<BlogController> {
   const NewBlogView({super.key});
@@ -10,560 +12,303 @@ class NewBlogView extends GetView<BlogController> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(AppStrings.writeBlog),
+        title: const Text('Yeni Blog Yazısı'),
         actions: [
           // Save as Draft
           TextButton(
             onPressed: controller.blogTitle.value.trim().isNotEmpty
                 ? controller.saveBlogAsDraft
                 : null,
-            child: Text('Taslak'),
+            child: const Text('Taslak'),
           ),
           const SizedBox(width: 8),
           // Publish
-          Obx(() => TextButton(
-                onPressed: controller.isBlogFormValid() &&
-                        !controller.isCreatingBlog.value
-                    ? controller.createBlogPost
-                    : null,
-                child: controller.isCreatingBlog.value
-                    ? SizedBox(
-                        width: 20,
-                        height: 20,
-                        child: CircularProgressIndicator(
-                          strokeWidth: 2,
-                          color: Colors.white,
-                        ),
-                      )
-                    : Text('Yayınla'),
-              )),
+          Obx(
+            () => TextButton(
+              onPressed:
+                  controller.isBlogFormValid() &&
+                      !controller.isCreatingBlog.value
+                  ? controller.createBlogPost
+                  : null,
+              child: controller.isCreatingBlog.value
+                  ? const SizedBox(
+                      width: 20,
+                      height: 20,
+                      child: CircularProgressIndicator(
+                        strokeWidth: 2,
+                        color: Colors.white,
+                      ),
+                    )
+                  : const Text('Yayınla'),
+            ),
+          ),
         ],
       ),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // Header
-            Row(
-              children: [
-                Icon(Icons.article_outlined, size: 28, color: Colors.blue),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        'Yeni Blog Yazısı',
-                        style: Theme.of(context).textTheme.headlineSmall,
-                      ),
-                      Text(
-                        'Deneyimlerinizi ve fikirlerinizi paylaşın',
-                        style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                              color: Colors.grey,
-                            ),
-                      ),
-                    ],
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 24),
-
-            // Blog Title
-            Obx(() => TextFormField(
-                  onChanged: (value) => controller.blogTitle.value = value,
-                  decoration: InputDecoration(
-                    labelText: 'Blog Başlığı *',
-                    border: OutlineInputBorder(),
-                    prefixIcon: Icon(Icons.title),
-                    errorText: controller.blogTitle.value.trim().isEmpty &&
-                            controller.blogCreationError.value.isNotEmpty
-                        ? 'Blog başlığı gereklidir'
-                        : null,
-                  ),
-                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
-                )),
-            const SizedBox(height: 16),
-
-            // Blog Description
-            Obx(() => TextFormField(
-                  onChanged: (value) =>
-                      controller.blogDescription.value = value,
-                  decoration: InputDecoration(
-                    labelText: 'Kısa Açıklama *',
-                    border: OutlineInputBorder(),
-                    prefixIcon: Icon(Icons.description),
-                    hintText: 'Yazınızı kısaca özetleyin...',
-                    errorText:
-                        controller.blogDescription.value.trim().isEmpty &&
+      body: Row(
+        children: [
+          // Editor Section
+          Expanded(
+            flex: 3,
+            child: SingleChildScrollView(
+              padding: const EdgeInsets.all(16),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  // Blog Title
+                  Obx(
+                    () => TextFormField(
+                      controller: controller.titleController,
+                      decoration: InputDecoration(
+                        labelText: 'Blog Başlığı *',
+                        border: const OutlineInputBorder(),
+                        prefixIcon: const Icon(Icons.title),
+                        errorText:
+                            controller.blogTitle.value.trim().isEmpty &&
                                 controller.blogCreationError.value.isNotEmpty
-                            ? 'Blog açıklaması gereklidir'
+                            ? 'Blog başlığı gereklidir'
                             : null,
-                  ),
-                  maxLines: 2,
-                )),
-            const SizedBox(height: 16),
-
-            // Category and Tags Row
-            Row(
-              children: [
-                Expanded(
-                  child: Obx(() => TextFormField(
-                        onChanged: (value) =>
-                            controller.blogCategory.value = value,
-                        decoration: InputDecoration(
-                          labelText: 'Kategori',
-                          border: OutlineInputBorder(),
-                          prefixIcon: Icon(Icons.category),
-                          hintText: 'Flutter, React, Backend',
-                        ),
-                      )),
-                ),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: Obx(() => TextFormField(
-                        onChanged: (value) => controller.blogTags.value = value,
-                        decoration: InputDecoration(
-                          labelText: 'Etiketler',
-                          border: OutlineInputBorder(),
-                          prefixIcon: Icon(Icons.local_offer),
-                          hintText: 'tutorial, tips, guide',
-                        ),
-                      )),
-                ),
-              ],
-            ),
-            const SizedBox(height: 16),
-
-            // Content Editor
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
-                  children: [
-                    Text(
-                      'İçerik *',
-                      style: TextStyle(
+                      ),
+                      style: const TextStyle(
                         fontSize: 16,
                         fontWeight: FontWeight.w500,
                       ),
                     ),
-                    Spacer(),
-                    Obx(() => Text(
-                          '${controller.contentWordCount} kelime • ${controller.estimatedReadingTime}',
-                          style: TextStyle(
-                            fontSize: 12,
-                            color: Colors.grey,
+                  ),
+                  const SizedBox(height: 16),
+
+                  // Blog Description
+                  Obx(
+                    () => TextFormField(
+                      controller: controller.descriptionController,
+                      maxLines: 3,
+                      decoration: InputDecoration(
+                        labelText: 'Açıklama *',
+                        border: const OutlineInputBorder(),
+                        prefixIcon: const Icon(Icons.description),
+                        errorText:
+                            controller.blogDescription.value.trim().isEmpty &&
+                                controller.blogCreationError.value.isNotEmpty
+                            ? 'Blog açıklaması gereklidir'
+                            : null,
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+
+                  // Category and Tags
+                  Row(
+                    children: [
+                      Expanded(
+                        child: TextFormField(
+                          controller: controller.categoryController,
+                          decoration: const InputDecoration(
+                            labelText: 'Kategori',
+                            border: OutlineInputBorder(),
+                            prefixIcon: Icon(Icons.category),
                           ),
-                        )),
-                  ],
-                ),
-                const SizedBox(height: 8),
-                Obx(() => Container(
-                      decoration: BoxDecoration(
-                        border: Border.all(color: Colors.grey.shade300),
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                      child: TextFormField(
-                        onChanged: (value) =>
-                            controller.blogContent.value = value,
-                        decoration: InputDecoration(
-                          hintText:
-                              'Blog içeriğinizi buraya yazın...\n\nMarkdown formatını destekliyoruz:\n# Başlık\n**Kalın metin**\n*İtalik metin*\n[Link](url)',
-                          border: InputBorder.none,
-                          contentPadding: EdgeInsets.all(16),
-                          errorText: controller.blogContent.value
-                                      .trim()
-                                      .isEmpty &&
-                                  controller.blogCreationError.value.isNotEmpty
-                              ? 'Blog içeriği gereklidir'
-                              : null,
                         ),
-                        maxLines: 15,
-                        minLines: 10,
                       ),
-                    )),
-              ],
-            ),
-            const SizedBox(height: 24),
-
-            // Code Snippets Section
-            _buildCodeSnippetsSection(context),
-            const SizedBox(height: 24),
-
-            // Form Validation Status
-            Obx(() {
-              final error = controller.getBlogFormError();
-              if (error != null) {
-                return Container(
-                  width: double.infinity,
-                  padding: const EdgeInsets.all(12),
-                  decoration: BoxDecoration(
-                    color: Colors.orange.withOpacity(0.1),
-                    border: Border.all(color: Colors.orange),
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                  child: Row(
-                    children: [
-                      Icon(Icons.info_outline, color: Colors.orange),
-                      const SizedBox(width: 8),
+                      const SizedBox(width: 16),
                       Expanded(
-                        child: Text(
-                          error,
-                          style: TextStyle(color: Colors.orange),
+                        child: TextFormField(
+                          controller: controller.tagsController,
+                          decoration: const InputDecoration(
+                            labelText: 'Etiketler (virgülle ayırın)',
+                            border: OutlineInputBorder(),
+                            prefixIcon: Icon(Icons.tag),
+                          ),
                         ),
                       ),
                     ],
                   ),
-                );
-              }
-              return SizedBox.shrink();
-            }),
+                  const SizedBox(height: 24),
 
-            // Success/Error Messages
-            Obx(() {
-              if (controller.blogCreationError.value.isNotEmpty) {
-                return Container(
-                  width: double.infinity,
-                  margin: const EdgeInsets.only(top: 16),
-                  padding: const EdgeInsets.all(12),
-                  decoration: BoxDecoration(
-                    color: Colors.red.withOpacity(0.1),
-                    border: Border.all(color: Colors.red),
-                    borderRadius: BorderRadius.circular(8),
+                  // Rich Text Editor
+                  const Text(
+                    'Blog İçeriği *',
+                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
                   ),
-                  child: Row(
-                    children: [
-                      Icon(Icons.error_outline, color: Colors.red),
-                      const SizedBox(width: 8),
-                      Expanded(
-                        child: Text(
-                          controller.blogCreationError.value,
-                          style: TextStyle(color: Colors.red),
-                        ),
-                      ),
-                    ],
+                  const SizedBox(height: 8),
+                  SizedBox(
+                    height: 400,
+                    child: RichTextEditor(
+                      initialText: controller.blogContent.value,
+                      onChanged: (value) =>
+                          controller.blogContent.value = value,
+                    ),
                   ),
-                );
-              }
-              return SizedBox.shrink();
-            }),
 
-            const SizedBox(height: 24),
-
-            // Tips Card
-            Card(
-              color: Colors.blue.withOpacity(0.05),
-              child: Padding(
-                padding: const EdgeInsets.all(16),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Row(
+                  // Word Count and Reading Time
+                  Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 16),
+                    child: Row(
                       children: [
-                        Icon(Icons.lightbulb_outline, color: Colors.blue),
-                        const SizedBox(width: 8),
-                        Text(
-                          'İpuçları',
-                          style: TextStyle(
-                            fontWeight: FontWeight.bold,
-                            color: Colors.blue,
+                        Obx(
+                          () => Text(
+                            '${controller.wordCount} kelime',
+                            style: const TextStyle(color: Colors.grey),
+                          ),
+                        ),
+                        const SizedBox(width: 16),
+                        Obx(
+                          () => Text(
+                            controller.estimatedReadingTime,
+                            style: const TextStyle(color: Colors.grey),
                           ),
                         ),
                       ],
                     ),
-                    const SizedBox(height: 8),
-                    Text(
-                      '• Başlığınızı dikkat çekici ve açıklayıcı yapın\n'
-                      '• Kısa açıklamada yazınızın özünü verin\n'
-                      '• Kod örnekleri eklemek için ``` kullanın\n'
-                      '• Resim eklemek için ![alt](url) formatını kullanın',
-                      style: TextStyle(fontSize: 14, color: Colors.grey[700]),
-                    ),
-                  ],
-                ),
+                  ),
+                ],
               ),
             ),
-          ],
-        ),
+          ),
+
+          // Code Snippets Section
+          Container(
+            width: 300,
+            decoration: BoxDecoration(
+              border: Border(left: BorderSide(color: Colors.grey.shade300)),
+            ),
+            child: Column(
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(16),
+                  decoration: BoxDecoration(
+                    color: Colors.grey.shade50,
+                    border: Border(
+                      bottom: BorderSide(color: Colors.grey.shade300),
+                    ),
+                  ),
+                  child: Row(
+                    children: [
+                      const Icon(Icons.code, size: 20),
+                      const SizedBox(width: 8),
+                      const Text(
+                        'Kod Parçaları',
+                        style: TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      const Spacer(),
+                      IconButton(
+                        icon: const Icon(Icons.add),
+                        onPressed: _showAddCodeSnippetDialog,
+                      ),
+                    ],
+                  ),
+                ),
+                Expanded(
+                  child: DragTarget<CodeSnippetModel>(
+                    onAccept: (data) {
+                      // Handle reordering
+                    },
+                    builder: (context, candidateData, rejectedData) {
+                      return Obx(
+                        () => ListView.builder(
+                          padding: const EdgeInsets.all(16),
+                          itemCount: controller.codeSnippets.length,
+                          itemBuilder: (context, index) {
+                            return CodeSnippetCard(
+                              snippet: controller.codeSnippets[index],
+                              isDraggable: true,
+                              onDelete: () => controller.removeCodeSnippet(
+                                controller.codeSnippets[index].id,
+                              ),
+                            );
+                          },
+                        ),
+                      );
+                    },
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
       ),
     );
   }
 
-  Widget _buildCodeSnippetsSection(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Row(
-          children: [
-            Icon(Icons.code, color: Colors.purple),
-            const SizedBox(width: 8),
-            Text(
-              'Kod Parçaları',
-              style: TextStyle(
-                fontSize: 16,
-                fontWeight: FontWeight.w500,
-              ),
-            ),
-            Spacer(),
-            TextButton.icon(
-              onPressed: () => _showAddCodeSnippetDialog(context),
-              icon: Icon(Icons.add, size: 18),
-              label: Text('Kod Ekle'),
-              style: TextButton.styleFrom(
-                foregroundColor: Colors.purple,
-              ),
-            ),
-          ],
-        ),
-        const SizedBox(height: 12),
-        Obx(() {
-          if (controller.codeSnippets.isEmpty) {
-            return Container(
-              width: double.infinity,
-              padding: const EdgeInsets.all(20),
-              decoration: BoxDecoration(
-                border: Border.all(
-                    color: Colors.grey.shade300, style: BorderStyle.solid),
-                borderRadius: BorderRadius.circular(8),
-                color: Colors.grey.shade50,
-              ),
-              child: Column(
-                children: [
-                  Icon(Icons.code_off, color: Colors.grey, size: 40),
-                  const SizedBox(height: 8),
-                  Text(
-                    'Henüz kod parçası eklenmedi',
-                    style: TextStyle(color: Colors.grey, fontSize: 14),
-                  ),
-                  const SizedBox(height: 4),
-                  Text(
-                    'Yukarıdaki "Kod Ekle" butonunu kullanarak kod parçaları ekleyebilirsiniz',
-                    style: TextStyle(color: Colors.grey, fontSize: 12),
-                    textAlign: TextAlign.center,
-                  ),
-                ],
-              ),
-            );
-          }
-
-          return ListView.builder(
-            shrinkWrap: true,
-            physics: const NeverScrollableScrollPhysics(),
-            itemCount: controller.codeSnippets.length,
-            itemBuilder: (context, index) {
-              final snippet = controller.codeSnippets[index];
-              return Card(
-                margin: const EdgeInsets.only(bottom: 8),
-                child: Padding(
-                  padding: const EdgeInsets.all(12),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Row(
-                        children: [
-                          Expanded(
-                            child: Text(
-                              snippet.title,
-                              style: TextStyle(fontWeight: FontWeight.bold),
-                            ),
-                          ),
-                          Chip(
-                            label: Text(snippet.language),
-                            backgroundColor: Colors.purple.withOpacity(0.1),
-                          ),
-                          const SizedBox(width: 8),
-                          IconButton(
-                            icon:
-                                Icon(Icons.delete, color: Colors.red, size: 20),
-                            onPressed: () =>
-                                controller.removeCodeSnippet(index),
-                            padding: EdgeInsets.zero,
-                            constraints: BoxConstraints(),
-                          ),
-                        ],
-                      ),
-                      if (snippet.description != null) ...[
-                        const SizedBox(height: 4),
-                        Text(
-                          snippet.description!,
-                          style:
-                              TextStyle(color: Colors.grey[600], fontSize: 12),
-                        ),
-                      ],
-                      const SizedBox(height: 8),
-                      Container(
-                        width: double.infinity,
-                        padding: const EdgeInsets.all(8),
-                        decoration: BoxDecoration(
-                          color: Colors.grey.shade100,
-                          borderRadius: BorderRadius.circular(4),
-                          border: Border.all(color: Colors.grey.shade300),
-                        ),
-                        child: Text(
-                          snippet.code.length > 100
-                              ? '${snippet.code.substring(0, 100)}...'
-                              : snippet.code,
-                          style: TextStyle(
-                            fontFamily: 'monospace',
-                            fontSize: 12,
-                            color: Colors.grey[800],
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              );
-            },
-          );
-        }),
-      ],
-    );
-  }
-
-  void _showAddCodeSnippetDialog(BuildContext context) {
+  void _showAddCodeSnippetDialog() {
     final titleController = TextEditingController();
-    final descriptionController = TextEditingController();
     final codeController = TextEditingController();
+    final descriptionController = TextEditingController();
     String selectedLanguage = 'dart';
 
-    final languages = [
-      'dart',
-      'javascript',
-      'python',
-      'java',
-      'kotlin',
-      'swift',
-      'typescript',
-      'php',
-      'go',
-      'rust',
-      'cpp',
-      'c',
-      'html',
-      'css'
-    ];
-
     Get.dialog(
-      Dialog(
-        child: ConstrainedBox(
-          constraints: BoxConstraints(
-            maxWidth: MediaQuery.of(context).size.width * 0.9,
-            maxHeight: MediaQuery.of(context).size.height * 0.8,
-          ),
-          child: Container(
-            padding: const EdgeInsets.all(20),
-            child: SingleChildScrollView(
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Row(
-                    children: [
-                      Icon(Icons.code, color: Colors.purple),
-                      const SizedBox(width: 8),
-                      Text(
-                        'Kod Parçası Ekle',
-                        style: TextStyle(
-                            fontSize: 18, fontWeight: FontWeight.bold),
-                      ),
-                      Spacer(),
-                      IconButton(
-                        onPressed: () => Get.back(),
-                        icon: Icon(Icons.close),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 16),
-                  TextField(
-                    controller: titleController,
-                    decoration: InputDecoration(
-                      labelText: 'Başlık *',
-                      border: OutlineInputBorder(),
-                      prefixIcon: Icon(Icons.title),
-                    ),
-                  ),
-                  const SizedBox(height: 12),
-                  TextField(
-                    controller: descriptionController,
-                    decoration: InputDecoration(
-                      labelText: 'Açıklama (İsteğe bağlı)',
-                      border: OutlineInputBorder(),
-                      prefixIcon: Icon(Icons.description),
-                    ),
-                    maxLines: 2,
-                  ),
-                  const SizedBox(height: 12),
-                  StatefulBuilder(
-                    builder: (context, setState) {
-                      return DropdownButtonFormField<String>(
-                        value: selectedLanguage,
-                        decoration: InputDecoration(
-                          labelText: 'Programlama Dili',
-                          border: OutlineInputBorder(),
-                          prefixIcon: Icon(Icons.language),
-                        ),
-                        items: languages
-                            .map((lang) => DropdownMenuItem(
-                                  value: lang,
-                                  child: Text(lang.toUpperCase()),
-                                ))
-                            .toList(),
-                        onChanged: (value) {
-                          setState(() {
-                            selectedLanguage = value!;
-                          });
-                        },
-                      );
-                    },
-                  ),
-                  const SizedBox(height: 12),
-                  TextField(
-                    controller: codeController,
-                    decoration: InputDecoration(
-                      labelText: 'Kod *',
-                      border: OutlineInputBorder(),
-                      hintText: 'Kod parçanızı buraya yazın...',
-                    ),
-                    maxLines: 10,
-                    style: TextStyle(fontFamily: 'monospace'),
-                  ),
-                  const SizedBox(height: 20),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.end,
-                    children: [
-                      TextButton(
-                        onPressed: () => Get.back(),
-                        child: Text('İptal'),
-                      ),
-                      const SizedBox(width: 8),
-                      ElevatedButton(
-                        onPressed: () {
-                          if (titleController.text.trim().isNotEmpty &&
-                              codeController.text.trim().isNotEmpty) {
-                            controller.addCodeSnippet(
-                              title: titleController.text.trim(),
-                              description:
-                                  descriptionController.text.trim().isNotEmpty
-                                      ? descriptionController.text.trim()
-                                      : null,
-                              code: codeController.text.trim(),
-                              language: selectedLanguage,
-                            );
-                            Get.back();
-                          }
-                        },
-                        child: Text('Ekle'),
-                      ),
-                    ],
-                  ),
-                ],
+      AlertDialog(
+        title: const Text('Kod Parçası Ekle'),
+        content: SizedBox(
+          width: 500,
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              TextField(
+                controller: titleController,
+                decoration: const InputDecoration(
+                  labelText: 'Başlık *',
+                  border: OutlineInputBorder(),
+                ),
               ),
-            ),
+              const SizedBox(height: 16),
+              TextField(
+                controller: descriptionController,
+                decoration: const InputDecoration(
+                  labelText: 'Açıklama',
+                  border: OutlineInputBorder(),
+                ),
+              ),
+              const SizedBox(height: 16),
+              DropdownButtonFormField<String>(
+                value: selectedLanguage,
+                decoration: const InputDecoration(
+                  labelText: 'Programlama Dili',
+                  border: OutlineInputBorder(),
+                ),
+                items: const [
+                  DropdownMenuItem(value: 'dart', child: Text('Dart')),
+                  DropdownMenuItem(
+                    value: 'javascript',
+                    child: Text('JavaScript'),
+                  ),
+                  DropdownMenuItem(value: 'python', child: Text('Python')),
+                  DropdownMenuItem(value: 'java', child: Text('Java')),
+                ],
+                onChanged: (value) => selectedLanguage = value!,
+              ),
+              const SizedBox(height: 16),
+              TextField(
+                controller: codeController,
+                maxLines: 10,
+                decoration: const InputDecoration(
+                  labelText: 'Kod *',
+                  border: OutlineInputBorder(),
+                  hintText: 'Kodunuzu buraya yapıştırın',
+                ),
+              ),
+            ],
           ),
         ),
+        actions: [
+          TextButton(onPressed: () => Get.back(), child: const Text('İptal')),
+          ElevatedButton(
+            onPressed: () {
+              if (titleController.text.trim().isNotEmpty &&
+                  codeController.text.trim().isNotEmpty) {
+                controller.addCodeSnippet(
+                  title: titleController.text.trim(),
+                  code: codeController.text.trim(),
+                  language: selectedLanguage,
+                  description: descriptionController.text.trim(),
+                );
+                Get.back();
+              }
+            },
+            child: const Text('Ekle'),
+          ),
+        ],
       ),
     );
   }

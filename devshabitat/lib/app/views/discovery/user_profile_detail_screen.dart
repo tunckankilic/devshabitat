@@ -5,14 +5,12 @@ import '../../widgets/skill_chip.dart';
 import '../../widgets/connection_button.dart';
 import '../../controllers/user_profile_controller.dart';
 import '../../models/user_profile_model.dart';
+import '../../models/work_experience_model.dart';
 
 class UserProfileDetailScreen extends GetView<UserProfileController> {
   final UserProfile user;
 
-  const UserProfileDetailScreen({
-    super.key,
-    required this.user,
-  });
+  const UserProfileDetailScreen({super.key, required this.user});
 
   @override
   Widget build(BuildContext context) {
@@ -65,10 +63,7 @@ class UserProfileDetailScreen extends GetView<UserProfileController> {
                 gradient: LinearGradient(
                   begin: Alignment.topCenter,
                   end: Alignment.bottomCenter,
-                  colors: [
-                    Colors.transparent,
-                    Colors.black.withOpacity(0.7),
-                  ],
+                  colors: [Colors.transparent, Colors.black.withOpacity(0.7)],
                 ),
               ),
             ),
@@ -82,10 +77,7 @@ class UserProfileDetailScreen extends GetView<UserProfileController> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(
-          user.title ?? AppStrings.noTitle,
-          style: Get.textTheme.titleLarge,
-        ),
+        Text(user.title ?? AppStrings.noTitle, style: Get.textTheme.titleLarge),
         const SizedBox(height: 8),
         Row(
           children: [
@@ -112,15 +104,9 @@ class UserProfileDetailScreen extends GetView<UserProfileController> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(
-          AppStrings.about,
-          style: Get.textTheme.titleMedium,
-        ),
+        Text(AppStrings.about, style: Get.textTheme.titleMedium),
         const SizedBox(height: 8),
-        Text(
-          user.bio ?? AppStrings.noBio,
-          style: Get.textTheme.bodyMedium,
-        ),
+        Text(user.bio ?? AppStrings.noBio, style: Get.textTheme.bodyMedium),
       ],
     );
   }
@@ -129,20 +115,14 @@ class UserProfileDetailScreen extends GetView<UserProfileController> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(
-          AppStrings.skills,
-          style: Get.textTheme.titleMedium,
-        ),
+        Text(AppStrings.skills, style: Get.textTheme.titleMedium),
         const SizedBox(height: 8),
         Wrap(
           spacing: 8,
           runSpacing: 8,
           children: user.skills.map((skill) {
             final isMatching = controller.currentUserSkills.contains(skill);
-            return SkillChip(
-              label: skill,
-              isMatching: isMatching,
-            );
+            return SkillChip(label: skill, isMatching: isMatching);
           }).toList(),
         ),
       ],
@@ -153,18 +133,15 @@ class UserProfileDetailScreen extends GetView<UserProfileController> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(
-          AppStrings.experience,
-          style: Get.textTheme.titleMedium,
-        ),
+        Text(AppStrings.experience, style: Get.textTheme.titleMedium),
         const SizedBox(height: 8),
         ListView.builder(
           shrinkWrap: true,
           physics: const NeverScrollableScrollPhysics(),
-          itemCount: user.workExperience.length,
+          itemCount: user.workExperiences.length,
           itemBuilder: (context, index) {
-            final experienceMap = user.workExperience[index];
-            final experience = WorkExperience.fromMap(experienceMap);
+            final experienceMap = user.workExperiences[index];
+            final experience = WorkExperience.fromJson(experienceMap);
             return ListTile(
               contentPadding: EdgeInsets.zero,
               leading: const Icon(Icons.work_outline),
@@ -201,10 +178,12 @@ class UserProfileDetailScreen extends GetView<UserProfileController> {
   }
 
   Widget _buildConnectionButton() {
-    return Obx(() => ConnectionButton(
-          status: controller.connectionStatus.value,
-          onConnect: () => controller.sendConnectionRequest(user),
-          onMessage: () => controller.openChat(user),
-        ));
+    return Obx(
+      () => ConnectionButton(
+        status: controller.connectionStatus.value,
+        onConnect: () => controller.sendConnectionRequest(user),
+        onMessage: () => controller.openChat(user),
+      ),
+    );
   }
 }

@@ -1,158 +1,78 @@
-import 'dart:async';
+import 'dart:convert';
 import 'package:get/get.dart';
-import 'package:logger/logger.dart';
-import 'memory_manager_service.dart';
-
-class CacheEntry<T> {
-  final T data;
-  final DateTime expiresAt;
-
-  CacheEntry(this.data, this.expiresAt);
-
-  bool get isExpired => DateTime.now().isAfter(expiresAt);
-}
+import 'package:shared_preferences/shared_preferences.dart';
 
 class CacheService extends GetxService {
-  final Logger _logger = Logger();
-  final MemoryManagerService _memoryManager = Get.find();
+  late SharedPreferences _prefs;
 
-  final Map<String, CacheEntry<dynamic>> _cache = {};
-  final Duration _defaultExpiration = const Duration(minutes: 30);
-  Timer? _cleanupTimer;
-
-  @override
-  void onInit() {
-    super.onInit();
-    _startCleanupTimer();
+  Future<CacheService> init() async {
+    _prefs = await SharedPreferences.getInstance();
+    return this;
   }
 
-  @override
-  void onClose() {
-    _cleanupTimer?.cancel();
-    super.onClose();
+  Future<void> setData(String key, dynamic data) async {
+    final jsonData = json.encode(data);
+    await _prefs.setString(key, jsonData);
   }
 
-  void _startCleanupTimer() {
-    _cleanupTimer = Timer.periodic(
-      const Duration(minutes: 5),
-      (_) => _cleanExpiredEntries(),
-    );
+  Future<dynamic> getData(String key) async {
+    final jsonData = _prefs.getString(key);
+    if (jsonData == null) return null;
+    return json.decode(jsonData);
   }
 
-  void _cleanExpiredEntries() {
-    final expiredKeys = _cache.keys
-        .where((key) => _cache[key]?.isExpired ?? false)
-        .toList();
-
-    for (final key in expiredKeys) {
-      _cache.remove(key);
-    }
-
-    if (expiredKeys.isNotEmpty) {
-      _logger.i('Cleaned ${expiredKeys.length} expired cache entries');
-      _memoryManager.optimizeMemory();
-    }
+  Future<void> removeData(String key) async {
+    await _prefs.remove(key);
   }
 
-  T? get<T>(String key) {
-    final entry = _cache[key];
-    if (entry == null) return null;
-
-    if (entry.isExpired) {
-      _cache.remove(key);
-      return null;
-    }
-
-    return entry.data as T;
-  }
-
-  void set<T>(String key, T value, {Duration? expiration}) {
-    final expiresAt = DateTime.now().add(expiration ?? _defaultExpiration);
-    _cache[key] = CacheEntry<T>(value, expiresAt);
+  Future<void> clearAll() async {
+    await _prefs.clear();
   }
 
   Future<T> getOrFetch<T>(
     String key,
     Future<T> Function() fetchData, {
-    Duration? expiration,
+    Duration expiration = const Duration(minutes: 5),
   }) async {
-    final cachedValue = get<T>(key);
-    if (cachedValue != null) {
-      return cachedValue;
+    final data = await getData(key);
+    if (data != null) {
+      final timestamp = DateTime.parse(data['timestamp']);
+      if (DateTime.now().difference(timestamp) < expiration) {
+        return data['data'] as T;
+      }
     }
 
-    final value = await fetchData();
-    set<T>(key, value, expiration: expiration);
-    return value;
-  }
-
-  void remove(String key) {
-    _cache.remove(key);
-  }
-
-  void clear() {
-    _cache.clear();
-    _memoryManager.optimizeMemory();
-  }
-
-  bool containsKey(String key) => _cache.containsKey(key);
-
-  int get size => _cache.length;
-
-  List<String> get keys => _cache.keys.toList();
-
-  void setMultiple<T>(Map<String, T> entries, {Duration? expiration}) {
-    entries.forEach((key, value) {
-      set<T>(key, value, expiration: expiration);
+    final freshData = await fetchData();
+    await setData(key, {
+      'data': freshData,
+      'timestamp': DateTime.now().toIso8601String(),
     });
+    return freshData;
   }
 
-  Map<String, T> getMultiple<T>(List<String> keys) {
-    return Map.fromEntries(
-      keys.map((key) {
-        final value = get<T>(key);
-        return value != null ? MapEntry(key, value) : null;
-      }).whereType<MapEntry<String, T>>(),
-    );
-  }
+  Set<String> get keys => _prefs.getKeys();
 
-  void removeMultiple(List<String> keys) {
-    keys.forEach(remove);
-  }
-
-  Duration? getTimeToExpiration(String key) {
-    final entry = _cache[key];
-    if (entry == null || entry.isExpired) return null;
-
-    return entry.expiresAt.difference(DateTime.now());
-  }
-
-  void updateExpiration(String key, Duration newExpiration) {
-    final entry = _cache[key];
-    if (entry == null) return;
-
-    final newExpiresAt = DateTime.now().add(newExpiration);
-    _cache[key] = CacheEntry(entry.data, newExpiresAt);
+  Future<void> removeMultiple(List<String> keys) async {
+    for (final key in keys) {
+      await removeData(key);
+    }
   }
 
   Map<String, dynamic> getStats() {
-    final now = DateTime.now();
-    final totalEntries = _cache.length;
-    final expiredEntries = _cache.values
-        .where((entry) => entry.isExpired)
-        .length;
-    final avgTimeToExpiration = _cache.isEmpty
-        ? 0.0
-        : _cache.values
-                  .map((entry) => entry.expiresAt.difference(now).inSeconds)
-                  .reduce((a, b) => a + b) /
-              totalEntries;
-
     return {
-      'totalEntries': totalEntries,
-      'expiredEntries': expiredEntries,
-      'activeEntries': totalEntries - expiredEntries,
-      'avgTimeToExpirationSeconds': avgTimeToExpiration,
+      'totalKeys': _prefs.getKeys().length,
+      'keys': _prefs.getKeys().toList(),
     };
+  }
+
+  Duration? getTimeToExpiration(String key) {
+    final data = _prefs.getString(key);
+    if (data == null) return null;
+
+    final decoded = json.decode(data);
+    if (decoded['timestamp'] == null) return null;
+
+    final timestamp = DateTime.parse(decoded['timestamp']);
+    return DateTime.now().difference(timestamp);
   }
 }

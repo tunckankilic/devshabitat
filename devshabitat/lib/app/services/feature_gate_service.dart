@@ -9,9 +9,14 @@ import 'profile_completion_service.dart';
 class FeatureGateService extends GetxService {
   static FeatureGateService get to => Get.find();
 
-  final ProfileCompletionService _profileCompletionService =
-      ProfileCompletionService.to;
-  final UserService _userService = Get.find<UserService>();
+  final ProfileCompletionService _profileCompletionService;
+  final UserService _userService;
+
+  FeatureGateService({
+    required ProfileCompletionService profileCompletionService,
+    required UserService userService,
+  }) : _profileCompletionService = profileCompletionService,
+       _userService = userService;
 
   /// Feature requirements mapping with Turkish names
   static const Map<String, ProfileCompletionLevel> featureRequirements = {
@@ -50,8 +55,9 @@ class FeatureGateService extends GetxService {
     final currentUser = user ?? _userService.currentUser;
     if (currentUser == null) return false;
 
-    final userLevel =
-        _profileCompletionService.calculateCompletionLevel(currentUser);
+    final userLevel = _profileCompletionService.calculateCompletionLevel(
+      currentUser,
+    );
     final requiredLevel =
         featureRequirements[feature] ?? ProfileCompletionLevel.complete;
 
@@ -64,14 +70,18 @@ class FeatureGateService extends GetxService {
   }
 
   /// Get missing fields to access a feature
-  List<ProfileField> getMissingFieldsForFeature(String feature,
-      [EnhancedUserModel? user]) {
+  List<ProfileField> getMissingFieldsForFeature(
+    String feature, [
+    EnhancedUserModel? user,
+  ]) {
     final currentUser = user ?? _userService.currentUser;
     if (currentUser == null) return [];
 
     final requiredLevel = getRequiredLevel(feature);
     return _profileCompletionService.getMissingFieldsWithDetails(
-        currentUser, requiredLevel);
+      currentUser,
+      requiredLevel,
+    );
   }
 
   /// Get feature display name
@@ -136,11 +146,7 @@ class FeatureGateService extends GetxService {
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(
-            Icons.login,
-            size: 48,
-            color: Get.theme.primaryColor,
-          ),
+          Icon(Icons.login, size: 48, color: Get.theme.primaryColor),
           const SizedBox(height: 12),
           Text(
             'Bu özellik için giriş yapmanız gerekiyor',
@@ -173,8 +179,9 @@ class FeatureGateService extends GetxService {
   }) {
     final requiredLevel = getRequiredLevel(feature);
     final missingFields = getMissingFieldsForFeature(feature, user);
-    final currentStatus =
-        _profileCompletionService.calculateCompletionLevel(user);
+    final currentStatus = _profileCompletionService.calculateCompletionLevel(
+      user,
+    );
     final featureName = getFeatureDisplayName(feature);
     final levelName = getCompletionLevelDisplayName(requiredLevel);
 
@@ -194,11 +201,7 @@ class FeatureGateService extends GetxService {
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(
-            Icons.lock_outline,
-            size: 48,
-            color: Get.theme.primaryColor,
-          ),
+          Icon(Icons.lock_outline, size: 48, color: Get.theme.primaryColor),
           const SizedBox(height: 12),
           Text(
             '$featureName Özelliği',
@@ -241,7 +244,8 @@ class FeatureGateService extends GetxService {
                   ),
                   backgroundColor: Get.theme.primaryColor.withOpacity(0.1),
                   side: BorderSide(
-                      color: Get.theme.primaryColor.withOpacity(0.3)),
+                    color: Get.theme.primaryColor.withOpacity(0.3),
+                  ),
                 );
               }).toList(),
             ),
@@ -289,8 +293,9 @@ class FeatureGateService extends GetxService {
     final currentUser = user ?? _userService.currentUser;
     if (currentUser == null) return false;
 
-    final currentStatus =
-        _profileCompletionService.calculateCompletionLevel(currentUser);
+    final currentStatus = _profileCompletionService.calculateCompletionLevel(
+      currentUser,
+    );
     final requiredLevel = getRequiredLevel(feature);
 
     // If already accessible, return false
@@ -299,8 +304,9 @@ class FeatureGateService extends GetxService {
     }
 
     // Check if within one level
-    final currentIndex =
-        ProfileCompletionLevel.values.indexOf(currentStatus.level);
+    final currentIndex = ProfileCompletionLevel.values.indexOf(
+      currentStatus.level,
+    );
     final requiredIndex = ProfileCompletionLevel.values.indexOf(requiredLevel);
 
     return (requiredIndex - currentIndex) <= 1;

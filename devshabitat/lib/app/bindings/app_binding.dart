@@ -25,7 +25,7 @@ import '../controllers/email_auth_controller.dart';
 import '../controllers/developer_matching_controller.dart';
 import '../controllers/networking_controller.dart';
 import '../services/responsive_performance_service.dart';
-import '../controllers/enhanced_form_validation_controller.dart';
+import '../core/services/form_validation_service.dart';
 import '../controllers/file_upload_controller.dart';
 import '../controllers/integration/notification_controller.dart';
 import '../controllers/location/nearby_developers_controller.dart';
@@ -33,7 +33,6 @@ import '../controllers/network_controller.dart';
 import 'message_binding.dart';
 import '../services/network_analytics_service.dart';
 import '../services/location/maps_service.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import '../services/fcm_service.dart';
 import '../services/user_service.dart';
 import '../services/progressive_onboarding_service.dart';
@@ -43,6 +42,7 @@ import '../services/auth_migration_service.dart';
 import '../services/analytics_service.dart';
 import '../controllers/progressive_onboarding_controller.dart';
 import '../controllers/feature_gate_controller.dart';
+import '../core/services/cache_service.dart';
 
 class AppBinding extends Bindings {
   @override
@@ -61,7 +61,6 @@ class AppBinding extends Bindings {
     Get.put(ApiOptimizationService());
     Get.put(DeepLinkingService());
     Get.put(NetworkAnalyticsService());
-
     // Location Services
     Get.put(MapsService());
 
@@ -70,17 +69,20 @@ class AppBinding extends Bindings {
 
     // Responsive system (immediately needed for theme)
     Get.put<ResponsiveController>(ResponsiveController(), permanent: true);
-    Get.put<ResponsivePerformanceService>(ResponsivePerformanceService(),
-        permanent: true);
+    Get.put<ResponsivePerformanceService>(
+      ResponsivePerformanceService(),
+      permanent: true,
+    );
 
     // Initialize responsive performance service
     final performanceService = Get.find<ResponsivePerformanceService>();
     performanceService.preCalculateCommonValues();
 
-    // Enhanced Form Validation Controller
-    Get.put<EnhancedFormValidationController>(
-        EnhancedFormValidationController(),
-        permanent: true);
+    // Form Validation Service
+    Get.put<FormValidationService>(FormValidationService(), permanent: true);
+
+    // Cache Service
+    Get.put<CacheService>(CacheService(), permanent: true);
 
     // Image Upload Service
     Get.put(ImageUploadService(errorHandler: errorHandler));
@@ -107,7 +109,6 @@ class AppBinding extends Bindings {
 
     // Profile Completion & Feature Gate Services
     Get.put(ProfileCompletionService());
-    Get.put(FeatureGateService());
     Get.put(ProgressiveOnboardingService());
     Get.put(AuthMigrationService());
     Get.put(AnalyticsService());
@@ -117,9 +118,10 @@ class AppBinding extends Bindings {
     final errorHandler = Get.find<ErrorHandlerService>();
 
     try {
-      // SharedPreferences
+      // SharedPreferences & Cache Service
       final prefs = await SharedPreferences.getInstance();
       Get.put<SharedPreferences>(prefs);
+      await Get.find<CacheService>().init();
 
       // Notification Service
       final notificationService = Get.put(NotificationService(prefs));
@@ -130,41 +132,40 @@ class AppBinding extends Bindings {
 
       // Auth Related Services
       Get.lazyPut<GitHubOAuthService>(
-        () => GitHubOAuthService(
-          logger: Get.find(),
-          errorHandler: Get.find(),
-          auth: FirebaseAuth.instance,
-        ),
+        () => GitHubOAuthService(logger: Get.find(), errorHandler: Get.find()),
       );
 
-      final authRepository = Get.put(AuthRepository(
-        githubOAuthService: Get.find(),
-      ));
+      final authRepository = Get.put(
+        AuthRepository(githubOAuthService: Get.find()),
+      );
 
       // GitHub Services (after AuthRepository)
       Get.put(GithubService());
 
       // Auth Related Controllers
-      final authStateController = Get.put(AuthStateController(
-        authRepository: authRepository,
-      ));
+      final authStateController = Get.put(
+        AuthStateController(authRepository: authRepository),
+      );
 
-      final emailAuthController = Get.put(EmailAuthController(
-        authRepository: authRepository,
-        errorHandler: errorHandler,
-      ));
+      final emailAuthController = Get.put(
+        EmailAuthController(
+          authRepository: authRepository,
+          errorHandler: errorHandler,
+        ),
+      );
 
-      Get.put(AuthController(
-        authRepository: authRepository,
-        errorHandler: errorHandler,
-        emailAuth: emailAuthController,
-        authState: authStateController,
-      ));
+      Get.put(
+        AuthController(
+          authRepository: authRepository,
+          errorHandler: errorHandler,
+          emailAuth: emailAuthController,
+          authState: authStateController,
+          featureGateService: Get.find<FeatureGateService>(),
+        ),
+      );
 
       // App Controllers
-      Get.put(AppController(
-        errorHandler: errorHandler,
-      ));
+      Get.put(AppController(errorHandler: errorHandler));
 
       // Developer Matching Controller
       Get.put(DeveloperMatchingController());
@@ -179,12 +180,18 @@ class AppBinding extends Bindings {
       Get.put(NetworkController());
 
       // Post Service
-      Get.put(PostService(
-        errorHandler: errorHandler,
-      ));
+      Get.put(PostService(errorHandler: errorHandler));
 
       // User Service
       Get.put(UserService());
+
+      // Feature Gate Service
+      Get.put(
+        FeatureGateService(
+          profileCompletionService: Get.find<ProfileCompletionService>(),
+          userService: Get.find<UserService>(),
+        ),
+      );
 
       // Feature Gate & Progressive Onboarding Controllers
       Get.put(FeatureGateController());
@@ -193,8 +200,10 @@ class AppBinding extends Bindings {
       // Message Binding
       MessageBinding().dependencies();
     } catch (e) {
-      errorHandler.handleError('Bağımlılıklar başlatılırken hata oluştu: $e',
-          ErrorHandlerService.AUTH_ERROR);
+      errorHandler.handleError(
+        'Bağımlılıklar başlatılırken hata oluştu: $e',
+        ErrorHandlerService.AUTH_ERROR,
+      );
     }
   }
 }

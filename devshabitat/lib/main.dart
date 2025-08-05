@@ -29,20 +29,26 @@ import 'app/services/feed_service.dart';
 import 'app/services/connection_service.dart';
 import 'app/repositories/feed_repository.dart';
 import 'app/services/github_service.dart';
+import 'app/services/github/content_sharing_service.dart';
+import 'app/controllers/github_content_controller.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'app/services/notification_service.dart';
 import 'app/controllers/message/message_list_controller.dart';
 import 'app/controllers/message/message_search_controller.dart';
 import 'app/controllers/message/message_interaction_controller.dart';
 import 'package:flutter/foundation.dart' show kIsWeb;
+import 'app/services/user_service.dart';
+import 'app/services/profile_completion_service.dart';
+import 'app/services/feature_gate_service.dart';
+import 'app/services/auth_migration_service.dart';
+import 'app/core/services/cache_service.dart';
+import 'app/services/analytics_service.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
   // Firebase'i initialize et
-  await Firebase.initializeApp(
-    options: DefaultFirebaseOptions.currentPlatform,
-  );
+  await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
 
   // Web platformunda Firebase Auth persistence ayarını yap
   if (kIsWeb) {
@@ -51,15 +57,18 @@ void main() async {
       print('Web Firebase Auth persistence set to SESSION');
 
       // Web için redirect sonucunu dinle
-      FirebaseAuth.instance.getRedirectResult().then((result) {
-        if (result.user != null) {
-          print('Web redirect login successful: ${result.user?.email}');
-        } else if (result.credential != null) {
-          print('Web redirect login with credential');
-        }
-      }).catchError((error) {
-        print('Web redirect login error: $error');
-      });
+      FirebaseAuth.instance
+          .getRedirectResult()
+          .then((result) {
+            if (result.user != null) {
+              print('Web redirect login successful: ${result.user?.email}');
+            } else if (result.credential != null) {
+              print('Web redirect login with credential');
+            }
+          })
+          .catchError((error) {
+            print('Web redirect login error: $error');
+          });
     } catch (e) {
       print('Error setting web persistence: $e');
     }
@@ -79,48 +88,67 @@ Future<void> initBasicDependencies() async {
   Get.put(StorageService(), permanent: true);
   Get.put(ErrorHandlerService(), permanent: true);
   Get.put(ApiOptimizationService(), permanent: true);
+  Get.put(CacheService(), permanent: true);
+  Get.put(AnalyticsService(), permanent: true);
+
+  // User Service ve Profile Completion Service
+  Get.put(UserService(), permanent: true);
+  Get.put(ProfileCompletionService(), permanent: true);
+  Get.put(
+    FeatureGateService(
+      profileCompletionService: Get.find<ProfileCompletionService>(),
+      userService: Get.find<UserService>(),
+    ),
+    permanent: true,
+  );
+
+  // Auth Migration Service
+  Get.put(AuthMigrationService(), permanent: true);
 
   // GitHub OAuth Service
   Get.put(
-      GitHubOAuthService(
-        logger: Get.find(),
-        errorHandler: Get.find(),
-        auth: FirebaseAuth.instance,
-      ),
-      permanent: true);
+    GitHubOAuthService(logger: Get.find(), errorHandler: Get.find()),
+    permanent: true,
+  );
 
   // AuthRepository
-  Get.put(
-      AuthRepository(
-        githubOAuthService: Get.find(),
-      ),
-      permanent: true);
+  Get.put(AuthRepository(githubOAuthService: Get.find()), permanent: true);
 
-  // GitHub Service
+  // GitHub Services
   Get.put(GithubService(), permanent: true);
+  Get.put(
+    GitHubContentSharingService(logger: Get.find(), errorHandler: Get.find()),
+    permanent: true,
+  );
+
+  // GitHub Controllers
+  Get.put(
+    GitHubContentController(
+      contentService: Get.find(),
+      logger: Get.find(),
+      errorHandler: Get.find(),
+    ),
+    permanent: true,
+  );
 
   // Auth Controllers
   Get.put(
-      EmailAuthController(
-        authRepository: Get.find(),
-        errorHandler: Get.find(),
-      ),
-      permanent: true);
+    EmailAuthController(authRepository: Get.find(), errorHandler: Get.find()),
+    permanent: true,
+  );
+
+  Get.put(AuthStateController(authRepository: Get.find()), permanent: true);
 
   Get.put(
-      AuthStateController(
-        authRepository: Get.find(),
-      ),
-      permanent: true);
-
-  Get.put(
-      AuthController(
-        authRepository: Get.find(),
-        errorHandler: Get.find(),
-        emailAuth: Get.find(),
-        authState: Get.find(),
-      ),
-      permanent: true);
+    AuthController(
+      authRepository: Get.find(),
+      errorHandler: Get.find(),
+      emailAuth: Get.find(),
+      authState: Get.find(),
+      featureGateService: Get.find(),
+    ),
+    permanent: true,
+  );
 
   // SharedPreferences
   final prefs = await SharedPreferences.getInstance();
@@ -129,19 +157,19 @@ Future<void> initBasicDependencies() async {
   // Diğer servisler - parametreleri explicit belirtin
   Get.put(NotificationService(prefs), permanent: true);
   Get.put(
-      MessagingService(
-        logger: Get.find<Logger>(),
-        errorHandler: Get.find<ErrorHandlerService>(),
-        firestore: null, // Varsayılan değer
-        auth: null, // Varsayılan değer
-      ),
-      permanent: true);
+    MessagingService(
+      logger: Get.find<Logger>(),
+      errorHandler: Get.find<ErrorHandlerService>(),
+      firestore: null, // Varsayılan değer
+      auth: null, // Varsayılan değer
+    ),
+    permanent: true,
+  );
   Get.put(NavigationService(), permanent: true);
   Get.put(
-      FeedService(
-        errorHandler: Get.find<ErrorHandlerService>(),
-      ),
-      permanent: true);
+    FeedService(errorHandler: Get.find<ErrorHandlerService>()),
+    permanent: true,
+  );
   Get.put(ConnectionService(), permanent: true);
   Get.put(FeedRepository(), permanent: true);
 
@@ -149,30 +177,34 @@ Future<void> initBasicDependencies() async {
   Get.put(HomeController(), permanent: true);
   Get.put(DiscoveryController(), permanent: true);
   Get.put(
-      MessagingController(
-        messagingService: Get.find<MessagingService>(),
-        authService: Get.find<AuthRepository>(),
-        errorHandler: Get.find<ErrorHandlerService>(),
-      ),
-      permanent: true);
+    MessagingController(
+      messagingService: Get.find<MessagingService>(),
+      authService: Get.find<AuthRepository>(),
+      errorHandler: Get.find<ErrorHandlerService>(),
+    ),
+    permanent: true,
+  );
   Get.put(
-      MessageListController(
-        messagingService: Get.find<MessagingService>(),
-        errorHandler: Get.find<ErrorHandlerService>(),
-      ),
-      permanent: true);
+    MessageListController(
+      messagingService: Get.find<MessagingService>(),
+      errorHandler: Get.find<ErrorHandlerService>(),
+    ),
+    permanent: true,
+  );
   Get.put(
-      MessageSearchController(
-        messagingService: Get.find<MessagingService>(),
-        errorHandler: Get.find<ErrorHandlerService>(),
-      ),
-      permanent: true);
+    MessageSearchController(
+      messagingService: Get.find<MessagingService>(),
+      errorHandler: Get.find<ErrorHandlerService>(),
+    ),
+    permanent: true,
+  );
   Get.put(
-      MessageInteractionController(
-        messagingService: Get.find<MessagingService>(),
-        errorHandler: Get.find<ErrorHandlerService>(),
-      ),
-      permanent: true);
+    MessageInteractionController(
+      messagingService: Get.find<MessagingService>(),
+      errorHandler: Get.find<ErrorHandlerService>(),
+    ),
+    permanent: true,
+  );
   Get.put(ProfileController(), permanent: true);
   Get.put(NavigationController(Get.find<NavigationService>()), permanent: true);
 }

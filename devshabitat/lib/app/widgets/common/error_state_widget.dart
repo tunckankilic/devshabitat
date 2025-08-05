@@ -1,12 +1,12 @@
 import 'package:devshabitat/app/constants/app_strings.dart';
 import 'package:flutter/material.dart';
-import 'package:lottie/lottie.dart';
+
 import '../../constants/app_assets.dart';
 
 class ErrorStateWidget extends StatelessWidget {
   final String message;
   final VoidCallback? onRetry;
-  final String? lottieAsset;
+  final String? imageAsset;
   final double? width;
   final double? height;
 
@@ -14,7 +14,7 @@ class ErrorStateWidget extends StatelessWidget {
     super.key,
     required this.message,
     this.onRetry,
-    this.lottieAsset = AppAssets.errorAnimation,
+    this.imageAsset = AppAssets.errorImage,
     this.width,
     this.height,
   });
@@ -29,12 +29,12 @@ class ErrorStateWidget extends StatelessWidget {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            if (lottieAsset != null)
-              Lottie.asset(
-                lottieAsset!,
+            if (imageAsset != null)
+              Image.asset(
+                imageAsset!,
                 width: width ?? 200,
                 height: height ?? 200,
-                repeat: true,
+                fit: BoxFit.contain,
               ),
             const SizedBox(height: 24),
             Text(
@@ -66,17 +66,14 @@ class ErrorStateWidget extends StatelessWidget {
 class NetworkErrorWidget extends StatelessWidget {
   final VoidCallback? onRetry;
 
-  const NetworkErrorWidget({
-    super.key,
-    this.onRetry,
-  });
+  const NetworkErrorWidget({super.key, this.onRetry});
 
   @override
   Widget build(BuildContext context) {
     return ErrorStateWidget(
       message: AppStrings.networkError,
       onRetry: onRetry,
-      lottieAsset: AppAssets.noConnectionAnimation,
+      imageAsset: AppAssets.noConnectionImage,
     );
   }
 }
@@ -84,17 +81,14 @@ class NetworkErrorWidget extends StatelessWidget {
 class ServerErrorWidget extends StatelessWidget {
   final VoidCallback? onRetry;
 
-  const ServerErrorWidget({
-    super.key,
-    this.onRetry,
-  });
+  const ServerErrorWidget({super.key, this.onRetry});
 
   @override
   Widget build(BuildContext context) {
     return ErrorStateWidget(
       message: AppStrings.serverError,
       onRetry: onRetry,
-      lottieAsset: AppAssets.serverErrorAnimation,
+      imageAsset: AppAssets.serverErrorImage,
     );
   }
 }

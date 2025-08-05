@@ -96,11 +96,13 @@ class AppPages {
       bindings: [
         BindingsBuilder(() {
           // Sadece RegistrationController ekle, diğerleri zaten global
-          Get.lazyPut(() => RegistrationController(
-                authRepository: Get.find(),
-                errorHandler: Get.find(),
-                authController: Get.find(),
-              ));
+          Get.lazyPut(
+            () => RegistrationController(
+              authRepository: Get.find(),
+              errorHandler: Get.find(),
+              authController: Get.find(),
+            ),
+          );
         }),
       ],
     ),
@@ -286,8 +288,10 @@ class AppPages {
       page: () => Scaffold(
         appBar: AppBar(title: Text('Yeni Sohbet')),
         body: Center(
-          child: Text('Yeni sohbet sayfası yakında...',
-              style: TextStyle(fontSize: 18)),
+          child: Text(
+            'Yeni sohbet sayfası yakında...',
+            style: TextStyle(fontSize: 18),
+          ),
         ),
       ),
       middlewares: [AuthMiddleware()],
@@ -335,7 +339,7 @@ class AppPages {
     ),
     GetPage(
       name: AppRoutes.githubIntegration,
-      page: () => const GithubIntegrationView(),
+      page: () => GithubIntegrationView(),
       binding: GithubIntegrationBinding(),
       middlewares: [AuthMiddleware()],
     ),

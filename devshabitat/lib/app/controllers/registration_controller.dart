@@ -1,23 +1,56 @@
+import 'package:devshabitat/app/core/services/form_validation_service.dart'
+    show FormValidationService;
 import 'package:devshabitat/app/repositories/auth_repository.dart';
 import 'package:devshabitat/app/services/storage_service.dart';
 import 'package:get/get.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import '../core/services/error_handler_service.dart';
+import '../core/services/step_navigation_service.dart';
 import '../controllers/auth_controller.dart';
 import '../services/github_oauth_service.dart';
 import '../services/github_service.dart';
 import 'package:logger/logger.dart';
+import '../core/mixins/controller_lifecycle_mixin.dart';
 
-enum RegistrationStep {
-  basicInfo, // Email, şifre ve isim (zorunlu)
-  personalInfo, // Bio, konum, fotoğraf (opsiyonel)
-  professionalInfo, // İş deneyimi, eğitim (opsiyonel)
-  skillsInfo, // Yetenekler, diller (opsiyonel)
-  completed
-}
+// Step configurations
+final List<StepConfiguration> _registrationSteps = [
+  StepConfiguration(
+    id: 'basicInfo',
+    title: 'Temel Bilgiler',
+    description: 'Email, şifre ve isim bilgilerinizi girin',
+    isRequired: true,
+    canSkip: false,
+    requiredFields: ['email', 'password', 'displayName', 'githubConnection'],
+  ),
+  StepConfiguration(
+    id: 'personalInfo',
+    title: 'Kişisel Bilgiler',
+    description: 'Bio, konum ve fotoğraf bilgilerinizi girin',
+    isRequired: false,
+    canSkip: true,
+    optionalFields: ['bio', 'location', 'photo'],
+  ),
+  StepConfiguration(
+    id: 'professionalInfo',
+    title: 'Profesyonel Bilgiler',
+    description: 'İş deneyimi ve eğitim bilgilerinizi girin',
+    isRequired: false,
+    canSkip: true,
+    optionalFields: ['title', 'company', 'experience', 'education'],
+  ),
+  StepConfiguration(
+    id: 'skillsInfo',
+    title: 'Yetenekler',
+    description: 'Yetenekler, diller ve ilgi alanlarınızı girin',
+    isRequired: false,
+    canSkip: true,
+    optionalFields: ['skills', 'languages', 'interests'],
+  ),
+];
 
-class RegistrationController extends GetxController {
+class RegistrationController extends GetxController
+    with ControllerLifecycleMixin {
   final AuthRepository _authRepository;
   final ErrorHandlerService _errorHandler;
   final AuthController _authController;
@@ -27,12 +60,14 @@ class RegistrationController extends GetxController {
   final basicInfoFormKey = GlobalKey<FormState>();
 
   // Reactive state variables
-  final _currentStep = RegistrationStep.basicInfo.obs;
   final _isLoading = false.obs;
   final _lastError = RxnString();
   final _isEmailValid = false.obs;
   final _isPasswordValid = false.obs;
   final _isDisplayNameValid = false.obs;
+
+  // Step navigation service
+  late final StepNavigationService _stepNavigation;
 
   // Password validation states
   final _hasMinLength = false.obs;
@@ -44,22 +79,21 @@ class RegistrationController extends GetxController {
   final _passwordIsEmpty = true.obs;
   final _confirmPasswordIsEmpty = true.obs;
 
-  // Basic Info Controllers (Zorunlu)
-  final emailController = TextEditingController();
-  final passwordController = TextEditingController();
-  final confirmPasswordController = TextEditingController();
-  final displayNameController = TextEditingController();
+  // Controllers
+  late final TextEditingController emailController;
+  late final TextEditingController passwordController;
+  late final TextEditingController confirmPasswordController;
+  late final TextEditingController displayNameController;
+  late final TextEditingController bioController;
+  late final TextEditingController locationTextController;
+  late final TextEditingController photoUrlController;
+  late final TextEditingController locationNameController;
+  late final TextEditingController titleController;
+  late final TextEditingController companyController;
+  late final TextEditingController yearsOfExperienceController;
 
-  // Personal Info Controllers (Opsiyonel)
-  final bioController = TextEditingController();
-  final locationController = TextEditingController();
-  final photoUrlController = TextEditingController();
-  final locationNameController = TextEditingController();
-
-  // Professional Info Controllers (Opsiyonel)
-  final titleController = TextEditingController();
-  final companyController = TextEditingController();
-  final yearsOfExperienceController = TextEditingController();
+  // Location tracking
+  GeoPoint? lastValidLocation;
 
   // Work Preferences
   final isAvailableForWork = true.obs;
@@ -95,16 +129,22 @@ class RegistrationController extends GetxController {
   // Geçici kullanıcı ID'si için
   final RxString _tempUserId = RxString('');
 
-  // Sayfa indeksi (0: basic, 1: personal, 2: professional, 3: skills)
-  final _currentPageIndex = 0.obs;
-
   // Getters
   bool get isLoading => _isLoading.value;
-  RegistrationStep get currentStep => _currentStep.value;
   String? get lastError => _lastError.value;
   bool get isEmailValid => _isEmailValid.value;
   bool get isPasswordValid => _isPasswordValid.value;
   bool get isDisplayNameValid => _isDisplayNameValid.value;
+
+  // Step navigation getters
+  int get currentStepIndex => _stepNavigation.currentStepIndex;
+  StepConfiguration get currentStep => _stepNavigation.currentStep;
+  bool get isFirstStep => _stepNavigation.isFirstStep;
+  bool get isLastStep => _stepNavigation.isLastStep;
+  bool get canGoNext => _stepNavigation.canMoveNext() && canMoveNext;
+  bool get canGoPrevious => _stepNavigation.canMovePrevious();
+  bool get canSkip => _stepNavigation.canSkipStep();
+  bool get hasUnsavedChanges => _stepNavigation.hasUnsavedChanges;
 
   // Password validation getters
   bool get hasMinLength => _hasMinLength.value;
@@ -131,84 +171,251 @@ class RegistrationController extends GetxController {
       hasSpecialChar &&
       passwordsMatch;
 
-  int get currentPageIndex => _currentPageIndex.value;
-
-  bool get canGoNext {
-    switch (_currentPageIndex.value) {
-      case 0: // Basic info - sadece temel bilgiler zorunlu, GitHub opsiyonel
-        return _isEmailValid.value &&
-            _isDisplayNameValid.value &&
-            allPasswordRequirementsMet;
-      case 1: // Personal info - opsiyonel
-      case 2: // Professional info - opsiyonel
-      case 3: // Skills info - opsiyonel
-        return true;
-      default:
-        return false;
+  bool get canMoveNext {
+    // Basic info - GitHub bağlantısı zorunlu
+    if (currentStep.id == 'basicInfo') {
+      return _isEmailValid.value &&
+          _isDisplayNameValid.value &&
+          allPasswordRequirementsMet &&
+          _isGithubConnected.value;
     }
+
+    // Diğer adımlar opsiyonel
+    return true;
   }
 
-  bool get isLastPage => _currentPageIndex.value == 3;
-  bool get isFirstPage => _currentPageIndex.value == 0;
+  // Duplicate getters removed
 
-  void nextPage() {
+  Future<void> nextPage() async {
     if (!canGoNext) return;
 
-    if (isLastPage) {
+    if (isLastStep) {
       // Son sayfa - kayıt işlemini yap
-      _performRegistration();
+      await _performRegistration();
     } else {
-      // Sadece sayfa değiştir, auth işlemi yapma
-      _currentPageIndex.value++;
+      // Geçerli adımı tamamlandı olarak işaretle
+      _stepNavigation.markStepAsCompleted(currentStep.id);
+
+      // Sonraki adıma geç
+      await _stepNavigation.moveNext();
     }
   }
 
-  void previousPage() {
-    if (!isFirstPage) {
-      _currentPageIndex.value--;
+  Future<void> previousPage() async {
+    if (!canGoPrevious) return;
+
+    // Değişiklikler varsa kullanıcıya sor
+    if (hasUnsavedChanges) {
+      final result = await Get.dialog<bool>(
+        AlertDialog(
+          title: const Text('Kaydedilmemiş Değişiklikler'),
+          content: const Text(
+            'Kaydedilmemiş değişiklikleriniz var. Devam etmek istiyor musunuz?',
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Get.back(result: false),
+              child: const Text('İptal'),
+            ),
+            TextButton(
+              onPressed: () => Get.back(result: true),
+              child: const Text('Devam Et'),
+            ),
+          ],
+        ),
+      );
+
+      if (result != true) return;
     }
+
+    // Önceki adıma dön
+    await _stepNavigation.movePrevious();
   }
 
-  void skipCurrentPage() {
-    if (!isLastPage) {
-      _currentPageIndex.value++;
+  Future<void> skipStep() async {
+    if (!canSkip) return;
+
+    // Adımı atla
+    await _stepNavigation.skipStep();
+  }
+
+  Future<bool> handleBackButton() async {
+    // Navigation history'de geri dönülebilecek adım varsa
+    if (_stepNavigation.canGoBack()) {
+      return _stepNavigation.goBack();
     }
+
+    // Yoksa ilk sayfadaysa uygulamadan çık
+    if (isFirstStep) {
+      final result = await Get.dialog<bool>(
+        AlertDialog(
+          title: const Text('Kayıt İşleminden Çık'),
+          content: const Text(
+            'Kayıt işleminden çıkmak istediğinize emin misiniz?',
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Get.back(result: false),
+              child: const Text('İptal'),
+            ),
+            TextButton(
+              onPressed: () => Get.back(result: true),
+              child: const Text('Çık'),
+            ),
+          ],
+        ),
+      );
+
+      if (result == true) {
+        Get.back();
+        return true;
+      }
+    }
+
+    return false;
   }
 
   RegistrationController({
     required AuthRepository authRepository,
     required ErrorHandlerService errorHandler,
     required AuthController authController,
-  })  : _authRepository = authRepository,
-        _errorHandler = errorHandler,
-        _authController = authController;
+  }) : _authRepository = authRepository,
+       _errorHandler = errorHandler,
+       _authController = authController;
 
   @override
   void onInit() {
     super.onInit();
 
-    // Email validation
-    emailController.addListener(_validateEmail);
+    // Step navigation service'i başlat
+    _stepNavigation = Get.put(StepNavigationService(_registrationSteps));
 
-    // Display name validation
-    displayNameController.addListener(_validateDisplayName);
+    // Controller'ları factory method ile oluştur
+    emailController = createController();
+    passwordController = createController();
+    confirmPasswordController = createController();
+    displayNameController = createController();
+    bioController = createController();
+    locationTextController = createController();
+    photoUrlController = createController();
+    locationNameController = createController();
+    titleController = createController();
+    companyController = createController();
+    yearsOfExperienceController = createController();
 
-    // Password validation
-    passwordController.addListener(_validatePassword);
-    confirmPasswordController.addListener(_validatePasswordConfirmation);
+    // Workers'ları factory method ile oluştur
+    createWorker(ever(_isEmailValid, (_) => _validateForm()));
+    createWorker(ever(_isPasswordValid, (_) => _validateForm()));
+    createWorker(ever(_isDisplayNameValid, (_) => _validateForm()));
+
+    // Listener'ları ekle
+    emailController.addListener(() {
+      validateEmail();
+      _stepNavigation.setUnsavedChanges(true);
+    });
+    displayNameController.addListener(() {
+      validateDisplayName();
+      _stepNavigation.setUnsavedChanges(true);
+    });
+    passwordController.addListener(() {
+      validatePassword();
+      _stepNavigation.setUnsavedChanges(true);
+    });
+    confirmPasswordController.addListener(() {
+      validatePasswordConfirmation();
+      _stepNavigation.setUnsavedChanges(true);
+    });
+
+    // Form değişikliklerini takip et
+    bioController.addListener(() => _stepNavigation.setUnsavedChanges(true));
+    locationTextController.addListener(
+      () => _stepNavigation.setUnsavedChanges(true),
+    );
+    photoUrlController.addListener(
+      () => _stepNavigation.setUnsavedChanges(true),
+    );
+    locationNameController.addListener(
+      () => _stepNavigation.setUnsavedChanges(true),
+    );
+    titleController.addListener(() => _stepNavigation.setUnsavedChanges(true));
+    companyController.addListener(
+      () => _stepNavigation.setUnsavedChanges(true),
+    );
+    yearsOfExperienceController.addListener(
+      () => _stepNavigation.setUnsavedChanges(true),
+    );
   }
 
-  void _validateEmail() {
+  void _validateForm() {
+    if (basicInfoFormKey.currentState?.validate() ?? false) {
+      // Form geçerli, adımı tamamlandı olarak işaretle
+      _stepNavigation.markStepAsCompleted(currentStep.id);
+      _stepNavigation.setUnsavedChanges(false);
+    } else {
+      // Form geçersiz, adımı hata durumuna al
+      _stepNavigation.markStepAsError(currentStep.id);
+    }
+  }
+
+  @override
+  void onClose() {
+    // Step navigation service'i temizle
+    _stepNavigation.reset();
+    Get.delete<StepNavigationService>();
+
+    // Form controller'larını temizle
+    emailController.dispose();
+    passwordController.dispose();
+    confirmPasswordController.dispose();
+    displayNameController.dispose();
+    bioController.dispose();
+    locationTextController.dispose();
+    photoUrlController.dispose();
+    locationNameController.dispose();
+    titleController.dispose();
+    companyController.dispose();
+    yearsOfExperienceController.dispose();
+
+    super.onClose();
+  }
+
+  final _formValidation = Get.find<FormValidationService>();
+
+  void validateEmail() {
     final email = emailController.text;
-    _isEmailValid.value = email.isNotEmpty && GetUtils.isEmail(email);
+    _formValidation.validateFieldWithDebounce('email', email, (value) async {
+      if (value.isEmpty) {
+        _isEmailValid.value = false;
+        return 'Email adresi gereklidir';
+      }
+      if (!GetUtils.isEmail(value)) {
+        _isEmailValid.value = false;
+        return 'Geçerli bir email adresi giriniz';
+      }
+      _isEmailValid.value = true;
+      return null;
+    });
   }
 
-  void _validateDisplayName() {
+  void validateDisplayName() {
     final name = displayNameController.text;
-    _isDisplayNameValid.value = name.isNotEmpty && name.length >= 3;
+    _formValidation.validateFieldWithDebounce('displayName', name, (
+      value,
+    ) async {
+      if (value.isEmpty) {
+        _isDisplayNameValid.value = false;
+        return 'İsim gereklidir';
+      }
+      if (value.length < 3) {
+        _isDisplayNameValid.value = false;
+        return 'İsim en az 3 karakter olmalıdır';
+      }
+      _isDisplayNameValid.value = true;
+      return null;
+    });
   }
 
-  // GitHub verilerini çek (sadece veri çekme amaçlı)
+  // GitHub verilerini çek
   Future<void> importGithubData() async {
     try {
       _isGithubLoading.value = true;
@@ -216,7 +423,7 @@ class RegistrationController extends GetxController {
       final githubOAuthService = Get.find<GitHubOAuthService>();
 
       // GitHub OAuth ile token al
-      final accessToken = await githubOAuthService.signInWithGitHub();
+      final accessToken = await githubOAuthService.getGithubAccessToken();
       if (accessToken == null) {
         Get.snackbar(
           'Bilgi',
@@ -232,14 +439,32 @@ class RegistrationController extends GetxController {
       // GitHub kullanıcı bilgilerini çek
       final userInfo = await githubOAuthService.getUserInfo(accessToken);
       if (userInfo != null) {
-        // Form alanlarını doldur (sadece boş olanları)
+        // Form alanlarını doldur
         _populateFormFromGithubData(userInfo);
 
-        // GitHub verilerini sakla (opsiyonel)
+        // GitHub verilerini sakla
         _githubUsername.value = userInfo['login'];
         _githubToken.value = accessToken;
         _githubUserData.value = userInfo;
         _isGithubConnected.value = true;
+
+        // Repository bilgilerini çek
+        final repos = await githubOAuthService.getUserRepositories(accessToken);
+        if (repos != null) {
+          _githubUserData.value = {
+            ..._githubUserData.value ?? {},
+            'repositories': repos,
+          };
+        }
+
+        // Email bilgilerini çek
+        final emails = await githubOAuthService.getUserEmails(accessToken);
+        if (emails != null &&
+            emails.isNotEmpty &&
+            emailController.text.isEmpty) {
+          emailController.text = emails.first;
+          validateEmail();
+        }
 
         Get.snackbar(
           'Başarılı!',
@@ -274,7 +499,7 @@ class RegistrationController extends GetxController {
         githubData['email'].toString().isNotEmpty &&
         emailController.text.isEmpty) {
       emailController.text = githubData['email'];
-      _validateEmail();
+      validateEmail();
     }
 
     // Display name doldur (eğer boşsa)
@@ -282,7 +507,7 @@ class RegistrationController extends GetxController {
         githubData['name'].toString().isNotEmpty &&
         displayNameController.text.isEmpty) {
       displayNameController.text = githubData['name'];
-      _validateDisplayName();
+      validateDisplayName();
     }
 
     // Bio doldur (eğer boşsa)
@@ -295,8 +520,8 @@ class RegistrationController extends GetxController {
     // Location doldur (eğer boşsa)
     if (githubData['location'] != null &&
         githubData['location'].toString().isNotEmpty &&
-        locationController.text.isEmpty) {
-      locationController.text = githubData['location'];
+        locationTextController.text.isEmpty) {
+      locationTextController.text = githubData['location'];
     }
 
     // Company doldur (eğer boşsa)
@@ -314,8 +539,9 @@ class RegistrationController extends GetxController {
         final githubService = Get.find<GithubService>();
 
         // GitHub stats'ları çek
-        final githubStats =
-            await githubService.getGithubStats(_githubUsername.value!);
+        final githubStats = await githubService.getGithubStats(
+          _githubUsername.value!,
+        );
 
         if (githubStats != null) {
           // Bio bilgisini GitHub'dan al
@@ -328,8 +554,8 @@ class RegistrationController extends GetxController {
           // Location bilgisini GitHub'dan al
           if (githubStats.location != null &&
               githubStats.location!.isNotEmpty &&
-              locationController.text.isEmpty) {
-            locationController.text = githubStats.location!;
+              locationTextController.text.isEmpty) {
+            locationTextController.text = githubStats.location!;
           }
 
           // Company bilgisini GitHub'dan al
@@ -340,8 +566,9 @@ class RegistrationController extends GetxController {
           }
 
           // Tech stack'i skills olarak ekle
-          final techStack =
-              await githubService.getTechStack(_githubUsername.value!);
+          final techStack = await githubService.getTechStack(
+            _githubUsername.value!,
+          );
           if (techStack.isNotEmpty) {
             for (final tech in techStack.take(10)) {
               // İlk 10 teknolojiyi al
@@ -401,13 +628,13 @@ class RegistrationController extends GetxController {
       // Email ve isim bilgilerini aktar (eğer boşsa)
       if (githubData['email'] != null && emailController.text.isEmpty) {
         emailController.text = githubData['email'];
-        _validateEmail();
+        validateEmail();
       }
 
       if (githubData['displayName'] != null &&
           displayNameController.text.isEmpty) {
         displayNameController.text = githubData['displayName'];
-        _validateDisplayName();
+        validateDisplayName();
       }
 
       // GitHub kullanıcı adını kaydet
@@ -470,192 +697,89 @@ class RegistrationController extends GetxController {
   }
 
   // Email verification gönder
-  Future<void> _sendEmailVerification() async {
-    try {
-      final user = _authRepository.currentUser;
-      if (user != null && !user.emailVerified) {
-        await user.sendEmailVerification();
 
-        Get.snackbar(
-          'Email Doğrulama',
-          'Doğrulama emaili ${user.email} adresine gönderildi.',
-          backgroundColor: Colors.blue.withOpacity(0.8),
-          colorText: Colors.white,
-          snackPosition: SnackPosition.BOTTOM,
-          duration: const Duration(seconds: 4),
-          icon: const Icon(Icons.email, color: Colors.white),
-        );
-      }
-    } catch (e) {
-      print('Email verification gönderilemedi: $e');
-      // Email verification başarısız olsa bile registration devam etsin
-    }
-  }
-
-  void _validatePassword() {
+  void validatePassword() {
     final password = passwordController.text;
+    _formValidation.validateFieldWithDebounce('password', password, (
+      value,
+    ) async {
+      _passwordIsEmpty.value = value.isEmpty;
+      _hasMinLength.value = value.length >= 8;
+      _hasUppercase.value = value.contains(RegExp(r'[A-Z]'));
+      _hasLowercase.value = value.contains(RegExp(r'[a-z]'));
+      _hasNumber.value = value.contains(RegExp(r'[0-9]'));
+      _hasSpecialChar.value = value.contains(RegExp(r'[!@#$%^&*(),.?":{}|<>]'));
 
-    _passwordIsEmpty.value = password.isEmpty;
-    _hasMinLength.value = password.length >= 8;
-    _hasUppercase.value = password.contains(RegExp(r'[A-Z]'));
-    _hasLowercase.value = password.contains(RegExp(r'[a-z]'));
-    _hasNumber.value = password.contains(RegExp(r'[0-9]'));
-    _hasSpecialChar.value =
-        password.contains(RegExp(r'[!@#$%^&*(),.?":{}|<>]'));
+      if (value.isEmpty) {
+        _isPasswordValid.value = false;
+        return 'Şifre gereklidir';
+      }
 
-    _isPasswordValid.value = allPasswordRequirementsMet;
+      final errors = <String>[];
+      if (!_hasMinLength.value) errors.add('En az 8 karakter');
+      if (!_hasUppercase.value) errors.add('En az bir büyük harf');
+      if (!_hasLowercase.value) errors.add('En az bir küçük harf');
+      if (!_hasNumber.value) errors.add('En az bir rakam');
+      if (!_hasSpecialChar.value) errors.add('En az bir özel karakter');
 
-    // Also validate password confirmation when password changes
-    _validatePasswordConfirmation();
+      if (errors.isNotEmpty) {
+        _isPasswordValid.value = false;
+        return 'Şifre gereksinimleri:\n${errors.map((e) => '• $e').join('\n')}';
+      }
+
+      _isPasswordValid.value = true;
+      return null;
+    });
+
+    // Şifre değiştiğinde onay şifresini de kontrol et
+    validatePasswordConfirmation();
   }
 
-  void _validatePasswordConfirmation() {
+  void validatePasswordConfirmation() {
     final password = passwordController.text;
     final confirmPassword = confirmPasswordController.text;
 
-    _confirmPasswordIsEmpty.value = confirmPassword.isEmpty;
-    _passwordsMatch.value =
-        confirmPassword.isNotEmpty && password == confirmPassword;
+    _formValidation.validateFieldWithDebounce(
+      'confirmPassword',
+      confirmPassword,
+      (value) async {
+        _confirmPasswordIsEmpty.value = value.isEmpty;
+
+        if (value.isEmpty) {
+          _passwordsMatch.value = false;
+          return 'Şifre onayı gereklidir';
+        }
+
+        if (value != password) {
+          _passwordsMatch.value = false;
+          return 'Şifreler eşleşmiyor';
+        }
+
+        _passwordsMatch.value = true;
+        return null;
+      },
+    );
   }
 
   Future<void> proceedToNextStep() async {
     if (!canGoNext) return;
 
-    switch (_currentStep.value) {
-      case RegistrationStep.basicInfo:
-        // Sadece validasyon yap, kayıt etme
-        if (_validateBasicInfo()) {
-          // Kullanıcıyı oluştur ve geçici ID'yi kaydet
-          final userCredential =
-              await _authRepository.createUserWithEmailAndPassword(
-            emailController.text,
-            passwordController.text,
-            displayNameController.text,
-          );
+    if (isLastStep) {
+      // Son adım - gerçek kayıt işlemini yap
+      await _performRegistration();
+    } else {
+      // Geçerli adımı tamamlandı olarak işaretle
+      _stepNavigation.markStepAsCompleted(currentStep.id);
 
-          if (userCredential.user != null) {
-            _tempUserId.value = userCredential.user!.uid;
-            _currentStep.value = RegistrationStep.personalInfo;
-          }
-        }
-        break;
-      case RegistrationStep.personalInfo:
-        // Opsiyonel adım, direkt geç
-        _currentStep.value = RegistrationStep.professionalInfo;
-        break;
-      case RegistrationStep.professionalInfo:
-        // Opsiyonel adım, direkt geç
-        _currentStep.value = RegistrationStep.skillsInfo;
-        break;
-      case RegistrationStep.skillsInfo:
-        // Son adım - gerçek kayıt işlemini yap
-        if (await _completeRegistration()) {
-          _currentStep.value = RegistrationStep.completed;
-          // Email verification gönder
-          await _sendEmailVerification();
-          // Biraz bekle ki state güncellensin, sonra email verification sayfasına yönlendir
-          await Future.delayed(Duration(milliseconds: 200));
-          Get.offAllNamed('/email-verification');
-        }
-        break;
-      case RegistrationStep.completed:
-        break;
-    }
-  }
-
-  bool _validateBasicInfo() {
-    // Form validasyonunu kontrol et
-    if (basicInfoFormKey.currentState?.validate() ?? false) {
-      return allPasswordRequirementsMet;
-    }
-    return false;
-  }
-
-  Future<bool> _completeRegistration() async {
-    try {
-      _isLoading.value = true;
-
-      // 1. Önce kullanıcıyı kaydet
-      final userCredential =
-          await _authRepository.createUserWithEmailAndPassword(
-        emailController.text,
-        passwordController.text,
-        displayNameController.text,
-      );
-
-      if (userCredential.user == null) {
-        throw Exception('Kullanıcı oluşturulamadı');
-      }
-
-      // Geçici ID'yi kaydet
-      _tempUserId.value = userCredential.user!.uid;
-
-      // 2. Tüm ek bilgileri güncelle
-      final updates = <String, dynamic>{
-        // Personal Info
-        'bio': bioController.text,
-        'locationName': locationNameController.text,
-        'photoUrl': photoUrlController.text,
-        if (location.value != null) 'location': location.value,
-
-        // Professional Info
-        'title': titleController.text,
-        'company': companyController.text,
-        'yearsOfExperience':
-            int.tryParse(yearsOfExperienceController.text) ?? 0,
-        'isAvailableForWork': isAvailableForWork.value,
-        'isRemote': isRemote.value,
-        'isFullTime': isFullTime.value,
-        'isPartTime': isPartTime.value,
-        'isFreelance': isFreelance.value,
-        'isInternship': isInternship.value,
-        'workExperience': workExperience,
-        'education': education,
-        'projects': projects,
-        'certificates': certificates,
-
-        // Skills Info
-        'skills': selectedSkills,
-        'languages': selectedLanguages,
-        'interests': selectedInterests,
-        'socialLinks': socialLinks,
-        'portfolioUrls': portfolioUrls,
-
-        // GitHub Info (Zorunlu)
-        'githubUsername': _githubUsername.value,
-        'githubToken': _githubToken.value,
-        'githubUserData': _githubUserData.value,
-      };
-
-      // Sadece dolu olan alanları güncelle
-      final filteredUpdates = <String, dynamic>{};
-      updates.forEach((key, value) {
-        if (value != null &&
-            value != '' &&
-            value != 0 &&
-            (value is! List || (value).isNotEmpty) &&
-            (value is! Map || (value).isNotEmpty)) {
-          filteredUpdates[key] = value;
-        }
-      });
-
-      if (filteredUpdates.isNotEmpty) {
-        await _authRepository.updateUserProfile(filteredUpdates);
-      }
-
-      return true;
-    } catch (e) {
-      _errorHandler.handleError(e, ErrorHandlerService.AUTH_ERROR);
-      return false;
-    } finally {
-      _isLoading.value = false;
+      // Sonraki adıma geç
+      await _stepNavigation.moveNext();
     }
   }
 
   Future<void> updateProfilePhoto(String photoUrl) async {
     try {
       // Eğer kayıt aşamasındaysak sadece controller'ı güncelle
-      if (_currentStep.value == RegistrationStep.personalInfo) {
+      if (currentStep.id == 'personalInfo') {
         photoUrlController.text = photoUrl;
         return;
       }
@@ -664,12 +788,11 @@ class RegistrationController extends GetxController {
       final currentUser = _authController.currentUser;
       if (currentUser == null) {
         throw Exception(
-            'Kullanıcı oturumu bulunamadı. Lütfen tekrar giriş yapın.');
+          'Kullanıcı oturumu bulunamadı. Lütfen tekrar giriş yapın.',
+        );
       }
 
-      await _authRepository.updateUserProfile({
-        'photoURL': photoUrl,
-      });
+      await _authRepository.updateUserProfile({'photoURL': photoUrl});
 
       // AuthController'daki profil bilgilerini güncelle
       await _authController.refreshUserProfile();
@@ -679,34 +802,21 @@ class RegistrationController extends GetxController {
     }
   }
 
-  void goBack() {
-    if (_currentStep.value == RegistrationStep.basicInfo) {
+  Future<void> goBack() async {
+    if (isFirstStep) {
       Get.back();
     } else {
-      switch (_currentStep.value) {
-        case RegistrationStep.personalInfo:
-          _currentStep.value = RegistrationStep.basicInfo;
-          break;
-        case RegistrationStep.professionalInfo:
-          _currentStep.value = RegistrationStep.personalInfo;
-          break;
-        case RegistrationStep.skillsInfo:
-          _currentStep.value = RegistrationStep.professionalInfo;
-          break;
-        default:
-          break;
-      }
+      await previousPage();
     }
   }
 
-  void skipCurrentStep() {
-    proceedToNextStep();
+  Future<void> skipCurrentStep() async {
+    await skipStep();
   }
 
   String? getCurrentUserId() {
     // Eğer kayıt aşamasındaysak ve geçici ID varsa onu kullan
-    if (_currentStep.value == RegistrationStep.personalInfo &&
-        _tempUserId.isNotEmpty) {
+    if (currentStep.id == 'personalInfo' && _tempUserId.isNotEmpty) {
       return _tempUserId.value;
     }
 
@@ -714,7 +824,7 @@ class RegistrationController extends GetxController {
     final currentUser = _authController.currentUser;
     if (currentUser == null) {
       // Sadece kayıt aşamasında değilsek login'e yönlendir
-      if (_currentStep.value != RegistrationStep.personalInfo) {
+      if (currentStep.id != 'personalInfo') {
         Get.offAllNamed('/login');
       }
       return null;
@@ -727,13 +837,19 @@ class RegistrationController extends GetxController {
     try {
       _isLoading.value = true;
 
+      // GitHub bağlantısı artık opsiyonel
+      if (_isGithubConnected.value && _githubUsername.value != null) {
+        // GitHub verilerini ekle
+        await _fetchAndPopulateGithubData();
+      }
+
       // 1. Firebase Authentication'da kullanıcı oluştur
-      final userCredential =
-          await _authRepository.createUserWithEmailAndPassword(
-        emailController.text,
-        passwordController.text,
-        displayNameController.text,
-      );
+      final userCredential = await _authRepository
+          .createUserWithEmailAndPassword(
+            emailController.text,
+            passwordController.text,
+            displayNameController.text,
+          );
 
       if (userCredential.user == null) {
         throw Exception('Kullanıcı oluşturulamadı');
@@ -748,16 +864,20 @@ class RegistrationController extends GetxController {
         'Kayıt işleminiz tamamlandı',
         backgroundColor: Colors.green,
         colorText: Colors.white,
-        duration: Duration(seconds: 2),
+        duration: const Duration(seconds: 2),
       );
 
       // 4. Auth controller'ların hazır olduğundan emin ol
-      await Future.delayed(Duration(seconds: 2));
+      await Future.delayed(const Duration(seconds: 2));
 
-      // 5. Ana sayfaya yönlendir
+      // 5. Step navigation service'i temizle
+      _stepNavigation.reset();
+
+      // 6. Ana sayfaya yönlendir
       Get.offAllNamed('/home');
     } catch (e) {
       _errorHandler.handleError(e, ErrorHandlerService.AUTH_ERROR);
+      _stepNavigation.markStepAsError(currentStep.id);
     } finally {
       _isLoading.value = false;
     }
@@ -770,8 +890,10 @@ class RegistrationController extends GetxController {
     if (photoUrlController.text.isNotEmpty &&
         !photoUrlController.text.startsWith('http')) {
       try {
-        final uploadedUrl = await Get.find<StorageService>()
-            .uploadProfileImage(userId, photoUrlController.text);
+        final uploadedUrl = await Get.find<StorageService>().uploadProfileImage(
+          userId,
+          photoUrlController.text,
+        );
         if (uploadedUrl != null) {
           updates['photoUrl'] = uploadedUrl;
         }
@@ -782,8 +904,8 @@ class RegistrationController extends GetxController {
 
     // Diğer bilgiler...
     if (bioController.text.isNotEmpty) updates['bio'] = bioController.text;
-    if (locationController.text.isNotEmpty) {
-      updates['location'] = locationController.text;
+    if (locationTextController.text.isNotEmpty) {
+      updates['location'] = locationTextController.text;
     }
     if (locationNameController.text.isNotEmpty) {
       updates['locationName'] = locationNameController.text;
@@ -821,19 +943,82 @@ class RegistrationController extends GetxController {
     }
   }
 
-  @override
-  void onClose() {
-    emailController.dispose();
-    passwordController.dispose();
-    confirmPasswordController.dispose();
-    displayNameController.dispose();
-    bioController.dispose();
-    locationController.dispose();
-    photoUrlController.dispose();
-    locationNameController.dispose();
-    titleController.dispose();
-    companyController.dispose();
-    yearsOfExperienceController.dispose();
-    super.onClose();
+  // Google ile kayıt
+  Future<void> signUpWithGoogle() async {
+    try {
+      _isLoading.value = true;
+
+      // Google ile giriş yap
+      final userCredential = await _authRepository.signInWithGoogle();
+      if (userCredential.user == null) {
+        throw Exception('Google ile giriş başarısız oldu');
+      }
+
+      // Otomatik form doldurma
+      emailController.text = userCredential.user!.email ?? '';
+      displayNameController.text = userCredential.user!.displayName ?? '';
+      photoUrlController.text = userCredential.user!.photoURL ?? '';
+
+      // Email ve display name validasyonlarını çalıştır
+      validateEmail();
+      validateDisplayName();
+
+      // GitHub bağlantısı kontrolü
+      if (!_isGithubConnected.value) {
+        Get.snackbar(
+          'GitHub Bağlantısı Gerekli',
+          'Lütfen devam etmek için GitHub hesabınızı bağlayın.',
+          backgroundColor: Colors.orange.withOpacity(0.8),
+          colorText: Colors.white,
+          snackPosition: SnackPosition.BOTTOM,
+          duration: const Duration(seconds: 4),
+          icon: const Icon(Icons.warning, color: Colors.white),
+        );
+      }
+    } catch (e) {
+      _errorHandler.handleError(e, ErrorHandlerService.AUTH_ERROR);
+    } finally {
+      _isLoading.value = false;
+    }
   }
+
+  // Apple ile kayıt
+  Future<void> signUpWithApple() async {
+    try {
+      _isLoading.value = true;
+
+      // Apple ile giriş yap
+      final userCredential = await _authRepository.signInWithApple();
+      if (userCredential.user == null) {
+        throw Exception('Apple ile giriş başarısız oldu');
+      }
+
+      // Otomatik form doldurma
+      emailController.text = userCredential.user!.email ?? '';
+      displayNameController.text = userCredential.user!.displayName ?? '';
+
+      // Email ve display name validasyonlarını çalıştır
+      validateEmail();
+      validateDisplayName();
+
+      // GitHub bağlantısı kontrolü
+      if (!_isGithubConnected.value) {
+        Get.snackbar(
+          'GitHub Bağlantısı Gerekli',
+          'Lütfen devam etmek için GitHub hesabınızı bağlayın.',
+          backgroundColor: Colors.orange.withOpacity(0.8),
+          colorText: Colors.white,
+          snackPosition: SnackPosition.BOTTOM,
+          duration: const Duration(seconds: 4),
+          icon: const Icon(Icons.warning, color: Colors.white),
+        );
+      }
+    } catch (e) {
+      _errorHandler.handleError(e, ErrorHandlerService.AUTH_ERROR);
+    } finally {
+      _isLoading.value = false;
+    }
+  }
+
+  // onClose metodunu kaldır - mixin hallediyor
 }

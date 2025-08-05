@@ -1,6 +1,7 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:get/get.dart';
 import 'package:devshabitat/app/models/enhanced_user_model.dart' as enhanced;
+import 'package:devshabitat/app/models/work_experience_model.dart';
 import 'package:devshabitat/app/models/profile_completion_model.dart';
 import 'package:devshabitat/app/models/user_profile_model.dart';
 import 'package:devshabitat/app/models/location/location_model.dart';
@@ -125,7 +126,11 @@ void main() {
         skills: ['Flutter', 'Dart', 'JavaScript'],
         githubUsername: 'testuser',
         workExperience: [
-          enhanced.WorkExperience(title: 'Developer', company: 'Test Company'),
+          WorkExperience(
+            title: 'Developer',
+            company: 'Test Company',
+            startDate: DateTime.now(),
+          ),
         ],
         location: LocationModel(
           latitude: 40.7128,
@@ -225,7 +230,11 @@ void main() {
       final profile = UserProfile(
         id: 'test-id',
         email: 'test@example.com',
-        displayName: 'Test User',
+        fullName: 'Test User',
+        isRemote: false,
+        isFullTime: true,
+        isPartTime: false,
+        isFreelance: false,
         bio: 'I am a developer',
         skills: ['Flutter', 'Dart', 'JavaScript'],
         interests: ['Mobile Development', 'Web Development'],
@@ -300,7 +309,11 @@ void main() {
         skills: ['Flutter', 'Dart', 'JavaScript'],
         githubUsername: 'testuser',
         workExperience: [
-          enhanced.WorkExperience(title: 'Developer', company: 'Test Company'),
+          WorkExperience(
+            title: 'Developer',
+            company: 'Test Company',
+            startDate: DateTime.now(),
+          ),
         ],
         location: LocationModel(
           latitude: 40.7128,

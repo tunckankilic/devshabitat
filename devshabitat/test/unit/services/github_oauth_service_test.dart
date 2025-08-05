@@ -39,7 +39,6 @@ void main() {
     service = GitHubOAuthService(
       logger: mockLogger,
       errorHandler: mockErrorHandler,
-      auth: mockFirebaseAuth,
     );
 
     // DeepLinkingService'i Get'e ekle
@@ -59,11 +58,11 @@ void main() {
   group('GitHubOAuthService - Sign In with GitHub', () {
     test('should handle successful GitHub sign in', () async {
       // Mock successful URL launch
-      when(mockDeepLinkingService.oauthCallbackStream).thenAnswer(
-        (_) => Stream.value({'code': 'mock_auth_code'}),
-      );
+      when(
+        mockDeepLinkingService.oauthCallbackStream,
+      ).thenAnswer((_) => Stream.value({'code': 'mock_auth_code'}));
 
-      final result = await service.signInWithGitHub();
+      final result = await service.getGithubAccessToken();
 
       expect(result, isNotNull);
     });
@@ -72,7 +71,7 @@ void main() {
       // GitHub config mock'u için gerekli setup
       // Bu test için GitHubConfig.isConfigured false olmalı
 
-      final result = await service.signInWithGitHub();
+      final result = await service.getGithubAccessToken();
 
       expect(result, isNull);
       verify(mockErrorHandler.handleError(any, any)).called(1);
@@ -83,33 +82,33 @@ void main() {
         (_) => Stream.value({}), // code yok
       );
 
-      final result = await service.signInWithGitHub();
+      final result = await service.getGithubAccessToken();
 
       expect(result, isNull);
     });
 
     test('should handle access token request failure', () async {
-      when(mockDeepLinkingService.oauthCallbackStream).thenAnswer(
-        (_) => Stream.value({'code': 'mock_auth_code'}),
-      );
+      when(
+        mockDeepLinkingService.oauthCallbackStream,
+      ).thenAnswer((_) => Stream.value({'code': 'mock_auth_code'}));
 
       // HTTP client mock'u için gerekli setup
       // Bu test için HTTP response'u başarısız olmalı
 
-      final result = await service.signInWithGitHub();
+      final result = await service.getGithubAccessToken();
 
       expect(result, isNull);
     });
 
     test('should handle user email request failure', () async {
-      when(mockDeepLinkingService.oauthCallbackStream).thenAnswer(
-        (_) => Stream.value({'code': 'mock_auth_code'}),
-      );
+      when(
+        mockDeepLinkingService.oauthCallbackStream,
+      ).thenAnswer((_) => Stream.value({'code': 'mock_auth_code'}));
 
       // HTTP client mock'u için gerekli setup
       // Bu test için email API response'u başarısız olmalı
 
-      final result = await service.signInWithGitHub();
+      final result = await service.getGithubAccessToken();
 
       expect(result, isNull);
     });
@@ -117,24 +116,24 @@ void main() {
 
   group('GitHubOAuthService - Get Access Token', () {
     test('should get access token successfully', () async {
-      when(mockDeepLinkingService.oauthCallbackStream).thenAnswer(
-        (_) => Stream.value({'code': 'mock_auth_code'}),
-      );
+      when(
+        mockDeepLinkingService.oauthCallbackStream,
+      ).thenAnswer((_) => Stream.value({'code': 'mock_auth_code'}));
 
-      final result = await service.getAccessToken();
+      final result = await service.getGithubAccessToken();
 
       expect(result, isNotNull);
     });
 
     test('should handle access token request error', () async {
-      when(mockDeepLinkingService.oauthCallbackStream).thenAnswer(
-        (_) => Stream.value({'code': 'mock_auth_code'}),
-      );
+      when(
+        mockDeepLinkingService.oauthCallbackStream,
+      ).thenAnswer((_) => Stream.value({'code': 'mock_auth_code'}));
 
       // HTTP client mock'u için gerekli setup
       // Bu test için token API response'u başarısız olmalı
 
-      final result = await service.getAccessToken();
+      final result = await service.getGithubAccessToken();
 
       expect(result, isNull);
       verify(mockLogger.e(any)).called(1);
@@ -144,40 +143,40 @@ void main() {
 
   group('GitHubOAuthService - Error Handling', () {
     test('should handle network timeout', () async {
-      when(mockDeepLinkingService.oauthCallbackStream).thenAnswer(
-        (_) => Stream.value({'code': 'mock_auth_code'}),
-      );
+      when(
+        mockDeepLinkingService.oauthCallbackStream,
+      ).thenAnswer((_) => Stream.value({'code': 'mock_auth_code'}));
 
       // Timeout simülasyonu için gerekli setup
 
-      final result = await service.getAccessToken();
+      final result = await service.getGithubAccessToken();
 
       expect(result, isNull);
     });
 
     test('should handle malformed JSON response', () async {
-      when(mockDeepLinkingService.oauthCallbackStream).thenAnswer(
-        (_) => Stream.value({'code': 'mock_auth_code'}),
-      );
+      when(
+        mockDeepLinkingService.oauthCallbackStream,
+      ).thenAnswer((_) => Stream.value({'code': 'mock_auth_code'}));
 
       // HTTP client mock'u için gerekli setup
       // Bu test için geçersiz JSON response döndürülmeli
 
-      final result = await service.getAccessToken();
+      final result = await service.getGithubAccessToken();
 
       expect(result, isNull);
       verify(mockLogger.e(any)).called(1);
     });
 
     test('should handle missing access token in response', () async {
-      when(mockDeepLinkingService.oauthCallbackStream).thenAnswer(
-        (_) => Stream.value({'code': 'mock_auth_code'}),
-      );
+      when(
+        mockDeepLinkingService.oauthCallbackStream,
+      ).thenAnswer((_) => Stream.value({'code': 'mock_auth_code'}));
 
       // HTTP client mock'u için gerekli setup
       // Bu test için access_token olmayan response döndürülmeli
 
-      final result = await service.getAccessToken();
+      final result = await service.getGithubAccessToken();
 
       expect(result, isNull);
     });
@@ -185,37 +184,37 @@ void main() {
 
   group('GitHubOAuthService - Edge Cases', () {
     test('should handle empty auth code', () async {
-      when(mockDeepLinkingService.oauthCallbackStream).thenAnswer(
-        (_) => Stream.value({'code': ''}),
-      );
+      when(
+        mockDeepLinkingService.oauthCallbackStream,
+      ).thenAnswer((_) => Stream.value({'code': ''}));
 
-      final result = await service.getAccessToken();
+      final result = await service.getGithubAccessToken();
 
       expect(result, isNull);
     });
 
     test('should handle user with no primary email', () async {
-      when(mockDeepLinkingService.oauthCallbackStream).thenAnswer(
-        (_) => Stream.value({'code': 'mock_auth_code'}),
-      );
+      when(
+        mockDeepLinkingService.oauthCallbackStream,
+      ).thenAnswer((_) => Stream.value({'code': 'mock_auth_code'}));
 
       // HTTP client mock'u için gerekli setup
       // Bu test için primary email olmayan response döndürülmeli
 
-      final result = await service.signInWithGitHub();
+      final result = await service.getGithubAccessToken();
 
       expect(result, isNull);
     });
 
     test('should handle user with no email at all', () async {
-      when(mockDeepLinkingService.oauthCallbackStream).thenAnswer(
-        (_) => Stream.value({'code': 'mock_auth_code'}),
-      );
+      when(
+        mockDeepLinkingService.oauthCallbackStream,
+      ).thenAnswer((_) => Stream.value({'code': 'mock_auth_code'}));
 
       // HTTP client mock'u için gerekli setup
       // Bu test için boş email listesi döndürülmeli
 
-      final result = await service.signInWithGitHub();
+      final result = await service.getGithubAccessToken();
 
       expect(result, isNull);
     });

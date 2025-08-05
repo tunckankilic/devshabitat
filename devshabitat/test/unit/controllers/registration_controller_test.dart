@@ -1,5 +1,7 @@
 // ignore_for_file: unused_local_variable
 
+import 'package:devshabitat/app/core/services/step_navigation_service.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:get/get.dart';
 import 'package:mockito/mockito.dart';
@@ -11,6 +13,7 @@ import 'package:devshabitat/app/repositories/auth_repository.dart';
 import 'package:devshabitat/app/core/services/error_handler_service.dart';
 import 'package:devshabitat/app/controllers/auth_controller.dart';
 import 'package:devshabitat/app/services/github_oauth_service.dart';
+import 'package:devshabitat/app/views/auth/register/steps/basic_info_step.dart';
 import '../../test_helper.dart';
 
 @GenerateNiceMocks([
@@ -66,12 +69,22 @@ void main() {
 
   group('RegistrationController - Initialization', () {
     test('should initialize with correct default values', () {
-      expect(controller.currentStep, RegistrationStep.basicInfo);
+      expect(
+        controller.currentStep,
+        StepConfiguration(
+          id: 'basicInfo',
+          title: 'basicInfo',
+          description: 'basicInfo',
+          isRequired: true,
+          canSkip: false,
+          optionalFields: [],
+        ),
+      );
       expect(controller.isLoading, false);
       expect(controller.lastError, null);
-      expect(controller.currentPageIndex, 0);
-      expect(controller.isFirstPage, true);
-      expect(controller.isLastPage, false);
+      expect(controller.currentStepIndex, 0);
+      expect(controller.isFirstStep, true);
+      expect(controller.isLastStep, false);
     });
 
     test('should have empty form controllers initially', () {
@@ -184,8 +197,9 @@ void main() {
       controller.passwordController.text = 'StrongPass123!';
       controller.confirmPasswordController.text = 'StrongPass123!';
       // GitHub bağlantısını simüle et
-      when(mockAuthController.signInWithGithub())
-          .thenAnswer((_) async => 'mock_token');
+      when(
+        mockAuthController.signInWithGithub(),
+      ).thenAnswer((_) async => 'mock_token');
 
       expect(controller.canGoNext, true);
     });
@@ -195,12 +209,13 @@ void main() {
       controller.displayNameController.text = 'John Doe';
       controller.passwordController.text = 'StrongPass123!';
       controller.confirmPasswordController.text = 'StrongPass123!';
-      when(mockAuthController.signInWithGithub())
-          .thenAnswer((_) async => 'mock_token');
+      when(
+        mockAuthController.signInWithGithub(),
+      ).thenAnswer((_) async => 'mock_token');
 
       controller.nextPage();
 
-      expect(controller.currentPageIndex, 1);
+      expect(controller.currentStepIndex, 1);
     });
 
     test('should navigate to previous page', () {
@@ -209,43 +224,111 @@ void main() {
       controller.displayNameController.text = 'John Doe';
       controller.passwordController.text = 'StrongPass123!';
       controller.confirmPasswordController.text = 'StrongPass123!';
-      when(mockAuthController.signInWithGithub())
-          .thenAnswer((_) async => 'mock_token');
+      when(
+        mockAuthController.signInWithGithub(),
+      ).thenAnswer((_) async => 'mock_token');
       controller.nextPage();
 
       controller.previousPage();
 
-      expect(controller.currentPageIndex, 0);
+      expect(controller.currentStepIndex, 0);
     });
 
     test('should not navigate to previous page when on first page', () {
       controller.previousPage();
 
-      expect(controller.currentPageIndex, 0);
+      expect(controller.currentStepIndex, 0);
     });
   });
 
-/*
+  /*
   group('RegistrationController - GitHub Integration', () {
     test('should connect to GitHub successfully', () async {
-      when(mockAuthController.signInWithGithub())
+      // Mock GitHub OAuth token
+      when(mockGithubOAuth.getGithubAccessToken())
           .thenAnswer((_) async => 'mock_token');
+
+      // Mock GitHub API responses
       when(mockGithubOAuth.getUserInfo('mock_token')).thenAnswer(
-          (_) async => {'login': 'testuser', 'email': 'test@example.com'});
+        (_) async => {
+          'login': 'testuser',
+          'email': 'test@example.com',
+          'name': 'Test User',
+          'bio': 'Test bio',
+          'company': 'Test Company',
+          'location': 'Test Location',
+        },
+      );
 
-      await controller.connectGithub();
+      when(mockGithubOAuth.getUserEmails('mock_token')).thenAnswer(
+        (_) async => ['test@example.com', 'test2@example.com'],
+      );
 
-      expect(controller.isGithubConnected, true);
-      expect(controller.githubUsername, 'testuser');
+      when(mockGithubOAuth.getUserRepositories('mock_token')).thenAnswer(
+        (_) async => [
+          {
+            'name': 'test-repo',
+            'description': 'Test repository',
+            'language': 'Dart',
+          }
+        ],
+      );
+
+      // Test GitHub veri entegrasyonu
+      await controller.importGithubData();
+
+      // Doğrulamalar
+      expect(controller.isGithubConnected.value, true);
+      expect(controller.githubData['login'], 'testuser');
+      expect(controller.githubData['primaryEmail'], 'test@example.com');
+      expect(controller.githubData['repositories'], isNotEmpty);
+      
+      // Form alanlarının doldurulduğunu kontrol et
+      expect(controller.emailController.text, 'test@example.com');
+      expect(controller.displayNameController.text, 'Test User');
     });
 
     test('should handle GitHub connection error', () async {
-      when(mockAuthController.signInWithGithub())
+      when(mockGithubOAuth.getGithubAccessToken())
           .thenThrow(Exception('GitHub connection failed'));
 
-      await controller.connectGithub();
+      await controller.importGithubData();
 
-      expect(controller.isGithubConnected, false);
+      expect(controller.isGithubConnected.value, false);
+      verify(mockErrorHandler.handleError(any, any)).called(1);
+    });
+
+    test('should handle partial GitHub data', () async {
+      when(mockGithubOAuth.getGithubAccessToken())
+          .thenAnswer((_) async => 'mock_token');
+
+      // Sadece temel bilgileri döndür
+      when(mockGithubOAuth.getUserInfo('mock_token')).thenAnswer(
+        (_) async => {'login': 'testuser'},
+      );
+
+      // Boş email ve repo listesi
+      when(mockGithubOAuth.getUserEmails('mock_token'))
+          .thenAnswer((_) async => []);
+      when(mockGithubOAuth.getUserRepositories('mock_token'))
+          .thenAnswer((_) async => []);
+
+      await controller.importGithubData();
+
+      expect(controller.isGithubConnected.value, true);
+      expect(controller.githubData['login'], 'testuser');
+      expect(controller.githubData['primaryEmail'], isNull);
+      expect(controller.githubData['repositories'], isEmpty);
+    });
+
+    test('should handle network timeout', () async {
+      when(mockGithubOAuth.getGithubAccessToken()).thenAnswer(
+        (_) => Future.delayed(Duration(seconds: 10)),
+      );
+
+      await controller.importGithubData();
+
+      expect(controller.isGithubConnected.value, false);
       verify(mockErrorHandler.handleError(any, any)).called(1);
     });
   });
@@ -258,16 +341,14 @@ void main() {
       controller.passwordController.text = 'StrongPass123!';
       controller.confirmPasswordController.text = 'StrongPass123!';
       controller.bioController.text = 'Test bio';
-      controller.locationController.text = 'Test Location';
+      controller.locationTextController.text = 'Test Location';
       controller.titleController.text = 'Software Developer';
       controller.companyController.text = 'Test Company';
       controller.yearsOfExperienceController.text = '5';
 
-      when(mockAuthRepository.createUserWithEmailAndPassword(
-        any,
-        any,
-        any,
-      )).thenAnswer((_) async => mockUserCredential);
+      when(
+        mockAuthRepository.createUserWithEmailAndPassword(any, any, any),
+      ).thenAnswer((_) async => mockUserCredential);
       when(mockUserCredential.user).thenReturn(mockUser);
       when(mockUser.uid).thenReturn('test-user-id');
 
@@ -276,19 +357,22 @@ void main() {
       controller.displayNameController.text = 'John Doe';
       controller.passwordController.text = 'StrongPass123!';
       controller.confirmPasswordController.text = 'StrongPass123!';
-      when(mockAuthController.signInWithGithub())
-          .thenAnswer((_) async => 'mock_token');
+      when(
+        mockAuthController.signInWithGithub(),
+      ).thenAnswer((_) async => 'mock_token');
 
       // İlk sayfadan son sayfaya kadar ilerle
       controller.nextPage(); // personal info
       controller.nextPage(); // professional info
       controller.nextPage(); // skills info - bu kayıt işlemini tetikler
 
-      verify(mockAuthRepository.createUserWithEmailAndPassword(
-        'test@example.com',
-        'StrongPass123!',
-        'John Doe',
-      )).called(1);
+      verify(
+        mockAuthRepository.createUserWithEmailAndPassword(
+          'test@example.com',
+          'StrongPass123!',
+          'John Doe',
+        ),
+      ).called(1);
     });
 
     test('should handle registration error', () async {
@@ -297,13 +381,12 @@ void main() {
       controller.passwordController.text = 'StrongPass123!';
       controller.confirmPasswordController.text = 'StrongPass123!';
 
-      when(mockAuthRepository.createUserWithEmailAndPassword(
-        any,
-        any,
-        any,
-      )).thenThrow(Exception('Registration failed'));
-      when(mockAuthController.signInWithGithub())
-          .thenAnswer((_) async => 'mock_token');
+      when(
+        mockAuthRepository.createUserWithEmailAndPassword(any, any, any),
+      ).thenThrow(Exception('Registration failed'));
+      when(
+        mockAuthController.signInWithGithub(),
+      ).thenAnswer((_) async => 'mock_token');
 
       // Son sayfaya geç
       controller.nextPage();
@@ -314,6 +397,84 @@ void main() {
     });
   });
 
+  group('RegistrationController - Accessibility', () {
+    testWidgets('should have proper semantic labels on form fields', (
+      WidgetTester tester,
+    ) async {
+      await tester.pumpWidget(
+        GetMaterialApp(home: Scaffold(body: BasicInfoStep())),
+      );
+
+      // Email alanı
+      expect(
+        find.bySemanticsLabel('E-posta adresi giriş alanı'),
+        findsOneWidget,
+      );
+
+      // Görünen ad alanı
+      expect(find.bySemanticsLabel('Görünen ad giriş alanı'), findsOneWidget);
+
+      // Şifre alanı
+      expect(find.bySemanticsLabel('Şifre giriş alanı'), findsOneWidget);
+
+      // Şifre doğrulama alanı
+      expect(
+        find.bySemanticsLabel('Şifre doğrulama giriş alanı'),
+        findsOneWidget,
+      );
+    });
+
+    testWidgets('should have proper semantic labels on icons', (
+      WidgetTester tester,
+    ) async {
+      await tester.pumpWidget(
+        GetMaterialApp(home: Scaffold(body: BasicInfoStep())),
+      );
+
+      // Icon semantik etiketleri
+      expect(find.bySemanticsLabel('E-posta simgesi'), findsOneWidget);
+      expect(find.bySemanticsLabel('Kullanıcı simgesi'), findsOneWidget);
+      expect(find.bySemanticsLabel('Şifre simgesi'), findsOneWidget);
+      expect(find.bySemanticsLabel('Şifre doğrulama simgesi'), findsOneWidget);
+    });
+
+    testWidgets('should have proper semantic labels on GitHub section', (
+      WidgetTester tester,
+    ) async {
+      await tester.pumpWidget(
+        GetMaterialApp(home: Scaffold(body: BasicInfoStep())),
+      );
+
+      // GitHub bölümü semantik etiketleri
+      expect(
+        find.bySemanticsLabel('GitHub veri içe aktarma bölümü'),
+        findsOneWidget,
+      );
+
+      // GitHub butonu semantik etiketleri
+      expect(find.bySemanticsLabel('GitHub\'dan verileri al'), findsOneWidget);
+    });
+
+    testWidgets('should respect text scaling', (WidgetTester tester) async {
+      await tester.pumpWidget(
+        GetMaterialApp(
+          home: MediaQuery(
+            data: MediaQueryData(textScaleFactor: 1.5),
+            child: Scaffold(body: BasicInfoStep()),
+          ),
+        ),
+      );
+
+      // Text widget'larının ölçeklendiğini kontrol et
+      final textWidgets = tester.widgetList<Text>(find.byType(Text));
+      for (final textWidget in textWidgets) {
+        if (textWidget.style?.fontSize != null) {
+          expect(textWidget.style!.fontSize, textWidget.style!.fontSize! * 1.5);
+        }
+      }
+    });
+  });
+
   group('RegistrationController - Edge Cases', () {
     test('should handle network timeout during registration', () async {
       controller.emailController.text = 'test@example.com';
@@ -321,13 +482,12 @@ void main() {
       controller.passwordController.text = 'StrongPass123!';
       controller.confirmPasswordController.text = 'StrongPass123!';
 
-      when(mockAuthRepository.createUserWithEmailAndPassword(
-        any,
-        any,
-        any,
-      )).thenAnswer((_) => Future.delayed(Duration(seconds: 10)));
-      when(mockAuthController.signInWithGithub())
-          .thenAnswer((_) async => 'mock_token');
+      when(
+        mockAuthRepository.createUserWithEmailAndPassword(any, any, any),
+      ).thenAnswer((_) => Future.delayed(Duration(seconds: 10)));
+      when(
+        mockAuthController.signInWithGithub(),
+      ).thenAnswer((_) async => 'mock_token');
 
       controller.nextPage();
       controller.nextPage();
@@ -344,13 +504,117 @@ void main() {
 
       // Optional fields are empty
       controller.bioController.text = '';
-      controller.locationController.text = '';
+      controller.locationTextController.text = '';
       controller.titleController.text = '';
 
-      when(mockAuthController.signInWithGithub())
-          .thenAnswer((_) async => 'mock_token');
+      when(
+        mockAuthController.signInWithGithub(),
+      ).thenAnswer((_) async => 'mock_token');
 
       expect(controller.canGoNext, true);
+    });
+  });
+
+  group('RegistrationController - Performance', () {
+    testWidgets('should minimize rebuilds during form validation', (
+      WidgetTester tester,
+    ) async {
+      await tester.pumpWidget(
+        GetMaterialApp(home: Scaffold(body: BasicInfoStep())),
+      );
+
+      // Rebuild sayacı
+      int rebuildCount = 0;
+      final rebuildCounter = GetBuilder<RegistrationController>(
+        builder: (controller) {
+          rebuildCount++;
+          return Container();
+        },
+      );
+
+      // Form alanlarını doldur
+      await tester.enterText(
+        find.byType(TextFormField).first,
+        'test@example.com',
+      );
+      await tester.pump();
+
+      // Sadece gerekli widget'lar yeniden oluşturulmalı
+      expect(rebuildCount, lessThan(3));
+    });
+
+    testWidgets('should handle rapid form input efficiently', (
+      WidgetTester tester,
+    ) async {
+      await tester.pumpWidget(
+        GetMaterialApp(home: Scaffold(body: BasicInfoStep())),
+      );
+
+      // Hızlı art arda form girişleri
+      for (int i = 0; i < 10; i++) {
+        await tester.enterText(
+          find.byType(TextFormField).first,
+          'test$i@example.com',
+        );
+        await tester.pump(Duration(milliseconds: 100));
+      }
+
+      // Son değer doğru olmalı
+      expect(
+        (find.byType(TextFormField).first.evaluate().single.widget
+                as TextFormField)
+            .controller!
+            .text,
+        'test9@example.com',
+      );
+    });
+
+    testWidgets('should debounce password validation', (
+      WidgetTester tester,
+    ) async {
+      await tester.pumpWidget(
+        GetMaterialApp(home: Scaffold(body: BasicInfoStep())),
+      );
+
+      // Şifre alanını bul
+      final passwordField = find.byType(TextFormField).at(2);
+
+      // Hızlı art arda şifre değişiklikleri
+      for (int i = 0; i < 5; i++) {
+        await tester.enterText(passwordField, 'Password$i');
+        await tester.pump(Duration(milliseconds: 100));
+      }
+
+      // Debounce süresi sonunda son değer doğru olmalı
+      await tester.pump(Duration(milliseconds: 500));
+      expect(
+        (passwordField.evaluate().single.widget as TextFormField)
+            .controller!
+            .text,
+        'Password4',
+      );
+    });
+
+    testWidgets('should handle GitHub data loading efficiently', (
+      WidgetTester tester,
+    ) async {
+      await tester.pumpWidget(
+        GetMaterialApp(home: Scaffold(body: BasicInfoStep())),
+      );
+
+      // GitHub bağlantı butonunu bul
+      final githubButton = find.byType(ElevatedButton);
+
+      // GitHub verilerini yükle
+      await tester.tap(githubButton);
+      await tester.pump();
+
+      // Yükleme göstergesi görünmeli
+      expect(find.byType(CircularProgressIndicator), findsOneWidget);
+
+      // Veriler yüklendiğinde form alanları doldurulmalı
+      await tester.pump(Duration(seconds: 2));
+      expect(find.byType(CircularProgressIndicator), findsNothing);
     });
   });
 
@@ -361,13 +625,12 @@ void main() {
       controller.passwordController.text = 'StrongPass123!';
       controller.confirmPasswordController.text = 'StrongPass123!';
 
-      when(mockAuthRepository.createUserWithEmailAndPassword(
-        any,
-        any,
-        any,
-      )).thenThrow(FirebaseAuthException(code: 'email-already-in-use'));
-      when(mockAuthController.signInWithGithub())
-          .thenAnswer((_) async => 'mock_token');
+      when(
+        mockAuthRepository.createUserWithEmailAndPassword(any, any, any),
+      ).thenThrow(FirebaseAuthException(code: 'email-already-in-use'));
+      when(
+        mockAuthController.signInWithGithub(),
+      ).thenAnswer((_) async => 'mock_token');
 
       controller.nextPage();
       controller.nextPage();

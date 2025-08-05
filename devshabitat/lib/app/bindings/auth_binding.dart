@@ -1,4 +1,4 @@
-import 'package:firebase_auth/firebase_auth.dart';
+import 'package:devshabitat/app/services/feature_gate_service.dart';
 import 'package:get/get.dart';
 import 'package:logger/logger.dart';
 import '../controllers/auth_controller.dart';
@@ -17,7 +17,6 @@ class AuthBinding extends Bindings {
     Get.lazyPut<ErrorHandlerService>(() => ErrorHandlerService());
     Get.lazyPut<GitHubOAuthService>(
       () => GitHubOAuthService(
-        auth: FirebaseAuth.instance,
         logger: Get.find<Logger>(),
         errorHandler: Get.find<ErrorHandlerService>(),
       ),
@@ -38,9 +37,7 @@ class AuthBinding extends Bindings {
     );
 
     Get.lazyPut<AuthStateController>(
-      () => AuthStateController(
-        authRepository: Get.find<AuthRepository>(),
-      ),
+      () => AuthStateController(authRepository: Get.find<AuthRepository>()),
     );
 
     Get.lazyPut<AuthController>(
@@ -49,6 +46,7 @@ class AuthBinding extends Bindings {
         authRepository: Get.find<AuthRepository>(),
         emailAuth: Get.find<EmailAuthController>(),
         authState: Get.find<AuthStateController>(),
+        featureGateService: Get.find<FeatureGateService>(),
       ),
     );
 

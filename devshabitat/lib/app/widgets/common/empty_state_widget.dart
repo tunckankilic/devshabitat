@@ -1,13 +1,13 @@
 import 'package:devshabitat/app/constants/app_strings.dart';
 import 'package:flutter/material.dart';
-import 'package:lottie/lottie.dart';
+
 import '../../constants/app_assets.dart';
 
 class EmptyStateWidget extends StatelessWidget {
   final String message;
   final String? actionLabel;
   final VoidCallback? onAction;
-  final String? lottieAsset;
+  final String? imageAsset;
   final double? width;
   final double? height;
 
@@ -16,7 +16,7 @@ class EmptyStateWidget extends StatelessWidget {
     required this.message,
     this.actionLabel,
     this.onAction,
-    this.lottieAsset = AppAssets.emptyAnimation,
+    this.imageAsset = AppAssets.emptyImage,
     this.width,
     this.height,
   });
@@ -31,12 +31,12 @@ class EmptyStateWidget extends StatelessWidget {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            if (lottieAsset != null)
-              Lottie.asset(
-                lottieAsset!,
+            if (imageAsset != null)
+              Image.asset(
+                imageAsset!,
                 width: width ?? 200,
                 height: height ?? 200,
-                repeat: true,
+                fit: BoxFit.contain,
               ),
             const SizedBox(height: 24),
             Text(
@@ -68,10 +68,7 @@ class EmptyStateWidget extends StatelessWidget {
 class NoEventsWidget extends StatelessWidget {
   final VoidCallback? onCreateEvent;
 
-  const NoEventsWidget({
-    super.key,
-    this.onCreateEvent,
-  });
+  const NoEventsWidget({super.key, this.onCreateEvent});
 
   @override
   Widget build(BuildContext context) {
@@ -79,7 +76,7 @@ class NoEventsWidget extends StatelessWidget {
       message: AppStrings.noEvents,
       actionLabel: AppStrings.createEvent,
       onAction: onCreateEvent,
-      lottieAsset: AppAssets.noEventsAnimation,
+      imageAsset: AppAssets.noEventsImage,
     );
   }
 }
@@ -87,10 +84,7 @@ class NoEventsWidget extends StatelessWidget {
 class NoCommunityWidget extends StatelessWidget {
   final VoidCallback? onCreateCommunity;
 
-  const NoCommunityWidget({
-    super.key,
-    this.onCreateCommunity,
-  });
+  const NoCommunityWidget({super.key, this.onCreateCommunity});
 
   @override
   Widget build(BuildContext context) {
@@ -98,7 +92,7 @@ class NoCommunityWidget extends StatelessWidget {
       message: AppStrings.noCommunities,
       actionLabel: AppStrings.createCommunity,
       onAction: onCreateCommunity,
-      lottieAsset: AppAssets.noCommunityAnimation,
+      imageAsset: AppAssets.noCommunityImage,
     );
   }
 }

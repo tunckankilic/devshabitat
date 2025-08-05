@@ -21,7 +21,9 @@ class ResponsivePerformanceService extends GetxService {
 
   /// Debounced screen size update to prevent excessive rebuilds
   void updateScreenSizeDebounced(
-      BuildContext context, ResponsiveController controller) {
+    BuildContext context,
+    ResponsiveController controller,
+  ) {
     final now = DateTime.now();
     _debounceTimer.value = now;
 
@@ -98,10 +100,10 @@ class ResponsivePerformanceService extends GetxService {
 
     return Obx(() {
       switch (controller.currentBreakpoint.value) {
-        case ScreenBreakpoint.smallPhone:
-        case ScreenBreakpoint.largePhone:
+        case ScreenBreakpoint.compact:
+        case ScreenBreakpoint.medium:
           return mobileBuilder();
-        case ScreenBreakpoint.tablet:
+        case ScreenBreakpoint.expanded:
           return desktopBuilder?.call() ?? tabletBuilder();
       }
     });
@@ -139,5 +141,20 @@ class ResponsivePerformanceService extends GetxService {
         tablet: (size * 1.1).toDouble(),
       );
     }
+  }
+
+  /// Get optimized icon size with caching
+  double getOptimizedIconSize({
+    required String cacheKey,
+    required double mobileSize,
+    required double tabletSize,
+    double? desktopSize,
+  }) {
+    return getCachedResponsiveValue<double>(
+      cacheKey: '${cacheKey}_icon_size',
+      mobile: mobileSize,
+      tablet: tabletSize,
+      desktop: desktopSize,
+    );
   }
 }

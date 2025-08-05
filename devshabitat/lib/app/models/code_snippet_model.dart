@@ -1,133 +1,121 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
+
 class CodeSnippetModel {
   final String id;
+  final String title;
   final String code;
   final String language;
-  final String title;
-  final String? description;
+  final String description;
   final String authorId;
+  final String authorName;
   final DateTime createdAt;
-  final List<CodeComment> comments;
-  final List<CodeSolution> solutions;
+  final List<dynamic> comments;
+  final List<dynamic> solutions;
+  final Map<String, dynamic>? metadata;
 
   CodeSnippetModel({
     required this.id,
+    required this.title,
     required this.code,
     required this.language,
-    required this.title,
-    this.description,
+    required this.description,
     required this.authorId,
+    required this.authorName,
     required this.createdAt,
     this.comments = const [],
     this.solutions = const [],
+    this.metadata,
   });
+
+  factory CodeSnippetModel.fromDocument(DocumentSnapshot doc) {
+    final data = doc.data() as Map<String, dynamic>;
+    return CodeSnippetModel(
+      id: doc.id,
+      title: data['title'] ?? '',
+      code: data['code'] ?? '',
+      language: data['language'] ?? '',
+      description: data['description'] ?? '',
+      authorId: data['authorId'] ?? '',
+      authorName: data['authorName'] ?? '',
+      createdAt: (data['createdAt'] as Timestamp).toDate(),
+      comments: data['comments'] ?? [],
+      solutions: data['solutions'] ?? [],
+      metadata: data['metadata'],
+    );
+  }
+
+  Map<String, dynamic> toMap() {
+    return {
+      'title': title,
+      'code': code,
+      'language': language,
+      'description': description,
+      'authorId': authorId,
+      'authorName': authorName,
+      'createdAt': Timestamp.fromDate(createdAt),
+      'comments': comments,
+      'solutions': solutions,
+      'metadata': metadata,
+    };
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'id': id,
+      'title': title,
+      'code': code,
+      'language': language,
+      'description': description,
+      'authorId': authorId,
+      'authorName': authorName,
+      'createdAt': createdAt.toIso8601String(),
+      'comments': comments,
+      'solutions': solutions,
+      'metadata': metadata,
+    };
+  }
 
   factory CodeSnippetModel.fromJson(Map<String, dynamic> json) {
     return CodeSnippetModel(
-      id: json['id'] as String,
-      code: json['code'] as String,
-      language: json['language'] as String,
-      title: json['title'] as String,
-      description: json['description'] as String?,
-      authorId: json['authorId'] as String,
-      createdAt: DateTime.parse(json['createdAt'] as String),
-      comments: (json['comments'] as List?)
-              ?.map((e) => CodeComment.fromJson(e as Map<String, dynamic>))
-              .toList() ??
-          [],
-      solutions: (json['solutions'] as List?)
-              ?.map((e) => CodeSolution.fromJson(e as Map<String, dynamic>))
-              .toList() ??
-          [],
+      id: json['id'] ?? '',
+      title: json['title'] ?? '',
+      code: json['code'] ?? '',
+      language: json['language'] ?? '',
+      description: json['description'] ?? '',
+      authorId: json['authorId'] ?? '',
+      authorName: json['authorName'] ?? '',
+      createdAt: DateTime.parse(json['createdAt']),
+      comments: json['comments'] ?? [],
+      solutions: json['solutions'] ?? [],
+      metadata: json['metadata'],
     );
   }
 
-  Map<String, dynamic> toJson() {
-    return {
-      'id': id,
-      'code': code,
-      'language': language,
-      'title': title,
-      'description': description,
-      'authorId': authorId,
-      'createdAt': createdAt.toIso8601String(),
-      'comments': comments.map((e) => e.toJson()).toList(),
-      'solutions': solutions.map((e) => e.toJson()).toList(),
-    };
-  }
-}
-
-class CodeComment {
-  final String id;
-  final String comment;
-  final String authorId;
-  final String? lineNumber;
-  final DateTime createdAt;
-
-  CodeComment({
-    required this.id,
-    required this.comment,
-    required this.authorId,
-    this.lineNumber,
-    required this.createdAt,
-  });
-
-  factory CodeComment.fromJson(Map<String, dynamic> json) {
-    return CodeComment(
-      id: json['id'] as String,
-      comment: json['comment'] as String,
-      authorId: json['authorId'] as String,
-      lineNumber: json['lineNumber'] as String?,
-      createdAt: DateTime.parse(json['createdAt'] as String),
+  CodeSnippetModel copyWith({
+    String? id,
+    String? title,
+    String? code,
+    String? language,
+    String? description,
+    String? authorId,
+    String? authorName,
+    DateTime? createdAt,
+    List<dynamic>? comments,
+    List<dynamic>? solutions,
+    Map<String, dynamic>? metadata,
+  }) {
+    return CodeSnippetModel(
+      id: id ?? this.id,
+      title: title ?? this.title,
+      code: code ?? this.code,
+      language: language ?? this.language,
+      description: description ?? this.description,
+      authorId: authorId ?? this.authorId,
+      authorName: authorName ?? this.authorName,
+      createdAt: createdAt ?? this.createdAt,
+      comments: comments ?? this.comments,
+      solutions: solutions ?? this.solutions,
+      metadata: metadata ?? this.metadata,
     );
-  }
-
-  Map<String, dynamic> toJson() {
-    return {
-      'id': id,
-      'comment': comment,
-      'authorId': authorId,
-      'lineNumber': lineNumber,
-      'createdAt': createdAt.toIso8601String(),
-    };
-  }
-}
-
-class CodeSolution {
-  final String id;
-  final String code;
-  final String explanation;
-  final String authorId;
-  final DateTime createdAt;
-  final int votes;
-
-  CodeSolution({
-    required this.id,
-    required this.code,
-    required this.explanation,
-    required this.authorId,
-    required this.createdAt,
-    this.votes = 0,
-  });
-
-  factory CodeSolution.fromJson(Map<String, dynamic> json) {
-    return CodeSolution(
-      id: json['id'] as String,
-      code: json['code'] as String,
-      explanation: json['explanation'] as String,
-      authorId: json['authorId'] as String,
-      createdAt: DateTime.parse(json['createdAt'] as String),
-      votes: json['votes'] as int? ?? 0,
-    );
-  }
-
-  Map<String, dynamic> toJson() {
-    return {
-      'id': id,
-      'code': code,
-      'explanation': explanation,
-      'authorId': authorId,
-      'createdAt': createdAt.toIso8601String(),
-      'votes': votes,
-    };
   }
 }

@@ -5,14 +5,12 @@ import 'package:flutter_highlight/flutter_highlight.dart';
 import 'package:flutter_highlight/themes/github.dart';
 import '../controllers/code_discussion_controller.dart';
 import '../models/code_snippet_model.dart';
+import '../models/code_comment_model.dart';
 
 class CodeDiscussionWidget extends StatelessWidget {
   final CodeSnippetModel snippet;
 
-  const CodeDiscussionWidget({
-    super.key,
-    required this.snippet,
-  });
+  const CodeDiscussionWidget({super.key, required this.snippet});
 
   @override
   Widget build(BuildContext context) {
@@ -43,8 +41,9 @@ class CodeDiscussionWidget extends StatelessWidget {
                 children: [
                   Chip(
                     label: Text(snippet.language),
-                    backgroundColor:
-                        Theme.of(context).primaryColor.withOpacity(0.1),
+                    backgroundColor: Theme.of(
+                      context,
+                    ).primaryColor.withOpacity(0.1),
                   ),
                   const SizedBox(width: 8),
                   Text(
@@ -77,10 +76,7 @@ class CodeDiscussionWidget extends StatelessWidget {
           padding: EdgeInsets.all(16.0),
           child: Text(
             AppStrings.comments,
-            style: TextStyle(
-              fontSize: 18,
-              fontWeight: FontWeight.bold,
-            ),
+            style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
           ),
         ),
         ListView.builder(
@@ -99,10 +95,7 @@ class CodeDiscussionWidget extends StatelessWidget {
             padding: EdgeInsets.all(16.0),
             child: Text(
               AppStrings.solutionSuggestions,
-              style: TextStyle(
-                fontSize: 18,
-                fontWeight: FontWeight.bold,
-              ),
+              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
             ),
           ),
           ListView.builder(
@@ -140,10 +133,7 @@ class CodeDiscussionWidget extends StatelessWidget {
 class CommentCard extends StatelessWidget {
   final CodeComment comment;
 
-  const CommentCard({
-    super.key,
-    required this.comment,
-  });
+  const CommentCard({super.key, required this.comment});
 
   @override
   Widget build(BuildContext context) {
@@ -183,10 +173,7 @@ class CommentCard extends StatelessWidget {
 class SolutionCard extends StatelessWidget {
   final CodeSolution solution;
 
-  const SolutionCard({
-    super.key,
-    required this.solution,
-  });
+  const SolutionCard({super.key, required this.solution});
 
   @override
   Widget build(BuildContext context) {
@@ -250,10 +237,7 @@ class SolutionCard extends StatelessWidget {
 class AddCommentForm extends StatefulWidget {
   final Function(String) onSubmit;
 
-  const AddCommentForm({
-    super.key,
-    required this.onSubmit,
-  });
+  const AddCommentForm({super.key, required this.onSubmit});
 
   @override
   State<AddCommentForm> createState() => _AddCommentFormState();

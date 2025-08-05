@@ -10,7 +10,10 @@ import 'package:devshabitat/app/controllers/auth_state_controller.dart' as _i11;
 import 'package:devshabitat/app/controllers/email_auth_controller.dart' as _i6;
 import 'package:devshabitat/app/core/services/error_handler_service.dart'
     as _i13;
+import 'package:devshabitat/app/models/enhanced_user_model.dart' as _i15;
+import 'package:devshabitat/app/models/profile_completion_model.dart' as _i16;
 import 'package:devshabitat/app/repositories/auth_repository.dart' as _i12;
+import 'package:devshabitat/app/services/feature_gate_service.dart' as _i14;
 import 'package:firebase_auth/firebase_auth.dart' as _i4;
 import 'package:flutter/material.dart' as _i2;
 import 'package:get/get.dart' as _i3;
@@ -85,6 +88,15 @@ class _FakeConfirmationResult_8 extends _i1.SmartFake
 class _FakeUser_9 extends _i1.SmartFake implements _i4.User {
   _FakeUser_9(Object parent, Invocation parentInvocation)
     : super(parent, parentInvocation);
+}
+
+class _FakeWidget_10 extends _i1.SmartFake implements _i2.Widget {
+  _FakeWidget_10(Object parent, Invocation parentInvocation)
+    : super(parent, parentInvocation);
+
+  @override
+  String toString({_i2.DiagnosticLevel? minLevel = _i2.DiagnosticLevel.info}) =>
+      super.toString();
 }
 
 /// A class which mocks [EmailAuthController].
@@ -1045,6 +1057,15 @@ class MockAuthRepository extends _i1.Mock implements _i12.AuthRepository {
                 _i8.Future<Map<String, dynamic>?>.value(),
           )
           as _i8.Future<Map<String, dynamic>?>);
+
+  @override
+  _i8.Future<void> setPersistence(bool? isPersistent) =>
+      (super.noSuchMethod(
+            Invocation.method(#setPersistence, [isPersistent]),
+            returnValue: _i8.Future<void>.value(),
+            returnValueForMissingStub: _i8.Future<void>.value(),
+          )
+          as _i8.Future<void>);
 }
 
 /// A class which mocks [ErrorHandlerService].
@@ -1571,4 +1592,226 @@ class MockUser extends _i1.Mock implements _i4.User {
             returnValueForMissingStub: _i8.Future<void>.value(),
           )
           as _i8.Future<void>);
+}
+
+/// A class which mocks [FeatureGateService].
+///
+/// See the documentation for Mockito's code generation for more information.
+class MockFeatureGateService extends _i1.Mock
+    implements _i14.FeatureGateService {
+  @override
+  _i3.InternalFinalCallback<void> get onStart =>
+      (super.noSuchMethod(
+            Invocation.getter(#onStart),
+            returnValue: _FakeInternalFinalCallback_1<void>(
+              this,
+              Invocation.getter(#onStart),
+            ),
+            returnValueForMissingStub: _FakeInternalFinalCallback_1<void>(
+              this,
+              Invocation.getter(#onStart),
+            ),
+          )
+          as _i3.InternalFinalCallback<void>);
+
+  @override
+  _i3.InternalFinalCallback<void> get onDelete =>
+      (super.noSuchMethod(
+            Invocation.getter(#onDelete),
+            returnValue: _FakeInternalFinalCallback_1<void>(
+              this,
+              Invocation.getter(#onDelete),
+            ),
+            returnValueForMissingStub: _FakeInternalFinalCallback_1<void>(
+              this,
+              Invocation.getter(#onDelete),
+            ),
+          )
+          as _i3.InternalFinalCallback<void>);
+
+  @override
+  bool get initialized =>
+      (super.noSuchMethod(
+            Invocation.getter(#initialized),
+            returnValue: false,
+            returnValueForMissingStub: false,
+          )
+          as bool);
+
+  @override
+  bool get isClosed =>
+      (super.noSuchMethod(
+            Invocation.getter(#isClosed),
+            returnValue: false,
+            returnValueForMissingStub: false,
+          )
+          as bool);
+
+  @override
+  bool canAccess(String? feature, [_i15.EnhancedUserModel? user]) =>
+      (super.noSuchMethod(
+            Invocation.method(#canAccess, [feature, user]),
+            returnValue: false,
+            returnValueForMissingStub: false,
+          )
+          as bool);
+
+  @override
+  _i16.ProfileCompletionLevel getRequiredLevel(String? feature) =>
+      (super.noSuchMethod(
+            Invocation.method(#getRequiredLevel, [feature]),
+            returnValue: _i16.ProfileCompletionLevel.minimal,
+            returnValueForMissingStub: _i16.ProfileCompletionLevel.minimal,
+          )
+          as _i16.ProfileCompletionLevel);
+
+  @override
+  List<_i16.ProfileField> getMissingFieldsForFeature(
+    String? feature, [
+    _i15.EnhancedUserModel? user,
+  ]) =>
+      (super.noSuchMethod(
+            Invocation.method(#getMissingFieldsForFeature, [feature, user]),
+            returnValue: <_i16.ProfileField>[],
+            returnValueForMissingStub: <_i16.ProfileField>[],
+          )
+          as List<_i16.ProfileField>);
+
+  @override
+  String getFeatureDisplayName(String? feature) =>
+      (super.noSuchMethod(
+            Invocation.method(#getFeatureDisplayName, [feature]),
+            returnValue: _i7.dummyValue<String>(
+              this,
+              Invocation.method(#getFeatureDisplayName, [feature]),
+            ),
+            returnValueForMissingStub: _i7.dummyValue<String>(
+              this,
+              Invocation.method(#getFeatureDisplayName, [feature]),
+            ),
+          )
+          as String);
+
+  @override
+  String getCompletionLevelDisplayName(_i16.ProfileCompletionLevel? level) =>
+      (super.noSuchMethod(
+            Invocation.method(#getCompletionLevelDisplayName, [level]),
+            returnValue: _i7.dummyValue<String>(
+              this,
+              Invocation.method(#getCompletionLevelDisplayName, [level]),
+            ),
+            returnValueForMissingStub: _i7.dummyValue<String>(
+              this,
+              Invocation.method(#getCompletionLevelDisplayName, [level]),
+            ),
+          )
+          as String);
+
+  @override
+  _i2.Widget gateFeature({
+    required String? feature,
+    required _i2.Widget? child,
+    _i2.Widget? fallback,
+    _i10.VoidCallback? onUpgrade,
+    bool? showUpgradePrompt = true,
+  }) =>
+      (super.noSuchMethod(
+            Invocation.method(#gateFeature, [], {
+              #feature: feature,
+              #child: child,
+              #fallback: fallback,
+              #onUpgrade: onUpgrade,
+              #showUpgradePrompt: showUpgradePrompt,
+            }),
+            returnValue: _FakeWidget_10(
+              this,
+              Invocation.method(#gateFeature, [], {
+                #feature: feature,
+                #child: child,
+                #fallback: fallback,
+                #onUpgrade: onUpgrade,
+                #showUpgradePrompt: showUpgradePrompt,
+              }),
+            ),
+            returnValueForMissingStub: _FakeWidget_10(
+              this,
+              Invocation.method(#gateFeature, [], {
+                #feature: feature,
+                #child: child,
+                #fallback: fallback,
+                #onUpgrade: onUpgrade,
+                #showUpgradePrompt: showUpgradePrompt,
+              }),
+            ),
+          )
+          as _i2.Widget);
+
+  @override
+  String getCompletionTimeEstimate(
+    String? feature, [
+    _i15.EnhancedUserModel? user,
+  ]) =>
+      (super.noSuchMethod(
+            Invocation.method(#getCompletionTimeEstimate, [feature, user]),
+            returnValue: _i7.dummyValue<String>(
+              this,
+              Invocation.method(#getCompletionTimeEstimate, [feature, user]),
+            ),
+            returnValueForMissingStub: _i7.dummyValue<String>(
+              this,
+              Invocation.method(#getCompletionTimeEstimate, [feature, user]),
+            ),
+          )
+          as String);
+
+  @override
+  bool isCloseToUnlocking(String? feature, [_i15.EnhancedUserModel? user]) =>
+      (super.noSuchMethod(
+            Invocation.method(#isCloseToUnlocking, [feature, user]),
+            returnValue: false,
+            returnValueForMissingStub: false,
+          )
+          as bool);
+
+  @override
+  List<String> getLockedFeatures([_i15.EnhancedUserModel? user]) =>
+      (super.noSuchMethod(
+            Invocation.method(#getLockedFeatures, [user]),
+            returnValue: <String>[],
+            returnValueForMissingStub: <String>[],
+          )
+          as List<String>);
+
+  @override
+  List<String> getAccessibleFeatures([_i15.EnhancedUserModel? user]) =>
+      (super.noSuchMethod(
+            Invocation.method(#getAccessibleFeatures, [user]),
+            returnValue: <String>[],
+            returnValueForMissingStub: <String>[],
+          )
+          as List<String>);
+
+  @override
+  void onInit() => super.noSuchMethod(
+    Invocation.method(#onInit, []),
+    returnValueForMissingStub: null,
+  );
+
+  @override
+  void onReady() => super.noSuchMethod(
+    Invocation.method(#onReady, []),
+    returnValueForMissingStub: null,
+  );
+
+  @override
+  void onClose() => super.noSuchMethod(
+    Invocation.method(#onClose, []),
+    returnValueForMissingStub: null,
+  );
+
+  @override
+  void $configureLifeCycle() => super.noSuchMethod(
+    Invocation.method(#$configureLifeCycle, []),
+    returnValueForMissingStub: null,
+  );
 }

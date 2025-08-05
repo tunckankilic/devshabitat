@@ -10,7 +10,9 @@ import 'package:devshabitat/app/services/community/membership_service.dart';
 import 'package:devshabitat/app/services/community/moderation_service.dart';
 import 'package:devshabitat/app/models/community/moderation_model.dart';
 
-class CommunityController extends GetxController {
+import '../../core/base/base_community_controller.dart';
+
+class CommunityController extends BaseCommunityController {
   final CommunityService _communityService = Get.find<CommunityService>();
   final MembershipService _membershipService = Get.find<MembershipService>();
   final ModerationService _moderationService = ModerationService();
@@ -19,8 +21,6 @@ class CommunityController extends GetxController {
   final community = Rxn<CommunityModel>();
   final communitySettings = Rx<CommunitySettingsModel?>(null);
   final membershipStatus = Rx<MembershipModel?>(null);
-  final isLoading = false.obs;
-  final error = ''.obs;
   final isUserModerator = false.obs;
   final isMember = false.obs;
   final members = <UserProfile>[].obs;
@@ -34,239 +34,178 @@ class CommunityController extends GetxController {
   }
 
   Future<void> loadCommunity(String communityId) async {
-    try {
-      isLoading.value = true;
-      error.value = '';
+    await handleAsync(
+      operation: () async {
+        // Topluluk bilgilerini yükle
+        community.value = await _communityService.getCommunity(communityId);
 
-      // Topluluk bilgilerini yükle
-      community.value = await _communityService.getCommunity(communityId);
+        // Kullanıcı rollerini kontrol et
+        final currentUser = _authService.currentUser;
+        if (currentUser != null && community.value != null) {
+          isUserModerator.value = community.value!.isModerator(currentUser.uid);
+          isMember.value = community.value!.isMember(currentUser.uid);
+        }
 
-      // Kullanıcı rollerini kontrol et
-      final currentUser = _authService.currentUser;
-      if (currentUser != null && community.value != null) {
-        isUserModerator.value = community.value!.isModerator(currentUser.uid);
-        isMember.value = community.value!.isMember(currentUser.uid);
-      }
+        // Üyeleri yükle
+        await loadMembers();
 
-      // Üyeleri yükle
-      await loadMembers();
+        // Moderatör ise bekleyen üyeleri yükle
+        if (isUserModerator.value) {
+          await loadPendingMembers();
+        }
 
-      // Moderatör ise bekleyen üyeleri yükle
-      if (isUserModerator.value) {
-        await loadPendingMembers();
-      }
-
-      // Load community settings
-      final settings =
-          await _communityService.getCommunitySettings(communityId);
-      communitySettings.value = settings;
-
-      // Load membership status for current user
-      if (currentUser != null) {
-        final membership = await _membershipService.getMemberStatus(
-          communityId: communityId,
-          userId: currentUser.uid,
+        // Load community settings
+        final settings = await _communityService.getCommunitySettings(
+          communityId,
         );
-        membershipStatus.value = membership;
-      }
-    } catch (e) {
-      error.value = 'Topluluk bilgileri yüklenirken bir hata oluştu: $e';
-    } finally {
-      isLoading.value = false;
-    }
+        communitySettings.value = settings;
+
+        // Load membership status for current user
+        if (currentUser != null) {
+          final membership = await _membershipService.getMemberStatus(
+            communityId: communityId,
+            userId: currentUser.uid,
+          );
+          membershipStatus.value = membership;
+        }
+      },
+      successMessage: 'Topluluk bilgileri başarıyla yüklendi',
+    );
   }
 
   Future<void> loadMembers() async {
-    try {
-      if (community.value == null) return;
+    if (community.value == null) return;
 
-      final membersList = await _membershipService
-          .getCommunityMembersDetailed(community.value!.id);
-      members.assignAll(membersList);
-    } catch (e) {
-      error.value = 'Üyeler yüklenirken bir hata oluştu: $e';
-    }
+    await handleAsync(
+      operation: () async {
+        final membersList = await _membershipService
+            .getCommunityMembersDetailed(community.value!.id);
+        members.assignAll(membersList);
+      },
+      showLoading: false,
+    );
   }
 
   Future<void> loadPendingMembers() async {
-    try {
-      if (community.value == null) return;
+    if (community.value == null) return;
 
-      final pendingList = await _membershipService.getPendingMembers(
-        community.value!.id,
-      );
-      pendingMembers.assignAll(pendingList);
-    } catch (e) {
-      error.value = 'Bekleyen üyeler yüklenirken bir hata oluştu: $e';
-    }
+    await handleAsync(
+      operation: () async {
+        final pendingList = await _membershipService.getPendingMembers(
+          community.value!.id,
+        );
+        pendingMembers.assignAll(pendingList);
+      },
+      showLoading: false,
+    );
   }
 
   Future<void> joinCommunity() async {
-    try {
-      if (community.value == null) return;
+    if (community.value == null) return;
 
-      final currentUser = _authService.currentUser;
-      if (currentUser == null) {
-        error.value = 'Oturum açmanız gerekmektedir';
-        return;
-      }
-
-      await _membershipService.requestMembership(
-        communityId: community.value!.id,
-        userId: currentUser.uid,
-      );
-
-      Get.snackbar(
-        'Başarılı',
-        'Üyelik talebiniz gönderildi',
-        snackPosition: SnackPosition.BOTTOM,
-      );
-    } catch (e) {
-      error.value = 'Topluluğa katılırken bir hata oluştu: $e';
-      Get.snackbar(
-        'Hata',
-        'Topluluğa katılırken bir hata oluştu',
-        snackPosition: SnackPosition.BOTTOM,
-      );
+    final currentUser = _authService.currentUser;
+    if (currentUser == null) {
+      setError('Oturum açmanız gerekmektedir');
+      return;
     }
+
+    await handleAsync(
+      operation: () async {
+        await _membershipService.requestMembership(
+          communityId: community.value!.id,
+          userId: currentUser.uid,
+        );
+      },
+      successMessage: 'Üyelik talebiniz gönderildi',
+    );
   }
 
   Future<void> leaveCommunity() async {
-    try {
-      if (community.value == null) return;
+    if (community.value == null) return;
 
-      final currentUser = _authService.currentUser;
-      if (currentUser == null) {
-        error.value = 'Oturum açmanız gerekmektedir';
-        return;
-      }
-
-      await _membershipService.removeMember(
-        communityId: community.value!.id,
-        userId: currentUser.uid,
-      );
-
-      isMember.value = false;
-      await loadMembers();
-
-      Get.snackbar(
-        'Başarılı',
-        'Topluluktan ayrıldınız',
-        snackPosition: SnackPosition.BOTTOM,
-      );
-    } catch (e) {
-      error.value = 'Topluluktan ayrılırken bir hata oluştu: $e';
-      Get.snackbar(
-        'Hata',
-        'Topluluktan ayrılırken bir hata oluştu',
-        snackPosition: SnackPosition.BOTTOM,
-      );
+    final currentUser = _authService.currentUser;
+    if (currentUser == null) {
+      setError('Oturum açmanız gerekmektedir');
+      return;
     }
+
+    await handleAsync(
+      operation: () async {
+        await _membershipService.removeMember(
+          communityId: community.value!.id,
+          userId: currentUser.uid,
+        );
+
+        isMember.value = false;
+        await loadMembers();
+      },
+      successMessage: 'Topluluktan ayrıldınız',
+    );
   }
 
   Future<void> acceptMember(UserProfile user) async {
-    try {
-      if (community.value == null) return;
+    if (community.value == null) return;
 
-      await _membershipService.acceptMembership(
-        communityId: community.value!.id,
-        userId: user.id,
-      );
+    await handleAsync(
+      operation: () async {
+        await _membershipService.acceptMembership(
+          communityId: community.value!.id,
+          userId: user.id,
+        );
 
-      pendingMembers.remove(user);
-      await loadMembers();
-
-      Get.snackbar(
-        'Başarılı',
-        'Üyelik talebi kabul edildi',
-        snackPosition: SnackPosition.BOTTOM,
-      );
-    } catch (e) {
-      error.value = 'Üyelik talebi kabul edilirken bir hata oluştu: $e';
-      Get.snackbar(
-        'Hata',
-        'Üyelik talebi kabul edilirken bir hata oluştu',
-        snackPosition: SnackPosition.BOTTOM,
-      );
-    }
+        pendingMembers.remove(user);
+        await loadMembers();
+      },
+      successMessage: 'Üyelik talebi kabul edildi',
+    );
   }
 
   Future<void> rejectMember(UserProfile user) async {
-    try {
-      if (community.value == null) return;
+    if (community.value == null) return;
 
-      await _membershipService.rejectMembership(
-        communityId: community.value!.id,
-        userId: user.id,
-      );
+    await handleAsync(
+      operation: () async {
+        await _membershipService.rejectMembership(
+          communityId: community.value!.id,
+          userId: user.id,
+        );
 
-      pendingMembers.remove(user);
-
-      Get.snackbar(
-        'Başarılı',
-        'Üyelik talebi reddedildi',
-        snackPosition: SnackPosition.BOTTOM,
-      );
-    } catch (e) {
-      error.value = 'Üyelik talebi reddedilirken bir hata oluştu: $e';
-      Get.snackbar(
-        'Hata',
-        'Üyelik talebi reddedilirken bir hata oluştu',
-        snackPosition: SnackPosition.BOTTOM,
-      );
-    }
+        pendingMembers.remove(user);
+      },
+      successMessage: 'Üyelik talebi reddedildi',
+    );
   }
 
   Future<void> removeMember(UserProfile user) async {
-    try {
-      if (community.value == null) return;
+    if (community.value == null) return;
 
-      await _membershipService.removeMember(
-        communityId: community.value!.id,
-        userId: user.id,
-      );
+    await handleAsync(
+      operation: () async {
+        await _membershipService.removeMember(
+          communityId: community.value!.id,
+          userId: user.id,
+        );
 
-      await loadMembers();
-
-      Get.snackbar(
-        'Başarılı',
-        'Üye topluluktan çıkarıldı',
-        snackPosition: SnackPosition.BOTTOM,
-      );
-    } catch (e) {
-      error.value = 'Üye çıkarılırken bir hata oluştu: $e';
-      Get.snackbar(
-        'Hata',
-        'Üye çıkarılırken bir hata oluştu',
-        snackPosition: SnackPosition.BOTTOM,
-      );
-    }
+        await loadMembers();
+      },
+      successMessage: 'Üye topluluktan çıkarıldı',
+    );
   }
 
   Future<void> promoteToModerator(UserProfile user) async {
-    try {
-      if (community.value == null) return;
+    if (community.value == null) return;
 
-      await _membershipService.promoteToModerator(
-        communityId: community.value!.id,
-        userId: user.id,
-      );
+    await handleAsync(
+      operation: () async {
+        await _membershipService.promoteToModerator(
+          communityId: community.value!.id,
+          userId: user.id,
+        );
 
-      await loadCommunity(community.value!.id);
-
-      Get.snackbar(
-        'Başarılı',
-        'Üye moderatör yapıldı',
-        snackPosition: SnackPosition.BOTTOM,
-      );
-    } catch (e) {
-      error.value = 'Moderatör atanırken bir hata oluştu: $e';
-      Get.snackbar(
-        'Hata',
-        'Moderatör atanırken bir hata oluştu',
-        snackPosition: SnackPosition.BOTTOM,
-      );
-    }
+        await loadCommunity(community.value!.id);
+      },
+      successMessage: 'Üye moderatör yapıldı',
+    );
   }
 
   void showMemberProfile(UserProfile user) {
@@ -281,16 +220,13 @@ class CommunityController extends GetxController {
   Future<void> updateSettings(CommunitySettingsModel newSettings) async {
     if (community.value == null) return;
 
-    try {
-      isLoading.value = true;
-      await _communityService.updateCommunitySettings(newSettings);
-      communitySettings.value = newSettings;
-      Get.snackbar('Başarılı', 'Topluluk ayarları güncellendi');
-    } catch (e) {
-      Get.snackbar('Hata', 'Ayarlar güncellenirken bir hata oluştu');
-    } finally {
-      isLoading.value = false;
-    }
+    await handleAsync(
+      operation: () async {
+        await _communityService.updateCommunitySettings(newSettings);
+        communitySettings.value = newSettings;
+      },
+      successMessage: 'Topluluk ayarları güncellendi',
+    );
   }
 
   // Report content
@@ -301,39 +237,38 @@ class CommunityController extends GetxController {
   }) async {
     if (community.value == null) return;
 
-    try {
-      isLoading.value = true;
-      final userId = Get.find<String>();
+    final userId = Get.find<String>();
 
-      await _moderationService.reportContent(
-        communityId: community.value!.id,
-        contentId: contentId,
-        reporterId: userId,
-        reason: reason,
-        contentType: contentType,
-      );
-
-      Get.snackbar('Başarılı', 'İçerik moderatörlere bildirildi');
-    } catch (e) {
-      Get.snackbar('Hata', 'İçerik bildirilirken bir hata oluştu');
-    } finally {
-      isLoading.value = false;
-    }
+    await handleAsync(
+      operation: () async {
+        await _moderationService.reportContent(
+          communityId: community.value!.id,
+          contentId: contentId,
+          reporterId: userId,
+          reason: reason,
+          contentType: contentType,
+        );
+      },
+      successMessage: 'İçerik moderatörlere bildirildi',
+    );
   }
 
   // Check if user can moderate
   Future<bool> canModerate() async {
     if (community.value == null) return false;
 
-    try {
-      final userId = Get.find<String>();
-      return await _moderationService.canModerate(
-        communityId: community.value!.id,
-        userId: userId,
-      );
-    } catch (e) {
-      return false;
-    }
+    final userId = Get.find<String>();
+    final result = await handleAsync<bool>(
+      operation: () async {
+        return await _moderationService.canModerate(
+          communityId: community.value!.id,
+          userId: userId,
+        );
+      },
+      showLoading: false,
+    );
+
+    return result ?? false;
   }
 
   // Get community members
@@ -345,13 +280,15 @@ class CommunityController extends GetxController {
   }) async {
     if (community.value == null) return [];
 
-    try {
-      final memberships = await _membershipService
-          .getCommunityMembersDetailed(community.value!.id);
-      return memberships;
-    } catch (e) {
-      Get.snackbar('Hata', 'Üyeler yüklenirken bir hata oluştu');
-      return [];
-    }
+    final result = await handleAsync<List<UserProfile>>(
+      operation: () async {
+        return await _membershipService.getCommunityMembersDetailed(
+          community.value!.id,
+        );
+      },
+      showLoading: false,
+    );
+
+    return result ?? [];
   }
 }

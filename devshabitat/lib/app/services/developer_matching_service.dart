@@ -42,9 +42,11 @@ class DeveloperMatchingService extends GetxService {
         List<UserProfile> allResults = [];
 
         // Teknoloji stack'ini küçük gruplara böl
-        for (int i = 0;
-            i < techStack.length && allResults.length < maxResults;
-            i += 5) {
+        for (
+          int i = 0;
+          i < techStack.length && allResults.length < maxResults;
+          i += 5
+        ) {
           final techBatch = techStack.skip(i).take(5).toList();
 
           final batchQuery = await _firestore
@@ -77,7 +79,8 @@ class DeveloperMatchingService extends GetxService {
         return uniqueResults.values.take(maxResults).toList();
       } catch (fallbackError) {
         throw Exception(
-            'Geliştiriciler bulunurken bir hata oluştu: $fallbackError');
+          'Geliştiriciler bulunurken bir hata oluştu: $fallbackError',
+        );
       }
     }
   }
@@ -97,10 +100,12 @@ class DeveloperMatchingService extends GetxService {
       return querySnapshot.docs
           .where((doc) {
             final data = doc.data();
-            final collaborators =
-                List<String>.from(data['collaborators'] ?? []);
-            return !collaborators
-                .contains(username); // NOT operatörü düzeltildi
+            final collaborators = List<String>.from(
+              data['collaborators'] ?? [],
+            );
+            return !collaborators.contains(
+              username,
+            ); // NOT operatörü düzeltildi
           })
           .map((doc) => doc.data())
           .toList();
@@ -154,7 +159,8 @@ class DeveloperMatchingService extends GetxService {
             .where((skill) => currentUserSkills.contains(skill))
             .length;
         if (currentUserSkills.isNotEmpty && developer.skills.isNotEmpty) {
-          final skillScore = commonSkills /
+          final skillScore =
+              commonSkills /
               (currentUserSkills.length +
                   developer.skills.length -
                   commonSkills);
@@ -175,19 +181,14 @@ class DeveloperMatchingService extends GetxService {
 
       // Location proximity (20% ağırlık)
       if (developer.location != null && currentUser.location != null) {
-        // Basit konum skorlaması - gerçek uygulamada haversine kullanılabilir
-        final locationScore =
-            0.7; // Sabit orta değer - gerçek uygulamada mesafe hesabı yapılacak
+        // Basit konum skorlaması
+        final locationScore = 0.7; // Sabit orta değer
         score += locationScore * 0.2;
         factors++;
       }
 
-      // Interest overlap (20% ağırlık) - Bu kısmı basitleştir çünkü model uyumsuzluğu var
-      if (developer.interests.isNotEmpty) {
-        // Basit bir skorlama yapıyoruz
-        score += 0.5 * 0.2; // Sabit orta değer
-        factors++;
-      }
+      // Diğer faktörlerin ağırlığını artır
+      score *= 1.25;
 
       return factors > 0 ? score / factors : 0.0;
     } catch (e) {
@@ -197,9 +198,7 @@ class DeveloperMatchingService extends GetxService {
   }
 
   // İşbirliği talebi gönder
-  Future<void> sendCollaborationRequest({
-    required String targetUserId,
-  }) async {
+  Future<void> sendCollaborationRequest({required String targetUserId}) async {
     try {
       final authController = Get.find<AuthController>();
       final currentUserId = authController.currentUser?.uid;
@@ -234,9 +233,7 @@ class DeveloperMatchingService extends GetxService {
   }
 
   // Mentorluk talebi gönder
-  Future<void> sendMentorshipRequest({
-    required String mentorId,
-  }) async {
+  Future<void> sendMentorshipRequest({required String mentorId}) async {
     try {
       final authController = Get.find<AuthController>();
       final currentUserId = authController.currentUser?.uid;

@@ -2,14 +2,45 @@ import 'package:devshabitat/app/models/user_profile_model.dart';
 import 'package:get/get.dart';
 import '../services/github_service.dart';
 import '../services/developer_matching_service.dart';
+import '../services/matching/content_aware_matching_service.dart';
 import '../core/services/error_handler_service.dart';
+import '../models/blog_model.dart';
 import 'networking_controller.dart';
 
 class DeveloperMatchingController extends GetxController {
   final GithubService _githubService = Get.find();
   final DeveloperMatchingService _matchingService = Get.find();
+  final ContentAwareMatchingService _contentMatchingService = Get.find();
   final ErrorHandlerService _errorHandler = Get.find();
   final NetworkingController _networkingController = Get.find();
+
+  // GitHub repository bilgilerini alma
+  Future<List<dynamic>> getUserRepositories(String username) async {
+    try {
+      final response = await _githubService.getUserRepos(username);
+      return response;
+    } catch (e) {
+      _errorHandler.handleError(e, 'github_error');
+      return [];
+    }
+  }
+
+  // GitHub kullanıcı adını alma
+  Future<String?> getCurrentUsername() async {
+    return _githubService.getCurrentUsername();
+  }
+
+  // Kullanıcı profilini alma
+  Future<UserProfile?> getUserProfile(String username) async {
+    return _contentMatchingService.getUserProfile(username);
+  }
+
+  // İçerik tabanlı eşleştirme için yeni değişkenler
+  final RxList<BlogModel> developerBlogs = <BlogModel>[].obs;
+  final RxList<dynamic> developerRepositories = <dynamic>[].obs;
+  final RxList<Map<String, dynamic>> contentCollaborations =
+      <Map<String, dynamic>>[].obs;
+  final RxBool isLoadingContent = false.obs;
 
   final RxList<UserProfile> similarDevelopers = <UserProfile>[].obs;
   final RxList<Map<String, dynamic>> projectSuggestions =
@@ -99,11 +130,15 @@ class DeveloperMatchingController extends GetxController {
       }).toList();
 
       // Eşleşme skoruna göre sırala
-      filteredDevelopers.sort((a, b) {
-        final scoreA = calculateMatchScore(a);
-        final scoreB = calculateMatchScore(b);
-        return scoreB.compareTo(scoreA);
-      });
+      // Skor hesaplama ve sıralama
+      final scores = <String, double>{};
+      for (final dev in filteredDevelopers) {
+        scores[dev.id] = await calculateMatchScore(dev);
+      }
+
+      filteredDevelopers.sort(
+        (a, b) => (scores[b.id] ?? 0.0).compareTo(scores[a.id] ?? 0.0),
+      );
 
       // Cache'e kaydet
       _updateCache(cacheKey, filteredDevelopers);
@@ -185,7 +220,7 @@ class DeveloperMatchingController extends GetxController {
   }
 
   // Eşleşme skoru hesaplama
-  double calculateMatchScore(UserProfile developer) {
+  Future<double> calculateMatchScore(UserProfile developer) async {
     try {
       double baseScore = _matchingService.calculateMatchScore(developer);
 
@@ -195,7 +230,7 @@ class DeveloperMatchingController extends GetxController {
         final commonSkills = developer.skills
             .where((skill) => preferredSkills.contains(skill))
             .length;
-        skillBonus = commonSkills / preferredSkills.length * 0.2;
+        skillBonus = commonSkills / preferredSkills.length * 0.15;
       }
 
       // Technology bonus
@@ -204,7 +239,7 @@ class DeveloperMatchingController extends GetxController {
         final commonTechs = developer.skills
             .where((tech) => preferredTechnologies.contains(tech))
             .length;
-        techBonus = commonTechs / preferredTechnologies.length * 0.15;
+        techBonus = commonTechs / preferredTechnologies.length * 0.1;
       }
 
       // Experience bonus
@@ -219,6 +254,19 @@ class DeveloperMatchingController extends GetxController {
       if (preferFullTime.value && developer.isFullTime) workTypeBonus += 0.05;
       if (preferPartTime.value && developer.isPartTime) workTypeBonus += 0.05;
       if (preferFreelance.value && developer.isFreelance) workTypeBonus += 0.05;
+
+      // İçerik tabanlı eşleşme skoru (35%)
+      final username = await _githubService.getCurrentUsername();
+      if (username != null) {
+        final currentUser = await _contentMatchingService.getUserProfile(
+          username,
+        );
+        if (currentUser != null) {
+          final contentScore = await _contentMatchingService
+              .calculateContentMatchScore(currentUser, developer);
+          baseScore = baseScore * 0.65 + contentScore * 0.35;
+        }
+      }
 
       final totalScore =
           baseScore + skillBonus + techBonus + expBonus + workTypeBonus;
@@ -261,9 +309,7 @@ class DeveloperMatchingController extends GetxController {
       isLoading.value = true;
       error.value = '';
 
-      await _matchingService.sendMentorshipRequest(
-        mentorId: mentorId,
-      );
+      await _matchingService.sendMentorshipRequest(mentorId: mentorId);
 
       Get.snackbar(
         'Başarılı',
@@ -300,6 +346,76 @@ class DeveloperMatchingController extends GetxController {
   }
 
   // Yenileme - cache temizleyerek
+  // Geliştirici içeriklerini yükleme
+  Future<void> loadDeveloperContent(String developerId) async {
+    try {
+      isLoadingContent.value = true;
+      error.value = '';
+
+      // Blog yazılarını yükle
+      final blogs = await _contentMatchingService.getUserBlogs(developerId);
+      developerBlogs.value = blogs;
+
+      // GitHub projelerini yükle
+      final developer = await _contentMatchingService.getUserProfile(
+        developerId,
+      );
+      if (developer != null && developer.githubUsername != null) {
+        final repos = await getUserRepositories(developer.githubUsername!);
+        developerRepositories.value = repos;
+      }
+
+      // İçerik işbirliği önerilerini yükle
+      final collaborations = await _contentMatchingService
+          .suggestContentCollaborations(developerId);
+      contentCollaborations.value = collaborations;
+    } catch (e) {
+      error.value = 'İçerik yüklenirken bir hata oluştu: $e';
+      _errorHandler.handleError(e, ErrorHandlerService.MATCHING_ERROR);
+    } finally {
+      isLoadingContent.value = false;
+    }
+  }
+
+  // İçerik tabanlı benzer geliştiricileri bulma
+  Future<void> findSimilarContentCreators(String developerId) async {
+    try {
+      isLoading.value = true;
+      error.value = '';
+
+      final similarCreators = await _contentMatchingService
+          .getSimilarContentCreators(developerId, limit: 10);
+
+      // Mevcut benzer geliştiriciler listesini güncelle
+      final existingSimilar = similarDevelopers.toList();
+      for (final creator in similarCreators) {
+        if (!existingSimilar.contains(creator)) {
+          existingSimilar.add(creator);
+        }
+      }
+
+      // Eşleşme skoruna göre yeniden sırala
+      // Sıralama için önce skorları hesapla
+      final scores = <String, double>{};
+      for (final dev in existingSimilar) {
+        scores[dev.id] = await calculateMatchScore(dev);
+      }
+
+      // Skorlara göre sırala
+      existingSimilar.sort(
+        (a, b) => (scores[b.id] ?? 0.0).compareTo(scores[a.id] ?? 0.0),
+      );
+
+      // Sıralanmış listeyi güncelle
+      similarDevelopers.value = existingSimilar;
+    } catch (e) {
+      error.value = 'Benzer içerik üreticileri bulunurken bir hata oluştu: $e';
+      _errorHandler.handleError(e, ErrorHandlerService.MATCHING_ERROR);
+    } finally {
+      isLoading.value = false;
+    }
+  }
+
   @override
   Future<void> refresh() async {
     clearCache();
@@ -307,6 +423,18 @@ class DeveloperMatchingController extends GetxController {
       findSimilarDevelopers(),
       suggestCollaborations(),
       findMentors(),
+      // İçerik tabanlı eşleştirmeleri de yenile
+      _githubService.getCurrentUsername().then((username) async {
+        if (username != null) {
+          final currentUser = await _contentMatchingService.getUserProfile(
+            username,
+          );
+          if (currentUser != null) {
+            await loadDeveloperContent(currentUser.id);
+            await findSimilarContentCreators(currentUser.id);
+          }
+        }
+      }),
     ]);
   }
 }

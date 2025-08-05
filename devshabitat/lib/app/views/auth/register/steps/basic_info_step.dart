@@ -1,14 +1,15 @@
 import 'package:devshabitat/app/constants/app_strings.dart';
-import 'package:flutter/material.dart';
+import 'package:flutter/material.dart' hide FormFieldState;
 import 'package:get/get.dart';
 import '../../../../controllers/registration_controller.dart';
 import '../../../../controllers/responsive_controller.dart';
-import '../../../../controllers/enhanced_form_validation_controller.dart';
-import '../../../../widgets/enhanced_form_field.dart';
+import '../../../../core/services/form_validation_service.dart';
+import '../../../../widgets/common/enhanced_form_field.dart';
+import '../../../../widgets/common/password_requirements_widget.dart';
 
 class BasicInfoStep extends GetView<RegistrationController> {
   final _responsiveController = Get.find<ResponsiveController>();
-  final _validationController = Get.find<EnhancedFormValidationController>();
+  final _formValidation = Get.find<FormValidationService>();
 
   BasicInfoStep({super.key});
 
@@ -21,306 +22,287 @@ class BasicInfoStep extends GetView<RegistrationController> {
         children: [
           // Email field with EnhancedFormField
           EnhancedFormField(
-            fieldType: FieldType.email,
+            fieldId: 'email',
             controller: controller.emailController,
-            label: AppStrings.email,
-            hint: AppStrings.emailHint,
-            prefixIcon: Icons.email,
-            iconSize: _responsiveController.responsiveValue(
-              mobile: 24.0,
-              tablet: 32.0,
+            labelText: AppStrings.email,
+            hintText: AppStrings.emailHint,
+            semanticLabel: 'E-posta adresi giriş alanı',
+            semanticHint: 'Lütfen geçerli bir e-posta adresi girin',
+            prefixIcon: Icon(
+              Icons.email,
+              size: _responsiveController.responsiveValue(
+                mobile: 24.0,
+                tablet: 32.0,
+              ),
+              semanticLabel: 'E-posta simgesi',
             ),
-            contentPadding: _responsiveController.responsivePadding(
-              horizontal: 16.0,
-              vertical: 16.0,
-            ),
-            border: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(
-                _responsiveController.responsiveValue(
-                  mobile: 8.0,
-                  tablet: 12.0,
+            keyboardType: TextInputType.emailAddress,
+            textInputAction: TextInputAction.next,
+            onChanged: (value) => controller.validateEmail(),
+            decoration: InputDecoration(
+              contentPadding: _responsiveController.responsivePadding(
+                horizontal: 16.0,
+                vertical: 16.0,
+              ),
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(
+                  _responsiveController.responsiveValue(
+                    mobile: 8.0,
+                    tablet: 12.0,
+                  ),
                 ),
               ),
             ),
-            onChanged: (value) {
-              // Update registration controller state
-              _validationController.validateEmail(value);
-            },
           ),
 
           SizedBox(
-              height: _responsiveController.responsiveValue(
-                  mobile: 16.0, tablet: 24.0)),
+            height: _responsiveController.responsiveValue(
+              mobile: 16.0,
+              tablet: 24.0,
+            ),
+          ),
 
           // Display Name field with EnhancedFormField
           EnhancedFormField(
-            fieldType: FieldType.name,
+            fieldId: 'displayName',
             controller: controller.displayNameController,
-            label: AppStrings.displayName,
-            hint: AppStrings.displayNameHint,
-            prefixIcon: Icons.person,
-            iconSize: _responsiveController.responsiveValue(
-              mobile: 24.0,
-              tablet: 32.0,
+            labelText: AppStrings.displayName,
+            hintText: AppStrings.displayNameHint,
+            semanticLabel: 'Görünen ad giriş alanı',
+            semanticHint: 'Diğer kullanıcılara görünecek adınızı girin',
+            prefixIcon: Icon(
+              Icons.person,
+              size: _responsiveController.responsiveValue(
+                mobile: 24.0,
+                tablet: 32.0,
+              ),
+              semanticLabel: 'Kullanıcı simgesi',
             ),
-            contentPadding: _responsiveController.responsivePadding(
-              horizontal: 16.0,
-              vertical: 16.0,
-            ),
-            border: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(
-                _responsiveController.responsiveValue(
-                  mobile: 8.0,
-                  tablet: 12.0,
+            textInputAction: TextInputAction.next,
+            onChanged: (value) => controller.validateDisplayName(),
+            decoration: InputDecoration(
+              contentPadding: _responsiveController.responsivePadding(
+                horizontal: 16.0,
+                vertical: 16.0,
+              ),
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(
+                  _responsiveController.responsiveValue(
+                    mobile: 8.0,
+                    tablet: 12.0,
+                  ),
                 ),
               ),
             ),
-            onChanged: (value) {
-              // Update registration controller state
-              _validationController.validateName(value);
-            },
           ),
 
           SizedBox(
-              height: _responsiveController.responsiveValue(
-                  mobile: 16.0, tablet: 24.0)),
+            height: _responsiveController.responsiveValue(
+              mobile: 16.0,
+              tablet: 24.0,
+            ),
+          ),
 
           // Password field with EnhancedFormField
           EnhancedFormField(
-            fieldType: FieldType.password,
+            fieldId: 'password',
             controller: controller.passwordController,
-            label: AppStrings.password,
-            hint: "En az 8 karakter, büyük/küçük harf, sayı ve özel karakter",
-            prefixIcon: Icons.lock,
-            iconSize: _responsiveController.responsiveValue(
-              mobile: 24.0,
-              tablet: 32.0,
+            labelText: AppStrings.password,
+            hintText:
+                "En az 8 karakter, büyük/küçük harf, sayı ve özel karakter",
+            semanticLabel: 'Şifre giriş alanı',
+            semanticHint:
+                'Güvenli bir şifre oluşturun. En az 8 karakter, büyük/küçük harf, sayı ve özel karakter içermelidir',
+            prefixIcon: Icon(
+              Icons.lock,
+              size: _responsiveController.responsiveValue(
+                mobile: 24.0,
+                tablet: 32.0,
+              ),
+              semanticLabel: 'Şifre simgesi',
             ),
             obscureText: true,
-            contentPadding: _responsiveController.responsivePadding(
-              horizontal: 16.0,
-              vertical: 16.0,
-            ),
-            border: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(
-                _responsiveController.responsiveValue(
-                  mobile: 8.0,
-                  tablet: 12.0,
+            textInputAction: TextInputAction.next,
+            onChanged: (value) => controller.validatePassword(),
+            decoration: InputDecoration(
+              contentPadding: _responsiveController.responsivePadding(
+                horizontal: 16.0,
+                vertical: 16.0,
+              ),
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(
+                  _responsiveController.responsiveValue(
+                    mobile: 8.0,
+                    tablet: 12.0,
+                  ),
                 ),
               ),
             ),
-            onChanged: (value) {
-              // Update registration controller state
-              _validationController.validatePassword(value);
-            },
           ),
 
           SizedBox(
-              height: _responsiveController.responsiveValue(
-                  mobile: 12.0, tablet: 16.0)),
+            height: _responsiveController.responsiveValue(
+              mobile: 12.0,
+              tablet: 16.0,
+            ),
+          ),
 
           // Password Requirements Checklist
           Obx(() => _buildPasswordChecklist()),
 
           SizedBox(
-              height: _responsiveController.responsiveValue(
-                  mobile: 16.0, tablet: 24.0)),
+            height: _responsiveController.responsiveValue(
+              mobile: 16.0,
+              tablet: 24.0,
+            ),
+          ),
 
           // Confirm Password field with EnhancedFormField
           EnhancedFormField(
-            fieldType: FieldType.custom,
+            fieldId: 'confirmPassword',
             controller: controller.confirmPasswordController,
-            label: AppStrings.confirmPassword,
-            hint: "Şifrenizi tekrar girin",
-            prefixIcon: Icons.lock_outline,
-            iconSize: _responsiveController.responsiveValue(
-              mobile: 24.0,
-              tablet: 32.0,
+            labelText: AppStrings.confirmPassword,
+            hintText: "Şifrenizi tekrar girin",
+            semanticLabel: 'Şifre doğrulama giriş alanı',
+            semanticHint: 'Güvenlik için şifrenizi tekrar girin',
+            prefixIcon: Icon(
+              Icons.lock_outline,
+              size: _responsiveController.responsiveValue(
+                mobile: 24.0,
+                tablet: 32.0,
+              ),
+              semanticLabel: 'Şifre doğrulama simgesi',
             ),
             obscureText: true,
-            contentPadding: _responsiveController.responsivePadding(
-              horizontal: 16.0,
-              vertical: 16.0,
-            ),
-            border: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(
-                _responsiveController.responsiveValue(
-                  mobile: 8.0,
-                  tablet: 12.0,
+            textInputAction: TextInputAction.done,
+            onChanged: (value) => controller.validatePasswordConfirmation(),
+            decoration: InputDecoration(
+              contentPadding: _responsiveController.responsivePadding(
+                horizontal: 16.0,
+                vertical: 16.0,
+              ),
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(
+                  _responsiveController.responsiveValue(
+                    mobile: 8.0,
+                    tablet: 12.0,
+                  ),
                 ),
               ),
             ),
-            customValidator: (value) {
-              if (value == null || value.isEmpty) {
-                return AppStrings.confirmPasswordRequired;
-              }
-              if (value != controller.passwordController.text) {
-                return AppStrings.confirmPasswordInvalid;
-              }
-              return null;
-            },
-            onChanged: (value) {
-              // Update registration controller state
-              // Password confirmation validation is handled by customValidator
-            },
           ),
 
           SizedBox(
-              height: _responsiveController.responsiveValue(
-                  mobile: 16.0, tablet: 24.0)),
+            height: _responsiveController.responsiveValue(
+              mobile: 16.0,
+              tablet: 24.0,
+            ),
+          ),
 
           // Password Match Status
-          Obx(() => !controller.confirmPasswordIsEmpty
-              ? _buildPasswordMatchStatus()
-              : SizedBox.shrink()),
+          Obx(
+            () => !controller.confirmPasswordIsEmpty
+                ? _buildPasswordMatchStatus()
+                : SizedBox.shrink(),
+          ),
 
           SizedBox(
-              height: _responsiveController.responsiveValue(
-                  mobile: 24.0, tablet: 32.0)),
+            height: _responsiveController.responsiveValue(
+              mobile: 24.0,
+              tablet: 32.0,
+            ),
+          ),
 
           // GitHub Veri İçe Aktarma Bölümü (İsteğe Bağlı)
-          _buildGithubImportSection(),
+          Semantics(
+            label: 'GitHub veri içe aktarma bölümü',
+            hint:
+                'GitHub hesabınızdan bilgileri otomatik olarak doldurabilirsiniz',
+            child: _buildGithubImportSection(context),
+          ),
         ],
       ),
     );
   }
 
   Widget _buildPasswordChecklist() {
-    if (controller.passwordIsEmpty) {
-      return SizedBox.shrink();
-    }
+    return Obx(() {
+      final focusedField = _formValidation.getFieldState('password');
+      final isVisible =
+          focusedField == FormFieldState.touched || !controller.passwordIsEmpty;
 
-    return Container(
-      padding: _responsiveController.responsivePadding(all: 16.0),
-      decoration: BoxDecoration(
-        color: Colors.grey[50],
-        borderRadius: BorderRadius.circular(
-          _responsiveController.responsiveValue(mobile: 8.0, tablet: 12.0),
-        ),
-        border: Border.all(color: Colors.grey[300]!),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            'Şifre Gereksinimleri:',
-            style: TextStyle(
-              fontSize: _responsiveController.responsiveValue(
-                  mobile: 14.0, tablet: 16.0),
-              fontWeight: FontWeight.w600,
-              color: Colors.grey[700],
-            ),
-          ),
-          SizedBox(
-              height: _responsiveController.responsiveValue(
-                  mobile: 8.0, tablet: 12.0)),
-          _buildRequirementItem(
-            'En az 8 karakter',
-            controller.hasMinLength,
-          ),
-          _buildRequirementItem(
-            'En az bir büyük harf (A-Z)',
-            controller.hasUppercase,
-          ),
-          _buildRequirementItem(
-            'En az bir küçük harf (a-z)',
-            controller.hasLowercase,
-          ),
-          _buildRequirementItem(
-            'En az bir sayı (0-9)',
-            controller.hasNumber,
-          ),
-          _buildRequirementItem(
-            'En az bir özel karakter (!@#\$%^&*)',
-            controller.hasSpecialChar,
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildRequirementItem(String text, bool isMet) {
-    return Padding(
-      padding: EdgeInsets.symmetric(
-        vertical:
-            _responsiveController.responsiveValue(mobile: 2.0, tablet: 4.0),
-      ),
-      child: Row(
-        children: [
-          Icon(
-            isMet ? Icons.check_circle : Icons.radio_button_unchecked,
-            size: _responsiveController.responsiveValue(
-                mobile: 16.0, tablet: 20.0),
-            color: isMet ? Colors.green : Colors.grey,
-          ),
-          SizedBox(
-              width: _responsiveController.responsiveValue(
-                  mobile: 8.0, tablet: 12.0)),
-          Expanded(
-            child: Text(
-              text,
-              style: TextStyle(
-                fontSize: _responsiveController.responsiveValue(
-                    mobile: 12.0, tablet: 14.0),
-                color: isMet ? Colors.green[700] : Colors.grey[600],
-                fontWeight: isMet ? FontWeight.w500 : FontWeight.normal,
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
+      return PasswordRequirementsWidget(
+        hasMinLength: controller.hasMinLength,
+        hasUppercase: controller.hasUppercase,
+        hasLowercase: controller.hasLowercase,
+        hasNumber: controller.hasNumber,
+        hasSpecialChar: controller.hasSpecialChar,
+        passwordsMatch: controller.passwordsMatch,
+        isVisible: isVisible,
+      );
+    });
   }
 
   Widget _buildPasswordMatchStatus() {
-    return Container(
-      padding: _responsiveController.responsivePadding(
-        horizontal: 16.0,
-        vertical: 12.0,
-      ),
-      decoration: BoxDecoration(
-        color: controller.passwordsMatch ? Colors.green[50] : Colors.red[50],
-        borderRadius: BorderRadius.circular(
-          _responsiveController.responsiveValue(mobile: 8.0, tablet: 12.0),
+    return Obx(() {
+      final focusedField = _formValidation.getFieldState('confirmPassword');
+      final error = _formValidation.getFieldError('confirmPassword');
+      final isVisible =
+          focusedField == FormFieldState.touched ||
+          !controller.confirmPasswordIsEmpty;
+
+      if (!isVisible) return const SizedBox.shrink();
+
+      return Container(
+        padding: _responsiveController.responsivePadding(
+          horizontal: 16.0,
+          vertical: 12.0,
         ),
-        border: Border.all(
-          color:
-              controller.passwordsMatch ? Colors.green[300]! : Colors.red[300]!,
-        ),
-      ),
-      child: Row(
-        children: [
-          Icon(
-            controller.passwordsMatch ? Icons.check_circle : Icons.error,
-            size: _responsiveController.responsiveValue(
-                mobile: 16.0, tablet: 20.0),
-            color:
-                controller.passwordsMatch ? Colors.green[700] : Colors.red[700],
+        decoration: BoxDecoration(
+          color: error == null ? Colors.green[50] : Colors.red[50],
+          borderRadius: BorderRadius.circular(
+            _responsiveController.responsiveValue(mobile: 8.0, tablet: 12.0),
           ),
-          SizedBox(
+          border: Border.all(
+            color: error == null ? Colors.green[300]! : Colors.red[300]!,
+          ),
+        ),
+        child: Row(
+          children: [
+            Icon(
+              error == null ? Icons.check_circle : Icons.error,
+              size: _responsiveController.responsiveValue(
+                mobile: 16.0,
+                tablet: 20.0,
+              ),
+              color: error == null ? Colors.green[700] : Colors.red[700],
+            ),
+            SizedBox(
               width: _responsiveController.responsiveValue(
-                  mobile: 8.0, tablet: 12.0)),
-          Expanded(
-            child: Text(
-              controller.passwordsMatch
-                  ? 'Şifreler eşleşiyor'
-                  : 'Şifreler eşleşmiyor',
-              style: TextStyle(
-                fontSize: _responsiveController.responsiveValue(
-                    mobile: 12.0, tablet: 14.0),
-                color: controller.passwordsMatch
-                    ? Colors.green[700]
-                    : Colors.red[700],
-                fontWeight: FontWeight.w500,
+                mobile: 8.0,
+                tablet: 12.0,
               ),
             ),
-          ),
-        ],
-      ),
-    );
+            Expanded(
+              child: Text(
+                error ?? 'Şifreler eşleşiyor',
+                style: TextStyle(
+                  fontSize: _responsiveController.responsiveValue(
+                    mobile: 12.0,
+                    tablet: 14.0,
+                  ),
+                  color: error == null ? Colors.green[700] : Colors.red[700],
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
+            ),
+          ],
+        ),
+      );
+    });
   }
 
-  Widget _buildGithubImportSection() {
+  Widget _buildGithubImportSection(BuildContext context) {
     return Container(
       padding: _responsiveController.responsivePadding(all: 16.0),
       decoration: BoxDecoration(
@@ -392,52 +374,70 @@ class BasicInfoStep extends GetView<RegistrationController> {
           const SizedBox(height: 16.0),
           SizedBox(
             width: double.infinity,
-            child: ElevatedButton.icon(
-              onPressed: controller.isGithubConnected
-                  ? () {
-                      // GitHub bağlantısını kaldır
-                      controller.disconnectGithub();
-                    }
-                  : (controller.isGithubLoading
-                      ? null
-                      : () async {
-                          await controller.importGithubData();
-                        }),
-              icon: controller.isGithubLoading
-                  ? SizedBox(
-                      width: 16.0,
-                      height: 16.0,
-                      child: CircularProgressIndicator(
-                        strokeWidth: 2,
-                        valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+            child: Semantics(
+              button: true,
+              enabled: !controller.isGithubLoading,
+              label: controller.isGithubConnected
+                  ? 'GitHub verilerini temizle'
+                  : 'GitHub\'dan verileri al',
+              hint: controller.isGithubConnected
+                  ? 'Form alanlarından GitHub verilerini kaldır'
+                  : 'GitHub profilinden bilgileri otomatik doldur',
+              child: ElevatedButton.icon(
+                onPressed: controller.isGithubConnected
+                    ? () {
+                        // GitHub bağlantısını kaldır
+                        controller.disconnectGithub();
+                      }
+                    : (controller.isGithubLoading
+                          ? null
+                          : () async {
+                              await controller.importGithubData();
+                            }),
+                icon: controller.isGithubLoading
+                    ? SizedBox(
+                        width: 16.0,
+                        height: 16.0,
+                        child: CircularProgressIndicator(
+                          strokeWidth: 2,
+                          valueColor: AlwaysStoppedAnimation<Color>(
+                            Colors.white,
+                          ),
+                          semanticsLabel: 'Yükleniyor göstergesi',
+                        ),
+                      )
+                    : Icon(
+                        controller.isGithubConnected
+                            ? Icons.clear
+                            : Icons.download,
+                        size: 20.0,
+                        semanticLabel: controller.isGithubConnected
+                            ? 'Temizle simgesi'
+                            : 'İndir simgesi',
                       ),
-                    )
-                  : Icon(
-                      controller.isGithubConnected
-                          ? Icons.clear
-                          : Icons.download,
-                      size: 20.0,
-                    ),
-              label: Text(
-                controller.isGithubLoading
-                    ? 'GitHub verileriniz alınıyor...'
-                    : (controller.isGithubConnected
-                        ? 'GitHub Verilerini Temizle'
-                        : 'GitHub\'dan Verileri Al'),
-                style: const TextStyle(
-                  fontSize: 16.0,
-                  fontWeight: FontWeight.w600,
+                label: Text(
+                  controller.isGithubLoading
+                      ? 'GitHub verileriniz alınıyor...'
+                      : (controller.isGithubConnected
+                            ? 'GitHub Verilerini Temizle'
+                            : 'GitHub\'dan Verileri Al'),
+                  style: TextStyle(
+                    fontSize: 16.0 * MediaQuery.of(context).textScaleFactor,
+                    fontWeight: FontWeight.w600,
+                  ),
                 ),
-              ),
-              style: ElevatedButton.styleFrom(
-                backgroundColor: controller.isGithubConnected
-                    ? Colors.grey[600]
-                    : Colors.blue[600],
-                foregroundColor: Colors.white,
-                padding: const EdgeInsets.symmetric(
-                    horizontal: 24.0, vertical: 16.0),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(8.0),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: controller.isGithubConnected
+                      ? Colors.grey[600]
+                      : Colors.blue[600],
+                  foregroundColor: Colors.white,
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 24.0,
+                    vertical: 16.0,
+                  ),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(8.0),
+                  ),
                 ),
               ),
             ),

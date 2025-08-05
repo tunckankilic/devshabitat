@@ -44,9 +44,7 @@ class SkillMatchCard extends GetView<DeveloperMatchingController> {
               }
 
               if (controller.similarDevelopers.isEmpty) {
-                return Center(
-                  child: Text(AppStrings.noSimilarDevelopers),
-                );
+                return Center(child: Text(AppStrings.noSimilarDevelopers));
               }
 
               return ListView.builder(
@@ -55,12 +53,16 @@ class SkillMatchCard extends GetView<DeveloperMatchingController> {
                 itemCount: controller.similarDevelopers.length,
                 itemBuilder: (context, index) {
                   final developer = controller.similarDevelopers[index];
-                  return DeveloperCard(
-                    developer: developer,
-                    matchScore: controller.calculateMatchScore(developer),
-                    onConnect: () => controller.sendCollaborationRequest(
-                      developer.id,
-                    ),
+                  return FutureBuilder<double>(
+                    future: controller.calculateMatchScore(developer),
+                    builder: (context, snapshot) {
+                      return DeveloperCard(
+                        developer: developer,
+                        matchScore: snapshot.data ?? 0.0,
+                        onConnect: () =>
+                            controller.sendCollaborationRequest(developer.id),
+                      );
+                    },
                   );
                 },
               );
@@ -95,9 +97,7 @@ class ProjectSuggestions extends GetView<DeveloperMatchingController> {
               }
 
               if (controller.projectSuggestions.isEmpty) {
-                return Center(
-                  child: Text(AppStrings.noProjectSuggestions),
-                );
+                return Center(child: Text(AppStrings.noProjectSuggestions));
               }
 
               return ListView.builder(
@@ -106,9 +106,7 @@ class ProjectSuggestions extends GetView<DeveloperMatchingController> {
                 itemCount: controller.projectSuggestions.length,
                 itemBuilder: (context, index) {
                   final project = controller.projectSuggestions[index];
-                  return ProjectSuggestionCard(
-                    project: project,
-                  );
+                  return ProjectSuggestionCard(project: project);
                 },
               );
             }),
@@ -142,9 +140,7 @@ class MentorshipCard extends GetView<DeveloperMatchingController> {
               }
 
               if (controller.potentialMentors.isEmpty) {
-                return Center(
-                  child: Text(AppStrings.noMentors),
-                );
+                return Center(child: Text(AppStrings.noMentors));
               }
 
               return ListView.builder(
@@ -155,9 +151,8 @@ class MentorshipCard extends GetView<DeveloperMatchingController> {
                   final mentor = controller.potentialMentors[index];
                   return MentorCard(
                     mentor: mentor,
-                    onRequest: () => controller.sendMentorshipRequest(
-                      mentor.id,
-                    ),
+                    onRequest: () =>
+                        controller.sendMentorshipRequest(mentor.id),
                   );
                 },
               );
@@ -198,11 +193,14 @@ class DeveloperCard extends StatelessWidget {
             Wrap(
               spacing: 4,
               children: developer.skills
-                  .map((tech) => Chip(
-                        label: Text(tech),
-                        backgroundColor:
-                            Theme.of(context).primaryColor.withOpacity(0.1),
-                      ))
+                  .map(
+                    (tech) => Chip(
+                      label: Text(tech),
+                      backgroundColor: Theme.of(
+                        context,
+                      ).primaryColor.withOpacity(0.1),
+                    ),
+                  )
                   .toList(),
             ),
           ],
@@ -228,10 +226,7 @@ class DeveloperCard extends StatelessWidget {
 class ProjectSuggestionCard extends StatelessWidget {
   final Map<String, dynamic> project;
 
-  const ProjectSuggestionCard({
-    super.key,
-    required this.project,
-  });
+  const ProjectSuggestionCard({super.key, required this.project});
 
   @override
   Widget build(BuildContext context) {
@@ -252,11 +247,14 @@ class ProjectSuggestionCard extends StatelessWidget {
             Wrap(
               spacing: 8,
               children: (project['technologies'] as List)
-                  .map((tech) => Chip(
-                        label: Text(tech as String),
-                        backgroundColor:
-                            Theme.of(context).primaryColor.withOpacity(0.1),
-                      ))
+                  .map(
+                    (tech) => Chip(
+                      label: Text(tech as String),
+                      backgroundColor: Theme.of(
+                        context,
+                      ).primaryColor.withOpacity(0.1),
+                    ),
+                  )
                   .toList(),
             ),
           ],
@@ -270,11 +268,7 @@ class MentorCard extends StatelessWidget {
   final UserProfile mentor;
   final VoidCallback onRequest;
 
-  const MentorCard({
-    super.key,
-    required this.mentor,
-    required this.onRequest,
-  });
+  const MentorCard({super.key, required this.mentor, required this.onRequest});
 
   @override
   Widget build(BuildContext context) {
@@ -293,11 +287,14 @@ class MentorCard extends StatelessWidget {
             Wrap(
               spacing: 4,
               children: mentor.skills
-                  .map((tech) => Chip(
-                        label: Text(tech),
-                        backgroundColor:
-                            Theme.of(context).primaryColor.withOpacity(0.1),
-                      ))
+                  .map(
+                    (tech) => Chip(
+                      label: Text(tech),
+                      backgroundColor: Theme.of(
+                        context,
+                      ).primaryColor.withOpacity(0.1),
+                    ),
+                  )
                   .toList(),
             ),
           ],

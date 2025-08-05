@@ -1,3 +1,4 @@
+import 'dart:io';
 import 'package:devshabitat/app/repositories/auth_repository.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -8,14 +9,20 @@ import '../../services/community/community_service.dart';
 import '../../services/storage_service.dart';
 import '../../routes/app_pages.dart';
 
-class CommunityCreateController extends GetxController {
+import '../../core/mixins/form_validation_mixin.dart';
+import '../../core/config/validation_config.dart';
+import '../../core/error/validation_error.dart';
+import '../../core/services/validation_service.dart';
+
+class CommunityCreateController extends GetxController
+    with FormValidationMixin {
   final CommunityService _communityService = Get.find<CommunityService>();
   final AuthRepository _authService = Get.find<AuthRepository>();
   final StorageService _storageService = Get.find<StorageService>();
 
   final formKey = GlobalKey<FormState>();
-  final nameController = TextEditingController();
-  final descriptionController = TextEditingController();
+  late final TextEditingController nameController;
+  late final TextEditingController descriptionController;
   final coverImageUrl = RxnString();
   final selectedCategories = <String>[].obs;
   final requiresApproval = true.obs;
@@ -23,6 +30,82 @@ class CommunityCreateController extends GetxController {
   final isLoading = false.obs;
 
   String? _selectedImagePath;
+
+  @override
+  void onInit() {
+    super.onInit();
+    nameController = TextEditingController()
+      ..addListener(() {
+        validateName(nameController.text);
+        markFormDirty();
+      });
+
+    descriptionController = TextEditingController()
+      ..addListener(() {
+        validateDescription(descriptionController.text);
+        markFormDirty();
+      });
+  }
+
+  // Form validasyonları
+  Future<void> validateName(String value) async {
+    final validationService = Get.find<ValidationService>();
+    final error = validationService.validateText(
+      value,
+      fieldName: 'Topluluk adı',
+      minLength: ValidationConfig.minCommunityNameLength,
+      maxLength: ValidationConfig.maxCommunityNameLength,
+    );
+
+    if (error == null && isFormDirty.value) {
+      final uniquenessError = await validationService
+          .validateCommunityNameUniqueness(value);
+      if (uniquenessError != null) {
+        setError('name', uniquenessError);
+        return;
+      }
+    }
+
+    setError('name', error);
+  }
+
+  void validateDescription(String value) {
+    final validationService = Get.find<ValidationService>();
+    final error = validationService.validateText(
+      value,
+      fieldName: 'Açıklama',
+      minLength: ValidationConfig.minCommunityDescriptionLength,
+      maxLength: ValidationConfig.maxCommunityDescriptionLength,
+    );
+    setError('description', error);
+  }
+
+  @override
+  String? validateCategories(List<String> categories) {
+    final error = super.validateCategories(categories);
+    if (error != null) {
+      setError('categories', error);
+    }
+    return error;
+  }
+
+  void validateSelectedCategories() {
+    validateCategories(selectedCategories);
+  }
+
+  Future<void> validateCoverImage() async {
+    if (_selectedImagePath == null) return;
+
+    final file = File(_selectedImagePath!);
+    final validationService = Get.find<ValidationService>();
+    final error = await validationService.validateFile(
+      file,
+      allowedExtensions: ValidationConfig.allowedImageExtensions,
+      maxSizeInMB: ValidationConfig.maxCoverImageSizeMB,
+      isImage: true,
+    );
+    setError('coverImage', error);
+  }
 
   List<String> get availableCategories => _communityService.getCategories();
 
@@ -37,88 +120,43 @@ class CommunityCreateController extends GetxController {
     _selectedImagePath = imagePath;
   }
 
-  Future<void> createCommunity() async {
-    // Form validasyonu ve güvenlik kontrolleri
-    if (formKey.currentState == null || !formKey.currentState!.validate()) {
-      Get.snackbar(
-        'Hata',
-        'Form verilerinde hata var, lütfen kontrol edin',
-        snackPosition: SnackPosition.BOTTOM,
-      );
-      return;
-    }
-
-    // Kategori kontrolü
-    if (selectedCategories.isEmpty) {
-      Get.snackbar(
-        'Hata',
-        'En az bir kategori seçmelisiniz',
-        snackPosition: SnackPosition.BOTTOM,
-      );
-      return;
-    }
-
-    // Kullanıcı doğrulama
-    final currentUser = _authService.currentUser;
-    if (currentUser == null) {
-      Get.snackbar(
-        'Hata',
-        'Oturum açmanız gerekmektedir',
-        snackPosition: SnackPosition.BOTTOM,
-      );
-      return;
-    }
-
-    // Input validasyonu
-    final name = nameController.text.trim();
-    final description = descriptionController.text.trim();
-
-    if (name.isEmpty) {
-      Get.snackbar(
-        'Hata',
-        'Topluluk adı boş olamaz',
-        snackPosition: SnackPosition.BOTTOM,
-      );
-      return;
-    }
-
-    if (name.length < 3) {
-      Get.snackbar(
-        'Hata',
-        'Topluluk adı en az 3 karakter olmalıdır',
-        snackPosition: SnackPosition.BOTTOM,
-      );
-      return;
-    }
-
-    if (name.length > 50) {
-      Get.snackbar(
-        'Hata',
-        'Topluluk adı en fazla 50 karakter olabilir',
-        snackPosition: SnackPosition.BOTTOM,
-      );
-      return;
-    }
-
-    if (description.isEmpty) {
-      Get.snackbar(
-        'Hata',
-        'Topluluk açıklaması boş olamaz',
-        snackPosition: SnackPosition.BOTTOM,
-      );
-      return;
-    }
-
-    if (description.length > 500) {
-      Get.snackbar(
-        'Hata',
-        'Topluluk açıklaması en fazla 500 karakter olabilir',
-        snackPosition: SnackPosition.BOTTOM,
-      );
-      return;
-    }
-
+  @override
+  Future<bool> validateForm() async {
     try {
+      // Tüm validasyonları çalıştır
+      await validateName(nameController.text);
+      validateDescription(descriptionController.text);
+      validateSelectedCategories();
+      await validateCoverImage();
+
+      // Tüm hataları kontrol et
+      return !hasError('name') &&
+          !hasError('description') &&
+          !hasError('categories') &&
+          !hasError('coverImage');
+    } catch (e) {
+      setError('general', e.toString());
+      return false;
+    }
+  }
+
+  Future<void> createCommunity() async {
+    try {
+      // Form validasyonu
+      if (!await validateForm()) {
+        return;
+      }
+
+      // Kullanıcı doğrulama
+      final currentUser = _authService.currentUser;
+      if (currentUser == null) {
+        throw ValidationError('Oturum açmanız gerekmektedir');
+      }
+
+      // Input sanitizasyonu
+      final name = sanitizeInput(nameController.text);
+      final description = sanitizeInput(descriptionController.text);
+
       isLoading.value = true;
 
       String? coverImageUrl;
@@ -150,8 +188,9 @@ class CommunityCreateController extends GetxController {
         postCount: 0,
       );
 
-      final createdCommunity =
-          await _communityService.createCommunity(community);
+      final createdCommunity = await _communityService.createCommunity(
+        community,
+      );
 
       Get.snackbar(
         'Başarılı',
@@ -159,10 +198,7 @@ class CommunityCreateController extends GetxController {
         snackPosition: SnackPosition.BOTTOM,
       );
 
-      Get.offNamed(
-        AppRoutes.COMMUNITY_DETAIL,
-        arguments: createdCommunity.id,
-      );
+      Get.offNamed(AppRoutes.COMMUNITY_DETAIL, arguments: createdCommunity.id);
     } on FirebaseException catch (e) {
       Get.snackbar(
         'Hata',
