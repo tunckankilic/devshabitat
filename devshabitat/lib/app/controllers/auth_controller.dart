@@ -2,7 +2,6 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'dart:io' show Platform;
 import 'package:logger/logger.dart';
 import '../repositories/auth_repository.dart';
 import '../core/services/error_handler_service.dart';
@@ -23,18 +22,12 @@ class AuthController extends GetxController {
   final AuthMigrationService _migrationService =
       Get.find<AuthMigrationService>();
 
-  // Authentication optimization services
-
   final Rx<User?> _firebaseUser = Rx<User?>(null);
   final RxMap<String, dynamic> _userProfile = RxMap<String, dynamic>();
   final RxBool _isLoading = false.obs;
   final RxString _lastError = ''.obs;
   final RxBool _isPasswordVisible = false.obs;
   final githubUsernameController = TextEditingController();
-
-  // Platform bazlı kontroller
-  final RxBool _isAppleSignInAvailable = false.obs;
-  final RxBool _isGoogleSignInAvailable = false.obs;
 
   AuthController({
     required EmailAuthController emailAuth,
@@ -52,8 +45,6 @@ class AuthController extends GetxController {
   Map<String, dynamic> get userProfile => _userProfile;
   bool get isLoading => _isLoading.value;
   String get lastError => _lastError.value;
-  bool get isAppleSignInAvailable => _isAppleSignInAvailable.value;
-  bool get isGoogleSignInAvailable => _isGoogleSignInAvailable.value;
   bool get isPasswordVisible => _isPasswordVisible.value;
 
   void togglePasswordVisibility() {
@@ -65,14 +56,12 @@ class AuthController extends GetxController {
     super.onInit();
     _firebaseUser.bindStream(_authRepository.authStateChanges);
     ever(_firebaseUser, _setInitialScreen);
-    _checkAvailableSignInMethods();
   }
 
   Timer? _navigationTimer;
   bool _isNavigating = false;
 
   void _setInitialScreen(User? user) {
-    // Navigation döngüsünü önlemek için debounce uygula
     _navigationTimer?.cancel();
     _navigationTimer = Timer(const Duration(milliseconds: 500), () {
       if (_isNavigating) return;
@@ -94,7 +83,6 @@ class AuthController extends GetxController {
       '/notifications',
     ];
 
-    // Sadece korumalı sayfalardaysa login sayfasına yönlendir
     if (protectedRoutes.contains(currentRoute)) {
       _navigateToRoute('/login');
     }
@@ -105,22 +93,17 @@ class AuthController extends GetxController {
     final currentRoute = Get.currentRoute;
     final authRoutes = ['/login', '/register', '/forgot-password'];
 
-    // Sadece auth sayfalarındaysa profil durumuna göre yönlendir
     if (authRoutes.contains(currentRoute)) {
       _checkProfileAndNavigate();
     }
   }
 
-  // Profil tamamlanma durumuna göre yönlendirme
   void _checkProfileAndNavigate() async {
     try {
       final currentUser = _firebaseUser.value;
       if (currentUser == null) return;
 
-      // Auto-migrate user if needed
       await _migrationService.autoMigrateUserOnLogin(currentUser.uid);
-
-      // Get updated user profile after potential migration
       await _loadUserProfile();
 
       final userProfile = _userProfile;
@@ -129,23 +112,19 @@ class AuthController extends GetxController {
         return;
       }
 
-      // Create enhanced user model for completion checking
       final enhancedUser = EnhancedUserModel.fromJson(userProfile);
 
-      // Check if user can access home (browsing feature)
       if (_featureGateService.canAccess('browsing', enhancedUser)) {
         _navigateToRoute('/home');
       } else {
-        // Show progressive onboarding for minimal completion
         _showProgressiveOnboarding(enhancedUser);
       }
     } catch (e) {
       _logger.e('Error in profile check and navigation: $e');
-      _navigateToRoute('/home'); // Fallback to home
+      _navigateToRoute('/home');
     }
   }
 
-  // Show progressive onboarding for uncompleted profiles
   Future<void> _showProgressiveOnboarding(EnhancedUserModel user) async {
     try {
       final result = await ProgressiveOnboardingService.showQuickSetup(
@@ -154,16 +133,14 @@ class AuthController extends GetxController {
       );
 
       if (result == true) {
-        // User completed setup, reload profile and navigate
         await _loadUserProfile();
         _navigateToRoute('/home');
       } else {
-        // User skipped setup, still navigate but with limited access
         _navigateToRoute('/home');
       }
     } catch (e) {
       _logger.e('Error showing progressive onboarding: $e');
-      _navigateToRoute('/home'); // Fallback
+      _navigateToRoute('/home');
     }
   }
 
@@ -191,62 +168,6 @@ class AuthController extends GetxController {
     }
   }
 
-  Future<void> _checkAvailableSignInMethods() async {
-    if (Platform.isIOS) {
-      _isAppleSignInAvailable.value = true;
-      _isGoogleSignInAvailable.value = false; // iOS'ta Google Sign In gizli
-    } else {
-      _isAppleSignInAvailable.value = false;
-      _isGoogleSignInAvailable.value = true;
-    }
-  }
-
-  Future<void> signInWithGoogle() async {
-    if (!_isGoogleSignInAvailable.value) {
-      _errorHandler.handleError(
-        'Google ile giriş bu platformda kullanılamaz',
-        ErrorHandlerService.AUTH_ERROR,
-      );
-      return;
-    }
-
-    try {
-      _isLoading.value = true;
-      _lastError.value = '';
-
-      await _authRepository.signInWithGoogle();
-      _errorHandler.handleSuccess('Google ile giriş başarılı');
-    } catch (e) {
-      _lastError.value = e.toString();
-      _errorHandler.handleError(e, ErrorHandlerService.AUTH_ERROR);
-    } finally {
-      _isLoading.value = false;
-    }
-  }
-
-  Future<void> signInWithApple() async {
-    if (!_isAppleSignInAvailable.value && !Platform.isIOS) {
-      _errorHandler.handleError(
-        'Apple ile giriş bu platformda kullanılamaz',
-        ErrorHandlerService.AUTH_ERROR,
-      );
-      return;
-    }
-
-    try {
-      _isLoading.value = true;
-      _lastError.value = '';
-
-      await _authRepository.signInWithApple();
-      _errorHandler.handleSuccess('Apple ile giriş başarılı');
-    } catch (e) {
-      _lastError.value = e.toString();
-      _errorHandler.handleError(e, ErrorHandlerService.AUTH_ERROR);
-    } finally {
-      _isLoading.value = false;
-    }
-  }
-
   Future<String?> signInWithGithub() async {
     try {
       _isLoading.value = true;
@@ -254,7 +175,6 @@ class AuthController extends GetxController {
 
       final accessToken = await _authRepository.getGithubAccessToken();
       if (accessToken == null) {
-        // Kullanıcı iptal etti veya işlem başarısız oldu
         _logger.i('GitHub sign in was cancelled or failed');
         return null;
       }
@@ -299,7 +219,6 @@ class AuthController extends GetxController {
     }
   }
 
-  // Email auth delegations
   Future<void> signInWithEmailAndPassword(String email, String password) async {
     try {
       if (email.isEmpty || password.isEmpty) {

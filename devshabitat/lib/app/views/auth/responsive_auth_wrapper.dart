@@ -4,7 +4,6 @@ import '../../controllers/auth_controller.dart';
 import '../../controllers/responsive_controller.dart';
 import 'widgets/auth_form.dart';
 import 'widgets/auth_header.dart';
-import 'widgets/social_auth_buttons.dart';
 import 'widgets/auth_footer.dart';
 
 class ResponsiveAuthWrapper extends StatelessWidget {
@@ -54,22 +53,17 @@ class ResponsiveAuthWrapper extends StatelessWidget {
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           Expanded(
-            flex: _responsiveController.responsiveValue(
-              mobile: 1,
-              tablet: 2,
-            ),
+            flex: _responsiveController.responsiveValue(mobile: 1, tablet: 2),
             child: _buildLeftColumn(),
           ),
           SizedBox(
-              width: _responsiveController.responsiveValue(
-            mobile: 32.0,
-            tablet: 48.0,
-          )),
-          Expanded(
-            flex: _responsiveController.responsiveValue(
-              mobile: 1,
-              tablet: 3,
+            width: _responsiveController.responsiveValue(
+              mobile: 32.0,
+              tablet: 48.0,
             ),
+          ),
+          Expanded(
+            flex: _responsiveController.responsiveValue(mobile: 1, tablet: 3),
             child: _buildRightColumn(),
           ),
         ],
@@ -83,10 +77,11 @@ class ResponsiveAuthWrapper extends StatelessWidget {
       children: [
         _buildLeftColumn(),
         SizedBox(
-            height: _responsiveController.responsiveValue(
-          mobile: 32.0,
-          tablet: 40.0,
-        )),
+          height: _responsiveController.responsiveValue(
+            mobile: 32.0,
+            tablet: 40.0,
+          ),
+        ),
         _buildRightColumn(),
       ],
     );
@@ -105,14 +100,10 @@ class ResponsiveAuthWrapper extends StatelessWidget {
           logoPath: 'assets/images/logo.svg',
         ),
         SizedBox(
-            height: _responsiveController.responsiveValue(
-          mobile: 24.0,
-          tablet: 32.0,
-        )),
-        SocialAuthButtons(
-          isLogin: isLogin,
-          onGoogleAuth: () => authController.signInWithGoogle(),
-          onAppleAuth: () => authController.signInWithApple(),
+          height: _responsiveController.responsiveValue(
+            mobile: 24.0,
+            tablet: 32.0,
+          ),
         ),
       ],
     );
@@ -126,10 +117,7 @@ class ResponsiveAuthWrapper extends StatelessWidget {
       ),
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(
-          _responsiveController.responsiveValue(
-            mobile: 16.0,
-            tablet: 20.0,
-          ),
+          _responsiveController.responsiveValue(mobile: 16.0, tablet: 20.0),
         ),
       ),
       child: Padding(
@@ -156,10 +144,11 @@ class ResponsiveAuthWrapper extends StatelessWidget {
                 },
               ),
               SizedBox(
-                  height: _responsiveController.responsiveValue(
-                mobile: 24.0,
-                tablet: 32.0,
-              )),
+                height: _responsiveController.responsiveValue(
+                  mobile: 24.0,
+                  tablet: 32.0,
+                ),
+              ),
               AuthFooter(
                 isLogin: isLogin,
                 onToggleAuth: () =>

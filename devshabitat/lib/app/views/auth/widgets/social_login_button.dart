@@ -1,7 +1,7 @@
+/*
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../../../controllers/responsive_controller.dart';
-import 'package:sign_in_with_apple/sign_in_with_apple.dart';
 
 class SocialLoginButton extends StatelessWidget {
   late final _responsiveController = Get.find<ResponsiveController>();
@@ -136,3 +136,4 @@ class SocialLoginButton extends StatelessWidget {
     );
   }
 }
+*/

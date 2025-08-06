@@ -6,7 +6,6 @@ import 'package:flutter_svg/flutter_svg.dart';
 import '../../../controllers/responsive_controller.dart';
 import '../../../controllers/auth_controller.dart';
 import '../../../routes/app_pages.dart';
-import '../widgets/social_login_button.dart';
 
 class LargePhoneLogin extends GetView<AuthController> {
   final _responsiveController = Get.find<ResponsiveController>();
@@ -326,34 +325,7 @@ class LargePhoneLogin extends GetView<AuthController> {
                   tablet: 32.0,
                 ),
               ),
-              SocialLoginButton(
-                text: AppStrings.continueWithGoogle,
-                imagePath: 'assets/icons/google.png',
-                onPressed: () => controller.signInWithGoogle(),
-                backgroundColor: Colors.white,
-                textColor: Colors.black87,
-                isOutlined: true,
-              ),
-              SizedBox(
-                height: _responsiveController.responsiveValue(
-                  mobile: 16.0,
-                  tablet: 24.0,
-                ),
-              ),
-              SocialLoginButton(
-                text: AppStrings.continueWithApple,
-                imagePath: 'assets/icons/apple.png',
-                onPressed: () => controller.signInWithApple(),
-                backgroundColor: Colors.black,
-                textColor: Colors.white,
-                isAppleButton: true,
-              ),
-              SizedBox(
-                height: _responsiveController.responsiveValue(
-                  mobile: 24.0,
-                  tablet: 32.0,
-                ),
-              ),
+
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [

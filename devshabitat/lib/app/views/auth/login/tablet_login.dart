@@ -6,7 +6,6 @@ import 'package:flutter_svg/flutter_svg.dart';
 import '../../../controllers/responsive_controller.dart';
 import '../../../controllers/auth_controller.dart';
 import '../../../routes/app_pages.dart';
-import '../widgets/social_login_button.dart';
 
 class TabletLogin extends GetView<AuthController> {
   final _responsiveController = Get.find<ResponsiveController>();
@@ -388,46 +387,7 @@ class TabletLogin extends GetView<AuthController> {
                                 ),
                               ],
                             ),
-                            SizedBox(
-                              height: _responsiveController.responsiveValue(
-                                mobile: 32.0,
-                                tablet: 40.0,
-                              ),
-                            ),
-                            Obx(
-                              () => Column(
-                                children: [
-                                  if (controller.isGoogleSignInAvailable)
-                                    SocialLoginButton(
-                                      text: AppStrings.continueWithGoogle,
-                                      imagePath: 'assets/icons/google.png',
-                                      onPressed: () =>
-                                          controller.signInWithGoogle(),
-                                      backgroundColor: Colors.white,
-                                      textColor: Colors.black87,
-                                      isOutlined: true,
-                                    ),
-                                  if (controller.isGoogleSignInAvailable)
-                                    SizedBox(
-                                      height: _responsiveController
-                                          .responsiveValue(
-                                            mobile: 16.0,
-                                            tablet: 24.0,
-                                          ),
-                                    ),
-                                  if (controller.isAppleSignInAvailable)
-                                    SocialLoginButton(
-                                      text: AppStrings.continueWithApple,
-                                      imagePath: 'assets/icons/apple.png',
-                                      onPressed: () =>
-                                          controller.signInWithApple(),
-                                      backgroundColor: Colors.black,
-                                      textColor: Colors.white,
-                                      isAppleButton: true,
-                                    ),
-                                ],
-                              ),
-                            ),
+
                             SizedBox(
                               height: _responsiveController.responsiveValue(
                                 mobile: 32.0,

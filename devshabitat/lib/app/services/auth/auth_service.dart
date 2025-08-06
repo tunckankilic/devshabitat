@@ -1,21 +1,12 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:google_sign_in/google_sign_in.dart';
-import 'package:sign_in_with_apple/sign_in_with_apple.dart';
+
 import 'package:devshabitat/app/models/user/user_model.dart';
 
 class AuthService {
   final FirebaseAuth _auth = FirebaseAuth.instance;
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
-  final GoogleSignIn _googleSignIn = GoogleSignIn.instance;
-
-  AuthService() {
-    _initGoogleSignIn();
-  }
-
-  Future<void> _initGoogleSignIn() async {
-    await _googleSignIn.initialize();
-  }
+  AuthService();
 
   // Kullanıcı bilgilerini getir
   Future<UserModel?> getUserById(String userId) async {
@@ -62,79 +53,9 @@ class AuthService {
     return UserModel.fromFirestore(userDoc);
   }
 
-  // Google ile giriş yap
-  Future<UserModel> signInWithGoogle() async {
-    final GoogleSignInAccount googleUser = await _googleSignIn.authenticate();
-    final GoogleSignInAuthentication googleAuth = googleUser.authentication;
-    final credential = GoogleAuthProvider.credential(
-      accessToken: googleAuth.idToken,
-      idToken: googleAuth.idToken,
-    );
-
-    final userCredential = await _auth.signInWithCredential(credential);
-    final user = userCredential.user!;
-
-    // Kullanıcı bilgilerini Firestore'a kaydet veya güncelle
-    final userDoc = await _firestore.collection('users').doc(user.uid).get();
-    if (!userDoc.exists) {
-      final userModel = UserModel(
-        id: user.uid,
-        email: user.email!,
-        displayName: user.displayName,
-        photoURL: user.photoURL,
-      );
-      await _firestore
-          .collection('users')
-          .doc(user.uid)
-          .set(userModel.toFirestore());
-      return userModel;
-    }
-
-    return UserModel.fromFirestore(userDoc);
-  }
-
-  // Apple ile giriş yap
-  Future<UserModel> signInWithApple() async {
-    final credential = await SignInWithApple.getAppleIDCredential(
-      scopes: [
-        AppleIDAuthorizationScopes.email,
-        AppleIDAuthorizationScopes.fullName,
-      ],
-    );
-
-    final oauthCredential = OAuthProvider('apple.com').credential(
-      idToken: credential.identityToken,
-      accessToken: credential.authorizationCode,
-    );
-
-    final userCredential = await _auth.signInWithCredential(oauthCredential);
-    final user = userCredential.user!;
-
-    // Kullanıcı bilgilerini Firestore'a kaydet veya güncelle
-    final userDoc = await _firestore.collection('users').doc(user.uid).get();
-    if (!userDoc.exists) {
-      final userModel = UserModel(
-        id: user.uid,
-        email: user.email!,
-        displayName:
-            credential.givenName != null && credential.familyName != null
-            ? '${credential.givenName} ${credential.familyName}'
-            : null,
-        photoURL: user.photoURL,
-      );
-      await _firestore
-          .collection('users')
-          .doc(user.uid)
-          .set(userModel.toFirestore());
-      return userModel;
-    }
-
-    return UserModel.fromFirestore(userDoc);
-  }
-
   // Oturumu kapat
   Future<void> signOut() async {
-    await Future.wait([_auth.signOut(), _googleSignIn.signOut()]);
+    await _auth.signOut();
   }
 
   // Şifre sıfırlama
