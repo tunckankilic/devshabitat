@@ -91,42 +91,6 @@ void main() {
       });
     });
 */
-    group('Apple Sign In Tests', () {
-      test('should handle successful Apple sign in', () async {
-        // Arrange
-        when(
-          mockAuthRepository.signInWithApple(),
-        ).thenAnswer((_) => Future.value(mockUserCredential));
-        when(mockUserCredential.user).thenReturn(mockUser);
-        when(mockUser.email).thenReturn('test@apple.com');
-
-        // Act
-        await controller.signInWithApple();
-
-        // Assert
-        verify(mockAuthRepository.signInWithApple()).called(1);
-        expect(controller.isLoading, false);
-        expect(controller.lastError, isEmpty);
-      });
-
-      test('should handle Apple sign in failure', () async {
-        // Arrange
-        when(
-          mockAuthRepository.signInWithApple(),
-        ).thenThrow(Exception('Apple login failed'));
-
-        // Act
-        await controller.signInWithApple();
-
-        // Assert
-        verify(mockAuthRepository.signInWithApple()).called(1);
-        verify(
-          mockErrorHandler.handleError(any, ErrorHandlerService.AUTH_ERROR),
-        ).called(1);
-        expect(controller.lastError, isNotEmpty);
-        expect(controller.isLoading, false);
-      });
-    });
 
     group('GitHub Sign In Tests', () {
       test('should handle successful GitHub sign in', () async {
@@ -179,43 +143,6 @@ void main() {
           mockErrorHandler.handleError(any, ErrorHandlerService.AUTH_ERROR),
         ).called(1);
         expect(controller.lastError, isNotEmpty);
-      });
-    });
-
-    group('Google Sign In Tests', () {
-      test('should handle successful Google sign in', () async {
-        // Arrange
-        when(
-          mockAuthRepository.signInWithGoogle(),
-        ).thenAnswer((_) => Future.value(mockUserCredential));
-        when(mockUserCredential.user).thenReturn(mockUser);
-        when(mockUser.email).thenReturn('test@gmail.com');
-
-        // Act
-        await controller.signInWithGoogle();
-
-        // Assert
-        verify(mockAuthRepository.signInWithGoogle()).called(1);
-        expect(controller.isLoading, false);
-        expect(controller.lastError, isEmpty);
-      });
-
-      test('should handle Google sign in failure', () async {
-        // Arrange
-        when(
-          mockAuthRepository.signInWithGoogle(),
-        ).thenThrow(Exception('Google login failed'));
-
-        // Act
-        await controller.signInWithGoogle();
-
-        // Assert
-        verify(mockAuthRepository.signInWithGoogle()).called(1);
-        verify(
-          mockErrorHandler.handleError(any, ErrorHandlerService.AUTH_ERROR),
-        ).called(1);
-        expect(controller.lastError, isNotEmpty);
-        expect(controller.isLoading, false);
       });
     });
 

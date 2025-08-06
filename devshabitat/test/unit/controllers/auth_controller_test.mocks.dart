@@ -18,7 +18,6 @@ import 'package:firebase_auth/firebase_auth.dart' as _i4;
 import 'package:flutter/material.dart' as _i2;
 import 'package:get/get.dart' as _i3;
 import 'package:get/get_state_manager/src/simple/list_notifier.dart' as _i9;
-import 'package:google_sign_in/google_sign_in.dart' as _i5;
 import 'package:mockito/mockito.dart' as _i1;
 import 'package:mockito/src/dummies.dart' as _i7;
 
@@ -50,11 +49,6 @@ class _FakeInternalFinalCallback_1<T> extends _i1.SmartFake
 
 class _FakeFirebaseAuth_2 extends _i1.SmartFake implements _i4.FirebaseAuth {
   _FakeFirebaseAuth_2(Object parent, Invocation parentInvocation)
-    : super(parent, parentInvocation);
-}
-
-class _FakeGoogleSignIn_3 extends _i1.SmartFake implements _i5.GoogleSignIn {
-  _FakeGoogleSignIn_3(Object parent, Invocation parentInvocation)
     : super(parent, parentInvocation);
 }
 
@@ -731,21 +725,6 @@ class MockAuthRepository extends _i1.Mock implements _i12.AuthRepository {
           as _i4.FirebaseAuth);
 
   @override
-  _i5.GoogleSignIn get googleSignIn =>
-      (super.noSuchMethod(
-            Invocation.getter(#googleSignIn),
-            returnValue: _FakeGoogleSignIn_3(
-              this,
-              Invocation.getter(#googleSignIn),
-            ),
-            returnValueForMissingStub: _FakeGoogleSignIn_3(
-              this,
-              Invocation.getter(#googleSignIn),
-            ),
-          )
-          as _i5.GoogleSignIn);
-
-  @override
   _i8.Stream<_i4.User?> get authStateChanges =>
       (super.noSuchMethod(
             Invocation.getter(#authStateChanges),
@@ -812,44 +791,6 @@ class MockAuthRepository extends _i1.Mock implements _i12.AuthRepository {
                   password,
                   username,
                 ]),
-              ),
-            ),
-          )
-          as _i8.Future<_i4.UserCredential>);
-
-  @override
-  _i8.Future<_i4.UserCredential> signInWithGoogle() =>
-      (super.noSuchMethod(
-            Invocation.method(#signInWithGoogle, []),
-            returnValue: _i8.Future<_i4.UserCredential>.value(
-              _FakeUserCredential_4(
-                this,
-                Invocation.method(#signInWithGoogle, []),
-              ),
-            ),
-            returnValueForMissingStub: _i8.Future<_i4.UserCredential>.value(
-              _FakeUserCredential_4(
-                this,
-                Invocation.method(#signInWithGoogle, []),
-              ),
-            ),
-          )
-          as _i8.Future<_i4.UserCredential>);
-
-  @override
-  _i8.Future<_i4.UserCredential> signInWithApple() =>
-      (super.noSuchMethod(
-            Invocation.method(#signInWithApple, []),
-            returnValue: _i8.Future<_i4.UserCredential>.value(
-              _FakeUserCredential_4(
-                this,
-                Invocation.method(#signInWithApple, []),
-              ),
-            ),
-            returnValueForMissingStub: _i8.Future<_i4.UserCredential>.value(
-              _FakeUserCredential_4(
-                this,
-                Invocation.method(#signInWithApple, []),
               ),
             ),
           )

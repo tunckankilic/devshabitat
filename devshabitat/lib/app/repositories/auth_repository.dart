@@ -1,7 +1,4 @@
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:google_sign_in/google_sign_in.dart';
-import 'package:sign_in_with_apple/sign_in_with_apple.dart';
-// import 'package:flutter_facebook_auth/flutter_facebook_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:logger/logger.dart';
 import 'package:get/get.dart';
@@ -20,10 +17,7 @@ abstract class IAuthRepository {
     String password,
     String username,
   );
-  Future<UserCredential> signInWithGoogle();
   Future<UserCredential> signInWithGithub();
-  //  Future<UserCredential> signInWithFacebook();
-  Future<UserCredential> signInWithApple();
   Future<void> signOut();
   Future<void> signOutFromAllDevices();
   Future<void> sendPasswordResetEmail(String email);
@@ -45,31 +39,20 @@ abstract class IAuthRepository {
 class AuthRepository implements IAuthRepository {
   final FirebaseAuth _auth;
   final FirebaseFirestore _firestore;
-  final GoogleSignIn _googleSignIn;
-  // final FacebookAuth _facebookAuth;
   final GitHubOAuthService _githubOAuthService;
   final Logger _logger;
 
   // Getters for auth instances
   FirebaseAuth get auth => _auth;
-  GoogleSignIn get googleSignIn => _googleSignIn;
 
   AuthRepository({
     FirebaseAuth? auth,
     FirebaseFirestore? firestore,
-    GoogleSignIn? googleSignIn,
     required GitHubOAuthService githubOAuthService,
   }) : _auth = auth ?? FirebaseAuth.instance,
        _firestore = firestore ?? FirebaseFirestore.instance,
-       _googleSignIn = googleSignIn ?? GoogleSignIn.instance,
        _githubOAuthService = githubOAuthService,
-       _logger = Get.find<Logger>() {
-    _initializeGoogleSignIn();
-  }
-
-  Future<void> _initializeGoogleSignIn() async {
-    await _googleSignIn.initialize();
-  }
+       _logger = Get.find<Logger>();
 
   @override
   Future<UserCredential> signInWithEmailAndPassword(
@@ -126,6 +109,7 @@ class AuthRepository implements IAuthRepository {
   }
 
   // Sosyal giriş öncesi email kontrolü
+  // ignore: unused_element
   Future<void> _checkEmailBeforeSocialSignIn(
     String email,
     String provider,
@@ -135,67 +119,6 @@ class AuthRepository implements IAuthRepository {
     } catch (e) {
       _logger.e('Email collision detected: $e');
       throw Exception(e);
-    }
-  }
-
-  @override
-  Future<UserCredential> signInWithGoogle() async {
-    try {
-      if (!_googleSignIn.supportsAuthenticate()) {
-        throw Exception(AppStrings.googleLoginNotSupported);
-      }
-
-      final googleUser = await _googleSignIn.authenticate();
-
-      // Email çakışmasını kontrol et
-      await _checkEmailBeforeSocialSignIn(googleUser.email, 'google.com');
-
-      final GoogleSignInAuthentication googleAuth = googleUser.authentication;
-      final credential = GoogleAuthProvider.credential(
-        accessToken: googleAuth.idToken,
-        idToken: googleAuth.idToken,
-      );
-
-      final userCredential = await _auth.signInWithCredential(credential);
-      await handleSocialSignIn(userCredential.user!, 'google');
-      return userCredential;
-    } catch (e) {
-      throw _handleAuthException(e);
-    }
-  }
-
-  /*
-  @override
-
-*/
-  @override
-  Future<UserCredential> signInWithApple() async {
-    try {
-      final appleCredential = await SignInWithApple.getAppleIDCredential(
-        scopes: [
-          AppleIDAuthorizationScopes.email,
-          AppleIDAuthorizationScopes.fullName,
-        ],
-      );
-
-      // Email çakışmasını kontrol et
-      if (appleCredential.email != null) {
-        await _checkEmailBeforeSocialSignIn(
-          appleCredential.email!,
-          'apple.com',
-        );
-      }
-
-      final oauthCredential = OAuthProvider('apple.com').credential(
-        idToken: appleCredential.identityToken,
-        accessToken: appleCredential.authorizationCode,
-      );
-
-      final userCredential = await _auth.signInWithCredential(oauthCredential);
-      await handleSocialSignIn(userCredential.user!, 'apple');
-      return userCredential;
-    } catch (e) {
-      throw _handleAuthException(e);
     }
   }
 
@@ -258,7 +181,7 @@ class AuthRepository implements IAuthRepository {
   @override
   Future<void> signOut() async {
     try {
-      await Future.wait([_auth.signOut(), _googleSignIn.signOut()]);
+      await Future.wait([_auth.signOut()]);
     } catch (e) {
       throw _handleAuthException(e);
     }
@@ -267,7 +190,7 @@ class AuthRepository implements IAuthRepository {
   @override
   Future<void> signOutFromAllDevices() async {
     try {
-      await Future.wait([_auth.signOut(), _googleSignIn.signOut()]);
+      await Future.wait([_auth.signOut()]);
     } catch (e) {
       throw _handleAuthException(e);
     }
