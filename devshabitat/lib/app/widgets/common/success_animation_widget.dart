@@ -54,6 +54,20 @@ class SuccessAnimationWidget extends StatelessWidget {
                           width: width ?? 150,
                           height: height ?? 150,
                           fit: BoxFit.contain,
+                          errorBuilder: (context, _, __) => Container(
+                            width: width ?? 150,
+                            height: height ?? 150,
+                            alignment: Alignment.center,
+                            decoration: BoxDecoration(
+                              color: Colors.green[50],
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                            child: Icon(
+                              Icons.check_circle,
+                              size: 48,
+                              color: Colors.green[400],
+                            ),
+                          ),
                         ).animate(
                           onComplete: (controller) {
                             if (autoHide) {

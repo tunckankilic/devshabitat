@@ -17,8 +17,13 @@ class VideoBinding extends Bindings {
       () => VideoCallController(
         webRTCService: Get.find<WebRTCService>(),
         signalingService: Get.find<SignalingService>(),
-        roomId: Get.arguments['roomId'] as String,
-        isInitiator: Get.arguments['isInitiator'] as bool,
+        roomId: (Get.arguments is Map && Get.arguments['roomId'] is String)
+            ? Get.arguments['roomId'] as String
+            : '',
+        isInitiator:
+            (Get.arguments is Map && Get.arguments['isInitiator'] is bool)
+            ? Get.arguments['isInitiator'] as bool
+            : false,
       ),
     );
   }

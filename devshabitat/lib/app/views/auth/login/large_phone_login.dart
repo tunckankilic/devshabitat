@@ -6,6 +6,7 @@ import 'package:flutter_svg/flutter_svg.dart';
 import '../../../controllers/responsive_controller.dart';
 import '../../../controllers/auth_controller.dart';
 import '../../../routes/app_pages.dart';
+import '../widgets/social_auth_buttons.dart';
 
 class LargePhoneLogin extends GetView<AuthController> {
   final _responsiveController = Get.find<ResponsiveController>();
@@ -325,7 +326,20 @@ class LargePhoneLogin extends GetView<AuthController> {
                   tablet: 32.0,
                 ),
               ),
-
+              // Sosyal/GitHub CTA
+              SocialAuthButtons(
+                isLogin: true,
+                onGithubCTA: () async {
+                  final token = await controller.signInWithGithub();
+                  if (token != null) {
+                    // Token alındı: kullanıcı yetkili. Eğer yeni kullanıcının profili yoksa kayıt adımlarına yönlendir.
+                    Get.offAllNamed(AppRoutes.home);
+                  } else {
+                    // Kullanıcı GitHub hesabı yok veya iptal etti: Register’a yönlendir.
+                    Get.toNamed(AppRoutes.register);
+                  }
+                },
+              ),
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [

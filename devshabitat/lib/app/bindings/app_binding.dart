@@ -29,6 +29,10 @@ import '../services/progressive_onboarding_service.dart';
 import '../controllers/progressive_onboarding_controller.dart';
 import '../controllers/feature_gate_controller.dart';
 import '../core/services/cache_service.dart';
+import '../services/reaction_service.dart';
+import '../controllers/message_interaction_controller.dart' as reactions;
+import '../controllers/feed_controller.dart';
+import '../repositories/feed_repository.dart';
 
 class AppBinding extends Bindings {
   @override
@@ -87,6 +91,15 @@ class AppBinding extends Bindings {
 
     // Progressive Onboarding Service (diğerleri main.dart'ta)
     Get.put(ProgressiveOnboardingService());
+
+    // Feed Controller (FeedView ve ilgili widget'larda kullanılıyor)
+    Get.lazyPut<FeedController>(
+      () => FeedController(
+        repository: Get.find<FeedRepository>(),
+        errorHandler: Get.find<ErrorHandlerService>(),
+      ),
+      fenix: true,
+    );
   }
 
   Future<void> _initAsynchronousDependencies() async {
@@ -123,6 +136,13 @@ class AppBinding extends Bindings {
 
       // Message Binding
       MessageBinding().dependencies();
+
+      // Reactions service ve controller (MessageReactionsWidget için gerekli)
+      Get.lazyPut<ReactionService>(() => ReactionService(), fenix: true);
+      Get.lazyPut<reactions.MessageInteractionController>(
+        () => reactions.MessageInteractionController(),
+        fenix: true,
+      );
     } catch (e) {
       errorHandler.handleError(
         'Bağımlılıklar başlatılırken hata oluştu: $e',

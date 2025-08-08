@@ -32,7 +32,6 @@ abstract class AppRoutes {
   static const eventDetails = '/event-details';
   static const eventDiscovery = '/event-discovery';
   static const myEvents = '/my-events';
-  static const EVENT_DETAIL = '/event-detail';
   static const NEARBY_EVENTS = '/nearby-events';
 
   // Video routes

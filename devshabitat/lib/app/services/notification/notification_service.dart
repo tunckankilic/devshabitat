@@ -1,7 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 
-class NotificationService {
+class SimpleNotificationService {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
   final FirebaseMessaging _messaging = FirebaseMessaging.instance;
 
@@ -50,10 +50,7 @@ class NotificationService {
       userId: userId,
       title: 'Etkinlik Hatırlatması',
       body: '$eventTitle etkinliği $timeText sonra başlayacak!',
-      data: {
-        'type': 'event_reminder',
-        'eventId': eventId,
-      },
+      data: {'type': 'event_reminder', 'eventId': eventId},
     );
   }
 

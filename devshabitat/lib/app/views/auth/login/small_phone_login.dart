@@ -6,6 +6,7 @@ import 'package:flutter_svg/flutter_svg.dart';
 import '../../../controllers/responsive_controller.dart';
 import '../../../controllers/auth_controller.dart';
 import '../../../routes/app_pages.dart';
+import '../widgets/social_auth_buttons.dart';
 
 class SmallPhoneLogin extends GetView<AuthController> {
   final _responsiveController = Get.find<ResponsiveController>();
@@ -43,6 +44,19 @@ class SmallPhoneLogin extends GetView<AuthController> {
                   mobile: 24.0,
                   tablet: 32.0,
                 ),
+              ),
+
+              // Sosyal/GitHub CTA
+              SocialAuthButtons(
+                isLogin: true,
+                onGithubCTA: () async {
+                  final token = await controller.signInWithGithub();
+                  if (token != null) {
+                    Get.offAllNamed(AppRoutes.home);
+                  } else {
+                    Get.toNamed(AppRoutes.register);
+                  }
+                },
               ),
               Text(
                 AppStrings.welcome,
