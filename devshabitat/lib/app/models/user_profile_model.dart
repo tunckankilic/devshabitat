@@ -147,7 +147,7 @@ class UserProfile {
       ),
       company: data['company'],
       bio: data['bio'],
-      photoUrl: data['photoUrl'],
+      photoUrl: data['photoURL'],
       locationName: data['locationName'],
       githubUsername: data['githubUsername'],
       skills: List<String>.from(data['skills'] ?? []),
