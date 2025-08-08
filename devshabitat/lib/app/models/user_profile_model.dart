@@ -47,7 +47,7 @@ class UserProfile {
       ),
       company: json['company'] as String?,
       bio: json['bio'] as String?,
-      photoUrl: json['photoUrl'] as String?,
+      photoUrl: json['photoURL'] as String?,
       locationName: json['locationName'] as String?,
       githubUsername: json['githubUsername'] as String?,
       skills: List<String>.from(json['skills'] ?? []),
