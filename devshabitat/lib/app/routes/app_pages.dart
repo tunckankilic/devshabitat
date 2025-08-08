@@ -58,6 +58,7 @@ import '../views/debug/performance_monitor_view.dart';
 import '../views/debug/enhanced_form_test_view.dart';
 import '../views/profile/edit_profile_view.dart';
 import '../views/profile/new_project_view.dart';
+import '../views/profile/profile_view.dart';
 import '../views/networking/connections_view.dart';
 import '../views/content/new_blog_view.dart';
 import '../views/map/location_history_view.dart';
@@ -241,11 +242,6 @@ class AppPages {
       binding: LocationBinding(),
     ),
     GetPage(
-      name: AppRoutes.EVENT_DETAIL,
-      page: () => const EventDetailsView(),
-      binding: EventDetailBinding(),
-    ),
-    GetPage(
       name: AppRoutes.COMMUNITY_EVENT,
       page: () => const CommunityEventView(),
       binding: CommunityEventBinding(),
@@ -295,6 +291,12 @@ class AppPages {
     GetPage(
       name: AppRoutes.editProfile,
       page: () => const EditProfileView(),
+      binding: ProfileBinding(),
+      middlewares: [AuthMiddleware()],
+    ),
+    GetPage(
+      name: AppRoutes.profile,
+      page: () => const ProfileView(),
       binding: ProfileBinding(),
       middlewares: [AuthMiddleware()],
     ),

@@ -335,7 +335,7 @@ class BasicInfoStep extends GetView<RegistrationController> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      'GitHub Verilerini İçe Aktar',
+                      'GitHub Bağlantısı (Zorunlu)',
                       style: TextStyle(
                         fontSize: 16.0,
                         fontWeight: FontWeight.w600,
@@ -347,7 +347,7 @@ class BasicInfoStep extends GetView<RegistrationController> {
                     Text(
                       controller.isGithubConnected
                           ? 'GitHub verileriniz form alanlarına aktarıldı'
-                          : 'GitHub profilinizden bilgileri otomatik doldur (İsteğe bağlı)',
+                          : 'Devam edebilmek için GitHub hesabınızı bağlamanız gerekir',
                       style: TextStyle(
                         fontSize: 12.0,
                         color: controller.isGithubConnected
@@ -364,7 +364,7 @@ class BasicInfoStep extends GetView<RegistrationController> {
           Text(
             controller.isGithubConnected
                 ? 'GitHub profilinizden name, email, bio, location ve company bilgileri aktarıldı.'
-                : 'GitHub profilinizden email, isim, bio ve diğer bilgileri otomatik olarak form alanlarına aktarabilirsiniz. Bu işlem isteğe bağlıdır.',
+                : 'GitHub profilinizden email, isim, bio ve diğer bilgileri otomatik olarak form alanlarına aktarmak ve kayıt işlemine devam etmek için bağlantı gereklidir.',
             style: TextStyle(
               fontSize: 13.0,
               color: Colors.grey[700],

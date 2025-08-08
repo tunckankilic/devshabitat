@@ -23,10 +23,7 @@ class EventCard extends StatelessWidget {
       ),
       margin: responsive.responsivePadding(horizontal: 16, vertical: 8),
       child: InkWell(
-        onTap: () => Get.toNamed(
-          AppRoutes.EVENT_DETAIL,
-          arguments: event,
-        ),
+        onTap: () => Get.toNamed(AppRoutes.eventDetails, arguments: event),
         child: Padding(
           padding: responsive.responsivePadding(all: 16),
           child: Column(
@@ -35,9 +32,9 @@ class EventCard extends StatelessWidget {
               Text(
                 event.title,
                 style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                      fontSize: 18 * responsive.textScaleFactor,
-                      fontWeight: FontWeight.bold,
-                    ),
+                  fontSize: 18 * responsive.textScaleFactor,
+                  fontWeight: FontWeight.bold,
+                ),
               ),
               SizedBox(height: 8 * responsive.textScaleFactor),
               Text(
@@ -45,8 +42,8 @@ class EventCard extends StatelessWidget {
                 maxLines: 2,
                 overflow: TextOverflow.ellipsis,
                 style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                      fontSize: 14 * responsive.textScaleFactor,
-                    ),
+                  fontSize: 14 * responsive.textScaleFactor,
+                ),
               ),
               SizedBox(height: 16 * responsive.textScaleFactor),
               Row(
@@ -94,8 +91,10 @@ class EventCard extends StatelessWidget {
                   ),
                   SizedBox(width: 4 * responsive.textScaleFactor),
                   Text(
-                    DateFormat('dd MMMM yyyy, HH:mm', 'tr_TR')
-                        .format(event.startDate),
+                    DateFormat(
+                      'dd MMMM yyyy, HH:mm',
+                      'tr_TR',
+                    ).format(event.startDate),
                     style: TextStyle(
                       fontSize: 14 * responsive.textScaleFactor,
                       color: Colors.grey,

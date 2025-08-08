@@ -3,7 +3,7 @@
 import 'package:devshabitat/app/core/services/error_handler_service.dart';
 import 'package:get/get.dart';
 import '../models/feed_item.dart';
-import '../services/feed_repository.dart';
+import '../repositories/feed_repository.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
@@ -16,8 +16,8 @@ class FeedController extends GetxController {
   FeedController({
     required FeedRepository repository,
     required ErrorHandlerService errorHandler,
-  })  : _repository = repository,
-        _errorHandler = errorHandler;
+  }) : _repository = repository,
+       _errorHandler = errorHandler;
 
   final RxList<FeedItem> _feedItems = <FeedItem>[].obs;
   final RxBool _isLoading = false.obs;
@@ -136,7 +136,7 @@ class FeedController extends GetxController {
         'postId': postId,
         'reportedBy': currentUserId,
         'createdAt': FieldValue.serverTimestamp(),
-        'status': 'pending'
+        'status': 'pending',
       });
       Get.snackbar('Başarılı', 'Gönderi şikayet edildi');
     } catch (e) {

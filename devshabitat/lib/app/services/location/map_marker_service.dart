@@ -11,20 +11,23 @@ class MapMarkerService extends GetxService {
       <String, CustomMapMarker>{}.obs;
 
   Future<BitmapDescriptor> getMarkerIcon(String iconPath) async {
-    final ByteData data = await rootBundle.load(iconPath);
-    final ui.Codec codec = await ui.instantiateImageCodec(
-      data.buffer.asUint8List(),
-      targetWidth: 120,
-      targetHeight: 120,
-    );
-    final ui.FrameInfo fi = await codec.getNextFrame();
-    final Uint8List bytes = (await fi.image.toByteData(
-      format: ui.ImageByteFormat.png,
-    ))!
-        .buffer
-        .asUint8List();
+    try {
+      final ByteData data = await rootBundle.load(iconPath);
+      final ui.Codec codec = await ui.instantiateImageCodec(
+        data.buffer.asUint8List(),
+        targetWidth: 120,
+        targetHeight: 120,
+      );
+      final ui.FrameInfo fi = await codec.getNextFrame();
+      final Uint8List bytes = (await fi.image.toByteData(
+        format: ui.ImageByteFormat.png,
+      ))!.buffer.asUint8List();
 
-    return BitmapDescriptor.fromBytes(bytes);
+      return BitmapDescriptor.fromBytes(bytes);
+    } catch (_) {
+      // Asset yoksa default marker dön
+      return BitmapDescriptor.defaultMarker;
+    }
   }
 
   Future<void> addMarker(CustomMapMarker customMarker) async {
@@ -51,7 +54,8 @@ class MapMarkerService extends GetxService {
   }
 
   Future<BitmapDescriptor> _getDefaultMarkerIcon(
-      MarkerCategory category) async {
+    MarkerCategory category,
+  ) async {
     // Kategori bazlı varsayılan ikonları döndür
     switch (category) {
       case MarkerCategory.user:

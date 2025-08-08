@@ -37,6 +37,20 @@ class EmptyStateWidget extends StatelessWidget {
                 width: width ?? 200,
                 height: height ?? 200,
                 fit: BoxFit.contain,
+                errorBuilder: (context, _, __) => Container(
+                  width: width ?? 200,
+                  height: height ?? 200,
+                  alignment: Alignment.center,
+                  decoration: BoxDecoration(
+                    color: Colors.grey[200],
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: Icon(
+                    Icons.image_not_supported,
+                    size: 48,
+                    color: Colors.grey[600],
+                  ),
+                ),
               ),
             const SizedBox(height: 24),
             Text(

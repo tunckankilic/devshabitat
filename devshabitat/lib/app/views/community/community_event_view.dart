@@ -26,9 +26,7 @@ class CommunityEventView extends GetView<CommunityEventController> {
 
   Widget _buildEventsList() {
     if (controller.events.isEmpty) {
-      return Center(
-        child: Text(AppStrings.noEvents),
-      );
+      return Center(child: Text(AppStrings.noEvents));
     }
 
     return ListView.builder(
@@ -58,10 +56,8 @@ class CommunityEventView extends GetView<CommunityEventController> {
         ),
         trailing: IconButton(
           icon: const Icon(Icons.arrow_forward_ios),
-          onPressed: () => Get.toNamed(
-            AppRoutes.EVENT_DETAIL,
-            arguments: event,
-          ),
+          onPressed: () =>
+              Get.toNamed(AppRoutes.eventDetails, arguments: event),
         ),
       ),
     );

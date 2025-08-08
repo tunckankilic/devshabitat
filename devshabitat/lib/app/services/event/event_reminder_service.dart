@@ -6,7 +6,8 @@ import 'package:devshabitat/app/services/notification/notification_service.dart'
 class EventReminderService {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
   final EventService _eventService = EventService();
-  final NotificationService _notificationService = NotificationService();
+  final SimpleNotificationService _notificationService =
+      SimpleNotificationService();
   final String _collection = 'event_reminders';
 
   // Hatırlatıcı oluştur
@@ -103,11 +104,7 @@ class EventReminderService {
       final event = await _eventService.getEventById(eventId);
 
       if (event != null) {
-        reminders.add({
-          'id': doc.id,
-          ...data,
-          'event': event.toMap(),
-        });
+        reminders.add({'id': doc.id, ...data, 'event': event.toMap()});
       }
     }
 
@@ -145,9 +142,11 @@ class EventReminderService {
 
     final snapshot = await _firestore
         .collection(_collection)
-        .where('reminderTime',
-            isGreaterThanOrEqualTo: Timestamp.fromDate(now),
-            isLessThanOrEqualTo: Timestamp.fromDate(fiveMinutesFromNow))
+        .where(
+          'reminderTime',
+          isGreaterThanOrEqualTo: Timestamp.fromDate(now),
+          isLessThanOrEqualTo: Timestamp.fromDate(fiveMinutesFromNow),
+        )
         .where('isActive', isEqualTo: true)
         .get();
 

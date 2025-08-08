@@ -3,7 +3,6 @@ class AppAssets {
   static const String _imagesPath = 'assets/images';
   static const String _iconsPath = 'assets/icons';
   static const String _mapStylesPath = 'assets/map_styles';
-  static const String _soundsPath = 'assets/sounds';
 
   // Logo ve marka (Login/Auth ekranlarında kullanılıyor)
   static const String logo = '$_imagesPath/logo.svg';
@@ -36,8 +35,4 @@ class AppAssets {
   // Harita stilleri (MapController ve MapTheme'de kullanılıyor)
   static const String darkMapStyle = '$_mapStylesPath/dark_style.json';
   static const String lightMapStyle = '$_mapStylesPath/light_style.json';
-
-  // Ses dosyaları (Messaging ve Notification için)
-  static const String messageSound = '$_soundsPath/message.mp3';
-  static const String notificationSound = '$_soundsPath/notification.mp3';
 }

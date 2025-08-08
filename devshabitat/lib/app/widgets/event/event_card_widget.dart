@@ -19,14 +19,9 @@ class EventCard extends StatelessWidget {
     return Card(
       elevation: 2,
       margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(12),
-      ),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       child: InkWell(
-        onTap: () => Get.toNamed(
-          AppRoutes.EVENT_DETAIL,
-          arguments: event,
-        ),
+        onTap: () => Get.toNamed(AppRoutes.eventDetails, arguments: event),
         borderRadius: BorderRadius.circular(12),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -58,10 +53,7 @@ class EventCard extends StatelessWidget {
                       event.description,
                       maxLines: 3,
                       overflow: TextOverflow.ellipsis,
-                      style: TextStyle(
-                        color: Colors.grey[600],
-                        height: 1.5,
-                      ),
+                      style: TextStyle(color: Colors.grey[600], height: 1.5),
                     ),
                   ],
                   const SizedBox(height: 16),
@@ -149,10 +141,7 @@ class EventCard extends StatelessWidget {
       ),
       child: Text(
         text,
-        style: TextStyle(
-          color: color,
-          fontWeight: FontWeight.w500,
-        ),
+        style: TextStyle(color: color, fontWeight: FontWeight.w500),
       ),
     );
   }
@@ -165,10 +154,7 @@ class EventCard extends StatelessWidget {
         Expanded(
           child: Text(
             text,
-            style: TextStyle(
-              color: Colors.grey[600],
-              fontSize: 14,
-            ),
+            style: TextStyle(color: Colors.grey[600], fontSize: 14),
             overflow: TextOverflow.ellipsis,
           ),
         ),

@@ -35,6 +35,20 @@ class ErrorStateWidget extends StatelessWidget {
                 width: width ?? 200,
                 height: height ?? 200,
                 fit: BoxFit.contain,
+                errorBuilder: (context, _, __) => Container(
+                  width: width ?? 200,
+                  height: height ?? 200,
+                  alignment: Alignment.center,
+                  decoration: BoxDecoration(
+                    color: Colors.red[50],
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: Icon(
+                    Icons.broken_image,
+                    size: 48,
+                    color: Colors.red[300],
+                  ),
+                ),
               ),
             const SizedBox(height: 24),
             Text(
