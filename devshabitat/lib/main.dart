@@ -1,23 +1,21 @@
+import 'dart:async';
+
 import 'package:devshabitat/app/constants/app_strings.dart';
-import 'package:devshabitat/app/controllers/email_auth_controller.dart';
 import 'package:devshabitat/app/core/services/api_optimization_service.dart';
 import 'package:devshabitat/app/core/services/error_handler_service.dart';
-import 'package:devshabitat/app/core/services/memory_manager_service.dart';
 import 'package:devshabitat/firebase_options.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:logger/logger.dart';
+import 'app/core/services/logger_service.dart';
 import 'app/routes/app_pages.dart';
 import 'app/core/theme/dev_habitat_theme.dart';
 import 'app/bindings/app_binding.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'app/controllers/responsive_controller.dart';
 import 'app/services/github_oauth_service.dart';
-import 'app/repositories/auth_repository.dart';
-import 'app/controllers/auth_controller.dart';
 import 'app/controllers/auth_state_controller.dart';
-import 'app/services/storage_service.dart';
 import 'app/controllers/home_controller.dart';
 import 'app/controllers/discovery_controller.dart';
 import 'app/controllers/messaging_controller.dart';
@@ -30,12 +28,8 @@ import 'app/services/connection_service.dart';
 import 'app/repositories/feed_repository.dart';
 import 'app/services/github_service.dart';
 import 'app/services/github/content_sharing_service.dart';
-import 'app/controllers/github_content_controller.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'app/services/notification_service.dart';
-import 'app/controllers/message/message_list_controller.dart';
-import 'app/controllers/message/message_search_controller.dart';
-import 'app/controllers/message/message_interaction_controller.dart';
 import 'package:flutter/foundation.dart' show kIsWeb;
 import 'app/services/user_service.dart';
 import 'app/services/profile_completion_service.dart';
@@ -47,164 +41,114 @@ import 'app/services/analytics_service.dart';
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
-  // Firebase'i initialize et
-  await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
+  // Kritik servisleri başlat
+  await _initializeCriticalServices();
 
-  // Web platformunda Firebase Auth persistence ayarını yap
-  if (kIsWeb) {
-    try {
-      await FirebaseAuth.instance.setPersistence(Persistence.SESSION);
-      print('Web Firebase Auth persistence set to SESSION');
+  // Firebase'i arka planda başlat
+  unawaited(_initializeFirebaseAsync());
 
-      // Web için redirect sonucunu dinle
-      FirebaseAuth.instance
-          .getRedirectResult()
-          .then((result) {
-            if (result.user != null) {
-              print('Web redirect login successful: ${result.user?.email}');
-            } else if (result.credential != null) {
-              print('Web redirect login with credential');
-            }
-          })
-          .catchError((error) {
-            print('Web redirect login error: $error');
-          });
-    } catch (e) {
-      print('Error setting web persistence: $e');
-    }
-  }
-
-  // Sadece temel servisleri yükle, auth'u sonra
-  await initBasicDependencies();
-
-  runApp(MyApp());
+  runApp(const MyApp());
 }
 
-Future<void> initBasicDependencies() async {
-  // Sadece kritik servisleri yükle, AppBinding'den çakışmaları kaldır
-  Get.put(Logger(), permanent: true);
-  Get.put(MemoryManagerService(), permanent: true);
-  Get.put(ResponsiveController(), permanent: true);
-  Get.put(StorageService(), permanent: true);
+Future<void> _initializeCriticalServices() async {
+  // Sadece başlangıç için kritik olanlar
+  final logger = Logger();
+  Get.put(logger, permanent: true);
+  Get.put(LoggerService(logger: logger), permanent: true);
   Get.put(ErrorHandlerService(), permanent: true);
-  Get.put(ApiOptimizationService(), permanent: true);
   Get.put(CacheService(), permanent: true);
-  Get.put(AnalyticsService(), permanent: true);
 
-  // User Service ve Profile Completion Service
-  Get.put(UserService(), permanent: true);
-  Get.put(ProfileCompletionService(), permanent: true);
-  Get.put(
-    FeatureGateService(
-      profileCompletionService: Get.find<ProfileCompletionService>(),
-      userService: Get.find<UserService>(),
-    ),
-    permanent: true,
-  );
-
-  // Auth Migration Service
-  Get.put(AuthMigrationService(), permanent: true);
-
-  // GitHub OAuth Service
-  Get.put(
-    GitHubOAuthService(logger: Get.find(), errorHandler: Get.find()),
-    permanent: true,
-  );
-
-  // AuthRepository
-  Get.put(AuthRepository(githubOAuthService: Get.find()), permanent: true);
-
-  // GitHub Services
-  Get.put(GithubService(), permanent: true);
-  Get.put(
-    GitHubContentSharingService(logger: Get.find(), errorHandler: Get.find()),
-    permanent: true,
-  );
-
-  // GitHub Controllers
-  Get.put(
-    GitHubContentController(
-      contentService: Get.find(),
-      logger: Get.find(),
-      errorHandler: Get.find(),
-    ),
-    permanent: true,
-  );
-
-  // Auth Controllers
-  Get.put(
-    EmailAuthController(authRepository: Get.find(), errorHandler: Get.find()),
-    permanent: true,
-  );
-
-  Get.put(AuthStateController(authRepository: Get.find()), permanent: true);
-
-  Get.put(
-    AuthController(
-      authRepository: Get.find(),
-      errorHandler: Get.find(),
-      emailAuth: Get.find(),
-      authState: Get.find(),
-      featureGateService: Get.find(),
-    ),
-    permanent: true,
-  );
-
-  // SharedPreferences
+  // SharedPreferences - kritik
   final prefs = await SharedPreferences.getInstance();
   Get.put(prefs, permanent: true);
 
-  // Messaging Service
-  Get.put(NotificationService(prefs), permanent: true);
-  Get.put(
-    MessagingService(
-      logger: Get.find<Logger>(),
-      errorHandler: Get.find<ErrorHandlerService>(),
-    ),
-    permanent: true,
-  );
-  Get.put(NavigationService(), permanent: true);
-  Get.put(
-    FeedService(errorHandler: Get.find<ErrorHandlerService>()),
-    permanent: true,
-  );
-  Get.put(ConnectionService(), permanent: true);
-  Get.put(FeedRepository(), permanent: true);
+  // Auth - kritik
+  Get.put(AuthStateController(authRepository: Get.find()), permanent: true);
+}
 
-  // Ana sayfa controller'ları
-  Get.put(HomeController(), permanent: true);
-  Get.put(DiscoveryController(), permanent: true);
+Future<void> _initializeFirebaseAsync() async {
+  try {
+    await Firebase.initializeApp(
+      options: DefaultFirebaseOptions.currentPlatform,
+    );
+
+    if (kIsWeb) {
+      await FirebaseAuth.instance.setPersistence(Persistence.SESSION);
+    }
+
+    // Firebase başlatıldıktan sonra diğer servisleri başlat
+    _initializePostFirebaseServices();
+  } catch (e) {
+    print('Firebase initialization error: $e');
+  }
+}
+
+void _initializePostFirebaseServices() {
+  // Auth ve güvenlik servisleri
+  Get.put(AuthMigrationService(), permanent: true);
   Get.put(
-    MessagingController(
-      messagingService: Get.find<MessagingService>(),
-      authService: Get.find<AuthRepository>(),
-      errorHandler: Get.find<ErrorHandlerService>(),
+    GitHubOAuthService(
+      logger: Get.find<LoggerService>(),
+      errorHandler: Get.find(),
     ),
     permanent: true,
   );
-  Get.put(
-    MessageListController(
-      messagingService: Get.find<MessagingService>(),
-      errorHandler: Get.find<ErrorHandlerService>(),
+
+  // Diğer servisler lazy olarak yüklenecek
+  _initializeNonCriticalServices();
+}
+
+void _initializeNonCriticalServices() {
+  // UI ve responsive servisleri
+  Get.lazyPut(() => ResponsiveController(), fenix: true);
+  Get.lazyPut(() => ApiOptimizationService(), fenix: true);
+  Get.lazyPut(() => AnalyticsService(), fenix: true);
+
+  // User ve profil servisleri
+  Get.lazyPut(() => UserService(), fenix: true);
+  Get.lazyPut(() => ProfileCompletionService(), fenix: true);
+  Get.lazyPut(
+    () => FeatureGateService(
+      profileCompletionService: Get.find<ProfileCompletionService>(),
+      userService: Get.find<UserService>(),
     ),
-    permanent: true,
+    fenix: true,
   );
-  Get.put(
-    MessageSearchController(
-      messagingService: Get.find<MessagingService>(),
-      errorHandler: Get.find<ErrorHandlerService>(),
+
+  // GitHub servisleri
+  Get.lazyPut(() => GithubService(), fenix: true);
+  Get.lazyPut(
+    () => GitHubContentSharingService(
+      logger: Get.find(),
+      errorHandler: Get.find(),
     ),
-    permanent: true,
+    fenix: true,
   );
-  Get.put(
-    MessageInteractionController(
-      messagingService: Get.find<MessagingService>(),
-      errorHandler: Get.find<ErrorHandlerService>(),
+
+  // Messaging ve feed servisleri
+  Get.lazyPut(() => NotificationService(Get.find()), fenix: true);
+  Get.lazyPut(
+    () => MessagingService(logger: Get.find(), errorHandler: Get.find()),
+    fenix: true,
+  );
+  Get.lazyPut(() => NavigationService(), fenix: true);
+  Get.lazyPut(() => FeedService(errorHandler: Get.find()), fenix: true);
+  Get.lazyPut(() => ConnectionService(), fenix: true);
+  Get.lazyPut(() => FeedRepository(), fenix: true);
+
+  // Controller'lar
+  Get.lazyPut(() => HomeController(), fenix: true);
+  Get.lazyPut(() => DiscoveryController(), fenix: true);
+  Get.lazyPut(
+    () => MessagingController(
+      messagingService: Get.find(),
+      authService: Get.find(),
+      errorHandler: Get.find(),
     ),
-    permanent: true,
+    fenix: true,
   );
-  Get.put(ProfileController(), permanent: true);
-  Get.put(NavigationController(Get.find<NavigationService>()), permanent: true);
+  Get.lazyPut(() => ProfileController(), fenix: true);
+  Get.lazyPut(() => NavigationController(Get.find()), fenix: true);
 }
 
 class MyApp extends StatelessWidget {
@@ -245,7 +189,7 @@ class ErrorApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
+    return GetMaterialApp(
       home: Scaffold(
         body: Center(
           child: Text(

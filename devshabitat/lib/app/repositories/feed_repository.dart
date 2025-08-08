@@ -3,16 +3,15 @@ import 'package:devshabitat/app/constants/app_strings.dart';
 import 'package:devshabitat/app/repositories/auth_repository.dart';
 import '../models/feed_item.dart';
 import '../services/github_oauth_service.dart';
-import '../core/services/error_handler_service.dart';
 import 'package:get/get.dart';
-import 'package:logger/logger.dart';
+import '../core/services/logger_service.dart';
 
 class FeedRepository {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
   final AuthRepository _authService = AuthRepository(
     githubOAuthService: GitHubOAuthService(
-      logger: Get.find<Logger>(),
-      errorHandler: Get.find<ErrorHandlerService>(),
+      logger: Get.find<LoggerService>(),
+      errorHandler: Get.find(),
     ),
   );
 

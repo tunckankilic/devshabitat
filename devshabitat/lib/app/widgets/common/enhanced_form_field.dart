@@ -83,6 +83,7 @@ class EnhancedFormField extends StatefulWidget {
     this.validator,
     this.semanticLabel,
     this.semanticHint,
+  
   });
 
   @override
