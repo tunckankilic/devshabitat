@@ -121,5 +121,11 @@
 
 	<key>io.flutter.embedded_views_preview</key>
 	<true/>
+	<key>NSLocalNetworkUsageDescription</key>
+	<string>Bu uygulama debug modunda çalışırken yerel ağ erişimi gerektirir</string>
+	<key>NSBonjourServices</key>
+	<array>
+		<string>_dartobservatory._tcp</string>
+	</array>
 </dict>
 </plist>

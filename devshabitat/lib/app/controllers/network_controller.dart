@@ -50,20 +50,36 @@ class NetworkController extends GetxController {
 
   // Bağlantı değişikliklerini dinle
   void _setupConnectivityListener() {
-    _connectivity.onConnectivityChanged
-        .listen((List<ConnectivityResult> results) {
+    _connectivity.onConnectivityChanged.listen((
+      List<ConnectivityResult> results,
+    ) {
       _updateConnectionStatus(results.first);
     });
   }
 
   // Bağlantı durumunu güncelle
   void _updateConnectionStatus(ConnectivityResult result) {
-    _connectionType.value = result;
-    _isConnected.value = result != ConnectivityResult.none;
+    try {
+      _connectionType.value = result;
+      _isConnected.value = result != ConnectivityResult.none;
 
-    if (!_isConnected.value) {
-      _errorHandler.handleError(
-          AppStrings.errorNetwork, ErrorHandlerService.NETWORK_ERROR);
+      // Bağlantı durumunu sessizce güncelle, hata fırlatma
+      if (!_isConnected.value) {
+        Get.snackbar(
+          'Bağlantı Durumu',
+          'İnternet bağlantısı bulunamadı',
+          snackPosition: SnackPosition.TOP,
+          duration: const Duration(seconds: 3),
+          backgroundColor: Get.theme.colorScheme.error.withOpacity(0.8),
+          colorText: Get.theme.colorScheme.onError,
+        );
+      }
+    } catch (e) {
+      // Hata durumunda sadece log tut
+      _errorHandler.logError(
+        'Bağlantı durumu güncellenirken hata: $e',
+        ErrorHandlerService.NETWORK_ERROR,
+      );
     }
   }
 

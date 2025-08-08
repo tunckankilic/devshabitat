@@ -23,10 +23,12 @@ class ErrorHandlerService extends GetxService {
     showSuccess(message);
   }
 
-  Future<void> handleError(dynamic error,
-      [String? context,
-      Map<String, dynamic>? metadata,
-      StackTrace? stackTrace]) async {
+  Future<void> handleError(
+    dynamic error, [
+    String? context,
+    Map<String, dynamic>? metadata,
+    StackTrace? stackTrace,
+  ]) async {
     final errorMessage = _getErrorMessage(error);
     _logger.e('Error${context != null ? ' in $context' : ''}: $error');
 
@@ -125,5 +127,9 @@ class ErrorHandlerService extends GetxService {
       colorText: Colors.white,
       duration: const Duration(seconds: 3),
     );
+  }
+
+  void logError(String message, [String? context]) {
+    _logger.e('Error${context != null ? ' in $context' : ''}: $message');
   }
 }

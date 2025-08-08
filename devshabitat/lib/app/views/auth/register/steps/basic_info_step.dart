@@ -49,6 +49,7 @@ class _BasicInfoStepState extends State<BasicInfoStep> {
             autofocus: true,
             labelText: AppStrings.email,
             hintText: AppStrings.emailHint,
+
             semanticLabel: 'E-posta adresi giriş alanı',
             semanticHint: 'Lütfen geçerli bir e-posta adresi girin',
             prefixIcon: Icon(
