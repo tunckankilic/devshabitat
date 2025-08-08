@@ -83,7 +83,6 @@ class EnhancedFormField extends StatefulWidget {
     this.validator,
     this.semanticLabel,
     this.semanticHint,
-  
   });
 
   @override
@@ -94,12 +93,22 @@ class _EnhancedFormFieldState extends State<EnhancedFormField> {
   final _formValidation = Get.find<FormValidationService>();
   late FocusNode _focusNode;
   bool _isFocused = false;
+  TextEditingController? _controller;
 
   @override
   void initState() {
     super.initState();
     _focusNode = widget.focusNode ?? FocusNode();
     _focusNode.addListener(_handleFocusChange);
+    _controller = widget.controller;
+  }
+
+  @override
+  void didUpdateWidget(EnhancedFormField oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (widget.controller != oldWidget.controller) {
+      _controller = widget.controller;
+    }
   }
 
   @override
@@ -148,7 +157,7 @@ class _EnhancedFormFieldState extends State<EnhancedFormField> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           TextFormField(
-            controller: widget.controller,
+            controller: _controller,
             focusNode: _focusNode,
             obscureText: widget.obscureText,
             keyboardType: widget.keyboardType,
@@ -189,6 +198,7 @@ class _EnhancedFormFieldState extends State<EnhancedFormField> {
             decoration:
                 (widget.decoration ??
                         InputDecoration(
+                          hintStyle: TextStyle(color: Colors.grey),
                           labelText: widget.labelText,
                           hintText: widget.hintText,
                           prefixIcon: widget.prefixIcon,

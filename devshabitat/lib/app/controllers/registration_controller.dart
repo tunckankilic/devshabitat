@@ -290,18 +290,18 @@ class RegistrationController extends GetxController
     // Step navigation service'i başlat
     _stepNavigation = Get.put(StepNavigationService(_registrationSteps));
 
-    // Controller'ları factory method ile oluştur
-    emailController = createController();
-    passwordController = createController();
-    confirmPasswordController = createController();
-    displayNameController = createController();
-    bioController = createController();
-    locationTextController = createController();
-    photoUrlController = createController();
-    locationNameController = createController();
-    titleController = createController();
-    companyController = createController();
-    yearsOfExperienceController = createController();
+    // Controller'ları oluştur
+    emailController = TextEditingController();
+    passwordController = TextEditingController();
+    confirmPasswordController = TextEditingController();
+    displayNameController = TextEditingController();
+    bioController = TextEditingController();
+    locationTextController = TextEditingController();
+    photoUrlController = TextEditingController();
+    locationNameController = TextEditingController();
+    titleController = TextEditingController();
+    companyController = TextEditingController();
+    yearsOfExperienceController = TextEditingController();
 
     // Workers'ları factory method ile oluştur
     createWorker(ever(_isEmailValid, (_) => _validateForm()));
@@ -363,18 +363,22 @@ class RegistrationController extends GetxController
     _stepNavigation.reset();
     Get.delete<StepNavigationService>();
 
-    // Form controller'larını temizle
-    emailController.dispose();
-    passwordController.dispose();
-    confirmPasswordController.dispose();
-    displayNameController.dispose();
-    bioController.dispose();
-    locationTextController.dispose();
-    photoUrlController.dispose();
-    locationNameController.dispose();
-    titleController.dispose();
-    companyController.dispose();
-    yearsOfExperienceController.dispose();
+    // Form controller'larını güvenli bir şekilde temizle
+    try {
+      emailController.dispose();
+      passwordController.dispose();
+      confirmPasswordController.dispose();
+      displayNameController.dispose();
+      bioController.dispose();
+      locationTextController.dispose();
+      photoUrlController.dispose();
+      locationNameController.dispose();
+      titleController.dispose();
+      companyController.dispose();
+      yearsOfExperienceController.dispose();
+    } catch (e) {
+      _logger.e('Controller dispose hatası: $e');
+    }
 
     super.onClose();
   }

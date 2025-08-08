@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'package:get/get.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import '../../models/connection_model.dart';
 
 class CacheService extends GetxService {
   late SharedPreferences _prefs;
@@ -33,11 +34,27 @@ class CacheService extends GetxService {
     String key,
     Future<T> Function() fetchData, {
     Duration expiration = const Duration(minutes: 5),
+    T Function(Map<String, dynamic>)? fromJson,
   }) async {
     final data = await getData(key);
     if (data != null) {
       final timestamp = DateTime.parse(data['timestamp']);
       if (DateTime.now().difference(timestamp) < expiration) {
+        if (fromJson != null && data['data'] is Map<String, dynamic>) {
+          return fromJson(data['data'] as Map<String, dynamic>);
+        } else if (data['data'] is List && T.toString().startsWith('List<')) {
+          final list = data['data'] as List;
+          if (T.toString() == 'List<ConnectionModel>') {
+            return list
+                    .map(
+                      (item) => ConnectionModel.fromJson(
+                        item as Map<String, dynamic>,
+                      ),
+                    )
+                    .toList()
+                as T;
+          }
+        }
         return data['data'] as T;
       }
     }
