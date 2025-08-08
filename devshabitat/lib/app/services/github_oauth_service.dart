@@ -3,22 +3,23 @@
 import 'dart:convert';
 import 'dart:async';
 import 'package:get/get.dart';
-import 'package:logger/logger.dart';
+import '../core/services/logger_service.dart';
 import '../core/services/error_handler_service.dart';
 import '../core/config/github_config.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import '../packages/github_signin_promax/github_signin_promax.dart';
-import 'package:webview_flutter/webview_flutter.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class GitHubOAuthService extends GetxService {
-  final Logger _logger;
+  final LoggerService _logger;
   final ErrorHandlerService _errorHandler;
   late final GithubSignInParams _githubSignInParams;
-  bool _isRedirecting = false;
+  final StreamController<String> _authCodeController =
+      StreamController<String>();
 
   GitHubOAuthService({
-    required Logger logger,
+    required LoggerService logger,
     required ErrorHandlerService errorHandler,
   }) : _logger = logger,
        _errorHandler = errorHandler {
@@ -87,8 +88,7 @@ class GitHubOAuthService extends GetxService {
           'client_id': GitHubConfig.clientId,
           'client_secret': GitHubConfig.clientSecret,
           'code': code,
-          'redirect_uri': GitHubConfig
-              .redirectUrl, // ⚠️ Bu URL'nin WebView'daki ile aynı olması gerekiyor
+          'redirect_uri': GitHubConfig.redirectUrl,
         },
       );
 
@@ -226,115 +226,54 @@ class GitHubOAuthService extends GetxService {
       // GitHub OAuth URL'ini oluştur
       final authUrl = Uri.https('github.com', '/login/oauth/authorize', {
         'client_id': _githubSignInParams.clientId,
-        'redirect_uri': GitHubConfig.redirectUrl, // ✅ Config'den alıyoruz
+        'redirect_uri': GitHubConfig.redirectUrl,
         'scope': _githubSignInParams.scopes,
         'allow_signup': 'true',
-        'state': DateTime.now().millisecondsSinceEpoch
-            .toString(), // ✅ Güvenlik için state ekliyoruz
+        'state': DateTime.now().millisecondsSinceEpoch.toString(),
       });
       _logger.i('Auth URL: $authUrl');
 
-      // GitHub OAuth ekranını göster
-      final controller = WebViewController()
-        ..setJavaScriptMode(JavaScriptMode.unrestricted)
-        ..setNavigationDelegate(
-          NavigationDelegate(
-            onNavigationRequest: (request) async {
-              _logger.i('Navigation request to: ${request.url}');
+      // URL'i varsayılan tarayıcıda aç
+      if (await canLaunchUrl(authUrl)) {
+        await launchUrl(authUrl, mode: LaunchMode.externalApplication);
 
-              // Hata kontrolü
-              if (request.url.contains('error=')) {
-                _logger.e('GitHub OAuth error: ${request.url}');
-                Get.back(
-                  result: GithubSignInResponse(
-                    status: SignInStatus.failed,
-                    error:
-                        Uri.parse(
-                          request.url,
-                        ).queryParameters['error_description'] ??
-                        'OAuth hatası',
-                  ),
-                );
-                return NavigationDecision.prevent;
-              }
-
-              // Success kontrolü - code parametresi varlığını kontrol et
-              if (request.url.contains('code=') && !_isRedirecting) {
-                _isRedirecting = true;
-                _logger.i('GitHub OAuth success, extracting code');
-                final uri = Uri.parse(request.url);
-                final code = uri.queryParameters['code'];
-
-                if (code != null && code.isNotEmpty) {
-                  _logger.i(
-                    'Extracted authorization code: ${code.substring(0, 8)}...',
-                  ); // Güvenlik için sadece ilk 8 karakteri logla
-
-                  // ✅ Code'u döndürüyoruz, token olarak değil!
-                  Future.delayed(const Duration(milliseconds: 100), () {
-                    Navigator.of(Get.context!).pop(
-                      GithubSignInResponse(
-                        status: SignInStatus.success,
-                        accessToken:
-                            code, // Bu aslında code, sonra token'a çevrilecek
-                      ),
-                    );
-                  });
-                } else {
-                  _logger.e('Authorization code is empty');
-                  Get.back(
-                    result: GithubSignInResponse(
-                      status: SignInStatus.failed,
-                      error: 'Authorization code alınamadı',
-                    ),
-                  );
-                }
-                return NavigationDecision.prevent;
-              }
-
-              _logger.d('Allowing navigation to: ${request.url}');
-              return NavigationDecision.navigate;
+        // Auth code'u bekle
+        try {
+          final code = await _authCodeController.stream.first.timeout(
+            const Duration(minutes: 5),
+            onTimeout: () {
+              throw TimeoutException(
+                'GitHub yetkilendirme zaman aşımına uğradı',
+              );
             },
-          ),
-        )
-        ..loadRequest(Uri.parse(authUrl.toString()))
-        ..setUserAgent(
-          'Mozilla/5.0 (iPhone; CPU iPhone OS 14_7_1 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/14.1.2 Mobile/15E148 Safari/604.1',
-        );
+          );
 
-      final result = await Get.to<GithubSignInResponse>(
-        () => Scaffold(
-          appBar: AppBar(
-            title: const Text('GitHub Login'),
-            leading: IconButton(
-              icon: const Icon(Icons.close),
-              onPressed: () => Get.back(),
-            ),
-          ),
-          body: WebViewWidget(controller: controller),
-        ),
-      );
-
-      // Reset redirect flag
-      _isRedirecting = false;
-
-      // Sonucu logla ve döndür
-      if (result != null) {
-        if (result.status == SignInStatus.success) {
-          _logger.i('GitHub authorization successful');
-        } else {
-          _logger.w('GitHub authorization failed: ${result.error}');
+          return GithubSignInResponse(
+            status: SignInStatus.success,
+            accessToken: code,
+          );
+        } on TimeoutException catch (e) {
+          _logger.e('GitHub authorization timeout: $e');
+          Get.snackbar(
+            'Zaman Aşımı',
+            'GitHub yetkilendirme işlemi zaman aşımına uğradı. Lütfen tekrar deneyin.',
+            backgroundColor: Colors.orange.withOpacity(0.8),
+            colorText: Colors.white,
+            snackPosition: SnackPosition.BOTTOM,
+            duration: const Duration(seconds: 4),
+            icon: const Icon(Icons.timer_off, color: Colors.white),
+          );
+          return GithubSignInResponse(
+            status: SignInStatus.failed,
+            error: 'Yetkilendirme zaman aşımına uğradı',
+          );
         }
       } else {
-        _logger.w('GitHub authorization cancelled by user');
+        throw 'GitHub yetkilendirme URL\'i açılamadı';
       }
-
-      return result;
     } catch (e) {
       _logger.e('GitHub authorization error: $e');
-      _isRedirecting = false; // Reset flag on error
 
-      // Kullanıcıya hata göster
       Get.snackbar(
         'GitHub Bağlantı Hatası',
         'GitHub hesabınıza bağlanırken bir hata oluştu. Lütfen tekrar deneyin.',
@@ -345,7 +284,10 @@ class GitHubOAuthService extends GetxService {
         icon: const Icon(Icons.error, color: Colors.white),
       );
 
-      rethrow;
+      return GithubSignInResponse(
+        status: SignInStatus.failed,
+        error: e.toString(),
+      );
     }
   }
 }

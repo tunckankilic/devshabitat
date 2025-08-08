@@ -45,8 +45,10 @@ class AppBinding extends Bindings {
   }
 
   void initSynchronousDependencies() {
-    // Sadece AppBinding'e özel servisleri yükle
-    // Core servisler main.dart'ta yüklendi
+    // Core servisler
+    Get.put(ErrorHandlerService(), permanent: true);
+
+    // AppBinding'e özel servisler
     Get.put(DeepLinkingService());
     Get.put(NetworkAnalyticsService());
 
@@ -67,7 +69,7 @@ class AppBinding extends Bindings {
     Get.put<FormValidationService>(FormValidationService(), permanent: true);
 
     // Image Upload Service
-    Get.put(ImageUploadService(errorHandler: Get.find()));
+    Get.put(ImageUploadService(errorHandler: Get.find<ErrorHandlerService>()));
 
     // Developer Matching Service
     Get.put(DeveloperMatchingService());

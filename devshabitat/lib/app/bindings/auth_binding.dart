@@ -1,3 +1,4 @@
+import 'package:devshabitat/app/core/services/logger_service.dart';
 import 'package:devshabitat/app/services/feature_gate_service.dart';
 import 'package:get/get.dart';
 import 'package:logger/logger.dart';
@@ -17,7 +18,7 @@ class AuthBinding extends Bindings {
     Get.lazyPut<ErrorHandlerService>(() => ErrorHandlerService());
     Get.lazyPut<GitHubOAuthService>(
       () => GitHubOAuthService(
-        logger: Get.find<Logger>(),
+        logger: Get.find<LoggerService>(),
         errorHandler: Get.find<ErrorHandlerService>(),
       ),
     );

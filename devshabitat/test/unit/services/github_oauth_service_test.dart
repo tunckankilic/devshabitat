@@ -1,3 +1,4 @@
+import 'package:devshabitat/app/core/services/logger_service.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:get/get.dart';
 import 'package:mockito/mockito.dart';
@@ -35,8 +36,8 @@ void main() {
     mockDeepLinkingService = MockDeepLinkingService();
 
     service = GitHubOAuthService(
-      logger: mockLogger,
       errorHandler: mockErrorHandler,
+      logger: Get.find<LoggerService>(),
     );
 
     // DeepLinkingService'i Get'e ekle

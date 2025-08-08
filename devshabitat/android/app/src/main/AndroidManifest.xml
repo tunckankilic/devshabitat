@@ -27,6 +27,8 @@
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
     <uses-permission android:name="android.permission.ACCESS_BACKGROUND_LOCATION" />
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
+    <!-- Android 14+ foreground service type for location updates -->
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_LOCATION" />
     
     <!-- Push Notification Permissions -->
     <uses-permission android:name="android.permission.WAKE_LOCK" />
@@ -162,6 +164,14 @@
                 android:resource="@xml/file_paths" />
         </provider>
         
+
+        <!-- FCM default notification appearance -->
+        <meta-data
+            android:name="com.google.firebase.messaging.default_notification_icon"
+            android:resource="@mipmap/ic_launcher" />
+        <meta-data
+            android:name="com.google.firebase.messaging.default_notification_color"
+            android:resource="@color/notification_color" />
 
         
         <!-- Google Sign In -->

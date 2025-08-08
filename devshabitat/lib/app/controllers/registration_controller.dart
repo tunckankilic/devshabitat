@@ -837,7 +837,19 @@ class RegistrationController extends GetxController
     try {
       _isLoading.value = true;
 
-      // GitHub bağlantısı artık opsiyonel
+      // GitHub bağlantısı zorunlu
+      if (!_isGithubConnected.value || _githubUsername.value == null) {
+        Get.snackbar(
+          'GitHub Gerekli',
+          'Devam edebilmek için GitHub hesabınızı bağlamalısınız',
+          backgroundColor: Colors.red,
+          colorText: Colors.white,
+          duration: const Duration(seconds: 2),
+        );
+        _stepNavigation.markStepAsError('basicInfo');
+        return;
+      }
+
       if (_isGithubConnected.value && _githubUsername.value != null) {
         // GitHub verilerini ekle
         await _fetchAndPopulateGithubData();
@@ -895,7 +907,7 @@ class RegistrationController extends GetxController
           photoUrlController.text,
         );
         if (uploadedUrl != null) {
-          updates['photoUrl'] = uploadedUrl;
+          updates['photoURL'] = uploadedUrl;
         }
       } catch (e) {
         print('Fotoğraf yükleme hatası: $e');

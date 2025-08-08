@@ -1,29 +1,52 @@
 import 'package:devshabitat/app/constants/app_strings.dart';
+import 'package:devshabitat/app/controllers/registration_controller.dart';
+import 'package:devshabitat/app/controllers/responsive_controller.dart';
 import 'package:flutter/material.dart' hide FormFieldState;
 import 'package:get/get.dart';
-import '../../../../controllers/registration_controller.dart';
-import '../../../../controllers/responsive_controller.dart';
 import '../../../../core/services/form_validation_service.dart';
 import '../../../../widgets/common/enhanced_form_field.dart';
 import '../../../../widgets/common/password_requirements_widget.dart';
 
-class BasicInfoStep extends GetView<RegistrationController> {
+class BasicInfoStep extends StatefulWidget {
+  const BasicInfoStep({super.key});
+
+  @override
+  State<BasicInfoStep> createState() => _BasicInfoStepState();
+}
+
+class _BasicInfoStepState extends State<BasicInfoStep> {
   final _responsiveController = Get.find<ResponsiveController>();
   final _formValidation = Get.find<FormValidationService>();
+  final _controller = Get.find<RegistrationController>();
 
-  BasicInfoStep({super.key});
+  // Form field focus nodes
+  final _emailFocus = FocusNode();
+  final _displayNameFocus = FocusNode();
+  final _passwordFocus = FocusNode();
+  final _confirmPasswordFocus = FocusNode();
+
+  @override
+  void dispose() {
+    _emailFocus.dispose();
+    _displayNameFocus.dispose();
+    _passwordFocus.dispose();
+    _confirmPasswordFocus.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
     return Form(
-      key: controller.basicInfoFormKey,
+      key: _controller.basicInfoFormKey,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           // Email field with EnhancedFormField
           EnhancedFormField(
             fieldId: 'email',
-            controller: controller.emailController,
+            controller: _controller.emailController,
+            focusNode: _emailFocus,
+            autofocus: true,
             labelText: AppStrings.email,
             hintText: AppStrings.emailHint,
             semanticLabel: 'E-posta adresi giriş alanı',
@@ -38,7 +61,11 @@ class BasicInfoStep extends GetView<RegistrationController> {
             ),
             keyboardType: TextInputType.emailAddress,
             textInputAction: TextInputAction.next,
-            onChanged: (value) => controller.validateEmail(),
+            onChanged: (value) => _controller.validateEmail(),
+            onSubmitted: (_) {
+              _emailFocus.unfocus();
+              FocusScope.of(context).requestFocus(_displayNameFocus);
+            },
             decoration: InputDecoration(
               contentPadding: _responsiveController.responsivePadding(
                 horizontal: 16.0,
@@ -65,7 +92,8 @@ class BasicInfoStep extends GetView<RegistrationController> {
           // Display Name field with EnhancedFormField
           EnhancedFormField(
             fieldId: 'displayName',
-            controller: controller.displayNameController,
+            controller: _controller.displayNameController,
+            focusNode: _displayNameFocus,
             labelText: AppStrings.displayName,
             hintText: AppStrings.displayNameHint,
             semanticLabel: 'Görünen ad giriş alanı',
@@ -79,12 +107,17 @@ class BasicInfoStep extends GetView<RegistrationController> {
               semanticLabel: 'Kullanıcı simgesi',
             ),
             textInputAction: TextInputAction.next,
-            onChanged: (value) => controller.validateDisplayName(),
+            onChanged: (value) => _controller.validateDisplayName(),
+            onSubmitted: (_) {
+              _displayNameFocus.unfocus();
+              FocusScope.of(context).requestFocus(_passwordFocus);
+            },
             decoration: InputDecoration(
               contentPadding: _responsiveController.responsivePadding(
                 horizontal: 16.0,
                 vertical: 16.0,
               ),
+
               border: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(
                   _responsiveController.responsiveValue(
@@ -106,7 +139,8 @@ class BasicInfoStep extends GetView<RegistrationController> {
           // Password field with EnhancedFormField
           EnhancedFormField(
             fieldId: 'password',
-            controller: controller.passwordController,
+            controller: _controller.passwordController,
+            focusNode: _passwordFocus,
             labelText: AppStrings.password,
             hintText:
                 "En az 8 karakter, büyük/küçük harf, sayı ve özel karakter",
@@ -123,7 +157,11 @@ class BasicInfoStep extends GetView<RegistrationController> {
             ),
             obscureText: true,
             textInputAction: TextInputAction.next,
-            onChanged: (value) => controller.validatePassword(),
+            onChanged: (value) => _controller.validatePassword(),
+            onSubmitted: (_) {
+              _passwordFocus.unfocus();
+              FocusScope.of(context).requestFocus(_confirmPasswordFocus);
+            },
             decoration: InputDecoration(
               contentPadding: _responsiveController.responsivePadding(
                 horizontal: 16.0,
@@ -148,7 +186,7 @@ class BasicInfoStep extends GetView<RegistrationController> {
           ),
 
           // Password Requirements Checklist
-          Obx(() => _buildPasswordChecklist()),
+          _buildPasswordChecklist(),
 
           SizedBox(
             height: _responsiveController.responsiveValue(
@@ -160,7 +198,8 @@ class BasicInfoStep extends GetView<RegistrationController> {
           // Confirm Password field with EnhancedFormField
           EnhancedFormField(
             fieldId: 'confirmPassword',
-            controller: controller.confirmPasswordController,
+            controller: _controller.confirmPasswordController,
+            focusNode: _confirmPasswordFocus,
             labelText: AppStrings.confirmPassword,
             hintText: "Şifrenizi tekrar girin",
             semanticLabel: 'Şifre doğrulama giriş alanı',
@@ -175,7 +214,10 @@ class BasicInfoStep extends GetView<RegistrationController> {
             ),
             obscureText: true,
             textInputAction: TextInputAction.done,
-            onChanged: (value) => controller.validatePasswordConfirmation(),
+            onChanged: (value) => _controller.validatePasswordConfirmation(),
+            onSubmitted: (_) {
+              _confirmPasswordFocus.unfocus();
+            },
             decoration: InputDecoration(
               contentPadding: _responsiveController.responsivePadding(
                 horizontal: 16.0,
@@ -201,7 +243,7 @@ class BasicInfoStep extends GetView<RegistrationController> {
 
           // Password Match Status
           Obx(
-            () => !controller.confirmPasswordIsEmpty
+            () => !_controller.confirmPasswordIsEmpty
                 ? _buildPasswordMatchStatus()
                 : SizedBox.shrink(),
           ),
@@ -229,15 +271,16 @@ class BasicInfoStep extends GetView<RegistrationController> {
     return Obx(() {
       final focusedField = _formValidation.getFieldState('password');
       final isVisible =
-          focusedField == FormFieldState.touched || !controller.passwordIsEmpty;
+          focusedField == FormFieldState.touched ||
+          !_controller.passwordIsEmpty;
 
       return PasswordRequirementsWidget(
-        hasMinLength: controller.hasMinLength,
-        hasUppercase: controller.hasUppercase,
-        hasLowercase: controller.hasLowercase,
-        hasNumber: controller.hasNumber,
-        hasSpecialChar: controller.hasSpecialChar,
-        passwordsMatch: controller.passwordsMatch,
+        hasMinLength: _controller.hasMinLength,
+        hasUppercase: _controller.hasUppercase,
+        hasLowercase: _controller.hasLowercase,
+        hasNumber: _controller.hasNumber,
+        hasSpecialChar: _controller.hasSpecialChar,
+        passwordsMatch: _controller.passwordsMatch,
         isVisible: isVisible,
       );
     });
@@ -249,7 +292,7 @@ class BasicInfoStep extends GetView<RegistrationController> {
       final error = _formValidation.getFieldError('confirmPassword');
       final isVisible =
           focusedField == FormFieldState.touched ||
-          !controller.confirmPasswordIsEmpty;
+          !_controller.confirmPasswordIsEmpty;
 
       if (!isVisible) return const SizedBox.shrink();
 
@@ -309,7 +352,7 @@ class BasicInfoStep extends GetView<RegistrationController> {
         color: Colors.grey[50],
         borderRadius: BorderRadius.circular(12.0),
         border: Border.all(
-          color: controller.isGithubConnected
+          color: _controller.isGithubConnected
               ? Colors.green[300]!
               : Colors.blue[300]!,
           width: 1.5,
@@ -321,11 +364,11 @@ class BasicInfoStep extends GetView<RegistrationController> {
           Row(
             children: [
               Icon(
-                controller.isGithubConnected
+                _controller.isGithubConnected
                     ? Icons.check_circle
                     : Icons.download,
                 size: 24.0,
-                color: controller.isGithubConnected
+                color: _controller.isGithubConnected
                     ? Colors.green[700]
                     : Colors.blue[700],
               ),
@@ -339,18 +382,18 @@ class BasicInfoStep extends GetView<RegistrationController> {
                       style: TextStyle(
                         fontSize: 16.0,
                         fontWeight: FontWeight.w600,
-                        color: controller.isGithubConnected
+                        color: _controller.isGithubConnected
                             ? Colors.green[800]
                             : Colors.blue[800],
                       ),
                     ),
                     Text(
-                      controller.isGithubConnected
+                      _controller.isGithubConnected
                           ? 'GitHub verileriniz form alanlarına aktarıldı'
                           : 'Devam edebilmek için GitHub hesabınızı bağlamanız gerekir',
                       style: TextStyle(
                         fontSize: 12.0,
-                        color: controller.isGithubConnected
+                        color: _controller.isGithubConnected
                             ? Colors.green[600]
                             : Colors.blue[600],
                       ),
@@ -362,7 +405,7 @@ class BasicInfoStep extends GetView<RegistrationController> {
           ),
           const SizedBox(height: 12.0),
           Text(
-            controller.isGithubConnected
+            _controller.isGithubConnected
                 ? 'GitHub profilinizden name, email, bio, location ve company bilgileri aktarıldı.'
                 : 'GitHub profilinizden email, isim, bio ve diğer bilgileri otomatik olarak form alanlarına aktarmak ve kayıt işlemine devam etmek için bağlantı gereklidir.',
             style: TextStyle(
@@ -376,25 +419,25 @@ class BasicInfoStep extends GetView<RegistrationController> {
             width: double.infinity,
             child: Semantics(
               button: true,
-              enabled: !controller.isGithubLoading,
-              label: controller.isGithubConnected
+              enabled: !_controller.isGithubLoading,
+              label: _controller.isGithubConnected
                   ? 'GitHub verilerini temizle'
                   : 'GitHub\'dan verileri al',
-              hint: controller.isGithubConnected
+              hint: _controller.isGithubConnected
                   ? 'Form alanlarından GitHub verilerini kaldır'
                   : 'GitHub profilinden bilgileri otomatik doldur',
               child: ElevatedButton.icon(
-                onPressed: controller.isGithubConnected
+                onPressed: _controller.isGithubConnected
                     ? () {
                         // GitHub bağlantısını kaldır
-                        controller.disconnectGithub();
+                        _controller.disconnectGithub();
                       }
-                    : (controller.isGithubLoading
+                    : (_controller.isGithubLoading
                           ? null
                           : () async {
-                              await controller.importGithubData();
+                              await _controller.importGithubData();
                             }),
-                icon: controller.isGithubLoading
+                icon: _controller.isGithubLoading
                     ? SizedBox(
                         width: 16.0,
                         height: 16.0,
@@ -407,18 +450,18 @@ class BasicInfoStep extends GetView<RegistrationController> {
                         ),
                       )
                     : Icon(
-                        controller.isGithubConnected
+                        _controller.isGithubConnected
                             ? Icons.clear
                             : Icons.download,
                         size: 20.0,
-                        semanticLabel: controller.isGithubConnected
+                        semanticLabel: _controller.isGithubConnected
                             ? 'Temizle simgesi'
                             : 'İndir simgesi',
                       ),
                 label: Text(
-                  controller.isGithubLoading
+                  _controller.isGithubLoading
                       ? 'GitHub verileriniz alınıyor...'
-                      : (controller.isGithubConnected
+                      : (_controller.isGithubConnected
                             ? 'GitHub Verilerini Temizle'
                             : 'GitHub\'dan Verileri Al'),
                   style: TextStyle(
@@ -427,7 +470,7 @@ class BasicInfoStep extends GetView<RegistrationController> {
                   ),
                 ),
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: controller.isGithubConnected
+                  backgroundColor: _controller.isGithubConnected
                       ? Colors.grey[600]
                       : Colors.blue[600],
                   foregroundColor: Colors.white,
